@@ -1,8 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Book, ChevronDown, ChevronUp, Minus, Plus } from 'lucide-react'
-// import ReactSlider from 'react-slider'
+import { useParams } from 'react-router-dom'
+import { useFrappeCreateDoc } from 'frappe-react-sdk'
+import { cn } from '@/lib/utils'
+import { Slider } from '@/components/ui/slider'
 
 const TradeSheet = ({ market, choice, onClose }) => {
+  const { createDoc, isLoading, error } = useFrappeCreateDoc()
+  const { id } = useParams()
+
   const sheetRef = useRef(null)
   const [price, setPrice] = useState(4.5)
   const [quantity, setQuantity] = useState(10)
@@ -22,6 +28,37 @@ const TradeSheet = ({ market, choice, onClose }) => {
     { price: 5.5, yesQty: 78, noQty: 325 },
     { price: 6.0, yesQty: 5, noQty: 168 },
   ]
+
+  const handleConfirmTrade = async () => {
+    try {
+      // Prepare the order data with specific fields
+      const orderData = {
+        market_id: id, // Market ID from URL params
+        order_type: 'BUY', // You can adjust this if needed
+        quantity: quantity, // Quantity of the trade
+        opinion_type: choice, // 'yes' or 'no'
+        amount: price, // Total amount of the trade
+      }
+      console.log(orderData)
+      // Create the document
+      const newDoc = await createDoc('Orders', orderData)
+      console.log(newDoc)
+
+      // Show success toast
+      // toast.success('Order created successfully', {
+      //   description: `${choice.toUpperCase()} order placed for ${quantity} units`,
+      // })
+
+      // Close the sheet
+      onClose()
+    } catch (err) {
+      // Handle any errors
+      // toast.error('Failed to create order', {
+      //   description: error || 'Please try again',
+      // })
+      console.error('Order creation error:', err)
+    }
+  }
 
   useEffect(() => {
     document.body.style.overflow = 'hidden'
@@ -54,6 +91,13 @@ const TradeSheet = ({ market, choice, onClose }) => {
     setIsDragging(false)
   }
 
+  const handleOverlayClick = (e) => {
+    if (e.target === e.currentTarget) {
+      setIsClosing(true)
+      setTimeout(onClose, 200)
+    }
+  }
+
   const adjustPrice = (newPrice) => {
     // Round to nearest 0.5
     const rounded = Math.round(newPrice * 2) / 2
@@ -71,7 +115,10 @@ const TradeSheet = ({ market, choice, onClose }) => {
       : totalCost * (1 / (10 - price)) * (1 - commission)
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50">
+    <div
+      className="fixed inset-0 z-50 bg-black/50"
+      onClick={handleOverlayClick}
+    >
       <div
         ref={sheetRef}
         onTouchStart={handleTouchStart}
@@ -83,7 +130,9 @@ const TradeSheet = ({ market, choice, onClose }) => {
           opacity: isClosing ? 0 : 1,
         }}
         className="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl max-h-[85vh] overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
       >
+        {/* Rest of the existing code remains the same */}
         <div className="p-4">
           <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-4" />
 
@@ -107,6 +156,7 @@ const TradeSheet = ({ market, choice, onClose }) => {
               value={price}
               onChange={handlePriceChange}
             /> */}
+
             <div className="flex justify-between mt-2">
               <button
                 onClick={() => handlePriceChange(price - 0.5)}
@@ -135,6 +185,14 @@ const TradeSheet = ({ market, choice, onClose }) => {
               value={quantity}
               onChange={setQuantity}
             /> */}
+            <Slider
+              defaultValue={[1]}
+              max={50}
+              min={1}
+              step={1}
+              className={`w-full`}
+              onValueChange={setQuantity}
+            />
           </div>
 
           <div className="flex justify-between mb-4 text-lg">
@@ -182,20 +240,15 @@ const TradeSheet = ({ market, choice, onClose }) => {
           </div>
 
           <button
-            onClick={() => {
-              console.log('Trade confirmed:', {
-                market: market.title,
-                choice,
-                amount: price * quantity,
-                potentialWinnings,
-              })
-              onClose()
-            }}
-            className="w-full bg-blue-500 text-white py-4 rounded-xl font-medium active:bg-blue-600 transition-colors"
+            onClick={handleConfirmTrade}
+            disabled={isLoading}
+            className={`w-full bg-blue-500 text-white py-4 rounded-xl font-medium transition-colors 
+        ${isLoading ? 'opacity-50 cursor-not-allowed' : 'active:bg-blue-600'}`}
           >
-            Confirm {choice === 'yes' ? 'Yes' : 'No'}
+            {isLoading
+              ? 'Processing...'
+              : `Confirm ${choice === 'YES' ? 'YES' : 'NO'}`}
           </button>
-
           <p className="text-xs text-gray-500 text-center mt-4">
             Sale or purchase of Crypto Currency or Digital Assets is neither
             encouraged nor allowed on this platform
@@ -207,3 +260,213 @@ const TradeSheet = ({ market, choice, onClose }) => {
 }
 
 export default TradeSheet
+
+// import React, { useState, useRef, useEffect } from 'react'
+// import { Book, ChevronDown, ChevronUp, Minus, Plus } from 'lucide-react'
+// // import ReactSlider from 'react-slider'
+
+// const TradeSheet = ({ market, choice, onClose }) => {
+//   const sheetRef = useRef(null)
+//   const [price, setPrice] = useState(4.5)
+//   const [quantity, setQuantity] = useState(10)
+//   const [isDragging, setIsDragging] = useState(false)
+//   const [startY, setStartY] = useState(0)
+//   const [currentY, setCurrentY] = useState(0)
+//   const [isClosing, setIsClosing] = useState(false)
+
+//   const maxPrice = 9.5
+//   const minPrice = 0.5
+//   const maxQuantity = 100
+//   const commission = 0.2
+//   const availableBalance = 214.86
+
+//   const orderBook = [
+//     { price: 4.5, yesQty: 109, noQty: 80 },
+//     { price: 5.5, yesQty: 78, noQty: 325 },
+//     { price: 6.0, yesQty: 5, noQty: 168 },
+//   ]
+
+//   useEffect(() => {
+//     document.body.style.overflow = 'hidden'
+//     return () => {
+//       document.body.style.overflow = ''
+//     }
+//   }, [])
+
+//   const handleTouchStart = (e) => {
+//     setIsDragging(true)
+//     setStartY(e.touches[0].clientY)
+//   }
+
+//   const handleTouchMove = (e) => {
+//     if (!isDragging) return
+//     const touch = e.touches[0]
+//     const diff = touch.clientY - startY
+//     if (diff > 0) {
+//       setCurrentY(diff)
+//     }
+//   }
+
+//   const handleTouchEnd = () => {
+//     if (currentY > 150) {
+//       setIsClosing(true)
+//       setTimeout(onClose, 200)
+//     } else {
+//       setCurrentY(0)
+//     }
+//     setIsDragging(false)
+//   }
+
+//   const adjustPrice = (newPrice) => {
+//     // Round to nearest 0.5
+//     const rounded = Math.round(newPrice * 2) / 2
+//     return Math.min(Math.max(rounded, minPrice), maxPrice)
+//   }
+
+//   const handlePriceChange = (newPrice) => {
+//     setPrice(adjustPrice(newPrice))
+//   }
+
+//   const totalCost = price * quantity
+//   const potentialWinnings =
+//     choice === 'yes'
+//       ? totalCost * (1 / price) * (1 - commission)
+//       : totalCost * (1 / (10 - price)) * (1 - commission)
+
+//   return (
+//     <div className="fixed inset-0 z-50 bg-black/50">
+//       <div
+//         ref={sheetRef}
+//         onTouchStart={handleTouchStart}
+//         onTouchMove={handleTouchMove}
+//         onTouchEnd={handleTouchEnd}
+//         style={{
+//           transform: `translateY(${currentY}px)`,
+//           transition: isDragging ? 'none' : 'transform 0.2s ease-out',
+//           opacity: isClosing ? 0 : 1,
+//         }}
+//         className="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl max-h-[85vh] overflow-hidden"
+//       >
+//         <div className="p-4">
+//           <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-4" />
+
+//           <div className="mb-6">
+//             <div className="flex items-center justify-between mb-2">
+//               <span className="text-lg font-medium">Price</span>
+//               <div className="flex items-center">
+//                 <span className="text-lg font-medium">
+//                   ₹ {price.toFixed(1)}
+//                 </span>
+//                 <span className="text-sm text-gray-500 ml-2">
+//                   109 qty available
+//                 </span>
+//               </div>
+//             </div>
+//             {/* <ReactSlider
+//               className="horizontal-slider"
+//               min={minPrice}
+//               max={maxPrice}
+//               step={0.5}
+//               value={price}
+//               onChange={handlePriceChange}
+//             /> */}
+//             <div className="flex justify-between mt-2">
+//               <button
+//                 onClick={() => handlePriceChange(price - 0.5)}
+//                 className="p-2 active:bg-gray-100 rounded-lg transition-colors"
+//               >
+//                 <Minus className="h-4 w-4" />
+//               </button>
+//               <button
+//                 onClick={() => handlePriceChange(price + 0.5)}
+//                 className="p-2 active:bg-gray-100 rounded-lg transition-colors"
+//               >
+//                 <Plus className="h-4 w-4" />
+//               </button>
+//             </div>
+//           </div>
+
+//           <div className="mb-6">
+//             <div className="flex items-center justify-between mb-2">
+//               <span className="text-lg font-medium">Quantity</span>
+//               <span className="text-lg font-medium">{quantity}</span>
+//             </div>
+//             {/* <ReactSlider
+//               className="horizontal-slider"
+//               min={1}
+//               max={maxQuantity}
+//               value={quantity}
+//               onChange={setQuantity}
+//             /> */}
+//           </div>
+
+//           <div className="flex justify-between mb-4 text-lg">
+//             <div>
+//               <p className="text-gray-500">You put</p>
+//               <p className="font-medium">₹{totalCost.toFixed(1)}</p>
+//             </div>
+//             <div className="text-right">
+//               <p className="text-gray-500">You get</p>
+//               <p className="font-medium text-green-600">
+//                 ₹{potentialWinnings.toFixed(1)}
+//               </p>
+//             </div>
+//           </div>
+
+//           <div className="mb-4">
+//             <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+//               <div className="flex items-center px-4 py-3 bg-gray-50">
+//                 <Book className="h-5 w-5 mr-2" />
+//                 <span className="font-medium">Order Book</span>
+//               </div>
+//               <div className="divide-y divide-gray-100">
+//                 <div className="grid grid-cols-3 gap-4 px-4 py-3 bg-gray-50 text-sm font-medium">
+//                   <span>Price</span>
+//                   <span className="text-blue-600">Qty at YES</span>
+//                   <span className="text-rose-600">Qty at NO</span>
+//                 </div>
+//                 {orderBook.map((entry, index) => (
+//                   <div
+//                     key={index}
+//                     className="grid grid-cols-3 gap-4 px-4 py-3 text-sm"
+//                   >
+//                     <span>₹{entry.price}</span>
+//                     <span className="text-blue-600">{entry.yesQty}</span>
+//                     <span className="text-rose-600">{entry.noQty}</span>
+//                   </div>
+//                 ))}
+//               </div>
+//             </div>
+//           </div>
+
+//           <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+//             <span>Available Balance: ₹{availableBalance}</span>
+//             <span>Commission: {(commission * 100).toFixed(1)}%</span>
+//           </div>
+
+//           <button
+//             onClick={() => {
+//               console.log('Trade confirmed:', {
+//                 market: market.title,
+//                 choice,
+//                 amount: price * quantity,
+//                 potentialWinnings,
+//               })
+//               onClose()
+//             }}
+//             className="w-full bg-blue-500 text-white py-4 rounded-xl font-medium active:bg-blue-600 transition-colors"
+//           >
+//             Confirm {choice === 'yes' ? 'Yes' : 'No'}
+//           </button>
+
+//           <p className="text-xs text-gray-500 text-center mt-4">
+//             Sale or purchase of Crypto Currency or Digital Assets is neither
+//             encouraged nor allowed on this platform
+//           </p>
+//         </div>
+//       </div>
+//     </div>
+//   )
+// }
+
+// export default TradeSheet

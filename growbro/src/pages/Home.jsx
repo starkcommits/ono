@@ -21,6 +21,126 @@ import {
   useFrappeGetDocList,
 } from 'frappe-react-sdk'
 
+const categories = [
+  {
+    id: 'cricket',
+    name: 'Cricket',
+    icon: '🏏',
+    color: 'from-rose-400 to-rose-500',
+  },
+  {
+    id: 'crypto',
+    name: 'Crypto',
+    icon: '₿',
+    color: 'from-amber-400 to-amber-500',
+  },
+  {
+    id: 'youtube',
+    name: 'Youtube',
+    icon: '▶️',
+    color: 'from-blue-400 to-blue-500',
+  },
+  {
+    id: 'stocks',
+    name: 'Stocks',
+    icon: '📈',
+    color: 'from-green-400 to-green-500',
+  },
+  {
+    id: 'politics',
+    name: 'Politics',
+    icon: '🗳️',
+    color: 'from-purple-400 to-purple-500',
+  },
+  {
+    id: 'entertainment',
+    name: 'Entertainment',
+    icon: '🎬',
+    color: 'from-pink-400 to-pink-500',
+  },
+  {
+    id: 'sports',
+    name: 'Sports',
+    icon: '⚽',
+    color: 'from-orange-400 to-orange-500',
+  },
+  {
+    id: 'tech',
+    name: 'Tech',
+    icon: '💻',
+    color: 'from-cyan-400 to-cyan-500',
+  },
+]
+
+const trendingMarkets = [
+  {
+    id: '1',
+    category: 'Cricket',
+    title: 'New Zealand to win the 3rd T20I vs Pakistan?',
+    traders: 3349,
+    info: 'H2H last 5 T20: New Zealand 4, PAK 1',
+    odds: { yes: 8.0, no: 2.0 },
+    trend: '+12%',
+    image:
+      'https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=400&h=300&fit=crop',
+    type: 'featured',
+  },
+  {
+    id: '2',
+    category: 'Crypto',
+    title: 'Bitcoin to reach $50,000 by end of March?',
+    traders: 2891,
+    info: 'Current price: $48,235.21 (+2.4%)',
+    odds: { yes: 3.5, no: 1.5 },
+    trend: '+28%',
+    type: 'compact',
+  },
+  {
+    id: '3',
+    category: 'Youtube',
+    title: 'MrBeast to hit 250M subscribers by April?',
+    traders: 1567,
+    info: 'Current: 247M, Growth rate: 100k/day',
+    odds: { yes: 4.2, no: 1.8 },
+    trend: '+15%',
+    image:
+      'https://images.unsplash.com/photo-1611162616475-46b635cb6868?w=400&h=300&fit=crop',
+    type: 'featured',
+  },
+  {
+    id: '4',
+    category: 'Stocks',
+    title: 'Tesla to announce new AI chip in Q2?',
+    traders: 4231,
+    info: 'Recent hints from Elon about AI advancement',
+    odds: { yes: 5.5, no: 1.6 },
+    trend: '+32%',
+    type: 'compact',
+  },
+  {
+    id: '5',
+    category: 'Cricket',
+    title: 'India to win Test series against England?',
+    traders: 8921,
+    info: 'Current series score: IND 3 - 1 ENG',
+    odds: { yes: 1.8, no: 4.5 },
+    trend: '+8%',
+    image:
+      'https://images.unsplash.com/photo-1624526267942-ab0ff8a3e972?w=400&h=300&fit=crop',
+    type: 'featured',
+  },
+  {
+    id: '6',
+    category: 'Politics',
+    title: 'US Presidential Election 2024 Winner?',
+    traders: 12543,
+    info: 'Latest polls showing tight race',
+    odds: { yes: 2.1, no: 3.8 },
+    trend: '+45%',
+    type: 'compact',
+  },
+]
+
 const Home = () => {
   const navigate = useNavigate()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -44,6 +164,7 @@ const Home = () => {
   }, [marketData, marketDataLoading])
 
   useFrappeEventListener('market_event', (updatedMarket) => {
+    console.log('Updated Market: ', updatedMarket)
     setMarkets(
       (prevMarkets) =>
         prevMarkets
