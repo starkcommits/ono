@@ -1,0 +1,99 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:ONO_MARKET_{####}",
+ "creation": "2025-03-26 12:51:45.060449",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "question",
+  "end_result",
+  "status",
+  "column_break_sgfb",
+  "closing_time",
+  "yes_price",
+  "no_price"
+ ],
+ "fields": [
+  {
+   "fieldname": "question",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Question",
+   "reqd": 1
+  },
+  {
+   "fieldname": "end_result",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "End Result"
+  },
+  {
+   "fieldname": "column_break_sgfb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "closing_time",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Closing Time"
+  },
+  {
+   "default": "5.00",
+   "fieldname": "yes_price",
+   "fieldtype": "Float",
+   "label": "Yes Price"
+  },
+  {
+   "default": "5.00",
+   "fieldname": "no_price",
+   "fieldtype": "Float",
+   "label": "No Price"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "OPEN\nCLOSED\nRESOLVED"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-03-26 13:35:31.781145",
+ "modified_by": "Administrator",
+ "module": "Reward App",
+ "name": "Market",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Trader",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

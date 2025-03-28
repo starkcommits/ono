@@ -1,0 +1,407 @@
+import requests
+import frappe
+import json
+from frappe import _
+
+def order(doc, method):
+    """Send order from Frappe to Matching Engine."""
+    user_id = frappe.session.user
+    total_amount = doc.amount * doc.quantity  # Ensure total_amount is always defined
+
+    # # If order is canceled, send DELETE request
+    # if doc.status == "CANCELED" and doc.remark != "Insufficient Balance":
+    #     # Fetch & Lock Wallet Row
+    #     wallet_data = frappe.db.sql("""
+    #         SELECT name, balance FROM `tabUser Wallet`
+    #         WHERE user = %s AND is_active = 1
+    #         FOR UPDATE
+    #     """, (user_id,), as_dict=True)
+
+    #     if not wallet_data:
+    #         return frappe.throw("Wallet not found")
+
+    #     wallet_name = wallet_data[0]["name"]
+    #     available_balance = wallet_data[0]["balance"]
+    #     new_balance = available_balance + total_amount
+
+    #     frappe.db.sql("""
+    #         UPDATE `tabUser Wallet`
+    #         SET balance = %s
+    #         WHERE name = %s
+    #     """, (new_balance, wallet_name))
+
+    #     # Insert Transaction Log
+    #     txn_log = frappe.get_doc({
+    #         "doctype": "Transaction Logs",
+    #         "user": user_id,
+    #         "order_id": doc.name,
+    #         "order_amount": total_amount,
+    #         "order_status": doc.status,
+    #         "transaction_amount": total_amount,
+    #         "closing_balance": new_balance,
+    #         "status": "Completed"
+    #     })
+    #     txn_log.insert(ignore_permissions=True)
+    #     frappe.db.commit()
+        
+
+    #     url = f"http://94.136.187.188:8086/orders/{doc.name}"
+    #     try:
+    #         response = requests.delete(url)  # No need for JSON payload in DELETE
+    #         response.raise_for_status()  # Raise error if status is not 2xx
+    #         frappe.msgprint(f"Order Canceled Successfully.")
+    #     except requests.exceptions.RequestException as e:
+    #         frappe.throw(f"Error canceling order: {str(e)}")
+
+    # else:
+        # Construct order payload
+    payload = {
+        "user_id": user_id,
+        "order_id": doc.name,
+        "filled_quantity": doc.filled_quantity,
+        "status": doc.status,
+        "market_id": doc.market_id,
+        "option_type": doc.opinion_type,
+        "price": doc.amount,
+        "quantity": doc.quantity,
+        "order_type": doc.order_type
+    }
+    
+    # frappe.publish_realtime('order_event',{
+    #     "order_id": doc.name,
+    #     "status": doc.status,
+    #     "market_id": doc.market_id,
+    #     "option_type": doc.opinion_type,
+    #     "price": doc.amount,
+    #     "quantity": doc.quantity,
+    #     "order_type": doc.order_type
+    # },user=frappe.session.user)
+
+    frappe.log_error("Order Payload",payload)
+    try:
+        url = "http://94.136.187.188:8086/orders/"
+        response = requests.post(url, json=payload)
+        if response.status_code != 201:
+            error_text = response.text
+            frappe.log_error(f"Order API Error: {response.status_code} - {error_text}", "order_api_error")
+            frappe.throw(f"Error from API: {error_text}")
+        else:
+            frappe.msgprint("Order Created Successfully.")
+    except requests.exceptions.RequestException as e:
+        frappe.throw(f"Error sending order: {str(e)}")
+            
+        # if doc.order_type == "BUY":
+        #     # Fetch & Lock Wallet Row
+        #     wallet_data = frappe.db.sql("""
+        #         SELECT name, balance FROM `tabUser Wallet`
+        #         WHERE user = %s AND is_active = 1
+        #         FOR UPDATE
+        #     """, (user_id,), as_dict=True)
+
+        #     if not wallet_data:
+        #         doc.status = "CANCELED"
+        #         doc.remark = "No active wallet found."
+        #         frappe.db.commit()
+        #         frappe.msgprint("No active wallet found.")
+        #         return
+            
+        #     wallet_name = wallet_data[0]["name"]
+        #     available_balance = wallet_data[0]["balance"]
+
+        #     if available_balance < total_amount:
+        #         doc.status = "CANCELED"
+        #         doc.remark = "Insufficient Balance"
+        #         frappe.db.commit()
+        #         frappe.msgprint("Insufficient Balance")
+        #         return
+
+        #     new_balance = available_balance - total_amount
+        #     frappe.db.sql("""
+        #         UPDATE `tabUser Wallet`
+        #         SET balance = %s
+        #         WHERE name = %s
+        #     """, (new_balance, wallet_name))
+
+        #     # Insert Transaction Log
+        #     txn_log = frappe.get_doc({
+        #         "doctype": "Transaction Logs",
+        #         "user": user_id,
+        #         "order_id": doc.name,
+        #         "order_amount": total_amount,
+        #         "order_status": doc.status,
+        #         "transaction_amount": total_amount,
+        #         "closing_balance": new_balance,
+        #         "status": "Completed"
+        #     })
+        #     txn_log.insert(ignore_permissions=True)
+
+        # frappe.db.commit()  # ✅ Commit all changes atomically    
+        # frappe.log_error("Order Payload", f"{str(payload)}")
+
+        # Send request to Matching Engine
+
+@frappe.whitelist(allow_guest=True)  # Allow external requests
+def update_order():
+    """Accepts order updates from FastAPI and updates the Order Doctype in Frappe."""
+    
+    try:
+        # Parse incoming JSON data
+        data = frappe._dict(frappe.request.get_json())
+
+        # Ensure the required fields are present
+        # required_fields = ["order_id", "user_id", "market_id", "option_type", "price", 
+        #                    "quantity", "filled_quantity", "order_type", "status", "updated_at"]
+
+        frappe.log_error("Order matching",data)
+        # for field in required_fields:
+        #     if field not in data:
+        #         return {"status": "error", "message": f"Missing required field: {field}"}
+
+        # # Fetch the existing order from Frappe
+        try:
+            order = frappe.get_doc("Orders", data.order_id)
+        except Exception as e:
+            if not order:
+                order= frappe.get_doc("Orders", data.order_id)
+        # # Update fields
+        order.status = data.status
+        order.filled_quantity = data.filled_quantity
+
+        frappe.publish_realtime('order_event',{
+            "order_id":data.order_id,
+            "status":data.status,
+            "filled_quantity":data.filled_quantity
+        },user=frappe.session.user)
+        # # Save the updated order
+        order.save(ignore_permissions=True)
+        frappe.db.commit()
+
+        return {"status": "success", "message": "Order updated successfully", "order_id": order.name}
+    except Exception as e:
+        frappe.log_error(f"Order update failed: {str(e)}", "update_order")
+        return {"status": "error", "message": str(e)}
+
+@frappe.whitelist(allow_guest=True)
+def trades():
+    """Handles trades updates."""
+    try:
+        data = frappe._dict(frappe.request.get_json())
+        frappe.log_error("Trade Data", data)
+
+        if "trades" not in data:
+            return {"status": "error", "message": "Missing 'trades' key in request data"}
+
+        for trade in data.trades:
+            trade_doc = frappe.get_doc({
+                "doctype": "Trades",
+                "yes_order_id": trade["yes_order_id"],
+                "no_order_id": trade["no_order_id"],
+                "market_id": trade["market_id"],
+                "yes_user_id": trade["yes_user_id"],
+                "no_user_id": trade["no_user_id"],
+                "yes_price": trade["yes_price"],
+                "no_price": trade["no_price"],
+                "quantity": trade["quantity"]
+            })
+            trade_doc.insert(ignore_permissions=True)
+
+        frappe.db.commit()
+        return {"status": "success", "message": f"{len(data.trades)} trades inserted successfully"}
+    except Exception as e:
+        frappe.log_error(f"Trade update failed: {str(e)}", "Trade_order")
+        return {"status": "error", "message": str(e)}
+
+def market(doc, method):
+    try:
+        """Send real-time update via WebSockets"""
+        update_data = {
+            "doctype": doc.doctype,
+            "name": doc.name,
+            "status": doc.status,
+            "question": doc.question,
+            "timestamp": frappe.utils.now()
+        }
+
+        frappe.publish_realtime("market_event",update_data,user=frappe.session.user)
+        
+        if doc.status == "OPEN":
+            # Convert closing_time to ISO format if needed
+            if isinstance(doc.closing_time, str):
+                # If it's already a string, ensure it's in ISO format
+                closing_time = doc.closing_time
+            else:
+                # If it's a datetime object, convert to ISO
+                closing_time = doc.closing_time.isoformat()
+        
+            payload = {
+                "market_id": doc.name,
+                "question": doc.question,
+                "closing_time": closing_time,
+                "status": doc.status
+            }
+
+            # For debugging
+            frappe.logger().info(f"Sending payload to market engine: {payload}")
+            
+            url = "http://94.136.187.188:8086/markets/"
+            response = requests.post(url, json=payload)
+            
+            if response.status_code != 201:
+                frappe.logger().error(f"Error response: {response.text}")
+                frappe.throw(f"API error: {response.status_code} - {response.text}")
+            else:
+                frappe.msgprint("Market Created Successfully.")
+            
+        elif doc.status == "CLOSED":
+            payload = {
+                "winning_side":doc.end_result
+            }
+            
+            url=f"http://94.136.187.188:8086/markets/{doc.name}/close"
+            response = requests.post(url, json=payload)
+            
+            if response.status_code != 200:
+                frappe.logger().error(f"Error response: {response.text}")
+                frappe.throw(f"API error: {response.status_code} - {response.text}")
+            else:
+                frappe.msgprint("Market Closed Successfully.")
+    
+    except Exception as e:
+        frappe.log_error(f"Exception market: {str(e)}")
+        frappe.throw(f"Error market: {str(e)}")
+
+# Add a new route to check if the socket connection is alive
+@frappe.whitelist(allow_guest=True)
+def check_socket_connection():
+    """Test endpoint to check if socket connection is working"""
+    try:
+        # Send a test message to the socket
+        frappe.publish_realtime('test_event', {"message": "Hello from server!"})
+        
+        # Also send a progress message which is handled differently
+        frappe.publish_progress(25, 
+            title='Connection Test', 
+            description='Testing socket.io connection'
+        )
+        
+        # Send a market update message
+        frappe.publish_realtime("market_update",
+            {
+                "type": "test",
+                "status": "success",
+                "data": {"test": "This is a test market update"},
+                "timestamp": frappe.utils.now()
+            }
+        )
+        
+        return {
+            "status": "success", 
+            "message": "Test messages sent via socket.io"
+        }
+    except Exception as e:
+        frappe.log_error(f"Socket test error: {str(e)}")
+        return {"status": "error", "message": str(e)}
+
+    
+    
+@frappe.whitelist()
+def close_market():
+    try:
+        data = frappe._dict(frappe.request.get_json())
+
+        frappe.log_error("Market Closed",data)
+        if not data:
+            return {"status": "error", "message": "Missing 'close market' key in request data"}
+
+        market = frappe.get_doc("Market",data["market_id"])
+        market.status="CLOSED"
+        market.save(ignore_permissions=True)
+        frappe.db.commit()
+        
+        # unmatched_orders = frappe.db.sql("""
+        #     SELECT name, quantity, filled_quantity 
+        #     FROM `tabOrders` 
+        #     WHERE quantity != filled_quantity
+        # """, as_dict=True)
+
+        # if unmatched_orders:
+        #     for order_detail in unmatched_orders:
+        #         order=frappe.get_doc("Orders",order_detail.name)
+        #         order.status="CANCELED"
+        #         order.remark = "Market closed"
+        #         order.save(ignore_permissions=True)
+        #         frappe.db.commit()
+                
+        # frappe.db.commit()
+        return {
+            "status":"success","message":"Market closed"
+        }
+        
+    except Exception as e:
+        frappe.log_error("Error Closing market", f"{str(e)}")
+        return {"status": "error", "message": "Error in closing market"}
+
+@frappe.whitelist(allow_guest=True)
+def unmatched_orders():
+    try:
+        data = frappe._dict(frappe.request.get_json())
+        frappe.log_error("Unmatched Order Data", str(data))  # Log for debugging
+
+        # Correcting key name
+        for order_detail in data.unmatched_orders:
+            # Fetch the order
+            order = frappe.get_doc("Orders", order_detail["order_id"])
+
+            # Update status and remarks
+            order.status = "CANCELED"
+            order.remark = "Market Closed. Bid was unmatched"
+            order.save(ignore_permissions=True)
+
+            wallet_data = frappe.db.sql("""
+                SELECT name, balance FROM `tabUser Wallet`
+                WHERE user = %s AND is_active = 1
+                FOR UPDATE
+            """, (order_detail["user_id"],), as_dict=True)
+
+            if not wallet_data:
+                return {"status": "error", "message": "No active wallet found."}
+
+            wallet_name = wallet_data[0]["name"]
+            available_balance = wallet_data[0]["balance"]
+
+            new_balance = available_balance + (order_detail["quantity"] - order_detail["filled_quantity"]) * order_detail["price"]
+            
+            # Update wallet balance
+            frappe.db.sql("""
+                UPDATE `tabUser Wallet`
+                SET balance = %s
+                WHERE name = %s
+            """, (new_balance, wallet_name))
+
+            frappe.db.commit()  # Ensure transaction is committed
+
+        frappe.db.commit()  # Commit once after the loop for better performance
+
+        return {"status": "success", "message": "Unmatched orders updated"}
+
+    except Exception as e:
+        frappe.log_error("Error updating unmatched orders", frappe.get_traceback())  # Better logging
+        return {"status": "error", "message": f"Error: {str(e)}"}
+
+@frappe.whitelist()
+def market_settlements():
+    try:
+        data = frappe._dict(frappe.request.get_json())
+        frappe.log_error("Settled Orders", data)
+        return {
+            "status":"success",
+            "message":"Order settled"
+        }
+    except Exception as e:
+        frappe.log_error("Error in settling", f"{str(e)}")
+        return {
+            "status":"error",
+            "message":"Error in settling order"
+        }
+
+

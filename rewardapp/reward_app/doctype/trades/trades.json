@@ -1,0 +1,103 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:ONO_TRADE_{####}",
+ "creation": "2025-03-26 13:21:45.566598",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "market_id",
+  "yes_order_id",
+  "yes_user_id",
+  "yes_price",
+  "column_break_akxa",
+  "quantity",
+  "no_order_id",
+  "no_user_id",
+  "no_price"
+ ],
+ "fields": [
+  {
+   "fieldname": "yes_order_id",
+   "fieldtype": "Data",
+   "label": "Yes Order ID"
+  },
+  {
+   "fieldname": "no_order_id",
+   "fieldtype": "Data",
+   "label": "No Order ID"
+  },
+  {
+   "fieldname": "market_id",
+   "fieldtype": "Data",
+   "label": "Market ID"
+  },
+  {
+   "fieldname": "yes_user_id",
+   "fieldtype": "Data",
+   "label": "Yes User ID"
+  },
+  {
+   "fieldname": "no_user_id",
+   "fieldtype": "Data",
+   "label": "No User ID"
+  },
+  {
+   "fieldname": "yes_price",
+   "fieldtype": "Data",
+   "label": "Yes Price"
+  },
+  {
+   "fieldname": "column_break_akxa",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "quantity",
+   "fieldtype": "Data",
+   "label": "Quantity"
+  },
+  {
+   "fieldname": "no_price",
+   "fieldtype": "Data",
+   "label": "No Price"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-03-26 13:24:49.123424",
+ "modified_by": "Administrator",
+ "module": "Reward App",
+ "name": "Trades",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Trader",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

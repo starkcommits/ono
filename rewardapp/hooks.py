@@ -52,7 +52,7 @@ app_license = "mit"
 # ------------------
 # include app icons in desk
 # app_include_icons = "rewardapp/public/icons.svg"
-
+# app_commands = ["rewardapp.commands.get_commands"]
 # Home Pages
 # ----------
 
@@ -144,6 +144,34 @@ app_license = "mit"
 # 		"on_trash": "method"
 # 	}
 # }
+
+doc_events = {
+	"Orders": {
+		"after_insert": "rewardapp.engine.order"
+	},
+    "Market": {
+        "on_update": "rewardapp.engine.market"
+    }
+}
+
+api = {
+    "methods" : [
+        "rewardapp.wallet.get_balance",
+        "rewardapp.wallet.update_wallet",
+        "rewardapp.engine.update_order",
+        "rewardapp.engine.trades",
+        "rewardapp.engine.close_market",
+        "rewardapp.engine.unmatched_orders",
+        "rewardapp.engine.market_settlements",
+        "rewardapp.engine.check_socket_connection"
+    ]
+}
+
+scheduler_events = {
+    "*/1 * * * *": [
+        "rewardapp.tasks.execute"
+    ]
+}
 
 # Scheduled Tasks
 # ---------------
