@@ -23,10 +23,10 @@ import {
 
 const categories = [
   {
-    id: 'cricket',
-    name: 'Cricket',
-    icon: '🏏',
-    color: 'from-rose-400 to-rose-500',
+    id: 'sports',
+    name: 'Sports',
+    icon: '⚽',
+    color: 'from-orange-400 to-orange-500',
   },
   {
     id: 'crypto',
@@ -59,12 +59,6 @@ const categories = [
     color: 'from-pink-400 to-pink-500',
   },
   {
-    id: 'sports',
-    name: 'Sports',
-    icon: '⚽',
-    color: 'from-orange-400 to-orange-500',
-  },
-  {
     id: 'tech',
     name: 'Tech',
     icon: '💻',
@@ -75,7 +69,7 @@ const categories = [
 const trendingMarkets = [
   {
     id: '1',
-    category: 'Cricket',
+    category: 'Sports',
     title: 'New Zealand to win the 3rd T20I vs Pakistan?',
     traders: 3349,
     info: 'H2H last 5 T20: New Zealand 4, PAK 1',
@@ -118,18 +112,6 @@ const trendingMarkets = [
     type: 'compact',
   },
   {
-    id: '5',
-    category: 'Cricket',
-    title: 'India to win Test series against England?',
-    traders: 8921,
-    info: 'Current series score: IND 3 - 1 ENG',
-    odds: { yes: 1.8, no: 4.5 },
-    trend: '+8%',
-    image:
-      'https://images.unsplash.com/photo-1624526267942-ab0ff8a3e972?w=400&h=300&fit=crop',
-    type: 'featured',
-  },
-  {
     id: '6',
     category: 'Politics',
     title: 'US Presidential Election 2024 Winner?',
@@ -153,7 +135,7 @@ const Home = () => {
     isLoading: marketDataLoading,
     error,
   } = useFrappeGetDocList('Market', {
-    fields: ['name', 'question', 'yes_price', 'no_price'],
+    fields: ['name', 'question', 'yes_price', 'no_price', 'closing_time'],
     filters: [['status', '=', 'OPEN']],
   })
 
