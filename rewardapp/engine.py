@@ -110,18 +110,7 @@ def trades():
 
 def market(doc, method):
     try:
-        """Send real-time update via WebSockets"""
-        update_data = {
-            "name": doc.name,
-            "status": doc.status,
-            "question": doc.question,
-            "yes_price": doc.yes_price,
-            "no_price": doc.no_price,
-            "closing_time":doc.closing_time
-        }
 
-        frappe.publish_realtime("market_event",update_data,user=frappe.session.user)
-        
         if doc.status == "OPEN":
             # Convert closing_time to ISO format if needed
             if isinstance(doc.closing_time, str):
@@ -137,7 +126,7 @@ def market(doc, method):
                 "closing_time": closing_time,
                 "status": doc.status
             }
-
+        
             # For debugging
             frappe.logger().info(f"Sending payload to market engine: {payload}")
             
@@ -154,7 +143,16 @@ def market(doc, method):
             payload = {
                 "winning_side":doc.end_result
             }
+
+            """Send real-time update via WebSockets"""
+            update_data = {
+                "name": doc.name,
+                "status": doc.status,
+                "category": doc.category
+            }
             
+            frappe.publish_realtime("market_event",update_data,user=frappe.session.user)
+
             url=f"http://94.136.187.188:8086/markets/{doc.name}/close"
             response = requests.post(url, json=payload)
             
@@ -168,40 +166,6 @@ def market(doc, method):
         frappe.log_error(f"Exception market: {str(e)}")
         frappe.throw(f"Error market: {str(e)}")
 
-# Add a new route to check if the socket connection is alive
-@frappe.whitelist(allow_guest=True)
-def check_socket_connection():
-    """Test endpoint to check if socket connection is working"""
-    try:
-        # Send a test message to the socket
-        frappe.publish_realtime('test_event', {"message": "Hello from server!"})
-        
-        # Also send a progress message which is handled differently
-        frappe.publish_progress(25, 
-            title='Connection Test', 
-            description='Testing socket.io connection'
-        )
-        
-        # Send a market update message
-        frappe.publish_realtime("market_update",
-            {
-                "type": "test",
-                "status": "success",
-                "data": {"test": "This is a test market update"},
-                "timestamp": frappe.utils.now()
-            }
-        )
-        
-        return {
-            "status": "success", 
-            "message": "Test messages sent via socket.io"
-        }
-    except Exception as e:
-        frappe.log_error(f"Socket test error: {str(e)}")
-        return {"status": "error", "message": str(e)}
-
-    
-    
 @frappe.whitelist()
 def close_market():
     try:
@@ -216,21 +180,6 @@ def close_market():
         market.save(ignore_permissions=True)
         frappe.db.commit()
         
-        # unmatched_orders = frappe.db.sql("""
-        #     SELECT name, quantity, filled_quantity 
-        #     FROM `tabOrders` 
-        #     WHERE quantity != filled_quantity
-        # """, as_dict=True)
-
-        # if unmatched_orders:
-        #     for order_detail in unmatched_orders:
-        #         order=frappe.get_doc("Orders",order_detail.name)
-        #         order.status="CANCELED"
-        #         order.remark = "Market closed"
-        #         order.save(ignore_permissions=True)
-        #         frappe.db.commit()
-                
-        # frappe.db.commit()
         return {
             "status":"success","message":"Market closed"
         }
@@ -254,6 +203,12 @@ def unmatched_orders():
             order.status = "CANCELED"
             order.remark = "Market Closed. Bid was unmatched"
             order.save(ignore_permissions=True)
+
+            frappe.publish_realtime('order_event',{
+                "order_id":order.name,
+                "status":order.status,
+                "filled_quantity":order.filled_quantity
+            },user=frappe.session.user)
 
             wallet_data = frappe.db.sql("""
                 SELECT name, balance FROM `tabUser Wallet`

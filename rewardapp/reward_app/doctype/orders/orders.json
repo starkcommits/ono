@@ -23,6 +23,7 @@
    "label": "Quantity"
   },
   {
+   "default": "0",
    "fieldname": "filled_quantity",
    "fieldtype": "Int",
    "label": "Filled Quantity"
@@ -72,7 +73,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-03-26 13:25:09.663550",
+ "modified": "2025-03-28 13:56:56.581505",
  "modified_by": "Administrator",
  "module": "Reward App",
  "name": "Orders",
