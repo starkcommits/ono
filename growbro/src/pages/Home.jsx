@@ -26,141 +26,38 @@ const Home = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { currentUser, logout, getUserCookie, isValidating } = useFrappeAuth()
 
-  const { data: marketData, error } = useFrappeGetDocList('Market', {
+  const [markets, setMarkets] = useState([])
+
+  const {
+    data: marketData,
+    isLoading: marketDataLoading,
+    error,
+  } = useFrappeGetDocList('Market', {
     fields: ['name', 'question', 'yes_price', 'no_price'],
     filters: [['status', '=', 'OPEN']],
   })
 
-  useFrappeDocTypeEventListener('Market', (data) => {
-    console.log('Data:', data)
+  useEffect(() => {
+    if (marketData?.length > 0 && !marketDataLoading) {
+      setMarkets(marketData)
+    }
+  }, [marketData, marketDataLoading])
+
+  useFrappeEventListener('market_event', (updatedMarket) => {
+    setMarkets(
+      (prevMarkets) =>
+        prevMarkets
+          .map((market) =>
+            market.name === updatedMarket.name
+              ? { ...market, ...updatedMarket } // Update the market that changed
+              : market
+          )
+          .filter((market) => market.status !== 'CLOSED') // Remove closed markets
+    )
   })
 
-  console.log(marketData)
-
-  const categories = [
-    {
-      id: 'cricket',
-      name: 'Cricket',
-      icon: '🏏',
-      color: 'from-rose-400 to-rose-500',
-    },
-    {
-      id: 'crypto',
-      name: 'Crypto',
-      icon: '₿',
-      color: 'from-amber-400 to-amber-500',
-    },
-    {
-      id: 'youtube',
-      name: 'Youtube',
-      icon: '▶️',
-      color: 'from-blue-400 to-blue-500',
-    },
-    {
-      id: 'stocks',
-      name: 'Stocks',
-      icon: '📈',
-      color: 'from-green-400 to-green-500',
-    },
-    {
-      id: 'politics',
-      name: 'Politics',
-      icon: '🗳️',
-      color: 'from-purple-400 to-purple-500',
-    },
-    {
-      id: 'entertainment',
-      name: 'Entertainment',
-      icon: '🎬',
-      color: 'from-pink-400 to-pink-500',
-    },
-    {
-      id: 'sports',
-      name: 'Sports',
-      icon: '⚽',
-      color: 'from-orange-400 to-orange-500',
-    },
-    {
-      id: 'tech',
-      name: 'Tech',
-      icon: '💻',
-      color: 'from-cyan-400 to-cyan-500',
-    },
-  ]
-
-  const trendingMarkets = [
-    {
-      id: '1',
-      category: 'Cricket',
-      title: 'New Zealand to win the 3rd T20I vs Pakistan?',
-      traders: 3349,
-      info: 'H2H last 5 T20: New Zealand 4, PAK 1',
-      odds: { yes: 8.0, no: 2.0 },
-      trend: '+12%',
-      image:
-        'https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=400&h=300&fit=crop',
-      type: 'featured',
-    },
-    {
-      id: '2',
-      category: 'Crypto',
-      title: 'Bitcoin to reach $50,000 by end of March?',
-      traders: 2891,
-      info: 'Current price: $48,235.21 (+2.4%)',
-      odds: { yes: 3.5, no: 1.5 },
-      trend: '+28%',
-      type: 'compact',
-    },
-    {
-      id: '3',
-      category: 'Youtube',
-      title: 'MrBeast to hit 250M subscribers by April?',
-      traders: 1567,
-      info: 'Current: 247M, Growth rate: 100k/day',
-      odds: { yes: 4.2, no: 1.8 },
-      trend: '+15%',
-      image:
-        'https://images.unsplash.com/photo-1611162616475-46b635cb6868?w=400&h=300&fit=crop',
-      type: 'featured',
-    },
-    {
-      id: '4',
-      category: 'Stocks',
-      title: 'Tesla to announce new AI chip in Q2?',
-      traders: 4231,
-      info: 'Recent hints from Elon about AI advancement',
-      odds: { yes: 5.5, no: 1.6 },
-      trend: '+32%',
-      type: 'compact',
-    },
-    {
-      id: '5',
-      category: 'Cricket',
-      title: 'India to win Test series against England?',
-      traders: 8921,
-      info: 'Current series score: IND 3 - 1 ENG',
-      odds: { yes: 1.8, no: 4.5 },
-      trend: '+8%',
-      image:
-        'https://images.unsplash.com/photo-1624526267942-ab0ff8a3e972?w=400&h=300&fit=crop',
-      type: 'featured',
-    },
-    {
-      id: '6',
-      category: 'Politics',
-      title: 'US Presidential Election 2024 Winner?',
-      traders: 12543,
-      info: 'Latest polls showing tight race',
-      odds: { yes: 2.1, no: 3.8 },
-      trend: '+45%',
-      type: 'compact',
-    },
-  ]
-
-  const displayedMarkets = trendingMarkets
-
   const handleMarketClick = (market) => {
-    navigate(`/event/${market.id}`, { state: { market } })
+    navigate(`/event/${market.name}`, { state: { market } })
   }
 
   const handleCategoryClick = (category) => {
@@ -275,9 +172,9 @@ const Home = () => {
           </div>
 
           <div className="space-y-4">
-            {displayedMarkets.map((market) => (
+            {markets.map((market) => (
               <div
-                key={market.id}
+                key={market.name}
                 className="market-card cursor-pointer"
                 onClick={() => handleMarketClick(market)}
               >
@@ -303,12 +200,13 @@ const Home = () => {
 
                   <div className="p-4">
                     <h3 className="text-base font-medium mb-2">
-                      {market.title}
+                      {market?.question}
                     </h3>
                     <div className="flex items-center gap-3 mb-3">
                       <div className="flex items-center text-xs text-gray-600">
                         <Users className="h-3.5 w-3.5 mr-1" />
-                        <span>{market.traders.toLocaleString()} traders</span>
+                        {/* <span>{market.traders.toLocaleString()} traders</span> */}
+                        <span>4000 traders</span>
                       </div>
                       <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-600">
                         <div className="w-1 h-1 bg-red-500 rounded-full animate-pulse mr-1"></div>
@@ -318,10 +216,10 @@ const Home = () => {
                     {/* <p className="text-xs text-gray-600 mb-4">{market.info}</p> */}
                     <div className="grid grid-cols-2 gap-3">
                       <div className="py-2 px-4 bg-green-50 text-green-600 rounded-xl text-sm font-medium">
-                        Yes ₹{market.odds.yes}
+                        Yes ₹{market?.yes_price}
                       </div>
                       <div className="py-2 px-4 bg-rose-50 text-rose-600 rounded-xl text-sm font-medium">
-                        No ₹{market.odds.no}
+                        No ₹{market?.no_price}
                       </div>
                     </div>
                   </div>
