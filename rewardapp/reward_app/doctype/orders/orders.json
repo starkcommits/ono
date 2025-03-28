@@ -1,0 +1,110 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:ORD_ONO_{######}",
+ "creation": "2025-03-26 12:50:58.116812",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "market_id",
+  "question",
+  "status",
+  "order_type",
+  "column_break_spdz",
+  "quantity",
+  "filled_quantity",
+  "opinion_type",
+  "amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "quantity",
+   "fieldtype": "Int",
+   "label": "Quantity"
+  },
+  {
+   "fieldname": "filled_quantity",
+   "fieldtype": "Int",
+   "label": "Filled Quantity"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "UNMATCHED\nMATCHED\nPARTIAL\nCANCELED\nSETTLED"
+  },
+  {
+   "fieldname": "market_id",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Market ID",
+   "options": "Market",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "market_id.question",
+   "fieldname": "question",
+   "fieldtype": "Read Only",
+   "label": "Question"
+  },
+  {
+   "fieldname": "column_break_spdz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "order_type",
+   "fieldtype": "Select",
+   "label": "Order Type",
+   "options": "SELL\nBUY"
+  },
+  {
+   "fieldname": "opinion_type",
+   "fieldtype": "Select",
+   "label": "Opinion Type",
+   "options": "YES\nNO"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Float",
+   "label": "Amount"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-03-26 13:25:09.663550",
+ "modified_by": "Administrator",
+ "module": "Reward App",
+ "name": "Orders",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Trader",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
