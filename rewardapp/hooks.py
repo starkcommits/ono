@@ -5,6 +5,7 @@ app_description = "Reward App"
 app_email = "xfer@india100x.com"
 app_license = "mit"
 
+
 # Apps
 # ------------------
 
@@ -242,3 +243,5 @@ app_license = "mit"
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
 
+
+website_route_rules = [{'from_route': '/growbro/<path:app_path>', 'to_route': 'growbro'},]
