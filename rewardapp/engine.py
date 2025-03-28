@@ -8,53 +8,6 @@ def order(doc, method):
     user_id = frappe.session.user
     total_amount = doc.amount * doc.quantity  # Ensure total_amount is always defined
 
-    # # If order is canceled, send DELETE request
-    # if doc.status == "CANCELED" and doc.remark != "Insufficient Balance":
-    #     # Fetch & Lock Wallet Row
-    #     wallet_data = frappe.db.sql("""
-    #         SELECT name, balance FROM `tabUser Wallet`
-    #         WHERE user = %s AND is_active = 1
-    #         FOR UPDATE
-    #     """, (user_id,), as_dict=True)
-
-    #     if not wallet_data:
-    #         return frappe.throw("Wallet not found")
-
-    #     wallet_name = wallet_data[0]["name"]
-    #     available_balance = wallet_data[0]["balance"]
-    #     new_balance = available_balance + total_amount
-
-    #     frappe.db.sql("""
-    #         UPDATE `tabUser Wallet`
-    #         SET balance = %s
-    #         WHERE name = %s
-    #     """, (new_balance, wallet_name))
-
-    #     # Insert Transaction Log
-    #     txn_log = frappe.get_doc({
-    #         "doctype": "Transaction Logs",
-    #         "user": user_id,
-    #         "order_id": doc.name,
-    #         "order_amount": total_amount,
-    #         "order_status": doc.status,
-    #         "transaction_amount": total_amount,
-    #         "closing_balance": new_balance,
-    #         "status": "Completed"
-    #     })
-    #     txn_log.insert(ignore_permissions=True)
-    #     frappe.db.commit()
-        
-
-    #     url = f"http://94.136.187.188:8086/orders/{doc.name}"
-    #     try:
-    #         response = requests.delete(url)  # No need for JSON payload in DELETE
-    #         response.raise_for_status()  # Raise error if status is not 2xx
-    #         frappe.msgprint(f"Order Canceled Successfully.")
-    #     except requests.exceptions.RequestException as e:
-    #         frappe.throw(f"Error canceling order: {str(e)}")
-
-    # else:
-        # Construct order payload
     payload = {
         "user_id": user_id,
         "order_id": doc.name,
@@ -90,55 +43,6 @@ def order(doc, method):
     except requests.exceptions.RequestException as e:
         frappe.throw(f"Error sending order: {str(e)}")
             
-        # if doc.order_type == "BUY":
-        #     # Fetch & Lock Wallet Row
-        #     wallet_data = frappe.db.sql("""
-        #         SELECT name, balance FROM `tabUser Wallet`
-        #         WHERE user = %s AND is_active = 1
-        #         FOR UPDATE
-        #     """, (user_id,), as_dict=True)
-
-        #     if not wallet_data:
-        #         doc.status = "CANCELED"
-        #         doc.remark = "No active wallet found."
-        #         frappe.db.commit()
-        #         frappe.msgprint("No active wallet found.")
-        #         return
-            
-        #     wallet_name = wallet_data[0]["name"]
-        #     available_balance = wallet_data[0]["balance"]
-
-        #     if available_balance < total_amount:
-        #         doc.status = "CANCELED"
-        #         doc.remark = "Insufficient Balance"
-        #         frappe.db.commit()
-        #         frappe.msgprint("Insufficient Balance")
-        #         return
-
-        #     new_balance = available_balance - total_amount
-        #     frappe.db.sql("""
-        #         UPDATE `tabUser Wallet`
-        #         SET balance = %s
-        #         WHERE name = %s
-        #     """, (new_balance, wallet_name))
-
-        #     # Insert Transaction Log
-        #     txn_log = frappe.get_doc({
-        #         "doctype": "Transaction Logs",
-        #         "user": user_id,
-        #         "order_id": doc.name,
-        #         "order_amount": total_amount,
-        #         "order_status": doc.status,
-        #         "transaction_amount": total_amount,
-        #         "closing_balance": new_balance,
-        #         "status": "Completed"
-        #     })
-        #     txn_log.insert(ignore_permissions=True)
-
-        # frappe.db.commit()  # ✅ Commit all changes atomically    
-        # frappe.log_error("Order Payload", f"{str(payload)}")
-
-        # Send request to Matching Engine
 
 @frappe.whitelist(allow_guest=True)  # Allow external requests
 def update_order():
@@ -148,14 +52,7 @@ def update_order():
         # Parse incoming JSON data
         data = frappe._dict(frappe.request.get_json())
 
-        # Ensure the required fields are present
-        # required_fields = ["order_id", "user_id", "market_id", "option_type", "price", 
-        #                    "quantity", "filled_quantity", "order_type", "status", "updated_at"]
-
         frappe.log_error("Order matching",data)
-        # for field in required_fields:
-        #     if field not in data:
-        #         return {"status": "error", "message": f"Missing required field: {field}"}
 
         # # Fetch the existing order from Frappe
         try:
@@ -215,11 +112,12 @@ def market(doc, method):
     try:
         """Send real-time update via WebSockets"""
         update_data = {
-            "doctype": doc.doctype,
             "name": doc.name,
             "status": doc.status,
             "question": doc.question,
-            "timestamp": frappe.utils.now()
+            "yes_price": doc.yes_price,
+            "no_price": doc.no_price,
+            "closing_time":doc.closing_time
         }
 
         frappe.publish_realtime("market_event",update_data,user=frappe.session.user)

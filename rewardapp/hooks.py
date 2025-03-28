@@ -169,9 +169,11 @@ api = {
 }
 
 scheduler_events = {
-    "*/1 * * * *": [
-        "rewardapp.tasks.execute"
-    ]
+    "cron": {
+        "*/1 * * * *": [
+            "rewardapp.tasks.execute"
+        ]
+    }
 }
 
 # Scheduled Tasks
