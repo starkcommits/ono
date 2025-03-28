@@ -36,7 +36,7 @@ def order(doc, method):
         response = requests.post(url, json=payload)
         if response.status_code != 201:
             error_text = response.text
-            frappe.log_error(f"Order API Error: {response.status_code} - {error_text}", "order_api_error")
+            frappe.log_error("Order API Error: ", f"{response.status_code} - {error_text}")
             frappe.throw(f"Error from API: {error_text}")
         else:
             frappe.msgprint("Order Created Successfully.")
