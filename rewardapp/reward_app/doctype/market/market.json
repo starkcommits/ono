@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "question",
+  "category",
   "end_result",
   "status",
   "column_break_sgfb",
@@ -36,7 +37,8 @@
    "fieldname": "closing_time",
    "fieldtype": "Datetime",
    "in_list_view": 1,
-   "label": "Closing Time"
+   "label": "Closing Time",
+   "reqd": 1
   },
   {
    "default": "5.00",
@@ -56,12 +58,19 @@
    "in_list_view": 1,
    "label": "Status",
    "options": "OPEN\nCLOSED\nRESOLVED"
+  },
+  {
+   "fieldname": "category",
+   "fieldtype": "Link",
+   "label": "Category",
+   "options": "Market Category",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-03-26 13:35:31.781145",
+ "modified": "2025-03-28 12:50:06.173775",
  "modified_by": "Administrator",
  "module": "Reward App",
  "name": "Market",
