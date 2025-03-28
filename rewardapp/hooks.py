@@ -146,27 +146,27 @@ app_license = "mit"
 # 	}
 # }
 
-doc_events = {
-	"Orders": {
-		"after_insert": "rewardapp.engine.order"
-	},
-    "Market": {
-        "on_update": "rewardapp.engine.market"
-    }
-}
+# doc_events = {
+# 	"Orders": {
+# 		"after_insert": "rewardapp.engine.order"
+# 	},
+#     "Market": {
+#         "on_update": "rewardapp.engine.market"
+#     }
+# }
 
-api = {
-    "methods" : [
-        "rewardapp.wallet.get_balance",
-        "rewardapp.wallet.update_wallet",
-        "rewardapp.engine.update_order",
-        "rewardapp.engine.trades",
-        "rewardapp.engine.close_market",
-        "rewardapp.engine.unmatched_orders",
-        "rewardapp.engine.market_settlements",
-        "rewardapp.engine.check_socket_connection"
-    ]
-}
+# api = {
+#     "methods" : [
+#         "rewardapp.wallet.get_balance",
+#         "rewardapp.wallet.update_wallet",
+#         "rewardapp.engine.update_order",
+#         "rewardapp.engine.trades",
+#         "rewardapp.engine.close_market",
+#         "rewardapp.engine.unmatched_orders",
+#         "rewardapp.engine.market_settlements",
+#         "rewardapp.engine.check_socket_connection"
+#     ]
+# }
 
 scheduler_events = {
     "cron": {

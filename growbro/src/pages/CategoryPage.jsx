@@ -9,7 +9,7 @@ const CategoryPage = () => {
   const { id } = useParams()
   const { category, markets } = location.state
 
-  const [categoryMarkets, setCategoryMarkets] = useState([])
+  const [categoryMarkets, setCategoryMarkets] = useState({})
 
   const { data: categoryData, isLoading: categoryDataLoading } =
     useFrappeGetDocList('Market', {
@@ -21,27 +21,40 @@ const CategoryPage = () => {
     })
 
   useEffect(() => {
-    if (categoryData?.length > 0 && !categoryDataLoading) {
-      setCategoryMarkets(categoryData)
+    if (
+      categoryData?.length > 0 &&
+      !categoryDataLoading &&
+      Object.keys(categoryMarkets)?.length === 0
+    ) {
+      const marketMap = categoryData?.reduce((acc, market) => {
+        acc[market.name] = market // ✅ Store as { "market_name": marketData }
+        return acc
+      }, {})
+      setCategoryMarkets(marketMap)
     }
-  }, [categoryData, categoryDataLoading])
+  }, [categoryDataLoading])
 
   useFrappeEventListener('market_event', (updatedMarket) => {
-    console.log('Updated Market: ', updatedMarket)
+    console.log('Updated Market:', updatedMarket)
 
-    setCategoryMarkets(
-      (prevMarkets) =>
-        prevMarkets
-          .map((market) =>
-            market.name === updatedMarket.name &&
-            market.category === updatedMarket.category
-              ? { ...market, ...updatedMarket } // Update the market that changed
-              : market
-          )
-          .filter((market) => market.status !== 'CLOSED') // Remove closed markets
-    )
+    setCategoryMarkets((prevMarkets) => {
+      if (updatedMarket.category !== id) {
+        return // Exit if it doesn't match the category
+      }
+
+      const updatedMarkets = {
+        ...prevMarkets,
+        [updatedMarket.name]: updatedMarket,
+      }
+
+      // ❌ Remove market if it's closed
+      if (updatedMarket.status === 'CLOSED') {
+        delete updatedMarkets[updatedMarket.name]
+      }
+
+      return updatedMarkets
+    })
   })
-
   const getCategoryEmoji = () => {
     const emojiMap = {
       Cricket: '🏏',
@@ -100,8 +113,10 @@ const CategoryPage = () => {
                   {category} Markets
                 </h2>
                 <p className="text-white/80">
-                  {categoryMarkets.length} active{' '}
-                  {categoryMarkets.length === 1 ? 'event' : 'events'}
+                  {Object.values(categoryMarkets || {})?.length} active{' '}
+                  {Object.values(categoryMarkets || {})?.length === 1
+                    ? 'event'
+                    : 'events'}
                 </p>
               </div>
             </div>
@@ -111,8 +126,8 @@ const CategoryPage = () => {
 
       <div className="px-6 -mt-4">
         <div className="bg-white rounded-3xl shadow-sm divide-y divide-gray-100">
-          {categoryMarkets.length > 0 ? (
-            categoryMarkets.map((market) => (
+          {Object.values(categoryMarkets || {})?.length > 0 ? (
+            Object.values(categoryMarkets || {})?.map((market) => (
               <div
                 key={market.id}
                 onClick={() => handleMarketClick(market)}
@@ -134,7 +149,7 @@ const CategoryPage = () => {
                   </div>
                 )} */}
                 <h3 className="text-base font-medium mb-2">
-                  {market.question}
+                  {market?.question}
                 </h3>
                 <div className="flex items-center gap-3 mb-3">
                   <div className="flex items-center text-xs text-gray-600">
@@ -150,26 +165,26 @@ const CategoryPage = () => {
                     <Timer className="h-3.5 w-3.5 mr-1" />
                     <span>
                       {market?.closing_time
-                        .split(' ')[0]
-                        .split('-')
+                        ?.split(' ')[0]
+                        ?.split('-')
                         .reverse()
                         .join('-')}{' '}
                       {market?.closing_time
-                        .split(' ')[1]
-                        .split(':')
+                        ?.split(' ')[1]
+                        ?.split(':')
                         .reverse()
                         .join(':')
                         .slice(0, 5)}
                     </span>
                   </div>
                 </div>
-                <p className="text-xs text-gray-600 mb-4">{market.question}</p>
+                <p className="text-xs text-gray-600 mb-4">{market?.question}</p>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="py-2 px-4 bg-green-50 text-green-600 rounded-xl text-sm font-medium">
-                    Yes ₹{market.yes_price}
+                    Yes ₹{market?.yes_price}
                   </div>
                   <div className="py-2 px-4 bg-rose-50 text-rose-600 rounded-xl text-sm font-medium">
-                    No ₹{market.no_price}
+                    No ₹{market?.no_price}
                   </div>
                 </div>
               </div>

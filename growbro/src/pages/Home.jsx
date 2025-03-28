@@ -14,12 +14,7 @@ import {
 } from 'lucide-react'
 import WalletBalance from '../components/WalletBalance'
 import SlideMenu from '../components/SlideMenu'
-import {
-  useFrappeAuth,
-  useFrappeDocTypeEventListener,
-  useFrappeEventListener,
-  useFrappeGetDocList,
-} from 'frappe-react-sdk'
+import { useFrappeEventListener, useFrappeGetDocList } from 'frappe-react-sdk'
 
 const categories = [
   {
@@ -126,37 +121,45 @@ const trendingMarkets = [
 const Home = () => {
   const navigate = useNavigate()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const { currentUser, logout, getUserCookie, isValidating } = useFrappeAuth()
 
-  const [markets, setMarkets] = useState([])
+  const [markets, setMarkets] = useState({})
 
-  const {
-    data: marketData,
-    isLoading: marketDataLoading,
-    error,
-  } = useFrappeGetDocList('Market', {
-    fields: ['name', 'question', 'yes_price', 'no_price', 'closing_time'],
-    filters: [['status', '=', 'OPEN']],
-  })
+  const { data: marketData, isLoading: marketDataLoading } =
+    useFrappeGetDocList('Market', {
+      fields: ['name', 'question', 'yes_price', 'no_price', 'closing_time'],
+      filters: [['status', '=', 'OPEN']],
+    })
 
   useEffect(() => {
-    if (marketData?.length > 0 && !marketDataLoading) {
-      setMarkets(marketData)
+    if (
+      !marketDataLoading &&
+      marketData?.length > 0 &&
+      Object.keys(markets).length === 0
+    ) {
+      const marketMap = marketData.reduce((acc, market) => {
+        acc[market.name] = market // ✅ Store as { "market_name": marketData }
+        return acc
+      }, {})
+      setMarkets(marketMap)
     }
-  }, [marketData, marketDataLoading])
+  }, [marketDataLoading]) // Depend only on loading state
 
   useFrappeEventListener('market_event', (updatedMarket) => {
-    console.log('Updated Market: ', updatedMarket)
-    setMarkets(
-      (prevMarkets) =>
-        prevMarkets
-          .map((market) =>
-            market.name === updatedMarket.name
-              ? { ...market, ...updatedMarket } // Update the market that changed
-              : market
-          )
-          .filter((market) => market.status !== 'CLOSED') // Remove closed markets
-    )
+    console.log('Updated Market:', updatedMarket)
+
+    setMarkets((prevMarkets) => {
+      const updatedMarkets = {
+        ...prevMarkets,
+        [updatedMarket.name]: updatedMarket,
+      }
+
+      // ❌ Remove market if it's closed
+      if (updatedMarket.status === 'CLOSED') {
+        delete updatedMarkets[updatedMarket.name]
+      }
+
+      return updatedMarkets
+    })
   })
 
   const handleMarketClick = (market) => {
@@ -275,7 +278,7 @@ const Home = () => {
           </div>
 
           <div className="space-y-4">
-            {markets.map((market) => (
+            {Object.values(markets).map((market) => (
               <div
                 key={market.name}
                 className="market-card cursor-pointer"

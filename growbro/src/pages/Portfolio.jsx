@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   ArrowLeft,
@@ -24,6 +24,7 @@ import {
   Legend,
 } from 'chart.js'
 import TradeSheet from '../components/TradeSheet'
+import { useFrappeAuth, useFrappeGetDocList } from 'frappe-react-sdk'
 
 ChartJS.register(
   CategoryScale,
@@ -38,10 +39,44 @@ ChartJS.register(
 
 const Portfolio = () => {
   const navigate = useNavigate()
-  const [activeTab, setActiveTab] = useState('completed')
+  const [activeTab, setActiveTab] = useState('active')
   const [selectedPosition, setSelectedPosition] = useState(null)
   const [tradeAction, setTradeAction] = useState(null)
   const [showTradeSheet, setShowTradeSheet] = useState(false)
+
+  const { currentUser } = useFrappeAuth()
+
+  const { data: activeOrders, isLoading: loadingActive } = useFrappeGetDocList(
+    'Orders',
+    {
+      enabled: activeTab === 'active',
+      fields: ['name', 'amount', 'status'],
+      filters: [
+        ['owner', '=', currentUser],
+        ['status', '!=', 'SETTLED'],
+      ],
+      limit_page_length: 10,
+    },
+    { enabled: activeTab === 'active' }
+  ) // 👈 This ensures it only fetches when activeTab is 'active'
+
+  const { data: completedOrders, isLoading: loadingCompleted } =
+    useFrappeGetDocList(
+      'Orders',
+      {
+        enabled: activeTab === 'completed',
+        fields: ['name', 'amount', 'status'],
+        filters: [
+          ['owner', '=', currentUser],
+          ['status', '=', 'SETTLED'],
+        ],
+        limit_page_length: 10,
+      },
+      { enabled: activeTab === 'completed' }
+    ) // 👈 This ensures it only fetches when activeTab is 'completed'
+
+  console.log(activeOrders)
+  console.log(completedOrders)
 
   const performanceData = {
     labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
