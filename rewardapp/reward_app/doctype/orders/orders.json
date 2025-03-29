@@ -32,6 +32,7 @@
   {
    "fieldname": "status",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Status",
    "options": "UNMATCHED\nMATCHED\nPARTIAL\nCANCELED\nSETTLED"
   },
@@ -56,18 +57,21 @@
   {
    "fieldname": "order_type",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Order Type",
    "options": "SELL\nBUY"
   },
   {
    "fieldname": "opinion_type",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Opinion Type",
    "options": "YES\nNO"
   },
   {
    "fieldname": "amount",
    "fieldtype": "Float",
+   "in_list_view": 1,
    "label": "Amount"
   },
   {
@@ -80,7 +84,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-03-29 13:54:27.845540",
+ "modified": "2025-03-29 19:19:21.538612",
  "modified_by": "Administrator",
  "module": "Reward App",
  "name": "Orders",
