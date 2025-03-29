@@ -7,6 +7,20 @@ def order(doc, method):
     """Send order from Frappe to Matching Engine."""
     user_id = frappe.session.user
     total_amount = doc.amount * doc.quantity  # Ensure total_amount is always defined
+    
+    if doc.order_type=="BUY":
+        wallet = frappe.db.sql("""
+            SELECT name, balance FROM `tabUser Wallet`
+            WHERE user = %s AND is_active = 1
+        """, (user_id,), as_dict=True)
+
+        if not wallet:
+            frappe.msgprint("No active wallet found")
+            frappe.throw(f"No active wallet found for {user_id}")
+
+        if wallet[0]["balance"]<total_amount:
+            frappe.msgprint("Insufficient balance")
+            frappe.throw(f"Insufficient balance in {user_id}'s wallet")
 
     payload = {
         "user_id": user_id,
@@ -29,6 +43,9 @@ def order(doc, method):
     #     "quantity": doc.quantity,
     #     "order_type": doc.order_type
     # },user=frappe.session.user)
+    
+    doc.save()
+    frappe.db.commit()
 
     frappe.log_error("Order Payload",payload)
     try:
@@ -137,21 +154,24 @@ def market(doc, method):
                 frappe.logger().error(f"Error response: {response.text}")
                 frappe.throw(f"API error: {response.status_code} - {response.text}")
             else:
+                """Send real-time update via WebSockets"""
+                update_data = {
+                    "name": doc.name,
+                    "status": doc.status,
+                    "category": doc.category,
+                    "question": doc.question,
+                    "yes_price": doc.yes_price,
+                    "no_price": doc.no_price,
+                    "closing_time": doc.closing_time
+                }
+                
+                frappe.publish_realtime("market_event",update_data,user=frappe.session.user)
                 frappe.msgprint("Market Created Successfully.")
             
         elif doc.status == "CLOSED":
             payload = {
                 "winning_side":doc.end_result
             }
-
-            """Send real-time update via WebSockets"""
-            update_data = {
-                "name": doc.name,
-                "status": doc.status,
-                "category": doc.category
-            }
-            
-            frappe.publish_realtime("market_event",update_data,user=frappe.session.user)
 
             url=f"http://94.136.187.188:8086/markets/{doc.name}/close"
             response = requests.post(url, json=payload)
@@ -160,6 +180,14 @@ def market(doc, method):
                 frappe.logger().error(f"Error response: {response.text}")
                 frappe.throw(f"API error: {response.status_code} - {response.text}")
             else:
+                """Send real-time update via WebSockets"""
+                update_data = {
+                    "name": doc.name,
+                    "status": doc.status,
+                    "category": doc.category
+                }
+                
+                frappe.publish_realtime("market_event",update_data,user=frappe.session.user)
                 frappe.msgprint("Market Closed Successfully.")
     
     except Exception as e:
@@ -257,4 +285,21 @@ def market_settlements():
             "message":"Error in settling order"
         }
 
+@frappe.whitelist()
+def update_market_price():
+    try:
+        data = frappe._dict(frappe.request.get_json())
+
+        market = frappe.get_doc("Market",data.market_id)
+        market.yes_price = data.yes_price
+        market.no_price = data.no_price
+        
+        market.save(ignore_permissions=True)
+        
+        frappe.db.commit()
+
+        return True
+    except Exception as e:
+        frappe.log_error("Error in market price update", f"{str(e)}")
+        return False
 
