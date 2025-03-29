@@ -163,7 +163,7 @@ api = {
         "rewardapp.engine.close_market",
         "rewardapp.engine.unmatched_orders",
         "rewardapp.engine.market_settlements",
-        "rewardapp.engine.check_socket_connection"
+        "rewardapp.engine.update_market_price"
     ]
 }
 
