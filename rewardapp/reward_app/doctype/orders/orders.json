@@ -10,6 +10,7 @@
   "question",
   "status",
   "order_type",
+  "closing_time",
   "column_break_spdz",
   "quantity",
   "filled_quantity",
@@ -68,12 +69,18 @@
    "fieldname": "amount",
    "fieldtype": "Float",
    "label": "Amount"
+  },
+  {
+   "fetch_from": "market_id.closing_time",
+   "fieldname": "closing_time",
+   "fieldtype": "Read Only",
+   "label": "Closing Time"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-03-28 13:56:56.581505",
+ "modified": "2025-03-29 13:54:27.845540",
  "modified_by": "Administrator",
  "module": "Reward App",
  "name": "Orders",
