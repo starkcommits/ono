@@ -15,8 +15,8 @@ import SignIn from './pages/SignIn'
 import SignUp from './pages/SignUp'
 import KYC from './pages/KYC'
 import ProtectedRoute from './components/ProtectedRoute'
+import Layout from './components/Layout'
 import PublicRoute from './components/PublicRoute'
-import { useFrappeAuth } from 'frappe-react-sdk'
 import { Route, Routes } from 'react-router-dom'
 
 const navItems = [
@@ -28,7 +28,6 @@ const navItems = [
 ]
 
 function App() {
-  const { currentUser } = useFrappeAuth()
   return (
     <div className="App">
       <div className="min-h-screen w-full bg-gray-50">
@@ -39,22 +38,31 @@ function App() {
               <Route path="/signup" element={<SignUp />} />
             </Route>
             <Route element={<ProtectedRoute />}>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/kyc" element={<KYC />} />
-              <Route path="/wallet" element={<WalletPage />} />
-              <Route path="/portfolio" element={<Portfolio />} />
-              <Route path="/news" element={<News />} />
-              <Route path="/search" element={<SearchPage />} />
-              <Route path="/event/:id" element={<EventDetails />} />
-              <Route path="/category/:id" element={<CategoryPage />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/rewards" element={<Rewards />} />
-              <Route path="/notifications" element={<Notifications />} />
+              <Route element={<Layout />}>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/kyc" element={<KYC />} />
+                <Route path="/wallet" element={<WalletPage />} />
+                <Route path="/portfolio" element={<Portfolio />} />
+                <Route path="/news" element={<News />} />
+                <Route path="/search" element={<SearchPage />} />
+                <Route path="/event/:id" element={<EventDetails />} />
+                <Route path="/category/:id" element={<CategoryPage />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/rewards" element={<Rewards />} />
+                <Route path="/notifications" element={<Notifications />} />
+              </Route>
             </Route>
+            <Route
+              path="*"
+              element={
+                <div className="w-full h-screen flex justify-center items-center overflow-hidden">
+                  <div>404 NOT FOUND</div>
+                </div>
+              }
+            />
           </Routes>
         </div>
-        {currentUser && <Navbar items={navItems} />}
       </div>
     </div>
   )

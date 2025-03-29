@@ -2,16 +2,20 @@ import React, { useState, useRef, useEffect } from 'react'
 import { Book, ChevronDown, ChevronUp, Minus, Plus } from 'lucide-react'
 import { useParams } from 'react-router-dom'
 import { useFrappeCreateDoc } from 'frappe-react-sdk'
-import { cn } from '@/lib/utils'
 import { Slider } from '@/components/ui/slider'
 
-const TradeSheet = ({ market, choice, onClose }) => {
+const TradeSheet = ({ market, choice, onClose, tradeAction }) => {
   const { createDoc, isLoading, error } = useFrappeCreateDoc()
   const { id } = useParams()
 
+  const marketId = id ? id : market.market_id
+
   const sheetRef = useRef(null)
   const [price, setPrice] = useState(4.5)
-  const [quantity, setQuantity] = useState(10)
+  const [quantity, setQuantity] = useState(
+    tradeAction === 'SELL' ? market.quantity : 10
+  )
+  console.log(quantity)
   const [isDragging, setIsDragging] = useState(false)
   const [startY, setStartY] = useState(0)
   const [currentY, setCurrentY] = useState(0)
@@ -32,9 +36,10 @@ const TradeSheet = ({ market, choice, onClose }) => {
   const handleConfirmTrade = async () => {
     try {
       // Prepare the order data with specific fields
+
       const orderData = {
-        market_id: id, // Market ID from URL params
-        order_type: 'BUY', // You can adjust this if needed
+        market_id: tradeAction === 'BUY' ? marketId : market.market_id, // Market ID from URL params
+        order_type: tradeAction, // You can adjust this if needed
         quantity: quantity, // Quantity of the trade
         opinion_type: choice, // 'yes' or 'no'
         amount: price, // Total amount of the trade
@@ -43,15 +48,9 @@ const TradeSheet = ({ market, choice, onClose }) => {
       // Create the document
       const newDoc = await createDoc('Orders', orderData)
       console.log(newDoc)
-
-      // Show success toast
-      // toast.success('Order created successfully', {
-      //   description: `${choice.toUpperCase()} order placed for ${quantity} units`,
-      // })
-
-      // Close the sheet
       onClose()
     } catch (err) {
+      // Close the sheet
       // Handle any errors
       // toast.error('Failed to create order', {
       //   description: error || 'Please try again',
@@ -173,28 +172,32 @@ const TradeSheet = ({ market, choice, onClose }) => {
             </div>
           </div>
 
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-lg font-medium">Quantity</span>
-              <span className="text-lg font-medium">{quantity}</span>
+          {tradeAction === 'BUY' && (
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-lg font-medium">Quantity</span>
+                <span className="text-lg font-medium">{quantity}</span>
+              </div>
+              {/* <ReactSlider
+                    className="horizontal-slider"
+                    min={1}
+                    max={maxQuantity}
+                    value={quantity}
+                    onChange={setQuantity}
+                  /> */}
+              <Slider
+                defaultValue={[1]}
+                max={50}
+                min={1}
+                step={1}
+                value={[quantity]}
+                className={``}
+                onValueChange={(values) => {
+                  setQuantity(values[0])
+                }}
+              />
             </div>
-            {/* <ReactSlider
-              className="horizontal-slider"
-              min={1}
-              max={maxQuantity}
-              value={quantity}
-              onChange={setQuantity}
-            /> */}
-            <Slider
-              defaultValue={[1]}
-              max={50}
-              min={1}
-              step={1}
-              className={`w-full`}
-              onValueChange={setQuantity}
-            />
-          </div>
-
+          )}
           <div className="flex justify-between mb-4 text-lg">
             <div>
               <p className="text-gray-500">You put</p>

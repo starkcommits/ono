@@ -146,14 +146,14 @@ app_license = "mit"
 # 	}
 # }
 
-# doc_events = {
-# 	"Orders": {
-# 		"after_insert": "rewardapp.engine.order"
-# 	},
-#     "Market": {
-#         "on_update": "rewardapp.engine.market"
-#     }
-# }
+doc_events = {
+	"Orders": {
+		"after_insert": "rewardapp.engine.order"
+	},
+    "Market": {
+        "on_update": "rewardapp.engine.market"
+    }
+}
 
 api = {
     "methods" : [

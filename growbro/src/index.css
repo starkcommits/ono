@@ -3,110 +3,98 @@
 @tailwind utilities;
 
 @layer base {
-  html,
-  body {
-    @apply h-full w-full fixed overflow-hidden;
-    -webkit-tap-highlight-color: transparent;
-    overscroll-behavior: none;
-  }
+  :root {
+    /* Core colors */
+    --background: 0 0% 100%;
+    --foreground: 215 25% 27%;
 
-  #root {
-    @apply h-full w-full overflow-auto bg-gray-50;
-    overscroll-behavior: none;
-  }
-}
+    /* Card & Popover */
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 27%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 25% 27%;
 
-@layer components {
-  .glass-card {
-    @apply bg-white/70 backdrop-blur-lg rounded-2xl shadow-sm border border-white/20;
-  }
+    /* Primary Color - Teal */
+    --primary: 174 86% 31%;
+    --primary-foreground: 0 0% 100%;
+    --primary-light: 174 86% 41%;
+    --primary-dark: 174 86% 21%;
 
-  .category-card {
-    @apply relative w-full aspect-[3/4] transition-all duration-200 hover:scale-[1.02];
-  }
+    /* Secondary Color - Navy Blue */
+    --secondary: 215 60% 25%;
 
-  .category-content {
-    @apply absolute inset-0 flex flex-col items-center justify-center;
-  }
+    --secondary-foreground: 0 0% 100%;
+    --secondary-light: 215 60% 35%;
+    --secondary-dark: 215 60% 15%;
 
-  .nav-item {
-    @apply flex flex-col items-center gap-1.5 text-gray-400 transition-colors duration-200;
-  }
+    /* Accent Color - Gold */
+    --accent: 45 80% 60%;
+    --accent-foreground: 215 25% 27%;
 
-  .nav-item.active {
-    @apply text-indigo-600;
-  }
+    /* Neutral Colors */
+    --neutral-50: 210 20% 98%;
+    --neutral-100: 210 20% 96%;
+    --neutral-200: 210 20% 90%;
+    --neutral-300: 210 20% 80%;
+    --neutral-400: 210 20% 70%;
+    --neutral-500: 210 20% 60%;
+    --neutral-600: 210 20% 50%;
+    --neutral-700: 210 20% 40%;
+    --neutral-800: 210 20% 30%;
+    --neutral-900: 210 20% 20%;
 
-  .nav-text {
-    @apply text-xs font-medium;
-  }
+    /* Semantic Colors */
+    --success: 142 76% 36%;
+    --warning: 37 95% 58%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --info: 200 95% 47%;
 
-  .wallet-balance {
-    @apply flex items-center gap-2 px-4 py-2 bg-white rounded-full font-medium text-gray-700 shadow-sm border border-gray-100;
-  }
+    /* UI Elements */
+    --muted: 210 20% 96%;
+    --muted-foreground: 210 20% 40%;
+    --border: 210 20% 90%;
+    --input: 210 20% 90%;
+    --ring: 174 86% 31%;
 
-  .market-card {
-    @apply bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border border-gray-100;
-  }
+    /* Gradients */
+    --gradient-primary: linear-gradient(
+      135deg,
+      hsl(174 86% 31%),
+      hsl(174 86% 41%)
+    );
+    --gradient-secondary: linear-gradient(
+      135deg,
+      hsl(215 60% 25%),
+      hsl(215 60% 35%)
+    );
+    --gradient-primary-secondary: linear-gradient(
+      135deg,
+      hsl(174 86% 31%),
+      hsl(215 60% 25%)
+    );
+    --gradient-cta: linear-gradient(135deg, hsl(174 86% 31%), hsl(174 86% 41%));
+    --gradient-hero: linear-gradient(
+      135deg,
+      hsl(215 60% 15%),
+      hsl(215 60% 25%)
+    );
 
-  .trade-screen {
-    @apply h-full flex flex-col bg-gray-50;
-  }
+    /* Shadows */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08),
+      0 2px 4px -1px rgba(0, 0, 0, 0.04);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08),
+      0 4px 6px -2px rgba(0, 0, 0, 0.04);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.08),
+      0 10px 10px -5px rgba(0, 0, 0, 0.04);
 
-  .trade-header {
-    @apply fixed top-0 left-0 right-0 z-20 bg-white border-b border-gray-100;
+    /* Border Radius */
+    --radius-sm: 0.25rem;
+    --radius: 0.375rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+    --radius-full: 9999px;
   }
-
-  .trade-content {
-    @apply flex-1 overflow-y-auto;
-  }
-
-  .trade-footer {
-    @apply fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 shadow-lg;
-  }
-
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
-
-  /* Slider Styles */
-  .horizontal-slider {
-    @apply w-full h-2 bg-gray-200 rounded-full mt-2;
-  }
-
-  .horizontal-slider .thumb {
-    @apply w-6 h-6 -mt-2 bg-white border-2 border-blue-500 rounded-full cursor-grab focus:outline-none shadow-md;
-  }
-
-  .horizontal-slider .track {
-    @apply h-2 bg-blue-500 rounded-full;
-  }
-
-  .horizontal-slider .track-1 {
-    @apply bg-blue-500;
-  }
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .animate-fadeIn {
-    animation: fadeIn 0.3s ease-out forwards;
-  }
-}
-
-.gradient-purple {
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
 }

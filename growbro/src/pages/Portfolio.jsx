@@ -26,6 +26,7 @@ import {
 import TradeSheet from '../components/TradeSheet'
 import { useFrappeAuth, useFrappeGetDocList } from 'frappe-react-sdk'
 import ActivePosition from '../components/ActivePosition'
+import CompletedTrades from '../components/CompletedTrades'
 
 ChartJS.register(
   CategoryScale,
@@ -66,12 +67,13 @@ const Portfolio = () => {
         'name',
         'question',
         'amount',
+        'status',
         'quantity',
         'opinion_type',
         'market_id',
       ],
       filters: [
-        ['status', '!=', 'SETTLED'],
+        ['status', 'not in', ['SETTLED', 'CANCELED']],
         ['owner', '=', currentUser],
       ],
     })
@@ -79,9 +81,17 @@ const Portfolio = () => {
   const { data: completedOrdersData, isLoading: completedOrdersLoading } =
     activeTab === 'completed' &&
     useFrappeGetDocList('Orders', {
-      fields: ['name', 'amount', 'status'],
+      fields: [
+        'name',
+        'amount',
+        'quantity',
+        'status',
+        'opinion_type',
+        'market_id',
+        'closing_time',
+      ],
       filters: [
-        ['status', '=', 'SETTLED'],
+        ['status', 'in', ['SETTLED', 'CANCELED']],
         ['owner', '=', currentUser],
       ],
     })
@@ -289,7 +299,7 @@ const Portfolio = () => {
             <div className="text-sm font-medium text-gray-700">
               {activeTab === 'active'
                 ? `${activeOrders.length} Active Position`
-                : '15 Trades this month'}
+                : `${completedOrders.length} Trades this month`}
             </div>
             <button className="p-2 hover:bg-gray-50 rounded-lg transition-colors">
               <Filter className="h-4 w-4 text-gray-600" />
@@ -306,69 +316,8 @@ const Portfolio = () => {
                     handleTradeAction={handleTradeAction}
                   />
                 ))
-              : completedTrades.map((trade) => (
-                  <div key={trade.id} className="p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-medium text-gray-900">
-                        {trade.title}
-                      </h3>
-                      <div
-                        className={`flex items-center ${
-                          trade.status === 'won'
-                            ? 'text-emerald-600'
-                            : 'text-rose-600'
-                        }`}
-                      >
-                        {trade.status === 'won' ? (
-                          <CheckCircle className="h-4 w-4 mr-1" />
-                        ) : (
-                          <AlertCircle className="h-4 w-4 mr-1" />
-                        )}
-                        <span className="font-medium">
-                          {trade.profitPercentage >= 0 ? '+' : ''}
-                          {trade.profitPercentage}%
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
-                      <span
-                        className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                          trade.choice === 'yes'
-                            ? 'bg-blue-100 text-blue-700'
-                            : 'bg-rose-100 text-rose-700'
-                        }`}
-                      >
-                        {trade.choice.toUpperCase()}
-                      </span>
-                      <span>•</span>
-                      <span>
-                        {new Date(trade.completedAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <div className="text-gray-600 font-medium">Amount</div>
-                        <div className="font-semibold text-gray-900">
-                          ₹{trade.amount}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-gray-600 font-medium">
-                          Profit/Loss
-                        </div>
-                        <div
-                          className={`font-semibold ${
-                            trade.profit >= 0
-                              ? 'text-emerald-600'
-                              : 'text-rose-600'
-                          }`}
-                        >
-                          {trade.profit >= 0 ? '+' : ''}₹
-                          {Math.abs(trade.profit)}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+              : completedOrders.map((trade) => (
+                  <CompletedTrades key={trade.name} trade={trade} />
                 ))}
           </div>
         </div>
@@ -377,8 +326,9 @@ const Portfolio = () => {
       {showTradeSheet && selectedPosition && (
         <TradeSheet
           market={selectedPosition}
-          choice={selectedPosition.choice}
+          choice={selectedPosition.opinion_type}
           onClose={handleTradeComplete}
+          tradeAction={tradeAction}
         />
       )}
     </div>

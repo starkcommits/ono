@@ -42,6 +42,7 @@ const EventDetails = () => {
   const [probabilityTimeframe, setProbabilityTimeframe] = useState('all')
   const [showTradeSheet, setShowTradeSheet] = useState(false)
   const [selectedChoice, setSelectedChoice] = useState(null)
+  const [selectedAction, setSelectedAction] = useState(null)
   const [showOrderBook, setShowOrderBook] = useState(false)
   const [market, setMarket] = useState(initialMarket)
 
@@ -121,9 +122,10 @@ const EventDetails = () => {
     },
   }
 
-  const handleTradeClick = (choice) => {
+  const handleTradeClick = (choice, action) => {
     setSelectedChoice(choice)
     setShowTradeSheet(true)
+    setSelectedAction(action)
   }
 
   const closeTradeSheet = () => {
@@ -182,14 +184,14 @@ const EventDetails = () => {
         </div>
         <div className="flex gap-3 mb-6">
           <button
-            onClick={() => handleTradeClick('YES')}
+            onClick={() => handleTradeClick('YES', 'BUY')}
             className="flex-1 py-3 px-4 bg-blue-500 text-white font-medium rounded-xl active:bg-blue-600 transition-colors"
           >
             Yes ₹{market.yes_price}
           </button>
 
           <button
-            onClick={() => handleTradeClick('NO')}
+            onClick={() => handleTradeClick('NO', 'BUY')}
             className="flex-1 py-3 px-4 bg-rose-500 text-white font-medium rounded-xl active:bg-rose-600 transition-colors"
           >
             No ₹{market.no_price}
@@ -274,6 +276,7 @@ const EventDetails = () => {
           market={market}
           choice={selectedChoice}
           onClose={closeTradeSheet}
+          tradeAction={selectedAction}
         />
       )}
     </div>

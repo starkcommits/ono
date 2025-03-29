@@ -2,12 +2,27 @@ import {
   useFrappeEventListener,
   useFrappeGetDoc,
   useFrappeGetDocList,
+  useFrappeUpdateDoc,
 } from 'frappe-react-sdk'
 import { Clock, Plus, TrendingDown, TrendingUp, XCircle } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
+import { useFrappeDeleteDoc } from 'frappe-react-sdk'
 
 const ActivePosition = ({ position, handleTradeAction }) => {
   const [market, setMarket] = useState({})
+  const [isOpen, setIsOpen] = useState(false)
+  const { updateDoc } = useFrappeUpdateDoc()
+
   //   const { data: marketData, isLoading: marketDataLoading } = useFrappeGetDoc(
   //     {
   //       doctype: 'Market',
@@ -21,6 +36,7 @@ const ActivePosition = ({ position, handleTradeAction }) => {
   //       ],
   //     }
   //   )
+
   const { data: marketData, isLoading: marketDataLoading } =
     useFrappeGetDocList('Market', {
       /** SWR Configuration Options - Optional **/
@@ -34,7 +50,6 @@ const ActivePosition = ({ position, handleTradeAction }) => {
 
   useFrappeEventListener('market_event', (updatedMarket) => {
     console.log('Updated Market:', updatedMarket)
-
     if (updatedMarket.name === position.market_id) {
       if (position.opinion_type === 'YES') {
         setMarket((prevMarket) => ({
@@ -50,10 +65,42 @@ const ActivePosition = ({ position, handleTradeAction }) => {
     }
   })
 
+  const handleCancelOrder = async () => {
+    try {
+      const order = await updateDoc('Orders', position.name, {
+        status: 'CANCELED',
+      })
+      console.log(order)
+      setIsOpen(false)
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
   return (
-    <div key={position.name} className="p-4">
+    <div key={position.name} className="p-4 w-full">
       <div className="flex items-center justify-between mb-2">
-        <h3 className="font-medium text-gray-900">{position.question}</h3>
+        <div className="flex gap-2 items-center">
+          <h3 className="font-medium text-gray-900">{position.question}</h3>
+          {position.status === 'UNMATCHED' && (
+            <span className="bg-slate-200 text-slate-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
+              {' '}
+              {position.status}
+            </span>
+          )}
+          {position.status === 'PARTIAL' && (
+            <span className="bg-yellow-100 text-yellow-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
+              {' '}
+              {position.status}
+            </span>
+          )}
+          {position.status === 'MATCHED' && (
+            <span className="bg-emerald-100 text-emerald-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
+              {' '}
+              {position.status}
+            </span>
+          )}
+        </div>
         <div
           className={`flex items-center ${
             position.profit >= 0 ? 'text-emerald-600' : 'text-rose-600'
@@ -115,17 +162,52 @@ const ActivePosition = ({ position, handleTradeAction }) => {
           </div>
         </div>
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-2 w-full items-center justify-between">
+        {position.status !== 'MATCHED' ? (
+          <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogTrigger>
+              <Button className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-rose-50 text-rose-600 rounded-xl text-sm font-medium hover:bg-rose-100 transition-colors">
+                <XCircle className="h-4 w-4" />
+                Cancel Order
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="">
+              <DialogHeader>
+                <DialogTitle>Are you absolutely sure?</DialogTitle>
+                <DialogDescription>
+                  This action cannot be undone. This will permanently delete
+                  your account and remove your data from our servers.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <Button
+                  className="bg-white hover:bg-white/90"
+                  variant="outline"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="bg-neutral-900 text-white hover:text-neutral-800 hover:bg-neutral-800/40"
+                  onClick={() => handleCancelOrder(position)}
+                >
+                  Submit
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        ) : (
+          <Button
+            onClick={() => handleTradeAction(position, 'SELL')}
+            className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-rose-50 text-rose-600 rounded-xl text-sm font-medium hover:bg-rose-100 transition-colors"
+          >
+            <XCircle className="h-4 w-4" />
+            Exit Position
+          </Button>
+        )}
         <button
-          onClick={() => handleTradeAction(position, 'exit')}
-          className="flex-1 flex items-center justify-center gap-2 py-2 px-4 bg-rose-50 text-rose-600 rounded-xl text-sm font-medium hover:bg-rose-100 transition-colors"
-        >
-          <XCircle className="h-4 w-4" />
-          Exit Position
-        </button>
-        <button
-          onClick={() => handleTradeAction(position, 'invest')}
-          className="flex-1 flex items-center justify-center gap-2 py-2 px-4 bg-blue-50 text-blue-600 rounded-xl text-sm font-medium hover:bg-blue-100 transition-colors"
+          onClick={() => handleTradeAction(position, 'BUY')}
+          className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-blue-50 text-blue-600 rounded-xl text-sm font-medium hover:bg-blue-100 transition-colors"
         >
           <Plus className="h-4 w-4" />
           Invest More

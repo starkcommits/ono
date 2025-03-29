@@ -84,7 +84,7 @@ const CategoryPage = () => {
   }
 
   const handleMarketClick = (market) => {
-    navigate(`/event/${market.id}`, { state: { market } })
+    navigate(`/event/${market.name}`, { state: { market } })
   }
 
   return (
@@ -129,7 +129,7 @@ const CategoryPage = () => {
           {Object.values(categoryMarkets || {})?.length > 0 ? (
             Object.values(categoryMarkets || {})?.map((market) => (
               <div
-                key={market.id}
+                key={market.name}
                 onClick={() => handleMarketClick(market)}
                 className="p-4 cursor-pointer hover:bg-gray-50 transition-colors animate-fadeIn"
               >
