@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { cache, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   ArrowLeft,
@@ -25,6 +25,7 @@ import {
 } from 'chart.js'
 import TradeSheet from '../components/TradeSheet'
 import { useFrappeAuth, useFrappeGetDocList } from 'frappe-react-sdk'
+import ActivePosition from '../components/ActivePosition'
 
 ChartJS.register(
   CategoryScale,
@@ -43,40 +44,58 @@ const Portfolio = () => {
   const [selectedPosition, setSelectedPosition] = useState(null)
   const [tradeAction, setTradeAction] = useState(null)
   const [showTradeSheet, setShowTradeSheet] = useState(false)
-
+  const [activeOrders, setActiveOrders] = useState([])
+  const [completedOrders, setCompletedOrders] = useState([])
   const { currentUser } = useFrappeAuth()
 
-  const { data: activeOrders, isLoading: loadingActive } = useFrappeGetDocList(
-    'Orders',
-    {
-      enabled: activeTab === 'active',
+  const filters =
+    activeTab === 'active'
+      ? [
+          ['status', '!=', 'SETTLED'],
+          ['owner', '=', currentUser],
+        ]
+      : [
+          ['status', '=', 'SETTLED'],
+          ['owner', '=', currentUser],
+        ]
+
+  const { data: activeOrdersData, isLoading: activeOrdersLoading } =
+    activeTab === 'active' &&
+    useFrappeGetDocList('Orders', {
+      fields: [
+        'name',
+        'question',
+        'amount',
+        'quantity',
+        'opinion_type',
+        'market_id',
+      ],
+      filters: [
+        ['status', '!=', 'SETTLED'],
+        ['owner', '=', currentUser],
+      ],
+    })
+
+  const { data: completedOrdersData, isLoading: completedOrdersLoading } =
+    activeTab === 'completed' &&
+    useFrappeGetDocList('Orders', {
       fields: ['name', 'amount', 'status'],
       filters: [
+        ['status', '=', 'SETTLED'],
         ['owner', '=', currentUser],
-        ['status', '!=', 'SETTLED'],
       ],
-      limit_page_length: 10,
-    },
-    { enabled: activeTab === 'active' }
-  ) // 👈 This ensures it only fetches when activeTab is 'active'
+    })
 
-  const { data: completedOrders, isLoading: loadingCompleted } =
-    useFrappeGetDocList(
-      'Orders',
-      {
-        enabled: activeTab === 'completed',
-        fields: ['name', 'amount', 'status'],
-        filters: [
-          ['owner', '=', currentUser],
-          ['status', '=', 'SETTLED'],
-        ],
-        limit_page_length: 10,
-      },
-      { enabled: activeTab === 'completed' }
-    ) // 👈 This ensures it only fetches when activeTab is 'completed'
+  useEffect(() => {
+    if (activeOrdersData) setActiveOrders(activeOrdersData)
+  }, [activeOrdersData])
 
-  console.log(activeOrders)
-  console.log(completedOrders)
+  useEffect(() => {
+    if (completedOrdersData) setCompletedOrders(completedOrdersData)
+  }, [completedOrdersData])
+
+  console.log('Active: ', activeOrders)
+  console.log('Completed: ', completedOrders)
 
   const performanceData = {
     labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
@@ -269,7 +288,7 @@ const Portfolio = () => {
           <div className="p-4 flex items-center justify-between border-b border-gray-100">
             <div className="text-sm font-medium text-gray-700">
               {activeTab === 'active'
-                ? '2 Active Positions'
+                ? `${activeOrders.length} Active Position`
                 : '15 Trades this month'}
             </div>
             <button className="p-2 hover:bg-gray-50 rounded-lg transition-colors">
@@ -280,85 +299,12 @@ const Portfolio = () => {
           {/* Trades List */}
           <div className="divide-y divide-gray-100">
             {activeTab === 'active'
-              ? activePositions.map((position) => (
-                  <div key={position.id} className="p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-medium text-gray-900">
-                        {position.title}
-                      </h3>
-                      <div
-                        className={`flex items-center ${
-                          position.profit >= 0
-                            ? 'text-emerald-600'
-                            : 'text-rose-600'
-                        }`}
-                      >
-                        {position.profit >= 0 ? (
-                          <TrendingUp className="h-4 w-4 mr-1" />
-                        ) : (
-                          <TrendingDown className="h-4 w-4 mr-1" />
-                        )}
-                        <span className="font-medium">
-                          {position.profitPercentage >= 0 ? '+' : ''}
-                          {position.profitPercentage}%
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
-                      <span
-                        className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                          position.choice === 'yes'
-                            ? 'bg-blue-100 text-blue-700'
-                            : 'bg-rose-100 text-rose-700'
-                        }`}
-                      >
-                        {position.choice.toUpperCase()}
-                      </span>
-                      <span>•</span>
-                      <span className="flex items-center">
-                        <Clock className="h-3.5 w-3.5 mr-1" />
-                        {position.timeLeft} left
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-3 gap-4 text-sm mb-4">
-                      <div>
-                        <div className="text-gray-600 font-medium">Amount</div>
-                        <div className="font-semibold text-gray-900">
-                          ₹{position.amount}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-gray-600 font-medium">
-                          Qty @ Price
-                        </div>
-                        <div className="font-semibold text-gray-900">
-                          {position.quantity} @ ₹{position.price}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-gray-600 font-medium">Current</div>
-                        <div className="font-semibold text-gray-900">
-                          ₹{position.currentPrice}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleTradeAction(position, 'exit')}
-                        className="flex-1 flex items-center justify-center gap-2 py-2 px-4 bg-rose-50 text-rose-600 rounded-xl text-sm font-medium hover:bg-rose-100 transition-colors"
-                      >
-                        <XCircle className="h-4 w-4" />
-                        Exit Position
-                      </button>
-                      <button
-                        onClick={() => handleTradeAction(position, 'invest')}
-                        className="flex-1 flex items-center justify-center gap-2 py-2 px-4 bg-blue-50 text-blue-600 rounded-xl text-sm font-medium hover:bg-blue-100 transition-colors"
-                      >
-                        <Plus className="h-4 w-4" />
-                        Invest More
-                      </button>
-                    </div>
-                  </div>
+              ? activeOrders.map((position) => (
+                  <ActivePosition
+                    key={position.name}
+                    position={position}
+                    handleTradeAction={handleTradeAction}
+                  />
                 ))
               : completedTrades.map((trade) => (
                   <div key={trade.id} className="p-4">
