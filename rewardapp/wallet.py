@@ -67,7 +67,7 @@ def update_wallet():
             txn_log = frappe.get_doc({
                 "doctype": "Transaction Logs",
                 "user": data.user_id,
-                "order_id": data.reference_id,
+                "market_id": data.market_id,
                 "transaction_amount": data.amount,
                 "transaction_type": data.transaction_type,
                 "remark": data.description,

@@ -162,7 +162,8 @@ api = {
         "rewardapp.engine.close_market",
         "rewardapp.engine.unmatched_orders",
         "rewardapp.engine.market_settlements",
-        "rewardapp.engine.update_market_price"
+        "rewardapp.engine.update_market_price",
+        "rewardapp.engine.get_marketwise_transaction_summary"
     ]
 }
 

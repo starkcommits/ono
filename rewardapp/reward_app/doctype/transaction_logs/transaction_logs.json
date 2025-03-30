@@ -9,6 +9,8 @@
   "user",
   "remark",
   "status",
+  "market_id",
+  "question",
   "column_break_rbct",
   "order_id",
   "transaction_amount",
@@ -17,8 +19,10 @@
  "fields": [
   {
    "fieldname": "user",
-   "fieldtype": "Data",
-   "label": "User"
+   "fieldtype": "Link",
+   "label": "User",
+   "options": "User",
+   "reqd": 1
   },
   {
    "fieldname": "remark",
@@ -37,9 +41,10 @@
   },
   {
    "fieldname": "order_id",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Order ID"
+   "label": "Order ID",
+   "options": "Orders"
   },
   {
    "fieldname": "transaction_amount",
@@ -52,12 +57,24 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Transaction Type"
+  },
+  {
+   "fieldname": "market_id",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Market Id",
+   "options": "Market",
+   "reqd": 1
+  },
+  {
+   "fieldname": "question",
+   "fieldtype": "Read Only",
+   "label": "Question"
   }
  ],
- "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-03-26 13:28:08.317768",
+ "modified": "2025-03-30 22:56:31.894575",
  "modified_by": "Administrator",
  "module": "Reward App",
  "name": "Transaction Logs",

@@ -303,3 +303,49 @@ def update_market_price():
         frappe.log_error("Error in market price update", f"{str(e)}")
         return False
 
+
+@frappe.whitelist()
+def get_marketwise_transaction_summary():
+    """
+    Fetch total debited and credited amounts per user in each market,
+    restricted to the logged-in user's trades.
+    """
+    current_user = frappe.session.user  # Get the logged-in user
+
+    query = """
+        SELECT 
+            market_id,
+            user,
+            transaction_type,
+            SUM(CAST(transaction_amount AS DECIMAL(18,2))) AS total_amount
+        FROM `tabTransaction Logs`
+        WHERE transaction_type IN ('Debit', 'Credit')
+        AND user = %s
+        GROUP BY market_id, user, transaction_type
+    """
+
+    results = frappe.db.sql(query, (current_user,), as_dict=True)
+
+    return results
+    # # Process results into a structured dictionary
+    # summary = {}
+
+    # for row in results:
+    #     market = row["market_id"]
+    #     user = row["user"]
+    #     txn_type = row["transaction_type"].lower()
+    #     amount = row["total_amount"]
+
+    #     # Initialize market & user data
+    #     if market not in summary:
+    #         summary[market] = {}
+    #     if user not in summary[market]:
+    #         summary[market][user] = {"total_debit": 0, "total_credit": 0}
+
+    #     # Assign amounts to debit/credit
+    #     if txn_type == "debit":
+    #         summary[market][user]["total_debit"] = amount
+    #     elif txn_type == "credit":
+    #         summary[market][user]["total_credit"] = amount
+
+    # return summary
