@@ -5,7 +5,6 @@ app_description = "Reward App"
 app_email = "xfer@india100x.com"
 app_license = "mit"
 
-
 # Apps
 # ------------------
 
@@ -53,7 +52,6 @@ app_license = "mit"
 # ------------------
 # include app icons in desk
 # app_include_icons = "rewardapp/public/icons.svg"
-# app_commands = ["rewardapp.commands.get_commands"]
 # Home Pages
 # ----------
 
@@ -164,7 +162,8 @@ api = {
         "rewardapp.engine.close_market",
         "rewardapp.engine.unmatched_orders",
         "rewardapp.engine.market_settlements",
-        "rewardapp.engine.update_market_price"
+        "rewardapp.engine.update_market_price",
+        "rewardapp.engine.get_marketwise_transaction_summary"
     ]
 }
 

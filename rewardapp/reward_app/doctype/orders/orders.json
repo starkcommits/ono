@@ -57,18 +57,21 @@
   {
    "fieldname": "order_type",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Order Type",
    "options": "SELL\nBUY"
   },
   {
    "fieldname": "opinion_type",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Opinion Type",
    "options": "YES\nNO"
   },
   {
    "fieldname": "amount",
    "fieldtype": "Float",
+   "in_list_view": 1,
    "label": "Amount"
   },
   {
