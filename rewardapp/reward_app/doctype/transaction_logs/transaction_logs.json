@@ -8,9 +8,9 @@
  "field_order": [
   "user",
   "remark",
-  "status",
   "market_id",
   "question",
+  "winning_side",
   "column_break_rbct",
   "order_id",
   "transaction_amount",
@@ -29,11 +29,6 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Remark"
-  },
-  {
-   "fieldname": "status",
-   "fieldtype": "Data",
-   "label": "Status"
   },
   {
    "fieldname": "column_break_rbct",
@@ -67,14 +62,21 @@
    "reqd": 1
   },
   {
+   "fetch_from": "market_id.question",
    "fieldname": "question",
    "fieldtype": "Read Only",
    "label": "Question"
+  },
+  {
+   "fetch_from": "market_id.end_result",
+   "fieldname": "winning_side",
+   "fieldtype": "Read Only",
+   "label": "Winning Side"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-03-30 22:56:31.894575",
+ "modified": "2025-03-31 00:53:34.913731",
  "modified_by": "Administrator",
  "module": "Reward App",
  "name": "Transaction Logs",
