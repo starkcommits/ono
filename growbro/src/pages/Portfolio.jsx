@@ -24,7 +24,11 @@ import {
   Legend,
 } from 'chart.js'
 import TradeSheet from '../components/TradeSheet'
-import { useFrappeAuth, useFrappeGetDocList } from 'frappe-react-sdk'
+import {
+  useFrappeAuth,
+  useFrappeEventListener,
+  useFrappeGetDocList,
+} from 'frappe-react-sdk'
 import ActivePosition from '../components/ActivePosition'
 import CompletedTrades from '../components/CompletedTrades'
 
@@ -45,8 +49,8 @@ const Portfolio = () => {
   const [selectedPosition, setSelectedPosition] = useState(null)
   const [tradeAction, setTradeAction] = useState(null)
   const [showTradeSheet, setShowTradeSheet] = useState(false)
-  const [activeOrders, setActiveOrders] = useState([])
-  const [completedOrders, setCompletedOrders] = useState([])
+  const [activeOrders, setActiveOrders] = useState({})
+  const [completedOrders, setCompletedOrders] = useState({})
   const { currentUser } = useFrappeAuth()
 
   const filters =
@@ -97,15 +101,47 @@ const Portfolio = () => {
     })
 
   useEffect(() => {
-    if (activeOrdersData) setActiveOrders(activeOrdersData)
-  }, [activeOrdersData])
+    if (
+      !activeOrdersLoading &&
+      activeOrdersData?.length > 0 &&
+      Object.keys(activeOrders).length === 0
+    ) {
+      const activeOrdersMap = activeOrdersData.reduce((acc, order) => {
+        acc[order.name] = order // ✅ Store as { "market_name": marketData }
+        return acc
+      }, {})
+      setActiveOrders(activeOrdersMap)
+    }
+  }, [activeOrdersLoading])
 
   useEffect(() => {
-    if (completedOrdersData) setCompletedOrders(completedOrdersData)
-  }, [completedOrdersData])
+    if (
+      !completedOrdersLoading &&
+      completedOrdersData?.length > 0 &&
+      Object.keys(completedOrders).length === 0
+    ) {
+      const completedOrdersMap = completedOrdersData.reduce((acc, order) => {
+        acc[order.name] = order // ✅ Store as { "market_name": marketData }
+        return acc
+      }, {})
+      setCompletedOrders(completedOrdersMap)
+    }
+  }, [completedOrdersLoading])
 
-  console.log('Active: ', activeOrders)
-  console.log('Completed: ', completedOrders)
+  useFrappeEventListener('order_event', (updatedOrder) => {
+    console.log('Updated Order:', updatedOrder)
+    setActiveOrders((prevOrders) => {
+      if (!prevOrders[updatedOrder.name]) return prevOrders // If order doesn't exist, return previous state
+
+      return {
+        ...prevOrders,
+        [updatedOrder.name]: {
+          ...prevOrders[updatedOrder.name], // Keep existing order data
+          status: updatedOrder.status, // Update status if it changes
+        },
+      }
+    })
+  })
 
   const performanceData = {
     labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
@@ -298,8 +334,8 @@ const Portfolio = () => {
           <div className="p-4 flex items-center justify-between border-b border-gray-100">
             <div className="text-sm font-medium text-gray-700">
               {activeTab === 'active'
-                ? `${activeOrders.length} Active Position`
-                : `${completedOrders.length} Trades this month`}
+                ? `${Object.values(activeOrders).length} Active Position`
+                : `${Object.values(completedOrders).length} Trades this month`}
             </div>
             <button className="p-2 hover:bg-gray-50 rounded-lg transition-colors">
               <Filter className="h-4 w-4 text-gray-600" />
@@ -309,14 +345,14 @@ const Portfolio = () => {
           {/* Trades List */}
           <div className="divide-y divide-gray-100">
             {activeTab === 'active'
-              ? activeOrders.map((position) => (
+              ? Object.values(activeOrders).map((position) => (
                   <ActivePosition
                     key={position.name}
                     position={position}
                     handleTradeAction={handleTradeAction}
                   />
                 ))
-              : completedOrders.map((trade) => (
+              : Object.values(completedOrders).map((trade) => (
                   <CompletedTrades key={trade.name} trade={trade} />
                 ))}
           </div>

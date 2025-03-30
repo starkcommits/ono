@@ -19,7 +19,13 @@ const CompletedTrades = ({ trade }) => {
       filters: [['name', '=', trade.market_id]],
     })
 
-  console.log(trade)
+  //   const { data: marketData, isLoading: marketDataLoading } =
+  //     useFrappeGetDocList('Transaction Logs', {
+  //       fields: [],
+  //       filters: [],
+  //     })
+
+  // console.log(trade)
 
   useEffect(() => {
     if (marketData?.length > 0) setMarket(marketData[0])

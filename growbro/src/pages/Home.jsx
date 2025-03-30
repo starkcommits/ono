@@ -14,7 +14,12 @@ import {
 } from 'lucide-react'
 import WalletBalance from '../components/WalletBalance'
 import SlideMenu from '../components/SlideMenu'
-import { useFrappeEventListener, useFrappeGetDocList } from 'frappe-react-sdk'
+import {
+  useFrappeEventListener,
+  useFrappeAuth,
+  useFrappeGetDoc,
+  useFrappeGetDocList,
+} from 'frappe-react-sdk'
 
 const categories = [
   {
@@ -121,6 +126,7 @@ const trendingMarkets = [
 const Home = () => {
   const navigate = useNavigate()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { currentUser, logout } = useFrappeAuth()
 
   const [markets, setMarkets] = useState({})
 
@@ -129,6 +135,13 @@ const Home = () => {
       fields: ['name', 'question', 'yes_price', 'no_price', 'closing_time'],
       filters: [['status', '=', 'OPEN']],
     })
+
+  const { data: userWallet, isLoading: userWalletLoading } = useFrappeGetDoc(
+    'User Wallet',
+    currentUser
+  )
+
+  console.log(userWallet)
 
   useEffect(() => {
     if (
@@ -200,7 +213,7 @@ const Home = () => {
                   onClick={() => navigate('/wallet')}
                   className="wallet-balance"
                 >
-                  <WalletBalance balance={1234.56} />
+                  <WalletBalance balance={userWallet?.balance} />
                 </button>
                 <button
                   onClick={() => navigate('/notifications')}
