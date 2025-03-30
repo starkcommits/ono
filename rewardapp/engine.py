@@ -316,36 +316,43 @@ def get_marketwise_transaction_summary():
         SELECT 
             market_id,
             user,
+            question,
+            winning_side,
             transaction_type,
             SUM(CAST(transaction_amount AS DECIMAL(18,2))) AS total_amount
         FROM `tabTransaction Logs`
         WHERE transaction_type IN ('Debit', 'Credit')
         AND user = %s
-        GROUP BY market_id, user, transaction_type
+        AND market_id IN (
+            SELECT name FROM `tabMarket` WHERE status = 'CLOSED'
+        )
+        GROUP BY market_id, user, question, transaction_type
     """
 
     results = frappe.db.sql(query, (current_user,), as_dict=True)
 
-    return results
+    # return results
     # # Process results into a structured dictionary
-    # summary = {}
+    summary = {}
 
-    # for row in results:
-    #     market = row["market_id"]
-    #     user = row["user"]
-    #     txn_type = row["transaction_type"].lower()
-    #     amount = row["total_amount"]
+    for row in results:
+        market = row["market_id"]
+        user = row["user"]
+        winning_side = row["winning_side"]
+        question = row["question"]
+        txn_type = row["transaction_type"]
+        amount = row["total_amount"]
 
-    #     # Initialize market & user data
-    #     if market not in summary:
-    #         summary[market] = {}
-    #     if user not in summary[market]:
-    #         summary[market][user] = {"total_debit": 0, "total_credit": 0}
+        # Initialize market & user data
+        if market not in summary:
+            summary[market] = {}
+            summary[market]["question"] = question
+            summary[market]["winning_side"] = winning_side
 
-    #     # Assign amounts to debit/credit
-    #     if txn_type == "debit":
-    #         summary[market][user]["total_debit"] = amount
-    #     elif txn_type == "credit":
-    #         summary[market][user]["total_credit"] = amount
+        if txn_type not in summary[market]:
+            if txn_type == "Debit":
+                summary[market]["debited_amount"]=amount
+            else:
+                summary[market]["credited_amount"]=amount
 
-    # return summary
+    return summary
