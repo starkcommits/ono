@@ -388,4 +388,17 @@ def get_available_quantity(market_id):
     """
 
     result = frappe.db.sql(query, (market_id,), as_dict=True)
-    return result if result else []
+    res = {}
+
+    for temp in result:
+        amount_key = f"{temp.amount}"
+
+        if amount_key not in res:
+            res[amount_key] = {"price": temp.amount, "yesQty": 0, "noQty": 0}
+
+        if temp.opinion_type == "YES":
+            res[amount_key]["yesQty"] = temp.total_available_quantity
+        else:
+            res[amount_key]["noQty"] = temp.total_available_quantity
+
+    return res if res else {}
