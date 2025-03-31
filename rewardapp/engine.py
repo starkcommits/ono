@@ -34,15 +34,15 @@ def order(doc, method):
         "order_type": doc.order_type
     }
     
-    # frappe.publish_realtime('order_event',{
-    #     "order_id": doc.name,
-    #     "status": doc.status,
-    #     "market_id": doc.market_id,
-    #     "option_type": doc.opinion_type,
-    #     "price": doc.amount,
-    #     "quantity": doc.quantity,
-    #     "order_type": doc.order_type
-    # },user=frappe.session.user)
+    frappe.publish_realtime('order_event',{
+        "order_id": doc.name,
+        "status": doc.status,
+        "market_id": doc.market_id,
+        "option_type": doc.opinion_type,
+        "price": doc.amount,
+        "quantity": doc.quantity,
+        "order_type": doc.order_type
+    })
     
     doc.save()
     frappe.db.commit()
@@ -297,7 +297,19 @@ def update_market_price():
         market.save(ignore_permissions=True)
         
         frappe.db.commit()
-
+        """Send real-time update via WebSockets"""
+        update_data = {
+            "name": doc.name,
+            "status": doc.status,
+            "category": doc.category,
+            "question": doc.question,
+            "yes_price": doc.yes_price,
+            "no_price": doc.no_price,
+            "closing_time": doc.closing_time
+        }
+        
+        frappe.publish_realtime("market_event",update_data,user=frappe.session.user)
+        
         return True
     except Exception as e:
         frappe.log_error("Error in market price update", f"{str(e)}")
@@ -356,3 +368,24 @@ def get_marketwise_transaction_summary():
                 summary[market]["credited_amount"]=amount
 
     return summary
+
+@frappe.whitelist()
+def get_available_quantity(market_id):
+    query = """
+        SELECT 
+            amount,
+            opinion_type,
+            SUM(
+                CASE 
+                    WHEN status = 'UNMATCHED' THEN quantity
+                    WHEN status = 'PARTIAL' THEN quantity - filled_quantity
+                    ELSE 0 
+                END
+            ) AS total_available_quantity
+        FROM `tabOrders`
+        WHERE market_id = %s
+        GROUP BY amount, opinion_type
+    """
+
+    result = frappe.db.sql(query, (market_id,), as_dict=True)
+    return result if result else []

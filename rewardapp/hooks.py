@@ -153,19 +153,20 @@ app_license = "mit"
 #     }
 # }
 
-# api = {
-#     "methods" : [
-#         "rewardapp.wallet.get_balance",
-#         "rewardapp.wallet.update_wallet",
-#         "rewardapp.engine.update_order",
-#         "rewardapp.engine.trades",
-#         "rewardapp.engine.close_market",
-#         "rewardapp.engine.unmatched_orders",
-#         "rewardapp.engine.market_settlements",
-#         "rewardapp.engine.update_market_price",
-#         "rewardapp.engine.get_marketwise_transaction_summary"
-#     ]
-# }
+api = {
+    "methods" : [
+        "rewardapp.wallet.get_balance",
+        "rewardapp.wallet.update_wallet",
+        "rewardapp.engine.update_order",
+        "rewardapp.engine.trades",
+        "rewardapp.engine.close_market",
+        "rewardapp.engine.unmatched_orders",
+        "rewardapp.engine.market_settlements",
+        "rewardapp.engine.update_market_price",
+        "rewardapp.engine.get_marketwise_transaction_summary",
+        "rewardapp.engine.get_available_quantity"
+    ]
+}
 
 # scheduler_events = {
 #     "cron": {
