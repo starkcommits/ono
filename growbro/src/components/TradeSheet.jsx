@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { Book, ChevronDown, ChevronUp, Minus, Plus } from 'lucide-react'
 import { useParams } from 'react-router-dom'
-import { useFrappeCreateDoc } from 'frappe-react-sdk'
+import { useFrappeCreateDoc, useFrappeGetCall } from 'frappe-react-sdk'
 import { Slider } from '@/components/ui/slider'
 
 const TradeSheet = ({ market, choice, onClose, tradeAction }) => {
@@ -10,12 +10,390 @@ const TradeSheet = ({ market, choice, onClose, tradeAction }) => {
 
   const marketId = id ? id : market.market_id
 
+  const [orderBook, setOrderBook] = useState({})
+
+  const { data: orderBookData, isLoading: orderBookLoading } = useFrappeGetCall(
+    'rewardapp.engine.get_available_quantity',
+    { market_id: marketId }
+  )
+
+  console.log(orderBookData?.message)
+
+  useEffect(() => {
+    if (!orderBookLoading && orderBook?.length > 0) {
+      setOrderBook(orderBookData?.message)
+    }
+  }, [orderBookData])
+
+  // const [quantityYes, setQuantityYes] = useState([
+  //   {
+  //     0.5: {
+  //       amount: 0.5,
+  //       totalAvailableQuantity: 0,
+  //     },
+  //   },
+
+  //   {
+  //     1.0: {
+  //       amount: 1.0,
+  //       totalAvailableQuantity: 0,
+  //     },
+  //   },
+
+  //   {
+  //     1.5: {
+  //       amount: 1.5,
+  //       totalAvailableQuantity: 0,
+  //     },
+  //   },
+
+  //   {
+  //     2.0: {
+  //       amount: 2.0,
+  //       totalAvailableQuantity: 0,
+  //     },
+  //   },
+
+  //   {
+  //     2.5: {
+  //       amount: 2.5,
+  //       totalAvailableQuantity: 0,
+  //     },
+  //   },
+
+  //   {
+  //     3.0: {
+  //       amount: 3.0,
+  //       totalAvailableQuantity: 0,
+  //     },
+  //   },
+  //   {
+  //     3.5: {
+  //       amount: 3.5,
+  //       totalAvailableQuantity: 0,
+  //     },
+  //   },
+
+  //   {
+  //     4.0: {
+  //       amount: 4.0,
+  //       totalAvailableQuantity: 0,
+  //     },
+  //   },
+
+  //   {
+  //     4.5: {
+  //       amount: 4.5,
+  //       totalAvailableQuantity: 0,
+  //     },
+  //   },
+  //   {
+  //     5.0: {
+  //       amount: 5.0,
+  //       totalAvailableQuantity: 0,
+  //     },
+  //   },
+
+  //   {
+  //     5.5: {
+  //       amount: 5.5,
+  //       totalAvailableQuantity: 0,
+  //     },
+  //   },
+
+  //   {
+  //     6.0: {
+  //       amount: 6.0,
+  //       totalAvailableQuantity: 0,
+  //     },
+  //   },
+
+  //   {
+  //     6.5: {
+  //       amount: 6.5,
+  //       totalAvailableQuantity: 0,
+  //     },
+  //   },
+
+  //   {
+  //     7.0: {
+  //       amount: 7.0,
+  //       totalAvailableQuantity: 0,
+  //     },
+  //   },
+  //   {
+  //     7.5: {
+  //       amount: 7.5,
+  //       totalAvailableQuantity: 0,
+  //     },
+  //   },
+  //   {
+  //     8.0: {
+  //       amount: 8.0,
+  //       totalAvailableQuantity: 0,
+  //     },
+  //   },
+
+  //   {
+  //     8.5: {
+  //       amount: 8.5,
+  //       totalAvailableQuantity: 0,
+  //     },
+  //   },
+  //   {
+  //     9.0: {
+  //       amount: 9.0,
+  //       totalAvailableQuantity: 0,
+  //     },
+  //   },
+  //   {
+  //     9.5: {
+  //       amount: 9.5,
+  //       totalAvailableQuantity: 0,
+  //     },
+  //   },
+  // ])
+
+  // const [quantityNo, setQuantityNo] = useState([
+  //   {
+  //     0.5: {
+  //       amount: 0.5,
+  //       totalAvailableQuantity: 0,
+  //     },
+  //   },
+
+  //   {
+  //     1.0: {
+  //       amount: 1.0,
+  //       totalAvailableQuantity: 0,
+  //     },
+  //   },
+
+  //   {
+  //     1.5: {
+  //       amount: 1.5,
+  //       totalAvailableQuantity: 0,
+  //     },
+  //   },
+
+  //   {
+  //     2.0: {
+  //       amount: 2.0,
+  //       totalAvailableQuantity: 0,
+  //     },
+  //   },
+
+  //   {
+  //     2.5: {
+  //       amount: 2.5,
+  //       totalAvailableQuantity: 0,
+  //     },
+  //   },
+
+  //   {
+  //     3.0: {
+  //       amount: 3.0,
+  //       totalAvailableQuantity: 0,
+  //     },
+  //   },
+  //   {
+  //     3.5: {
+  //       amount: 3.5,
+  //       totalAvailableQuantity: 0,
+  //     },
+  //   },
+
+  //   {
+  //     4.0: {
+  //       amount: 4.0,
+  //       totalAvailableQuantity: 0,
+  //     },
+  //   },
+
+  //   {
+  //     4.5: {
+  //       amount: 4.5,
+  //       totalAvailableQuantity: 0,
+  //     },
+  //   },
+  //   {
+  //     5.0: {
+  //       amount: 5.0,
+  //       totalAvailableQuantity: 0,
+  //     },
+  //   },
+
+  //   {
+  //     5.5: {
+  //       amount: 5.5,
+  //       totalAvailableQuantity: 0,
+  //     },
+  //   },
+
+  //   {
+  //     6.0: {
+  //       amount: 6.0,
+  //       totalAvailableQuantity: 0,
+  //     },
+  //   },
+
+  //   {
+  //     6.5: {
+  //       amount: 6.5,
+  //       totalAvailableQuantity: 0,
+  //     },
+  //   },
+
+  //   {
+  //     7.0: {
+  //       amount: 7.0,
+  //       totalAvailableQuantity: 0,
+  //     },
+  //   },
+  //   {
+  //     7.5: {
+  //       amount: 7.5,
+  //       totalAvailableQuantity: 0,
+  //     },
+  //   },
+  //   {
+  //     8.0: {
+  //       amount: 8.0,
+  //       totalAvailableQuantity: 0,
+  //     },
+  //   },
+
+  //   {
+  //     8.5: {
+  //       amount: 8.5,
+  //       totalAvailableQuantity: 0,
+  //     },
+  //   },
+  //   {
+  //     9.0: {
+  //       amount: 9.0,
+  //       totalAvailableQuantity: 0,
+  //     },
+  //   },
+  //   {
+  //     9.5: {
+  //       amount: 9.5,
+  //       totalAvailableQuantity: 0,
+  //     },
+  //   },
+  // ])
+
+  // const [quantityNo, setQuantityNo] = useState([
+  //   {
+  //     amount: 0.5,
+  //     totalAvailableQuantity: 0,
+  //   },
+
+  //   {
+  //     amount: 1.0,
+  //     totalAvailableQuantity: 0,
+  //   },
+
+  //   {
+  //     amount: 1.5,
+  //     totalAvailableQuantity: 0,
+  //   },
+
+  //   {
+  //     amount: 2.0,
+  //     totalAvailableQuantity: 0,
+  //   },
+
+  //   {
+  //     amount: 2.5,
+  //     totalAvailableQuantity: 0,
+  //   },
+
+  //   {
+  //     amount: 3.0,
+  //     totalAvailableQuantity: 0,
+  //   },
+  //   {
+  //     amount: 3.5,
+  //     totalAvailableQuantity: 0,
+  //   },
+
+  //   {
+  //     amount: 4.0,
+  //     totalAvailableQuantity: 0,
+  //   },
+
+  //   {
+  //     amount: 4.5,
+  //     totalAvailableQuantity: 0,
+  //   },
+
+  //   {
+  //     amount: 5.0,
+  //     totalAvailableQuantity: 0,
+  //   },
+
+  //   {
+  //     amount: 5.5,
+  //     totalAvailableQuantity: 0,
+  //   },
+
+  //   {
+  //     amount: 6.0,
+  //     totalAvailableQuantity: 0,
+  //   },
+
+  //   {
+  //     amount: 6.5,
+  //     totalAvailableQuantity: 0,
+  //   },
+
+  //   {
+  //     amount: 7.0,
+  //     totalAvailableQuantity: 0,
+  //   },
+  //   {
+  //     amount: 7.5,
+  //     totalAvailableQuantity: 0,
+  //   },
+
+  //   {
+  //     amount: 8.0,
+  //     totalAvailableQuantity: 0,
+  //   },
+
+  //   {
+  //     amount: 8.5,
+  //     totalAvailableQuantity: 0,
+  //   },
+  //   {
+  //     amount: 9.0,
+  //     totalAvailableQuantity: 0,
+  //   },
+
+  //   {
+  //     amount: 9.5,
+  //     totalAvailableQuantity: 0,
+  //   },
+  // ])
+
   const sheetRef = useRef(null)
+  const dragRef = useRef({
+    isDragging: false,
+    startY: 0,
+    currentY: 0,
+  })
+
+  const [sheetState, setSheetState] = useState({
+    translateY: 0,
+    isClosing: false,
+    isDragging: false,
+  })
   const [price, setPrice] = useState(4.5)
   const [quantity, setQuantity] = useState(
     tradeAction === 'SELL' ? market.quantity : 10
   )
-  console.log(quantity)
+
   const [isDragging, setIsDragging] = useState(false)
   const [startY, setStartY] = useState(0)
   const [currentY, setCurrentY] = useState(0)
@@ -27,11 +405,11 @@ const TradeSheet = ({ market, choice, onClose, tradeAction }) => {
   const commission = 0.2
   const availableBalance = 214.86
 
-  const orderBook = [
-    { price: 4.5, yesQty: 109, noQty: 80 },
-    { price: 5.5, yesQty: 78, noQty: 325 },
-    { price: 6.0, yesQty: 5, noQty: 168 },
-  ]
+  // const orderBook = [
+  //   { price: 4.5, yesQty: 109, noQty: 80 },
+  //   { price: 5.5, yesQty: 78, noQty: 325 },
+  //   { price: 6.0, yesQty: 5, noQty: 168 },
+  // ]
 
   const handleConfirmTrade = async () => {
     try {
@@ -66,37 +444,73 @@ const TradeSheet = ({ market, choice, onClose, tradeAction }) => {
     }
   }, [])
 
-  const handleTouchStart = (e) => {
-    setIsDragging(true)
-    setStartY(e.touches[0].clientY)
-  }
+  // Optimized touch handlers that don't cause re-renders during dragging
+  const handleTouchStart = useCallback((e) => {
+    dragRef.current.isDragging = true
+    dragRef.current.startY = e.touches[0].clientY
+  }, [])
 
-  const handleTouchMove = (e) => {
-    if (!isDragging) return
+  const handleTouchMove = useCallback((e) => {
+    if (!dragRef.current.isDragging) return
+
     const touch = e.touches[0]
-    const diff = touch.clientY - startY
-    if (diff > 0) {
-      setCurrentY(diff)
-    }
-  }
+    const diff = touch.clientY - dragRef.current.startY
 
-  const handleTouchEnd = () => {
+    if (diff > 0) {
+      dragRef.current.currentY = diff
+      // Apply transform directly to DOM instead of through state
+      if (sheetRef.current) {
+        sheetRef.current.style.transform = `translateY(${diff}px)`
+        sheetRef.current.style.transition = 'none'
+      }
+    }
+  }, [])
+
+  const handleTouchEnd = useCallback(() => {
+    const currentY = dragRef.current.currentY
+
     if (currentY > 150) {
-      setIsClosing(true)
+      // Only set state once when closing
+      setSheetState((prev) => ({ ...prev, isClosing: true }))
+
+      // Apply closing animation directly to DOM
+      if (sheetRef.current) {
+        sheetRef.current.style.opacity = '0'
+        sheetRef.current.style.transform = `translateY(${currentY + 100}px)`
+        sheetRef.current.style.transition =
+          'transform 0.2s ease-out, opacity 0.2s ease-out'
+      }
+
       setTimeout(onClose, 200)
     } else {
-      setCurrentY(0)
+      // Reset without state update
+      if (sheetRef.current) {
+        sheetRef.current.style.transform = 'translateY(0)'
+        sheetRef.current.style.transition = 'transform 0.2s ease-out'
+      }
     }
-    setIsDragging(false)
-  }
 
-  const handleOverlayClick = (e) => {
-    if (e.target === e.currentTarget) {
-      setIsClosing(true)
-      setTimeout(onClose, 200)
-    }
-  }
+    dragRef.current.isDragging = false
+    dragRef.current.currentY = 0
+  }, [onClose])
 
+  const handleOverlayClick = useCallback(
+    (e) => {
+      if (e.target === e.currentTarget) {
+        setSheetState((prev) => ({ ...prev, isClosing: true }))
+
+        if (sheetRef.current) {
+          sheetRef.current.style.opacity = '0'
+          sheetRef.current.style.transform = 'translateY(100px)'
+          sheetRef.current.style.transition =
+            'transform 0.2s ease-out, opacity 0.2s ease-out'
+        }
+
+        setTimeout(onClose, 200)
+      }
+    },
+    [onClose]
+  )
   const adjustPrice = (newPrice) => {
     // Round to nearest 0.5
     const rounded = Math.round(newPrice * 2) / 2
@@ -112,6 +526,10 @@ const TradeSheet = ({ market, choice, onClose, tradeAction }) => {
     choice === 'yes'
       ? totalCost * (1 / price) * (1 - commission)
       : totalCost * (1 / (10 - price)) * (1 - commission)
+
+  const stopPropagation = useCallback((e) => {
+    e.stopPropagation()
+  }, [])
 
   return (
     <div
@@ -129,7 +547,7 @@ const TradeSheet = ({ market, choice, onClose, tradeAction }) => {
           opacity: isClosing ? 0 : 1,
         }}
         className="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl max-h-[85vh] overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
+        onClick={stopPropagation}
       >
         {/* Rest of the existing code remains the same */}
         <div className="p-4">
@@ -223,7 +641,7 @@ const TradeSheet = ({ market, choice, onClose, tradeAction }) => {
                   <span className="text-blue-600">Qty at YES</span>
                   <span className="text-rose-600">Qty at NO</span>
                 </div>
-                {orderBook.map((entry, index) => (
+                {Object.values(orderBook).map((entry, index) => (
                   <div
                     key={index}
                     className="grid grid-cols-3 gap-4 px-4 py-3 text-sm"
