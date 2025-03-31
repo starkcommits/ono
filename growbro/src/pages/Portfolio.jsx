@@ -10,6 +10,7 @@ import {
   Filter,
   XCircle,
   Plus,
+  CloudLightning,
 } from 'lucide-react'
 import { Line } from 'react-chartjs-2'
 import {
@@ -27,6 +28,7 @@ import TradeSheet from '../components/TradeSheet'
 import {
   useFrappeAuth,
   useFrappeEventListener,
+  useFrappeGetCall,
   useFrappeGetDocList,
 } from 'frappe-react-sdk'
 import ActivePosition from '../components/ActivePosition'
@@ -82,23 +84,33 @@ const Portfolio = () => {
       ],
     })
 
+  // const { data: completedOrdersData, isLoading: completedOrdersLoading } =
+  //   activeTab === 'completed' &&
+  //   useFrappeGetDocList('Orders', {
+  //     fields: [
+  //       'name',
+  //       'amount',
+  //       'quantity',
+  //       'status',
+  //       'opinion_type',
+  //       'market_id',
+  //       'closing_time',
+  //     ],
+  //     filters: [
+  //       ['status', 'in', ['SETTLED', 'CANCELED']],
+  //       ['owner', '=', currentUser],
+  //     ],
+  //   })
+
   const { data: completedOrdersData, isLoading: completedOrdersLoading } =
     activeTab === 'completed' &&
-    useFrappeGetDocList('Orders', {
-      fields: [
-        'name',
-        'amount',
-        'quantity',
-        'status',
-        'opinion_type',
-        'market_id',
-        'closing_time',
-      ],
-      filters: [
-        ['status', 'in', ['SETTLED', 'CANCELED']],
-        ['owner', '=', currentUser],
-      ],
+    useFrappeGetCall('rewardapp.engine.get_marketwise_transaction_summary', {
+      fields: ['*'],
     })
+
+  if (!completedOrdersLoading) {
+    console.log('Completed :', completedOrdersData?.message)
+  }
 
   useEffect(() => {
     if (
@@ -115,18 +127,10 @@ const Portfolio = () => {
   }, [activeOrdersLoading])
 
   useEffect(() => {
-    if (
-      !completedOrdersLoading &&
-      completedOrdersData?.length > 0 &&
-      Object.keys(completedOrders).length === 0
-    ) {
-      const completedOrdersMap = completedOrdersData.reduce((acc, order) => {
-        acc[order.name] = order // ✅ Store as { "market_name": marketData }
-        return acc
-      }, {})
-      setCompletedOrders(completedOrdersMap)
+    if (!completedOrdersLoading) {
+      setCompletedOrders(completedOrdersData?.message || {})
     }
-  }, [completedOrdersLoading])
+  }, [completedOrdersData])
 
   useFrappeEventListener('order_event', (updatedOrder) => {
     console.log('Updated Order:', updatedOrder)
@@ -281,7 +285,14 @@ const Portfolio = () => {
             <div className="grid grid-cols-3 gap-4 text-sm">
               <div>
                 <div className="text-white/90 font-medium mb-1">Invested</div>
-                <div className="text-white font-semibold">₹2,000.00</div>
+                <div className="text-white font-semibold">
+                  ₹
+                  {Object.values(activeOrders).length > 0
+                    ? Object.values(activeOrders).reduce((acc, order) => {
+                        return acc + parseFloat(order.amount * order.quantity)
+                      }, 0)
+                    : 0}
+                </div>
               </div>
               <div>
                 <div className="text-white/90 font-medium mb-1">Returns</div>
