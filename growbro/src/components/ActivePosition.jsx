@@ -5,6 +5,7 @@ import {
   useFrappeUpdateDoc,
 } from 'frappe-react-sdk'
 import { Clock, Plus, TrendingDown, TrendingUp, XCircle } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import {
   Dialog,
   DialogContent,
@@ -20,6 +21,7 @@ import { useFrappeDeleteDoc } from 'frappe-react-sdk'
 
 const ActivePosition = ({ position, handleTradeAction }) => {
   const [market, setMarket] = useState({})
+  const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
   const { updateDoc } = useFrappeUpdateDoc()
   console.log(position)
@@ -65,6 +67,7 @@ const ActivePosition = ({ position, handleTradeAction }) => {
       }))
     }
   })
+  
   const handleCancelOrder = async () => {
     try {
       const order = await updateDoc('Orders', position.name, {
@@ -75,6 +78,10 @@ const ActivePosition = ({ position, handleTradeAction }) => {
     } catch (err) {
       console.log(err)
     }
+  }
+
+  const handleMarketClick = (market) => {
+    navigate(`/event/${market.name}`, { state: { market } })
   }
 
   return (
@@ -96,6 +103,24 @@ const ActivePosition = ({ position, handleTradeAction }) => {
           )}
           {position.status === 'MATCHED' && (
             <span className="bg-emerald-100 text-emerald-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
+              {' '}
+              {position.status}
+            </span>
+          )}
+          {position.status === 'CANCELED' && (
+            <span className="bg-red-100 text-red-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
+              {' '}
+              {position.status}
+            </span>
+          )}
+          {position.status === 'EXITING' && (
+            <span className="bg-neutral-200 text-neutral-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
+              {' '}
+              {position.status}
+            </span>
+          )}
+          {position.status === 'EXITED' && (
+            <span className="bg-neutral-200 text-neutral-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
               {' '}
               {position.status}
             </span>
@@ -162,61 +187,68 @@ const ActivePosition = ({ position, handleTradeAction }) => {
           </div>
         </div>
       </div>
-      <div className="flex gap-2 w-full items-center justify-between">
-        <div className="w-[50%]">
-          {position.status !== 'MATCHED' ? (
-            <Dialog open={isOpen} onOpenChange={setIsOpen}>
-              <DialogTrigger>
-                <Button className="w-full bg-rose-50 text-rose-600 rounded-xl text-sm font-medium hover:bg-rose-100 transition-colors">
-                  <XCircle className="h-4 w-4" />
-                  Cancel Order
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="">
-                <DialogHeader>
-                  <DialogTitle>Are you absolutely sure?</DialogTitle>
-                  <DialogDescription>
-                    This action cannot be undone. This will permanently delete
-                    your account and remove your data from our servers.
-                  </DialogDescription>
-                </DialogHeader>
-                <DialogFooter>
-                  <Button
-                    className="bg-white hover:bg-white/90"
-                    variant="outline"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    Cancel
+      {position.status !== 'EXITED' && position.status !== 'CANCELED' && (
+        <div className="flex gap-2 w-full items-center justify-between">
+          <div className="w-[50%]">
+            {(position.status === 'PARTIAL' ||
+              position.status === 'UNMATCHED' ||
+              position.status === 'EXITING') && (
+              <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                <DialogTrigger>
+                  <Button className="w-full bg-rose-50 text-rose-600 rounded-xl text-sm font-medium hover:bg-rose-100 transition-colors">
+                    <XCircle className="h-4 w-4" />
+                    Cancel Order
                   </Button>
-                  <Button
-                    className="bg-neutral-900 text-white hover:text-neutral-800 hover:bg-neutral-800/40"
-                    onClick={() => handleCancelOrder(position)}
-                  >
-                    Submit
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          ) : (
+                </DialogTrigger>
+                <DialogContent className="">
+                  <DialogHeader>
+                    <DialogTitle>Are you absolutely sure?</DialogTitle>
+                    <DialogDescription>
+                      This action cannot be undone. This will permanently delete
+                      your account and remove your data from our servers.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <DialogFooter>
+                    <Button
+                      className="bg-white hover:bg-white/90"
+                      variant="outline"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      className="bg-neutral-900 text-white hover:text-neutral-800 hover:bg-neutral-800/40"
+                      onClick={() => handleCancelOrder(position)}
+                    >
+                      Submit
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            )}
+            {position.status === 'MATCHED' && (
+              <Button
+                onClick={() => handleTradeAction(position, 'SELL', market)}
+                className="w-full bg-rose-50 text-rose-600 rounded-xl text-sm font-medium hover:bg-rose-100 transition-colors"
+              >
+                <XCircle className="h-4 w-4" />
+                Exit Position
+              </Button>
+            )}
+          </div>
+          <div className="w-[50%]">
             <Button
-              onClick={() => handleTradeAction(position, 'SELL')}
-              className="w-full bg-rose-50 text-rose-600 rounded-xl text-sm font-medium hover:bg-rose-100 transition-colors"
+              onClick={() => {
+                handleMarketClick(market)
+              }}
+              className="w-full bg-blue-50 text-blue-600 rounded-xl text-sm font-medium hover:bg-blue-100 transition-colors"
             >
-              <XCircle className="h-4 w-4" />
-              Exit Position
+              <Plus className="h-4 w-4" />
+              Invest More
             </Button>
-          )}
+          </div>
         </div>
-        <div className="w-[50%]">
-          <Button
-            onClick={() => handleTradeAction(position, 'BUY')}
-            className="w-full bg-blue-50 text-blue-600 rounded-xl text-sm font-medium hover:bg-blue-100 transition-colors"
-          >
-            <Plus className="h-4 w-4" />
-            Invest More
-          </Button>
-        </div>
-      </div>
+      )}
     </div>
   )
 }

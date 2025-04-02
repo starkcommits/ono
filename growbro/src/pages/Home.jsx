@@ -128,13 +128,22 @@ const Home = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { currentUser, logout } = useFrappeAuth()
 
+  const [ask, setAsk] = useState(false)
+
   const [markets, setMarkets] = useState({})
 
   const { data: marketData, isLoading: marketDataLoading } =
     useFrappeGetDocList('Market', {
-      fields: ['name', 'question', 'yes_price', 'no_price', 'closing_time'],
+      fields: [
+        'name',
+        'question',
+        'yes_price',
+        'no_price',
+        'closing_time',
+        'status',
+      ],
       filters: [['status', '=', 'OPEN']],
-    })
+    } )
 
   const { data: userWallet, isLoading: userWalletLoading } = useFrappeGetDoc(
     'User Wallet',

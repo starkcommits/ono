@@ -29,8 +29,8 @@ const navItems = [
 
 function App() {
   return (
-    <div className="App">
-      <div className="min-h-screen w-full bg-gray-50">
+    <div className="">
+      <div className="w-full bg-gray-50">
         <div className="max-w-lg mx-auto">
           <Routes>
             <Route element={<PublicRoute />}>

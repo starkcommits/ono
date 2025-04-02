@@ -48,6 +48,7 @@ ChartJS.register(
 const Portfolio = () => {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('active')
+  const [tradePrice, setTradePrice] = useState({})
   const [selectedPosition, setSelectedPosition] = useState(null)
   const [tradeAction, setTradeAction] = useState(null)
   const [showTradeSheet, setShowTradeSheet] = useState(false)
@@ -79,7 +80,7 @@ const Portfolio = () => {
         'market_id',
       ],
       filters: [
-        ['status', 'not in', ['SETTLED', 'CANCELED']],
+        ['status', 'not in', ['SETTLED']],
         ['owner', '=', currentUser],
       ],
     })
@@ -245,9 +246,10 @@ const Portfolio = () => {
     },
   ]
 
-  const handleTradeAction = (position, action) => {
+  const handleTradeAction = (position, action, market) => {
     setSelectedPosition(position)
     setTradeAction(action)
+    setTradePrice(market)
     setShowTradeSheet(true)
   }
 
@@ -373,6 +375,7 @@ const Portfolio = () => {
       {showTradeSheet && selectedPosition && (
         <TradeSheet
           market={selectedPosition}
+          tradePrice={tradePrice}
           choice={selectedPosition.opinion_type}
           onClose={handleTradeComplete}
           tradeAction={tradeAction}

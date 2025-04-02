@@ -22,7 +22,13 @@ import {
   Legend,
 } from 'chart.js'
 import TradeSheet from '../components/TradeSheet'
-import { useFrappeEventListener, useFrappeGetDoc } from 'frappe-react-sdk'
+import {
+  useFrappeEventListener,
+  useFrappeGetCall,
+  useFrappeGetDoc,
+} from 'frappe-react-sdk'
+import TradingViewWidget from '../components/TradingViewWidget'
+import OrderBook from '../components/OrderBook'
 
 ChartJS.register(
   CategoryScale,
@@ -38,21 +44,14 @@ ChartJS.register(
 const EventDetails = () => {
   const location = useLocation()
   const navigate = useNavigate()
-  const initialMarket = location.state?.market || {}
+  const initialMarket = location.state.market || {}
+  const [market, setMarket] = useState(initialMarket)
   const [probabilityTimeframe, setProbabilityTimeframe] = useState('all')
   const [showTradeSheet, setShowTradeSheet] = useState(false)
   const [selectedChoice, setSelectedChoice] = useState(null)
   const [selectedAction, setSelectedAction] = useState(null)
-  const [showOrderBook, setShowOrderBook] = useState(false)
-  const [market, setMarket] = useState(initialMarket)
-
-  const { data: marketData, isLoading } = useFrappeGetDoc('Market', market.name)
-
-  useEffect(() => {
-    if (marketData) {
-      setMarket(marketData)
-    }
-  }, [marketData])
+  console.log(market.status)
+  const [orderBook, setOrderBook] = useState({})
 
   // Listen for real-time updates
   useFrappeEventListener('market_event', (updatedMarket) => {
@@ -60,14 +59,6 @@ const EventDetails = () => {
       setMarket((prev) => ({ ...prev, ...updatedMarket }))
     }
   })
-
-  const orderBook = [
-    { price: 4.5, yesQty: 109, noQty: 80 },
-    { price: 5.5, yesQty: 78, noQty: 325 },
-    { price: 6.0, yesQty: 5, noQty: 168 },
-    { price: 6.5, yesQty: 45, noQty: 92 },
-    { price: 7.0, yesQty: 23, noQty: 156 },
-  ]
 
   const probabilityData = {
     labels: ['3:17 PM', '3:20 PM', '3:22 PM', '3:25 PM', '3:27 PM', '3:30 PM'],
@@ -156,7 +147,7 @@ const EventDetails = () => {
 
       <div className="pt-[calc(env(safe-area-inset-top)+4rem)] pb-[calc(env(safe-area-inset-bottom)+5rem)] px-4">
         {/* ... existing content ... */}
-        <div className="flex flex-col items-center mb-6">
+        <div className="flex flex-col items-center mb-6 mt-4">
           <div className="w-20 h-20 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center mb-4">
             <span className="text-3xl text-white">₿</span>
           </div>
@@ -169,10 +160,28 @@ const EventDetails = () => {
               4000
               {/* {market.traders.toLocaleString()} */}
             </span>
-            <span className="flex items-center">
-              <Timer className="h-4 w-4 mr-1.5" />
-              Ends in 2d
-            </span>
+            {market.status === 'OPEN' && (
+              <span className="flex items-center">
+                <Timer className="h-4 w-4 mr-1.5" />
+                Ends At{' '}
+                {market.closing_time
+                  .split(' ')[0]
+                  .split('-')
+                  .reverse()
+                  .join(' ')}
+              </span>
+            )}
+            {market.status === 'CLOSED' && (
+              <span className="flex items-center">
+                <Timer className="h-4 w-4 mr-1.5" />
+                Market Closed At{' '}
+                {market.closing_time
+                  .split(' ')[0]
+                  .split('-')
+                  .reverse()
+                  .join(' ')}
+              </span>
+            )}
           </div>
         </div>
 
@@ -182,6 +191,7 @@ const EventDetails = () => {
             <p className="text-sm text-amber-800">{market.question}</p>
           </div>
         </div>
+
         <div className="flex gap-3 mb-6">
           <button
             onClick={() => handleTradeClick('YES', 'BUY')}
@@ -197,7 +207,7 @@ const EventDetails = () => {
             No ₹{market.no_price}
           </button>
         </div>
-        <div className="mb-8">
+        {/* <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">YES</span>
@@ -227,53 +237,16 @@ const EventDetails = () => {
           <div className="h-48 w-full mb-6">
             <Line data={probabilityData} options={chartOptions} />
           </div>
-        </div>
+        </div> */}
 
-        <div className="mb-4">
-          <button
-            onClick={() => setShowOrderBook(!showOrderBook)}
-            className="w-full flex items-center justify-between p-4 bg-gray-50 rounded-xl active:bg-gray-100 transition-colors"
-          >
-            <div className="flex items-center">
-              <Book className="h-5 w-5 mr-2" />
-              <span className="font-medium">Order Book</span>
-            </div>
-            {showOrderBook ? (
-              <ChevronUp className="h-5 w-5" />
-            ) : (
-              <ChevronDown className="h-5 w-5" />
-            )}
-          </button>
-
-          {showOrderBook && (
-            <div className="mt-4 bg-white rounded-xl border border-gray-100 overflow-hidden">
-              <div className="grid grid-cols-3 gap-4 px-4 py-3 bg-gray-50 text-sm font-medium">
-                <span>Price</span>
-                <span className="text-blue-600">Qty at YES</span>
-                <span className="text-rose-600">Qty at NO</span>
-              </div>
-              <div className="divide-y divide-gray-100">
-                {orderBook.map((entry, index) => (
-                  <div
-                    key={index}
-                    className="grid grid-cols-3 gap-4 px-4 py-3 text-sm"
-                  >
-                    <span>₹{entry.price}</span>
-                    <span className="text-blue-600">{entry.yesQty}</span>
-                    <span className="text-rose-600">{entry.noQty}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+        <OrderBook marketId={market.name} />
 
         {/* ... other existing content ... */}
       </div>
 
       {showTradeSheet && selectedChoice && (
         <TradeSheet
-          market={market}
+          tradePrice={market}
           choice={selectedChoice}
           onClose={closeTradeSheet}
           tradeAction={selectedAction}

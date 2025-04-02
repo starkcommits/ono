@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, TrendingUp, Users, Timer, Zap } from 'lucide-react'
 import { useFrappeEventListener, useFrappeGetDocList } from 'frappe-react-sdk'
+import TradingViewWidget from '../components/TradingViewWidget'
 
 const CategoryPage = () => {
   const location = useLocation()
@@ -13,7 +14,14 @@ const CategoryPage = () => {
 
   const { data: categoryData, isLoading: categoryDataLoading } =
     useFrappeGetDocList('Market', {
-      fields: ['name', 'question', 'yes_price', 'no_price', 'closing_time'],
+      fields: [
+        'name',
+        'question',
+        'yes_price',
+        'no_price',
+        'closing_time',
+        'status',
+      ],
       filters: [
         ['status', '=', 'OPEN'],
         ['category', '=', id],
@@ -102,7 +110,12 @@ const CategoryPage = () => {
           </div>
 
           <div className="bg-white/20 backdrop-blur-lg rounded-3xl p-6 mb-6">
-            <div className="flex items-center gap-4">
+            {id === 'crypto' && (
+              <div className="h-[350px]">
+                <TradingViewWidget />
+              </div>
+            )}
+            <div className="flex items-center gap-4 mt-4">
               <div
                 className={`w-16 h-16 bg-gradient-to-br ${getCategoryGradient()} rounded-2xl shadow-sm flex items-center justify-center`}
               >

@@ -19,21 +19,20 @@ const getSiteName = () => {
 }
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <FrappeProvider
-      swrConfig={{
-        // This creates a new Map instance for each request, effectively disabling shared caching
-        provider: () => new Map(),
-        keepPreviousData: false,
-        revalidateOnMount: true,
-        // Ensure data is always fetched from the network
-      }}
-      socketPort={import.meta.env.VITE_SOCKET_PORT}
-      siteName={getSiteName()}
-    >
-      <Router basename={import.meta.env.VITE_BASE_PATH}>
-        <App />
-      </Router>
-    </FrappeProvider>
-  </StrictMode>
+  <FrappeProvider
+    swrConfig={{
+      // This creates a new Map instance for each request, effectively disabling shared caching
+      provider: () => new Map(),
+      keepPreviousData: false,
+      revalidateOnMount: true,
+      revalidateOnFocus: false,
+      // Ensure data is always fetched from the network
+    }}
+    socketPort={import.meta.env.VITE_SOCKET_PORT}
+    siteName={getSiteName()}
+  >
+    <Router basename={import.meta.env.VITE_BASE_PATH}>
+      <App />
+    </Router>
+  </FrappeProvider>
 )

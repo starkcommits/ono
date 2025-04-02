@@ -34,7 +34,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Status",
-   "options": "UNMATCHED\nMATCHED\nPARTIAL\nCANCELED\nSETTLED"
+   "options": "UNMATCHED\nMATCHED\nPARTIAL\nCANCELED\nEXITING\nEXITED\nSETTLED"
   },
   {
    "fieldname": "market_id",
@@ -84,7 +84,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-03-29 19:24:36.761907",
+ "modified": "2025-04-01 11:21:18.295360",
  "modified_by": "Administrator",
  "module": "Reward App",
  "name": "Orders",

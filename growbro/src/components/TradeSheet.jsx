@@ -1,381 +1,17 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { Book, ChevronDown, ChevronUp, Minus, Plus } from 'lucide-react'
 import { useParams } from 'react-router-dom'
-import { useFrappeCreateDoc, useFrappeGetCall } from 'frappe-react-sdk'
+import { useFrappeCreateDoc, useFrappeUpdateDoc } from 'frappe-react-sdk'
 import { Slider } from '@/components/ui/slider'
+import OrderBook from './OrderBook'
 
-const TradeSheet = ({ market, choice, onClose, tradeAction }) => {
-  const { createDoc, isLoading, error } = useFrappeCreateDoc()
+const TradeSheet = ({ market, tradePrice, choice, onClose, tradeAction }) => {
+  const { createDoc, isLoading: createDocLoading } = useFrappeCreateDoc()
+  const { updateDoc, isLoading: updateDocLoading } = useFrappeUpdateDoc()
+
   const { id } = useParams()
 
   const marketId = id ? id : market.market_id
-
-  const [orderBook, setOrderBook] = useState({})
-
-  const { data: orderBookData, isLoading: orderBookLoading } = useFrappeGetCall(
-    'rewardapp.engine.get_available_quantity',
-    { market_id: marketId }
-  )
-
-  console.log(orderBookData?.message)
-
-  useEffect(() => {
-    if (!orderBookLoading && orderBook?.length > 0) {
-      setOrderBook(orderBookData?.message)
-    }
-  }, [orderBookData])
-
-  // const [quantityYes, setQuantityYes] = useState([
-  //   {
-  //     0.5: {
-  //       amount: 0.5,
-  //       totalAvailableQuantity: 0,
-  //     },
-  //   },
-
-  //   {
-  //     1.0: {
-  //       amount: 1.0,
-  //       totalAvailableQuantity: 0,
-  //     },
-  //   },
-
-  //   {
-  //     1.5: {
-  //       amount: 1.5,
-  //       totalAvailableQuantity: 0,
-  //     },
-  //   },
-
-  //   {
-  //     2.0: {
-  //       amount: 2.0,
-  //       totalAvailableQuantity: 0,
-  //     },
-  //   },
-
-  //   {
-  //     2.5: {
-  //       amount: 2.5,
-  //       totalAvailableQuantity: 0,
-  //     },
-  //   },
-
-  //   {
-  //     3.0: {
-  //       amount: 3.0,
-  //       totalAvailableQuantity: 0,
-  //     },
-  //   },
-  //   {
-  //     3.5: {
-  //       amount: 3.5,
-  //       totalAvailableQuantity: 0,
-  //     },
-  //   },
-
-  //   {
-  //     4.0: {
-  //       amount: 4.0,
-  //       totalAvailableQuantity: 0,
-  //     },
-  //   },
-
-  //   {
-  //     4.5: {
-  //       amount: 4.5,
-  //       totalAvailableQuantity: 0,
-  //     },
-  //   },
-  //   {
-  //     5.0: {
-  //       amount: 5.0,
-  //       totalAvailableQuantity: 0,
-  //     },
-  //   },
-
-  //   {
-  //     5.5: {
-  //       amount: 5.5,
-  //       totalAvailableQuantity: 0,
-  //     },
-  //   },
-
-  //   {
-  //     6.0: {
-  //       amount: 6.0,
-  //       totalAvailableQuantity: 0,
-  //     },
-  //   },
-
-  //   {
-  //     6.5: {
-  //       amount: 6.5,
-  //       totalAvailableQuantity: 0,
-  //     },
-  //   },
-
-  //   {
-  //     7.0: {
-  //       amount: 7.0,
-  //       totalAvailableQuantity: 0,
-  //     },
-  //   },
-  //   {
-  //     7.5: {
-  //       amount: 7.5,
-  //       totalAvailableQuantity: 0,
-  //     },
-  //   },
-  //   {
-  //     8.0: {
-  //       amount: 8.0,
-  //       totalAvailableQuantity: 0,
-  //     },
-  //   },
-
-  //   {
-  //     8.5: {
-  //       amount: 8.5,
-  //       totalAvailableQuantity: 0,
-  //     },
-  //   },
-  //   {
-  //     9.0: {
-  //       amount: 9.0,
-  //       totalAvailableQuantity: 0,
-  //     },
-  //   },
-  //   {
-  //     9.5: {
-  //       amount: 9.5,
-  //       totalAvailableQuantity: 0,
-  //     },
-  //   },
-  // ])
-
-  // const [quantityNo, setQuantityNo] = useState([
-  //   {
-  //     0.5: {
-  //       amount: 0.5,
-  //       totalAvailableQuantity: 0,
-  //     },
-  //   },
-
-  //   {
-  //     1.0: {
-  //       amount: 1.0,
-  //       totalAvailableQuantity: 0,
-  //     },
-  //   },
-
-  //   {
-  //     1.5: {
-  //       amount: 1.5,
-  //       totalAvailableQuantity: 0,
-  //     },
-  //   },
-
-  //   {
-  //     2.0: {
-  //       amount: 2.0,
-  //       totalAvailableQuantity: 0,
-  //     },
-  //   },
-
-  //   {
-  //     2.5: {
-  //       amount: 2.5,
-  //       totalAvailableQuantity: 0,
-  //     },
-  //   },
-
-  //   {
-  //     3.0: {
-  //       amount: 3.0,
-  //       totalAvailableQuantity: 0,
-  //     },
-  //   },
-  //   {
-  //     3.5: {
-  //       amount: 3.5,
-  //       totalAvailableQuantity: 0,
-  //     },
-  //   },
-
-  //   {
-  //     4.0: {
-  //       amount: 4.0,
-  //       totalAvailableQuantity: 0,
-  //     },
-  //   },
-
-  //   {
-  //     4.5: {
-  //       amount: 4.5,
-  //       totalAvailableQuantity: 0,
-  //     },
-  //   },
-  //   {
-  //     5.0: {
-  //       amount: 5.0,
-  //       totalAvailableQuantity: 0,
-  //     },
-  //   },
-
-  //   {
-  //     5.5: {
-  //       amount: 5.5,
-  //       totalAvailableQuantity: 0,
-  //     },
-  //   },
-
-  //   {
-  //     6.0: {
-  //       amount: 6.0,
-  //       totalAvailableQuantity: 0,
-  //     },
-  //   },
-
-  //   {
-  //     6.5: {
-  //       amount: 6.5,
-  //       totalAvailableQuantity: 0,
-  //     },
-  //   },
-
-  //   {
-  //     7.0: {
-  //       amount: 7.0,
-  //       totalAvailableQuantity: 0,
-  //     },
-  //   },
-  //   {
-  //     7.5: {
-  //       amount: 7.5,
-  //       totalAvailableQuantity: 0,
-  //     },
-  //   },
-  //   {
-  //     8.0: {
-  //       amount: 8.0,
-  //       totalAvailableQuantity: 0,
-  //     },
-  //   },
-
-  //   {
-  //     8.5: {
-  //       amount: 8.5,
-  //       totalAvailableQuantity: 0,
-  //     },
-  //   },
-  //   {
-  //     9.0: {
-  //       amount: 9.0,
-  //       totalAvailableQuantity: 0,
-  //     },
-  //   },
-  //   {
-  //     9.5: {
-  //       amount: 9.5,
-  //       totalAvailableQuantity: 0,
-  //     },
-  //   },
-  // ])
-
-  // const [quantityNo, setQuantityNo] = useState([
-  //   {
-  //     amount: 0.5,
-  //     totalAvailableQuantity: 0,
-  //   },
-
-  //   {
-  //     amount: 1.0,
-  //     totalAvailableQuantity: 0,
-  //   },
-
-  //   {
-  //     amount: 1.5,
-  //     totalAvailableQuantity: 0,
-  //   },
-
-  //   {
-  //     amount: 2.0,
-  //     totalAvailableQuantity: 0,
-  //   },
-
-  //   {
-  //     amount: 2.5,
-  //     totalAvailableQuantity: 0,
-  //   },
-
-  //   {
-  //     amount: 3.0,
-  //     totalAvailableQuantity: 0,
-  //   },
-  //   {
-  //     amount: 3.5,
-  //     totalAvailableQuantity: 0,
-  //   },
-
-  //   {
-  //     amount: 4.0,
-  //     totalAvailableQuantity: 0,
-  //   },
-
-  //   {
-  //     amount: 4.5,
-  //     totalAvailableQuantity: 0,
-  //   },
-
-  //   {
-  //     amount: 5.0,
-  //     totalAvailableQuantity: 0,
-  //   },
-
-  //   {
-  //     amount: 5.5,
-  //     totalAvailableQuantity: 0,
-  //   },
-
-  //   {
-  //     amount: 6.0,
-  //     totalAvailableQuantity: 0,
-  //   },
-
-  //   {
-  //     amount: 6.5,
-  //     totalAvailableQuantity: 0,
-  //   },
-
-  //   {
-  //     amount: 7.0,
-  //     totalAvailableQuantity: 0,
-  //   },
-  //   {
-  //     amount: 7.5,
-  //     totalAvailableQuantity: 0,
-  //   },
-
-  //   {
-  //     amount: 8.0,
-  //     totalAvailableQuantity: 0,
-  //   },
-
-  //   {
-  //     amount: 8.5,
-  //     totalAvailableQuantity: 0,
-  //   },
-  //   {
-  //     amount: 9.0,
-  //     totalAvailableQuantity: 0,
-  //   },
-
-  //   {
-  //     amount: 9.5,
-  //     totalAvailableQuantity: 0,
-  //   },
-  // ])
 
   const sheetRef = useRef(null)
   const dragRef = useRef({
@@ -389,7 +25,9 @@ const TradeSheet = ({ market, choice, onClose, tradeAction }) => {
     isClosing: false,
     isDragging: false,
   })
-  const [price, setPrice] = useState(4.5)
+  const [price, setPrice] = useState(
+    choice === 'YES' ? tradePrice.yes_price : tradePrice.no_price
+  )
   const [quantity, setQuantity] = useState(
     tradeAction === 'SELL' ? market.quantity : 10
   )
@@ -411,21 +49,49 @@ const TradeSheet = ({ market, choice, onClose, tradeAction }) => {
   //   { price: 6.0, yesQty: 5, noQty: 168 },
   // ]
 
-  const handleConfirmTrade = async () => {
+  const handleConfirmBuy = async () => {
     try {
       // Prepare the order data with specific fields
 
       const orderData = {
-        market_id: tradeAction === 'BUY' ? marketId : market.market_id, // Market ID from URL params
+        market_id: marketId, // Market ID from URL params
         order_type: tradeAction, // You can adjust this if needed
         quantity: quantity, // Quantity of the trade
-        opinion_type: choice, // 'yes' or 'no'
+        opinion_type: choice, // 'YES' or 'NO'
         amount: price, // Total amount of the trade
       }
+
+      await createDoc('Orders', orderData)
       console.log(orderData)
-      // Create the document
-      const newDoc = await createDoc('Orders', orderData)
-      console.log(newDoc)
+
+      onClose()
+    } catch (err) {
+      // Close the sheet
+      // Handle any errors
+      // toast.error('Failed to create order', {
+      //   description: error || 'Please try again',
+      // })
+      console.error('Order creation error:', err)
+    }
+  }
+
+  const handleConfirmSell = async () => {
+    try {
+      // Prepare the order data with specific fields
+
+      const orderData = {
+        market_id: marketId, // Market ID from URL params
+        order_type: tradeAction, // You can adjust this if needed
+        quantity: quantity, // Quantity of the trade
+        opinion_type: market.opinion_type, // 'YES' or 'NO'
+        amount: price, // Total amount of the trade
+        filled_quantity: 0,
+        status: 'EXITING',
+      }
+
+      await updateDoc('Orders', market.name, orderData)
+      console.log(orderData)
+
       onClose()
     } catch (err) {
       // Close the sheet
@@ -629,47 +295,45 @@ const TradeSheet = ({ market, choice, onClose, tradeAction }) => {
             </div>
           </div>
 
-          <div className="mb-4">
-            <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-              <div className="flex items-center px-4 py-3 bg-gray-50">
-                <Book className="h-5 w-5 mr-2" />
-                <span className="font-medium">Order Book</span>
-              </div>
-              <div className="divide-y divide-gray-100">
-                <div className="grid grid-cols-3 gap-4 px-4 py-3 bg-gray-50 text-sm font-medium">
-                  <span>Price</span>
-                  <span className="text-blue-600">Qty at YES</span>
-                  <span className="text-rose-600">Qty at NO</span>
-                </div>
-                {Object.values(orderBook).map((entry, index) => (
-                  <div
-                    key={index}
-                    className="grid grid-cols-3 gap-4 px-4 py-3 text-sm"
-                  >
-                    <span>₹{entry.price}</span>
-                    <span className="text-blue-600">{entry.yesQty}</span>
-                    <span className="text-rose-600">{entry.noQty}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          <OrderBook marketId={marketId} />
 
           <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
             <span>Available Balance: ₹{availableBalance}</span>
             <span>Commission: {(commission * 100).toFixed(1)}%</span>
           </div>
 
-          <button
-            onClick={handleConfirmTrade}
-            disabled={isLoading}
-            className={`w-full bg-blue-500 text-white py-4 rounded-xl font-medium transition-colors 
-        ${isLoading ? 'opacity-50 cursor-not-allowed' : 'active:bg-blue-600'}`}
-          >
-            {isLoading
-              ? 'Processing...'
-              : `Confirm ${choice === 'YES' ? 'YES' : 'NO'}`}
-          </button>
+          {tradeAction === 'BUY' && (
+            <button
+              onClick={handleConfirmBuy}
+              disabled={createDocLoading}
+              className={`w-full bg-blue-500 text-white py-4 rounded-xl font-medium transition-colors 
+        ${
+          createDocLoading
+            ? 'opacity-50 cursor-not-allowed'
+            : 'active:bg-blue-600'
+        }`}
+            >
+              {createDocLoading
+                ? 'Processing...'
+                : `Confirm ${choice === 'YES' ? 'YES' : 'NO'}`}
+            </button>
+          )}
+          {tradeAction === 'SELL' && (
+            <button
+              onClick={handleConfirmSell}
+              disabled={updateDocLoading}
+              className={`w-full bg-blue-500 text-white py-4 rounded-xl font-medium transition-colors 
+        ${
+          updateDocLoading
+            ? 'opacity-50 cursor-not-allowed'
+            : 'active:bg-blue-600'
+        }`}
+            >
+              {updateDocLoading
+                ? 'Processing...'
+                : `Confirm ${choice === 'YES' ? 'YES' : 'NO'}`}
+            </button>
+          )}
           <p className="text-xs text-gray-500 text-center mt-4">
             Sale or purchase of Crypto Currency or Digital Assets is neither
             encouraged nor allowed on this platform
