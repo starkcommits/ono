@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { ArrowLeft, Mail, Lock, Eye, EyeOff, User, Phone } from 'lucide-react'
 import toast from 'react-hot-toast'
 import {
+  useFrappeCreateDoc,
   useFrappeEventListener,
   useFrappeGetCall,
   useFrappePostCall,
@@ -10,11 +11,10 @@ import {
 
 const SignUp = () => {
   const navigate = useNavigate()
-  const {
-    execute: signUpExecuting,
-    isLoading: signUpLoading,
-    error,
-  } = useFrappePostCall('rewardapp.api.signup')
+  const { call } = useFrappePostCall('rewardapp.api.signup')
+
+  // const { createDoc } = useFrappeCreateDoc()
+
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -45,7 +45,9 @@ const SignUp = () => {
       // TODO: Implement actual registration
       const { confirm_password, ...dataToSend } = formData
 
-      const response = await execute(dataToSend)
+      const response = await call(dataToSend)
+
+      // const response = await createDoc('User', dataToSend)
 
       console.log('Response:', response)
 

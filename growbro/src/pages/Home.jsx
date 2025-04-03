@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { data, useNavigate } from 'react-router-dom'
 import {
   Bell,
   Menu,
@@ -19,6 +19,7 @@ import {
   useFrappeAuth,
   useFrappeGetDoc,
   useFrappeGetDocList,
+  useFrappeGetCall,
 } from 'frappe-react-sdk'
 
 const categories = [
@@ -127,6 +128,22 @@ const Home = () => {
   const navigate = useNavigate()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { currentUser, logout } = useFrappeAuth()
+
+  const { data: cardData } = useFrappeGetDoc('Number Card', 'T')
+  // Fetch the actual value
+  const {
+    data: cardValue,
+    error,
+    isValidating,
+  } = useFrappeGetCall(
+    'frappe.desk.doctype.number_card.number_card.get_result',
+    {
+      doc: cardData,
+      filters: {},
+    }
+  )
+
+  console.log('Data: ', cardValue)
 
   const [markets, setMarkets] = useState({})
 

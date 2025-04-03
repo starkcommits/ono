@@ -29,35 +29,35 @@ const ActivePosition = ({ position, setActiveOrders, handleTradeAction }) => {
 
   // console.log('Sell Order ID:', position.status === 'MATCHED' && position)
 
-  const { data: sellPosition, isLoading: sellPositionLoading } =
-    position.sell_order_id
-      ? useFrappeGetDocList('Orders', {
-          fields: [
-            'name',
-            'question',
-            'creation',
-            'amount',
-            'status',
-            'quantity',
-            'opinion_type',
-            'market_id',
-            'sell_order_id',
-          ],
-          filters: [
-            ['order_type', '=', 'SELL'],
-            ['name', '=', position.sell_order_id],
-            ['owner', '=', currentUser],
-          ],
-        })
-      : []
+  // const { data: sellPosition, isLoading: sellPositionLoading } =
+  //   position.sell_order_id
+  //     ? useFrappeGetDocList('Orders', {
+  //         fields: [
+  //           'name',
+  //           'question',
+  //           'creation',
+  //           'amount',
+  //           'status',
+  //           'quantity',
+  //           'opinion_type',
+  //           'market_id',
+  //           'sell_order_id',
+  //         ],
+  //         filters: [
+  //           ['order_type', '=', 'SELL'],
+  //           ['name', '=', position.sell_order_id],
+  //           ['owner', '=', currentUser],
+  //         ],
+  //       })
+  //     : []
 
   console.log('Position: ', position)
 
-  useEffect(() => {
-    if (position.sell_order_id && sellPosition?.length > 0) {
-      position = sellPosition[0]
-    }
-  }, [sellPosition])
+  // useEffect(() => {
+  //   if (position.sell_order_id && sellPosition?.length > 0) {
+  //     position = sellPosition[0]
+  //   }
+  // }, [sellPosition])
 
   const { data: marketData, isLoading: marketDataLoading } =
     useFrappeGetDocList('Market', {
