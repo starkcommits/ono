@@ -15,7 +15,8 @@
   "quantity",
   "filled_quantity",
   "opinion_type",
-  "amount"
+  "amount",
+  "sell_order_id"
  ],
  "fields": [
   {
@@ -79,12 +80,17 @@
    "fieldname": "closing_time",
    "fieldtype": "Read Only",
    "label": "Closing Time"
+  },
+  {
+   "fieldname": "sell_order_id",
+   "fieldtype": "Link",
+   "label": "Sell Order ID",
+   "options": "Orders"
   }
  ],
- "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-04-01 11:21:18.295360",
+ "modified": "2025-04-03 14:29:16.432776",
  "modified_by": "Administrator",
  "module": "Reward App",
  "name": "Orders",
