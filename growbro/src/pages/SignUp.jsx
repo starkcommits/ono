@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { ArrowLeft, Mail, Lock, Eye, EyeOff, User, Phone } from 'lucide-react'
+import toast from 'react-hot-toast'
 
 const SignUp = () => {
   const navigate = useNavigate()
@@ -21,18 +22,25 @@ const SignUp = () => {
 
   const handleSignUp = async (e) => {
     e.preventDefault()
-    if (formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match')
-      return
+
+    try {
+      if (formData.password !== formData.confirmPassword) {
+        toast.error(`Passwords do not match`)
+        return
+      }
+
+      setIsLoading(true)
+
+      // TODO: Implement actual registration
+      
+
+      setTimeout(() => {
+        setIsLoading(false)
+        navigate('/')
+      }, 1500)
+    } catch (err) {
+      toast.error(`Error occured in the registration process.`)
     }
-
-    setIsLoading(true)
-
-    // TODO: Implement actual registration
-    setTimeout(() => {
-      setIsLoading(false)
-      navigate('/kyc')
-    }, 1500)
   }
 
   return (

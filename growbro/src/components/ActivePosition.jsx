@@ -67,7 +67,17 @@ const ActivePosition = ({ position, handleTradeAction }) => {
       }))
     }
   })
-  
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+  }
+
   const handleCancelOrder = async () => {
     try {
       const order = await updateDoc('Orders', position.name, {
@@ -81,7 +91,7 @@ const ActivePosition = ({ position, handleTradeAction }) => {
   }
 
   const handleMarketClick = (market) => {
-    navigate(`/event/${market.name}`, { state: { market } })
+    navigate(`/event/${market.name}`)
   }
 
   return (
@@ -109,18 +119,6 @@ const ActivePosition = ({ position, handleTradeAction }) => {
           )}
           {position.status === 'CANCELED' && (
             <span className="bg-red-100 text-red-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
-              {' '}
-              {position.status}
-            </span>
-          )}
-          {position.status === 'EXITING' && (
-            <span className="bg-neutral-200 text-neutral-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
-              {' '}
-              {position.status}
-            </span>
-          )}
-          {position.status === 'EXITED' && (
-            <span className="bg-neutral-200 text-neutral-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
               {' '}
               {position.status}
             </span>
@@ -155,13 +153,7 @@ const ActivePosition = ({ position, handleTradeAction }) => {
         <span>•</span>
         <span className="flex items-center">
           <Clock className="h-3.5 w-3.5 mr-1" />
-          End at{' '}
-          {market?.closing_time
-            ?.split(' ')[0]
-            .split('-')
-            .reverse()
-            .join('-')}{' '}
-          {market?.closing_time?.split(' ')[1].split(':').join(':').slice(0, 5)}
+          End at {formatDate(market?.closing_time)}
         </span>
       </div>
       <div className="grid grid-cols-3 gap-4 text-sm mb-4">
@@ -194,7 +186,7 @@ const ActivePosition = ({ position, handleTradeAction }) => {
               position.status === 'UNMATCHED' ||
               position.status === 'EXITING') && (
               <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                <DialogTrigger>
+                <DialogTrigger className="w-full">
                   <Button className="w-full bg-rose-50 text-rose-600 rounded-xl text-sm font-medium hover:bg-rose-100 transition-colors">
                     <XCircle className="h-4 w-4" />
                     Cancel Order
@@ -236,17 +228,16 @@ const ActivePosition = ({ position, handleTradeAction }) => {
               </Button>
             )}
           </div>
-          <div className="w-[50%]">
-            <Button
-              onClick={() => {
-                handleMarketClick(market)
-              }}
-              className="w-full bg-blue-50 text-blue-600 rounded-xl text-sm font-medium hover:bg-blue-100 transition-colors"
-            >
-              <Plus className="h-4 w-4" />
-              Invest More
-            </Button>
-          </div>
+
+          <Button
+            onClick={() => {
+              handleMarketClick(market)
+            }}
+            className="w-[50%] bg-blue-50 text-blue-600 rounded-xl text-sm font-medium hover:bg-blue-100 transition-colors"
+          >
+            <Plus className="h-4 w-4" />
+            Invest More
+          </Button>
         </div>
       )}
     </div>

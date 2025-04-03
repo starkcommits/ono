@@ -73,6 +73,7 @@ const Portfolio = () => {
       fields: [
         'name',
         'question',
+        'creation',
         'amount',
         'status',
         'quantity',
@@ -83,6 +84,10 @@ const Portfolio = () => {
         ['status', 'not in', ['SETTLED']],
         ['owner', '=', currentUser],
       ],
+      orderBy: {
+        field: 'creation',
+        order: 'desc',
+      },
     })
 
   // const { data: completedOrdersData, isLoading: completedOrdersLoading } =
@@ -358,7 +363,8 @@ const Portfolio = () => {
           {/* Trades List */}
           <div className="divide-y divide-gray-100">
             {activeTab === 'active'
-              ? Object.values(activeOrders).map((position) => (
+              ? Object.values(activeOrders)
+                .map((position) => (
                   <ActivePosition
                     key={position.name}
                     position={position}

@@ -128,8 +128,6 @@ const Home = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { currentUser, logout } = useFrappeAuth()
 
-  const [ask, setAsk] = useState(false)
-
   const [markets, setMarkets] = useState({})
 
   const { data: marketData, isLoading: marketDataLoading } =
@@ -143,14 +141,12 @@ const Home = () => {
         'status',
       ],
       filters: [['status', '=', 'OPEN']],
-    } )
+    })
 
   const { data: userWallet, isLoading: userWalletLoading } = useFrappeGetDoc(
     'User Wallet',
     currentUser
   )
-
-  console.log(userWallet)
 
   useEffect(() => {
     if (
@@ -185,19 +181,11 @@ const Home = () => {
   })
 
   const handleMarketClick = (market) => {
-    navigate(`/event/${market.name}`, { state: { market } })
+    navigate(`/event/${market.name}`)
   }
 
   const handleCategoryClick = (category) => {
-    const categoryMarkets = trendingMarkets.filter(
-      (market) => market.category.toLowerCase() === category.id
-    )
-    navigate(`/category/${category.id}`, {
-      state: {
-        category: category.name,
-        markets: categoryMarkets,
-      },
-    })
+    navigate(`/category/${category.id}`)
   }
 
   return (

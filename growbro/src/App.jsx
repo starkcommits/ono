@@ -18,6 +18,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import Layout from './components/Layout'
 import PublicRoute from './components/PublicRoute'
 import { Route, Routes } from 'react-router-dom'
+import { Toaster } from 'react-hot-toast'
 
 const navItems = [
   { icon: Home, label: 'Home', path: '/' },
@@ -32,6 +33,7 @@ function App() {
     <div className="">
       <div className="w-full bg-gray-50">
         <div className="max-w-lg mx-auto">
+          <Toaster />
           <Routes>
             <Route element={<PublicRoute />}>
               <Route path="/signin" element={<SignIn />} />

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import {
   ArrowLeft,
   Share2,
@@ -42,16 +42,33 @@ ChartJS.register(
 )
 
 const EventDetails = () => {
-  const location = useLocation()
   const navigate = useNavigate()
-  const initialMarket = location.state.market || {}
-  const [market, setMarket] = useState(initialMarket)
-  const [probabilityTimeframe, setProbabilityTimeframe] = useState('all')
+  const { id } = useParams()
+  const [market, setMarket] = useState({})
   const [showTradeSheet, setShowTradeSheet] = useState(false)
   const [selectedChoice, setSelectedChoice] = useState(null)
   const [selectedAction, setSelectedAction] = useState(null)
-  console.log(market.status)
-  const [orderBook, setOrderBook] = useState({})
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+  }
+
+  const { data: marketData, isLoading: marketDataLoading } = useFrappeGetDoc(
+    'Market',
+    id
+  )
+
+  console.log(market)
+
+  useEffect(() => {
+    setMarket(marketData)
+  }, [marketData])
 
   // Listen for real-time updates
   useFrappeEventListener('market_event', (updatedMarket) => {
@@ -152,7 +169,7 @@ const EventDetails = () => {
             <span className="text-3xl text-white">₿</span>
           </div>
           <h2 className="text-xl text-center font-medium mb-4 px-6">
-            {market.question}
+            {market?.question}
           </h2>
           <div className="flex items-center gap-4 text-sm text-gray-600">
             <span className="flex items-center">
@@ -160,26 +177,16 @@ const EventDetails = () => {
               4000
               {/* {market.traders.toLocaleString()} */}
             </span>
-            {market.status === 'OPEN' && (
+            {market?.status === 'OPEN' && (
               <span className="flex items-center">
                 <Timer className="h-4 w-4 mr-1.5" />
-                Ends At{' '}
-                {market.closing_time
-                  .split(' ')[0]
-                  .split('-')
-                  .reverse()
-                  .join(' ')}
+                Ends At {formatDate(market?.closing_time)}
               </span>
             )}
-            {market.status === 'CLOSED' && (
+            {market?.status === 'CLOSED' && (
               <span className="flex items-center">
                 <Timer className="h-4 w-4 mr-1.5" />
-                Market Closed At{' '}
-                {market.closing_time
-                  .split(' ')[0]
-                  .split('-')
-                  .reverse()
-                  .join(' ')}
+                Market Closed At {formatDate(market?.closing_time)}
               </span>
             )}
           </div>
@@ -188,7 +195,7 @@ const EventDetails = () => {
         <div className="bg-amber-50 p-4 rounded-xl mb-6">
           <div className="flex items-center">
             <span className="text-2xl mr-2">💡</span>
-            <p className="text-sm text-amber-800">{market.question}</p>
+            <p className="text-sm text-amber-800">{market?.question}</p>
           </div>
         </div>
 
@@ -197,14 +204,14 @@ const EventDetails = () => {
             onClick={() => handleTradeClick('YES', 'BUY')}
             className="flex-1 py-3 px-4 bg-blue-500 text-white font-medium rounded-xl active:bg-blue-600 transition-colors"
           >
-            Yes ₹{market.yes_price}
+            Yes ₹{market?.yes_price}
           </button>
 
           <button
             onClick={() => handleTradeClick('NO', 'BUY')}
             className="flex-1 py-3 px-4 bg-rose-500 text-white font-medium rounded-xl active:bg-rose-600 transition-colors"
           >
-            No ₹{market.no_price}
+            No ₹{market?.no_price}
           </button>
         </div>
         {/* <div className="mb-8">
@@ -216,7 +223,7 @@ const EventDetails = () => {
               </span>
             </div>
             <span className="text-sm text-gray-500">-33.3% All</span>
-          </div>
+          </div>  
 
           <div className="flex gap-4 mb-4">
             {['5m', '10m', 'all'].map((timeframe) => (
@@ -239,7 +246,7 @@ const EventDetails = () => {
           </div>
         </div> */}
 
-        <OrderBook marketId={market.name} />
+        <OrderBook marketId={id} />
 
         {/* ... other existing content ... */}
       </div>

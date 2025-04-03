@@ -5,10 +5,8 @@ import { useFrappeEventListener, useFrappeGetDocList } from 'frappe-react-sdk'
 import TradingViewWidget from '../components/TradingViewWidget'
 
 const CategoryPage = () => {
-  const location = useLocation()
   const navigate = useNavigate()
   const { id } = useParams()
-  const { category, markets } = location.state
 
   const [categoryMarkets, setCategoryMarkets] = useState({})
 
@@ -74,7 +72,7 @@ const CategoryPage = () => {
       Sports: '⚽',
       Tech: '💻',
     }
-    return emojiMap[category] || '📊'
+    return emojiMap[id.toUpperCase()] || '📊'
   }
 
   const getCategoryGradient = () => {
@@ -88,11 +86,11 @@ const CategoryPage = () => {
       Sports: 'from-orange-400 to-orange-500',
       Tech: 'from-cyan-400 to-cyan-500',
     }
-    return gradientMap[category] || 'from-gray-400 to-gray-500'
+    return gradientMap[id.toUpperCase()] || 'from-gray-400 to-gray-500'
   }
 
   const handleMarketClick = (market) => {
-    navigate(`/event/${market.name}`, { state: { market } })
+    navigate(`/event/${market.name}`)
   }
 
   return (
@@ -106,7 +104,10 @@ const CategoryPage = () => {
             >
               <ArrowLeft className="h-6 w-6" />
             </button>
-            <h1 className="text-2xl font-bold text-white">{category}</h1>
+            <h1 className="text-2xl font-bold text-white">
+              {id.charAt(0).toUpperCase()}
+              {id.slice(1)}
+            </h1>
           </div>
 
           <div className="bg-white/20 backdrop-blur-lg rounded-3xl p-6 mb-6">
@@ -123,7 +124,8 @@ const CategoryPage = () => {
               </div>
               <div>
                 <h2 className="text-xl font-bold text-white mb-1">
-                  {category} Markets
+                {id.charAt(0).toUpperCase()}
+                {id.slice(1)} Markets
                 </h2>
                 <p className="text-white/80">
                   {Object.values(categoryMarkets || {})?.length} active{' '}

@@ -12,12 +12,25 @@ import {
   ChevronRight,
   Plus,
   Accessibility,
+  StethoscopeIcon,
 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
 import {
   useFrappeAuth,
   useFrappeGetDoc,
   useFrappeGetDocList,
+  useFrappeUpdateDoc,
 } from 'frappe-react-sdk'
+import toast from 'react-hot-toast'
 
 const Wallet = () => {
   const navigate = useNavigate()
@@ -28,11 +41,17 @@ const Wallet = () => {
   const [userHistory, setUserHistory] = useState([])
   const [userWithdrawals, setUserWithdrawals] = useState([])
   const [userDeposits, setUserDeposits] = useState([])
+  const [open, setOpen] = useState(false)
 
   const { currentUser } = useFrappeAuth()
 
-  const { data: userWalletData, isLoading: userWalletLoading } =
-    useFrappeGetDoc('User Wallet', currentUser)
+  const {
+    data: userWalletData,
+    isLoading: userWalletLoading,
+    mutate: refetchWalletData,
+  } = useFrappeGetDoc('User Wallet', currentUser)
+
+  const { updateDoc } = useFrappeUpdateDoc()
 
   const { data: transactionHistory, isLoading: transactionHistoryLoading } =
     activeTab === 'all' &&
@@ -147,9 +166,23 @@ const Wallet = () => {
     setAmount(value.toString())
   }
 
-  const handleAddMoney = () => {
+  const handleAddMoney = async () => {
     // TODO: Implement payment gateway integration
-    console.log('Adding money:', amount)
+    try {
+      console.log('Adding money:', amount)
+      await updateDoc('User Wallet', currentUser, {
+        balance: userWallet.balance + parseFloat(amount),
+      })
+      toast.success(`${amount} added to your wallet.`, {
+        top: 0,
+        right: 0,
+      })
+      refetchWalletData()
+      setOpen(false)
+    } catch (err) {
+      console.log(err)
+      toast.error('Failed to add money in the wallet.')
+    }
   }
 
   const formatDate = (dateString) => {
@@ -243,7 +276,7 @@ const Wallet = () => {
                 ))}
               </div>
             </div>
-
+            {/* 
             <div className="space-y-3 mb-6">
               <button className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 rounded-2xl hover:bg-indigo-50 hover:text-indigo-600 transition-colors">
                 <div className="flex items-center">
@@ -260,16 +293,38 @@ const Wallet = () => {
                 </div>
                 <ChevronRight className="h-5 w-5" />
               </button>
-            </div>
+            </div> */}
 
-            <button
-              onClick={handleAddMoney}
-              disabled={!amount}
-              className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-indigo-600 text-white font-medium rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-700 transition-colors"
-            >
-              <Plus className="h-5 w-5" />
-              Add Money
-            </button>
+            <div className="w-full">
+              <Dialog open={open} onOpenChange={setOpen}>
+                <DialogTrigger className="w-full">
+                  <button
+                    disabled={!amount}
+                    className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-indigo-600 text-white font-medium rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-700 transition-colors"
+                  >
+                    <Plus className="h-5 w-5" />
+                    Add Money
+                  </button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Are you absolutely sure?</DialogTitle>
+                    <DialogDescription>
+                      Are you sure you want to add money in your wallet?
+                    </DialogDescription>
+                  </DialogHeader>
+                  <DialogFooter>
+                    <Button
+                      disabled={!amount}
+                      className="bg-secondary hover:bg-secondary/90"
+                      onClick={handleAddMoney}
+                    >
+                      Confirm
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
 
           {/* Transactions Section */}
@@ -325,8 +380,11 @@ const Wallet = () => {
                   transaction.transaction_type === 'RECHARGE'
                 ) {
                   return (
-                    <div className="divide-y divide-gray-100">
-                      <div key={transaction.name} className="p-4">
+                    <div
+                      key={transaction.name}
+                      className="divide-y divide-gray-100"
+                    >
+                      <div className="p-4">
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-3">
                             <div
@@ -368,8 +426,11 @@ const Wallet = () => {
                   )
                 } else
                   return (
-                    <div className="divide-y divide-gray-100">
-                      <div key={transaction.name} className="p-4">
+                    <div
+                      key={transaction.name}
+                      className="divide-y divide-gray-100"
+                    >
+                      <div className="p-4">
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-3">
                             <div
@@ -415,8 +476,11 @@ const Wallet = () => {
               userDeposits?.map((transaction) => {
                 console.log('Transaction:', transaction)
                 return (
-                  <div className="divide-y divide-gray-100">
-                    <div key={transaction.name} className="p-4">
+                  <div
+                    key={transaction.name}
+                    className="divide-y divide-gray-100"
+                  >
+                    <div className="p-4">
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-3">
                           <div
@@ -458,8 +522,11 @@ const Wallet = () => {
               userWithdrawals?.map((transaction) => {
                 console.log('Transaction:', transaction)
                 return (
-                  <div className="divide-y divide-gray-100">
-                    <div key={transaction.name} className="p-4">
+                  <div
+                    key={transaction.name}
+                    className="divide-y divide-gray-100"
+                  >
+                    <div className="p-4">
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-3">
                           <div

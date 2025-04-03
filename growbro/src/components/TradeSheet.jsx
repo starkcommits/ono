@@ -4,13 +4,12 @@ import { useParams } from 'react-router-dom'
 import { useFrappeCreateDoc, useFrappeUpdateDoc } from 'frappe-react-sdk'
 import { Slider } from '@/components/ui/slider'
 import OrderBook from './OrderBook'
+import toast from 'react-hot-toast'
 
 const TradeSheet = ({ market, tradePrice, choice, onClose, tradeAction }) => {
   const { createDoc, isLoading: createDocLoading } = useFrappeCreateDoc()
-  const { updateDoc, isLoading: updateDocLoading } = useFrappeUpdateDoc()
-
+  const { updateDoc } = useFrappeUpdateDoc()
   const { id } = useParams()
-
   const marketId = id ? id : market.market_id
 
   const sheetRef = useRef(null)
@@ -62,6 +61,7 @@ const TradeSheet = ({ market, tradePrice, choice, onClose, tradeAction }) => {
       }
 
       await createDoc('Orders', orderData)
+      toast.success(`Buy Order Placed.`)
       console.log(orderData)
 
       onClose()
@@ -71,6 +71,7 @@ const TradeSheet = ({ market, tradePrice, choice, onClose, tradeAction }) => {
       // toast.error('Failed to create order', {
       //   description: error || 'Please try again',
       // })
+      toast.error(`Error in placing buy order.`)
       console.error('Order creation error:', err)
     }
   }
@@ -86,11 +87,14 @@ const TradeSheet = ({ market, tradePrice, choice, onClose, tradeAction }) => {
         opinion_type: market.opinion_type, // 'YES' or 'NO'
         amount: price, // Total amount of the trade
         filled_quantity: 0,
-        status: 'EXITING',
+        status: 'UNMATCHED',
       }
 
-      await updateDoc('Orders', market.name, orderData)
-      console.log(orderData)
+      console.log('90th:', orderData)
+
+      await createDoc('Orders', orderData)
+
+      toast.success(`Sell Order Placed.`)
 
       onClose()
     } catch (err) {
@@ -100,6 +104,7 @@ const TradeSheet = ({ market, tradePrice, choice, onClose, tradeAction }) => {
       //   description: error || 'Please try again',
       // })
       console.error('Order creation error:', err)
+      toast.error(`Error in placing the order.`)
     }
   }
 
@@ -226,9 +231,9 @@ const TradeSheet = ({ market, tradePrice, choice, onClose, tradeAction }) => {
                 <span className="text-lg font-medium">
                   ₹ {price.toFixed(1)}
                 </span>
-                <span className="text-sm text-gray-500 ml-2">
+                {/* <span className="text-sm text-gray-500 ml-2">
                   109 qty available
-                </span>
+                </span> */}
               </div>
             </div>
             {/* <ReactSlider
@@ -287,12 +292,12 @@ const TradeSheet = ({ market, tradePrice, choice, onClose, tradeAction }) => {
               <p className="text-gray-500">You put</p>
               <p className="font-medium">₹{totalCost.toFixed(1)}</p>
             </div>
-            <div className="text-right">
+            {/* <div className="text-right">
               <p className="text-gray-500">You get</p>
               <p className="font-medium text-green-600">
                 ₹{potentialWinnings.toFixed(1)}
               </p>
-            </div>
+            </div> */}
           </div>
 
           <OrderBook marketId={marketId} />
@@ -321,15 +326,15 @@ const TradeSheet = ({ market, tradePrice, choice, onClose, tradeAction }) => {
           {tradeAction === 'SELL' && (
             <button
               onClick={handleConfirmSell}
-              disabled={updateDocLoading}
+              disabled={createDocLoading}
               className={`w-full bg-blue-500 text-white py-4 rounded-xl font-medium transition-colors 
         ${
-          updateDocLoading
+          createDocLoading
             ? 'opacity-50 cursor-not-allowed'
             : 'active:bg-blue-600'
         }`}
             >
-              {updateDocLoading
+              {createDocLoading
                 ? 'Processing...'
                 : `Confirm ${choice === 'YES' ? 'YES' : 'NO'}`}
             </button>
