@@ -1,4 +1,5 @@
 import {
+  useFrappeAuth,
   useFrappeEventListener,
   useFrappeGetDoc,
   useFrappeGetDocList,
@@ -19,26 +20,44 @@ import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
 import { useFrappeDeleteDoc } from 'frappe-react-sdk'
 
-const ActivePosition = ({ position, handleTradeAction }) => {
+const ActivePosition = ({ position, setActiveOrders, handleTradeAction }) => {
   const [market, setMarket] = useState({})
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
   const { updateDoc } = useFrappeUpdateDoc()
-  console.log(position)
+  const { currentUser } = useFrappeAuth()
 
-  //   const { data: marketData, isLoading: marketDataLoading } = useFrappeGetDoc(
-  //     {
-  //       doctype: 'Market',
-  //       name: position.market_id,
-  //     },
+  // console.log('Sell Order ID:', position.status === 'MATCHED' && position)
 
-  //     {
-  //       fields: [
-  //         'name',
-  //         position.opinion_type === 'YES' ? 'yes_price' : 'no_price',
-  //       ],
-  //     }
-  //   )
+  const { data: sellPosition, isLoading: sellPositionLoading } =
+    position.sell_order_id
+      ? useFrappeGetDocList('Orders', {
+          fields: [
+            'name',
+            'question',
+            'creation',
+            'amount',
+            'status',
+            'quantity',
+            'opinion_type',
+            'market_id',
+            'sell_order_id',
+          ],
+          filters: [
+            ['order_type', '=', 'SELL'],
+            ['name', '=', position.sell_order_id],
+            ['owner', '=', currentUser],
+          ],
+        })
+      : []
+
+  console.log('Position: ', position)
+
+  useEffect(() => {
+    if (position.sell_order_id && sellPosition?.length > 0) {
+      position = sellPosition[0]
+    }
+  }, [sellPosition])
 
   const { data: marketData, isLoading: marketDataLoading } =
     useFrappeGetDocList('Market', {

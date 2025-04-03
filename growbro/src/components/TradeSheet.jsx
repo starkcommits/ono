@@ -92,7 +92,10 @@ const TradeSheet = ({ market, tradePrice, choice, onClose, tradeAction }) => {
 
       console.log('90th:', orderData)
 
-      await createDoc('Orders', orderData)
+      const newSellOrder = await createDoc('Orders', orderData)
+      await updateDoc('Orders', market.name, {
+        sell_order_id: newSellOrder.name,
+      })
 
       toast.success(`Sell Order Placed.`)
 

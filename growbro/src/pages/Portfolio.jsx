@@ -11,6 +11,7 @@ import {
   XCircle,
   Plus,
   CloudLightning,
+  ShieldEllipsis,
 } from 'lucide-react'
 import { Line } from 'react-chartjs-2'
 import {
@@ -79,6 +80,7 @@ const Portfolio = () => {
         'quantity',
         'opinion_type',
         'market_id',
+        'sell_order_id',
       ],
       filters: [
         ['status', 'not in', ['SETTLED']],
@@ -363,11 +365,12 @@ const Portfolio = () => {
           {/* Trades List */}
           <div className="divide-y divide-gray-100">
             {activeTab === 'active'
-              ? Object.values(activeOrders)
-                .map((position) => (
+              ? Object.values(activeOrders).map((position) => (
                   <ActivePosition
                     key={position.name}
                     position={position}
+                    setActiveOrders={setActiveOrders}
+                    activeOrders={activeOrders}
                     handleTradeAction={handleTradeAction}
                   />
                 ))
