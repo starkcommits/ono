@@ -88,6 +88,16 @@ def signup():
         # Commit transaction
         frappe.db.commit()
         
+        wallet = frappe.new_doc("User Wallet")
+        wallet.user = user.name
+        wallet.balance = 0
+        wallet.is_active = 1
+
+        wallet.save(ignore_permissions=True)
+
+        # Commit transaction
+        frappe.db.commit()
+
         return success_response("User registered successfully as Trader")
     
     except Exception as e:
