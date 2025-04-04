@@ -20,7 +20,7 @@ import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
 import { useFrappeDeleteDoc } from 'frappe-react-sdk'
 
-const ActivePosition = ({ position, setActiveOrders, handleTradeAction }) => {
+const ActivePosition = ({ position, setActiveOrders, handleTradeClick }) => {
   const [market, setMarket] = useState({})
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
@@ -59,31 +59,49 @@ const ActivePosition = ({ position, setActiveOrders, handleTradeAction }) => {
   //   }
   // }, [sellPosition])
 
-  const { data: marketData, isLoading: marketDataLoading } =
-    useFrappeGetDocList('Market', {
-      /** SWR Configuration Options - Optional **/
-      fields: ['name', 'yes_price', 'no_price', 'closing_time'], // Specify the fields you want
-      filters: [['name', '=', position.market_id]],
-    })
+  // const { data: marketData, isLoading: marketDataLoading } =
+  //   useFrappeGetDocList('Market', {
+  //     /** SWR Configuration Options - Optional **/
+  //     fields: ['name', 'yes_price', 'no_price', 'closing_time'], // Specify the fields you want
+  //     filters: [['name', '=', position.market_id]],
+  //   })
 
-  useEffect(() => {
-    if (marketData?.length > 0) setMarket(marketData[0])
-  }, [marketDataLoading])
+  // useEffect(() => {
+  //   if (marketData?.length > 0) setMarket(marketData[0])
+  // }, [marketDataLoading])
 
   useFrappeEventListener('market_event', (updatedMarket) => {
-    console.log('Updated Market:', updatedMarket)
-    if (updatedMarket.name === market.name) {
-      setMarket((prev) => ({
-        ...prev,
-        yes_price:
-          position.opinion_type === 'YES'
-            ? updatedMarket.yes_price
-            : prev.yes_price,
-        no_price:
-          position.opinion_type === 'NO'
-            ? updatedMarket.no_price
-            : prev.no_price,
-      }))
+    console.log('Hello')
+    if (updatedMarket.name === position.market_id) {
+      console.log('Current: ', position.market_id)
+      console.log('Updated:', updatedMarket.name)
+    }
+    if (updatedMarket.name === position.market_id) {
+      setActiveOrders((prev) => {
+        const updatedActiveOrders = {
+          ...prev,
+          [position.name]: {
+            name: position.name,
+            question: position.question,
+            creation: position.creation,
+            amount: position.amount,
+            status: position.status,
+            quantity: position.quantity,
+            opinion_type: position.opinion_type,
+            market_id: position.market_id,
+            yes_price:
+              position.opinion_type === 'YES'
+                ? updatedMarket.yes_price
+                : position.yes_price,
+            no_price:
+              position.opinion_type === 'NO'
+                ? updatedMarket.no_price
+                : position.no_price,
+            sell_order_id: position.sell_order_id,
+          },
+        }
+        return updatedActiveOrders
+      })
     }
   })
 
@@ -109,8 +127,8 @@ const ActivePosition = ({ position, setActiveOrders, handleTradeAction }) => {
     }
   }
 
-  const handleMarketClick = (market) => {
-    navigate(`/event/${market.name}`)
+  const handleMarketClick = (position) => {
+    navigate(`/event/${position.market_id}`)
   }
 
   return (
@@ -118,27 +136,40 @@ const ActivePosition = ({ position, setActiveOrders, handleTradeAction }) => {
       <div className="flex items-center justify-between mb-2">
         <div className="flex gap-2 items-center">
           <h3 className="font-medium text-gray-900">{position.question}</h3>
-          {position.status === 'UNMATCHED' && (
-            <span className="bg-slate-200 text-slate-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
-              {' '}
-              {position.status}
-            </span>
-          )}
-          {position.status === 'PARTIAL' && (
+          {position.status === 'UNMATCHED' &&
+            position.order_type === 'SELL' && (
+              <span className="bg-yellow-100 text-yellow-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
+                EXITING
+              </span>
+            )}
+          {position.status === 'PARTIAL' && position.order_type === 'SELL' && (
             <span className="bg-yellow-100 text-yellow-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
-              {' '}
+              EXITING
+            </span>
+          )}
+          {position.status === 'UNMATCHED' && position.order_type === 'BUY' && (
+            <span className="bg-yellow-100 text-yellow-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
               {position.status}
             </span>
           )}
-          {position.status === 'MATCHED' && (
+          {position.status === 'PARTIAL' && position.order_type === 'BUY' && (
+            <span className="bg-yellow-100 text-yellow-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
+              {position.status}
+            </span>
+          )}
+          {position.status === 'MATCHED' && position.order_type === 'SELL' && (
             <span className="bg-emerald-100 text-emerald-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
-              {' '}
+              EXITED
+            </span>
+          )}
+          {position.status === 'MATCHED' && position.order_type === 'BUY' && (
+            <span className="bg-emerald-100 text-emerald-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
               {position.status}
             </span>
           )}
+
           {position.status === 'CANCELED' && (
             <span className="bg-red-100 text-red-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
-              {' '}
               {position.status}
             </span>
           )}
@@ -167,12 +198,12 @@ const ActivePosition = ({ position, setActiveOrders, handleTradeAction }) => {
               : 'bg-rose-100 text-rose-700'
           }`}
         >
-          {position.opinion_type.toUpperCase()}
+          {position.opinion_type}
         </span>
         <span>•</span>
         <span className="flex items-center">
           <Clock className="h-3.5 w-3.5 mr-1" />
-          End at {formatDate(market?.closing_time)}
+          End at {formatDate(position.closing_time)}
         </span>
       </div>
       <div className="grid grid-cols-3 gap-4 text-sm mb-4">
@@ -193,17 +224,16 @@ const ActivePosition = ({ position, setActiveOrders, handleTradeAction }) => {
           <div className="font-semibold text-gray-900">
             ₹
             {position.opinion_type === 'YES'
-              ? market?.yes_price
-              : market?.no_price}
+              ? String(position.yes_price)
+              : String(position.no_price)}
           </div>
         </div>
       </div>
-      {position.status !== 'EXITED' && position.status !== 'CANCELED' && (
+      {position.status !== 'CANCELED' && position.order_type === 'BUY' && (
         <div className="flex gap-2 w-full items-center justify-between">
           <div className="w-[50%]">
             {(position.status === 'PARTIAL' ||
-              position.status === 'UNMATCHED' ||
-              position.status === 'EXITING') && (
+              position.status === 'UNMATCHED') && (
               <Dialog open={isOpen} onOpenChange={setIsOpen}>
                 <DialogTrigger className="w-full">
                   <Button className="w-full bg-rose-50 text-rose-600 rounded-xl text-sm font-medium hover:bg-rose-100 transition-colors">
@@ -239,7 +269,18 @@ const ActivePosition = ({ position, setActiveOrders, handleTradeAction }) => {
             )}
             {position.status === 'MATCHED' && (
               <Button
-                onClick={() => handleTradeAction(position, 'SELL', market)}
+                onClick={() =>
+                  handleTradeClick(
+                    position.opinion_type === 'YES'
+                      ? position.yes_price
+                      : position.no_price,
+                    position.opinion_type,
+                    'SELL',
+                    position.market_id,
+                    position.quantity,
+                    position.name
+                  )
+                }
                 className="w-full bg-rose-50 text-rose-600 rounded-xl text-sm font-medium hover:bg-rose-100 transition-colors"
               >
                 <XCircle className="h-4 w-4" />
@@ -250,13 +291,57 @@ const ActivePosition = ({ position, setActiveOrders, handleTradeAction }) => {
 
           <Button
             onClick={() => {
-              handleMarketClick(market)
+              handleMarketClick(position)
             }}
             className="w-[50%] bg-blue-50 text-blue-600 rounded-xl text-sm font-medium hover:bg-blue-100 transition-colors"
           >
             <Plus className="h-4 w-4" />
             Invest More
           </Button>
+        </div>
+      )}
+      {position.status !== 'CANCELED' && position.order_type === 'SELL' && (
+        <div className="flex gap-2 w-full items-center justify-between">
+          <div className="flex flex-col gap-2 justify-center text-neutral-800 py-1.5 text-center text-md font-bold">
+            {`Qty ${position.filled_quantity}/${position.quantity} matched`}
+          </div>
+          <div className="w-[50%]">
+            {(position.status === 'PARTIAL' ||
+              position.status === 'UNMATCHED') && (
+              <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                <DialogTrigger className="w-full">
+                  <Button className="w-full bg-rose-50 text-rose-600 rounded-xl text-sm font-medium hover:bg-rose-100 transition-colors">
+                    <XCircle className="h-4 w-4" />
+                    Cancel Order
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="">
+                  <DialogHeader>
+                    <DialogTitle>Are you absolutely sure?</DialogTitle>
+                    <DialogDescription>
+                      This action cannot be undone. This will permanently delete
+                      your account and remove your data from our servers.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <DialogFooter>
+                    <Button
+                      className="bg-white hover:bg-white/90"
+                      variant="outline"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      className="bg-neutral-900 text-white hover:text-neutral-800 hover:bg-neutral-800/40"
+                      onClick={() => handleCancelOrder(position)}
+                    >
+                      Submit
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            )}
+          </div>
         </div>
       )}
     </div>

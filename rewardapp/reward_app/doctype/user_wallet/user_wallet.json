@@ -9,6 +9,8 @@
   "user",
   "column_break_asee",
   "balance",
+  "column_break_nazl",
+  "pin",
   "column_break_xtji",
   "is_active"
  ],
@@ -42,12 +44,21 @@
   {
    "fieldname": "column_break_xtji",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_nazl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "pin",
+   "fieldtype": "Int",
+   "label": "PIN"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-03-26 13:25:22.605332",
+ "modified": "2025-04-04 12:12:12.099624",
  "modified_by": "Administrator",
  "module": "Reward App",
  "name": "User Wallet",

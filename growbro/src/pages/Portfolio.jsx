@@ -49,9 +49,13 @@ ChartJS.register(
 const Portfolio = () => {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('active')
-  const [tradePrice, setTradePrice] = useState({})
-  const [selectedPosition, setSelectedPosition] = useState(null)
-  const [tradeAction, setTradeAction] = useState(null)
+  const [tradePrice, setTradePrice] = useState(null)
+  const [selectedChoice, setSelectedChoice] = useState(null)
+  const [selectedAction, setSelectedAction] = useState(null)
+  const [marketPrice, setMarketPrice] = useState(null)
+  const [marketId, setMarketId] = useState(null)
+  const [sellQuantity, setSellQuantity] = useState(null)
+  const [previousOrderId, setPreviousOrderId] = useState(null)
   const [showTradeSheet, setShowTradeSheet] = useState(false)
   const [activeOrders, setActiveOrders] = useState({})
   const [completedOrders, setCompletedOrders] = useState({})
@@ -77,13 +81,19 @@ const Portfolio = () => {
         'creation',
         'amount',
         'status',
+        'filled_quantity',
         'quantity',
         'opinion_type',
+        'closing_time',
+        'order_type',
         'market_id',
+        'yes_price',
+        'no_price',
         'sell_order_id',
       ],
       filters: [
         ['status', 'not in', ['SETTLED']],
+        ['sell_order_id', '=', ''],
         ['owner', '=', currentUser],
       ],
       orderBy: {
@@ -142,16 +152,12 @@ const Portfolio = () => {
 
   useFrappeEventListener('order_event', (updatedOrder) => {
     console.log('Updated Order:', updatedOrder)
-    setActiveOrders((prevOrders) => {
-      if (!prevOrders[updatedOrder.name]) return prevOrders // If order doesn't exist, return previous state
-
-      return {
-        ...prevOrders,
-        [updatedOrder.name]: {
-          ...prevOrders[updatedOrder.name], // Keep existing order data
-          status: updatedOrder.status, // Update status if it changes
-        },
+    setActiveOrders((prev) => {
+      const updatedActiveOrders = {
+        ...prev,
+        [updatedOrder.name]: updatedOrder,
       }
+      return updatedActiveOrders
     })
   })
 
@@ -253,17 +259,27 @@ const Portfolio = () => {
     },
   ]
 
-  const handleTradeAction = (position, action, market) => {
-    setSelectedPosition(position)
-    setTradeAction(action)
-    setTradePrice(market)
+  const handleTradeClick = (
+    marketPrice,
+    choice,
+    tradeAction,
+    marketId,
+    sellQuantity,
+    previousOrderId
+  ) => {
+    setSelectedChoice(choice)
+    setSelectedAction(tradeAction)
+    setMarketPrice(marketPrice)
+    setMarketId(marketId)
+    setSellQuantity(sellQuantity)
+    setPreviousOrderId(previousOrderId)
     setShowTradeSheet(true)
   }
 
   const handleTradeComplete = () => {
     setShowTradeSheet(false)
-    setSelectedPosition(null)
-    setTradeAction(null)
+    setSelectedChoice(null)
+    setSelectedAction(null)
   }
 
   return (
@@ -370,8 +386,7 @@ const Portfolio = () => {
                     key={position.name}
                     position={position}
                     setActiveOrders={setActiveOrders}
-                    activeOrders={activeOrders}
-                    handleTradeAction={handleTradeAction}
+                    handleTradeClick={handleTradeClick}
                   />
                 ))
               : Object.values(completedOrders).map((trade) => (
@@ -381,13 +396,15 @@ const Portfolio = () => {
         </div>
       </div>
 
-      {showTradeSheet && selectedPosition && (
+      {showTradeSheet && selectedChoice && (
         <TradeSheet
-          market={selectedPosition}
-          tradePrice={tradePrice}
-          choice={selectedPosition.opinion_type}
+          marketPrice={marketPrice}
+          choice={selectedChoice}
+          tradeAction={selectedAction}
           onClose={handleTradeComplete}
-          tradeAction={tradeAction}
+          marketId={marketId}
+          sellQuantity={sellQuantity}
+          previousOrderId={previousOrderId}
         />
       )}
     </div>

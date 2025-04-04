@@ -13,7 +13,28 @@ import {
   Plus,
   Accessibility,
   StethoscopeIcon,
+  CircleX,
+  Check,
 } from 'lucide-react'
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSeparator,
+  InputOTPSlot,
+} from '@/components/ui/input-otp'
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
+import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -26,11 +47,25 @@ import {
 } from '@/components/ui/dialog'
 import {
   useFrappeAuth,
+  useFrappeCreateDoc,
   useFrappeGetDoc,
   useFrappeGetDocList,
   useFrappeUpdateDoc,
 } from 'frappe-react-sdk'
 import toast from 'react-hot-toast'
+import EnterWalletPIN from '../components/EnterWalletPIN'
+import CreateWalletPIN from '../components/CreateWalletPIN'
+
+const formSchema = z.object({
+  pin: z
+    .string()
+    .length(4, 'PIN must be exactly 4 digits')
+    .regex(/^\d+$/, 'PIN must contain only digits'),
+  confirm_pin: z
+    .string()
+    .length(4, 'PIN must be exactly 4 digits')
+    .regex(/^\d+$/, 'PIN must contain only digits'),
+})
 
 const Wallet = () => {
   const navigate = useNavigate()
@@ -42,16 +77,15 @@ const Wallet = () => {
   const [userWithdrawals, setUserWithdrawals] = useState([])
   const [userDeposits, setUserDeposits] = useState([])
   const [open, setOpen] = useState(false)
-
   const { currentUser } = useFrappeAuth()
+  const { createDoc } = useFrappeCreateDoc()
+  const { updateDoc } = useFrappeUpdateDoc()
 
   const {
     data: userWalletData,
     isLoading: userWalletLoading,
     mutate: refetchWalletData,
   } = useFrappeGetDoc('User Wallet', currentUser)
-
-  const { updateDoc } = useFrappeUpdateDoc()
 
   const { data: transactionHistory, isLoading: transactionHistoryLoading } =
     activeTab === 'all' &&
@@ -162,27 +196,34 @@ const Wallet = () => {
     },
   ]
 
-  const handleQuickAmount = (value) => {
-    setAmount(value.toString())
-  }
-
-  const handleAddMoney = async () => {
-    // TODO: Implement payment gateway integration
+  async function handleAddMoney(data) {
     try {
-      console.log('Adding money:', amount)
       await updateDoc('User Wallet', currentUser, {
-        balance: userWallet.balance + parseFloat(amount),
+        balance: userWalletData.balance + parseFloat(amount),
+      })
+      await createDoc('Transaction Logs', {
+        user: currentUser,
+        transaction_amount: amount,
+        transaction_type: 'RECHARGE',
+        transaction_status: 'Success',
+        transaction_method: 'UPI',
       })
       toast.success(`${amount} added to your wallet.`, {
         top: 0,
         right: 0,
       })
+
+      setAmount(0)
       refetchWalletData()
       setOpen(false)
     } catch (err) {
       console.log(err)
       toast.error('Failed to add money in the wallet.')
     }
+  }
+
+  const handleQuickAmount = (value) => {
+    setAmount(value.toString())
   }
 
   const formatDate = (dateString) => {
@@ -295,36 +336,36 @@ const Wallet = () => {
               </button>
             </div> */}
 
-            <div className="w-full">
-              <Dialog open={open} onOpenChange={setOpen}>
-                <DialogTrigger className="w-full">
-                  <button
-                    disabled={!amount}
-                    className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-indigo-600 text-white font-medium rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-700 transition-colors"
-                  >
-                    <Plus className="h-5 w-5" />
-                    Add Money
-                  </button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Are you absolutely sure?</DialogTitle>
-                    <DialogDescription>
-                      Are you sure you want to add money in your wallet?
-                    </DialogDescription>
-                  </DialogHeader>
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger className="w-full">
+                <Button
+                  className="bg-secondary w-full hover:bg-secondary/90"
+                  disabled={!amount}
+                >
+                  Add Money
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>
+                    Are you sure you want to add money in your wallet?
+                  </DialogTitle>
+                  <DialogDescription>
+                    Press the button to confirm it.
+                  </DialogDescription>
+
                   <DialogFooter>
                     <Button
-                      disabled={!amount}
-                      className="bg-secondary hover:bg-secondary/90"
+                      type="submit"
                       onClick={handleAddMoney}
+                      className="bg-secondary hover:bg-secondary/90"
                     >
-                      Confirm
+                      Submit
                     </Button>
                   </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            </div>
+                </DialogHeader>
+              </DialogContent>
+            </Dialog>
           </div>
 
           {/* Transactions Section */}
@@ -371,14 +412,113 @@ const Wallet = () => {
               </button>
             </div>
 
-            {activeTab === 'all' &&
-              userHistory?.map((transaction) => {
-                console.log('Transaction:', transaction)
+            <div className="mb-20">
+              {activeTab === 'all' &&
+                userHistory?.map((transaction) => {
+                  console.log('Transaction:', transaction)
 
-                if (
-                  transaction.transaction_type === 'WITHDRAWAL' ||
-                  transaction.transaction_type === 'RECHARGE'
-                ) {
+                  if (
+                    transaction.transaction_type === 'WITHDRAWAL' ||
+                    transaction.transaction_type === 'RECHARGE'
+                  ) {
+                    return (
+                      <div
+                        key={transaction.name}
+                        className="divide-y divide-gray-100"
+                      >
+                        <div className="p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-3">
+                              <div
+                                className={`p-2 rounded-xl bg-emerald-50 text-emerald-600`}
+                              >
+                                {transaction.transaction_status ===
+                                'Success' ? (
+                                  <Check className="h-5 w-5 text-green-600" />
+                                ) : (
+                                  <CircleX className="h-5 w-5 text-red-600" />
+                                )}
+                              </div>
+                              <div>
+                                <div className="font-medium text-gray-900">
+                                  Money Added
+                                </div>
+                                <div className="text-sm text-gray-500">
+                                  {transaction.transaction_method}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className={`font-medium `}>
+                                {transaction.transaction_type === 'RECHARGE'
+                                  ? '+'
+                                  : '-'}
+                                ₹{transaction.transaction_amount}
+                              </div>
+                              <div className="flex items-center text-xs text-gray-500">
+                                <span className={'text-neutral-600'}>
+                                  {transaction.transaction_status}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {formatDate(transaction.creation)}
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  } else
+                    return (
+                      <div
+                        key={transaction.name}
+                        className="divide-y divide-gray-100"
+                      >
+                        <div className="p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-3">
+                              <div
+                                className={`p-2 rounded-xl bg-emerald-50 text-emerald-600`}
+                              >
+                                <ArrowDownLeft className="h-5 w-5" />
+                              </div>
+                              <div>
+                                <div className="font-medium text-gray-900">
+                                  {transaction.question}
+                                </div>
+                                <div className="text-sm text-gray-500">
+                                  {transaction.transaction_method}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className={`font-medium`}>
+                                {transaction.transaction_type === 'CREDIT'
+                                  ? '+'
+                                  : '-'}
+                                ₹{transaction.transaction_amount}
+                              </div>
+                              <div className="flex items-center text-xs text-gray-500">
+                                <span className={'text-neutral-600'}>
+                                  {transaction.transaction_status
+                                    .charAt(0)
+                                    .toUpperCase() +
+                                    transaction.transaction_status.slice(1)}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {formatDate(transaction.creation)}
+                          </div>
+                        </div>
+                      </div>
+                    )
+                })}
+
+              {activeTab === 'deposits' &&
+                userDeposits?.map((transaction) => {
+                  console.log('Transaction:', transaction)
                   return (
                     <div
                       key={transaction.name}
@@ -402,14 +542,11 @@ const Wallet = () => {
                             </div>
                           </div>
                           <div className="text-right">
-                            <div className={`font-medium `}>
-                              {transaction.transaction_type === 'CREDIT'
-                                ? '+'
-                                : '-'}
-                              ₹{transaction.transaction_amount}
+                            <div className={`font-medium`}>
+                              {'+'}₹{transaction.transaction_amount}
                             </div>
-                            <div className="flex items-center text-xs text-gray-500">
-                              <span className={'text-neutral-600'}>
+                            <div className="flex items-center text-xs text-neutral-600">
+                              <span className={''}>
                                 {transaction.transaction_status
                                   .charAt(0)
                                   .toUpperCase() +
@@ -424,7 +561,10 @@ const Wallet = () => {
                       </div>
                     </div>
                   )
-                } else
+                })}
+              {activeTab === 'withdrawals' &&
+                userWithdrawals?.map((transaction) => {
+                  console.log('Transaction:', transaction)
                   return (
                     <div
                       key={transaction.name}
@@ -436,11 +576,11 @@ const Wallet = () => {
                             <div
                               className={`p-2 rounded-xl bg-emerald-50 text-emerald-600`}
                             >
-                              <ArrowDownLeft className="h-5 w-5" />
+                              <ArrowUpRight className="h-5 w-5" />
                             </div>
                             <div>
                               <div className="font-medium text-gray-900">
-                                {transaction.question}
+                                Money Added
                               </div>
                               <div className="text-sm text-gray-500">
                                 {transaction.transaction_method}
@@ -449,13 +589,10 @@ const Wallet = () => {
                           </div>
                           <div className="text-right">
                             <div className={`font-medium`}>
-                              {transaction.transaction_type === 'CREDIT'
-                                ? '+'
-                                : '-'}
-                              ₹{transaction.transaction_amount}
+                              {'-'}₹{transaction.transaction_amount}
                             </div>
-                            <div className="flex items-center text-xs text-gray-500">
-                              <span className={'text-neutral-600'}>
+                            <div className="flex items-center text-xs text-neutral-600">
+                              <span className={''}>
                                 {transaction.transaction_status
                                   .charAt(0)
                                   .toUpperCase() +
@@ -470,100 +607,8 @@ const Wallet = () => {
                       </div>
                     </div>
                   )
-              })}
-
-            {activeTab === 'deposits' &&
-              userDeposits?.map((transaction) => {
-                console.log('Transaction:', transaction)
-                return (
-                  <div
-                    key={transaction.name}
-                    className="divide-y divide-gray-100"
-                  >
-                    <div className="p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className={`p-2 rounded-xl bg-emerald-50 text-emerald-600`}
-                          >
-                            <ArrowDownLeft className="h-5 w-5" />
-                          </div>
-                          <div>
-                            <div className="font-medium text-gray-900">
-                              Money Added
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              {transaction.transaction_method}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className={`font-medium`}>
-                            {'+'}₹{transaction.transaction_amount}
-                          </div>
-                          <div className="flex items-center text-xs text-neutral-600">
-                            <span className={''}>
-                              {transaction.transaction_status
-                                .charAt(0)
-                                .toUpperCase() +
-                                transaction.transaction_status.slice(1)}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {formatDate(transaction.creation)}
-                      </div>
-                    </div>
-                  </div>
-                )
-              })}
-            {activeTab === 'withdrawals' &&
-              userWithdrawals?.map((transaction) => {
-                console.log('Transaction:', transaction)
-                return (
-                  <div
-                    key={transaction.name}
-                    className="divide-y divide-gray-100"
-                  >
-                    <div className="p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className={`p-2 rounded-xl bg-emerald-50 text-emerald-600`}
-                          >
-                            <ArrowUpRight className="h-5 w-5" />
-                          </div>
-                          <div>
-                            <div className="font-medium text-gray-900">
-                              Money Added
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              {transaction.transaction_method}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className={`font-medium`}>
-                            {'-'}₹{transaction.transaction_amount}
-                          </div>
-                          <div className="flex items-center text-xs text-neutral-600">
-                            <span className={''}>
-                              {transaction.transaction_status
-                                .charAt(0)
-                                .toUpperCase() +
-                                transaction.transaction_status.slice(1)}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {formatDate(transaction.creation)}
-                      </div>
-                    </div>
-                  </div>
-                )
-              })}
+                })}
+            </div>
           </div>
         </div>
       </div>

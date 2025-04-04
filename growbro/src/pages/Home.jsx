@@ -129,22 +129,6 @@ const Home = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { currentUser, logout } = useFrappeAuth()
 
-  const { data: cardData } = useFrappeGetDoc('Number Card', 'T')
-  // Fetch the actual value
-  const {
-    data: cardValue,
-    error,
-    isValidating,
-  } = useFrappeGetCall(
-    'frappe.desk.doctype.number_card.number_card.get_result',
-    {
-      doc: cardData,
-      filters: {},
-    }
-  )
-
-  console.log('Data: ', cardValue)
-
   const [markets, setMarkets] = useState({})
 
   const { data: marketData, isLoading: marketDataLoading } =
@@ -158,6 +142,7 @@ const Home = () => {
         'status',
       ],
       filters: [['status', '=', 'OPEN']],
+      limit: 5,
     })
 
   const { data: userWallet, isLoading: userWalletLoading } = useFrappeGetDoc(

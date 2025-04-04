@@ -64,71 +64,16 @@ const EventDetails = () => {
     id
   )
 
-  console.log(market)
-
   useEffect(() => {
     setMarket(marketData)
   }, [marketData])
 
   // Listen for real-time updates
-  useFrappeEventListener('market_event', (updatedMarket) => {
-    if (updatedMarket.name === market.name) {
-      setMarket((prev) => ({ ...prev, ...updatedMarket }))
-    }
-  })
-
-  const probabilityData = {
-    labels: ['3:17 PM', '3:20 PM', '3:22 PM', '3:25 PM', '3:27 PM', '3:30 PM'],
-    datasets: [
-      {
-        fill: true,
-        label: 'Probability',
-        data: [50, 48, 52, 45, 35, 33],
-        borderColor: 'rgb(59, 130, 246)',
-        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-        tension: 0.4,
-      },
-    ],
-  }
-
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        enabled: true,
-        mode: 'index',
-        intersect: false,
-        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-        titleColor: '#1F2937',
-        bodyColor: '#1F2937',
-        borderColor: '#E5E7EB',
-        borderWidth: 1,
-      },
-    },
-    scales: {
-      x: {
-        grid: { display: false },
-        ticks: { color: '#6B7280', font: { size: 10 } },
-      },
-      y: {
-        min: 0,
-        max: 100,
-        grid: { color: '#F3F4F6' },
-        ticks: {
-          color: '#6B7280',
-          font: { size: 10 },
-          callback: (value) => `${value}%`,
-        },
-      },
-    },
-    interaction: {
-      mode: 'nearest',
-      axis: 'x',
-      intersect: false,
-    },
-  }
+  // useFrappeEventListener('market_event', (updatedMarket) => {
+  //   if (updatedMarket.name === market.name) {
+  //     setMarket((prev) => ({ ...prev, ...updatedMarket }))
+  //   }
+  // })
 
   const handleTradeClick = (choice, action) => {
     setSelectedChoice(choice)
@@ -253,10 +198,11 @@ const EventDetails = () => {
 
       {showTradeSheet && selectedChoice && (
         <TradeSheet
-          tradePrice={market}
+          marketPrice={selectedChoice === 'YES' ? market.yes_price : market.no_price}
           choice={selectedChoice}
           onClose={closeTradeSheet}
           tradeAction={selectedAction}
+          marketId={id}
         />
       )}
     </div>

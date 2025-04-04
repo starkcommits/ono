@@ -6,11 +6,18 @@ import { Slider } from '@/components/ui/slider'
 import OrderBook from './OrderBook'
 import toast from 'react-hot-toast'
 
-const TradeSheet = ({ market, tradePrice, choice, onClose, tradeAction }) => {
+const TradeSheet = ({
+  marketId,
+  marketPrice,
+  choice,
+  onClose,
+  tradeAction,
+  sellQuantity,
+  previousOrderId,
+}) => {
   const { createDoc, isLoading: createDocLoading } = useFrappeCreateDoc()
   const { updateDoc } = useFrappeUpdateDoc()
   const { id } = useParams()
-  const marketId = id ? id : market.market_id
 
   const sheetRef = useRef(null)
   const dragRef = useRef({
@@ -24,11 +31,9 @@ const TradeSheet = ({ market, tradePrice, choice, onClose, tradeAction }) => {
     isClosing: false,
     isDragging: false,
   })
-  const [price, setPrice] = useState(
-    choice === 'YES' ? tradePrice.yes_price : tradePrice.no_price
-  )
+  const [price, setPrice] = useState(marketPrice)
   const [quantity, setQuantity] = useState(
-    tradeAction === 'SELL' ? market.quantity : 10
+    tradeAction === 'SELL' ? sellQuantity : 10
   )
 
   const [isDragging, setIsDragging] = useState(false)
@@ -42,22 +47,14 @@ const TradeSheet = ({ market, tradePrice, choice, onClose, tradeAction }) => {
   const commission = 0.2
   const availableBalance = 214.86
 
-  // const orderBook = [
-  //   { price: 4.5, yesQty: 109, noQty: 80 },
-  //   { price: 5.5, yesQty: 78, noQty: 325 },
-  //   { price: 6.0, yesQty: 5, noQty: 168 },
-  // ]
-
   const handleConfirmBuy = async () => {
     try {
-      // Prepare the order data with specific fields
-
       const orderData = {
-        market_id: marketId, // Market ID from URL params
-        order_type: tradeAction, // You can adjust this if needed
-        quantity: quantity, // Quantity of the trade
-        opinion_type: choice, // 'YES' or 'NO'
-        amount: price, // Total amount of the trade
+        market_id: marketId,
+        order_type: tradeAction,
+        quantity: quantity,
+        opinion_type: choice,
+        amount: price,
       }
 
       await createDoc('Orders', orderData)
@@ -66,11 +63,6 @@ const TradeSheet = ({ market, tradePrice, choice, onClose, tradeAction }) => {
 
       onClose()
     } catch (err) {
-      // Close the sheet
-      // Handle any errors
-      // toast.error('Failed to create order', {
-      //   description: error || 'Please try again',
-      // })
       toast.error(`Error in placing buy order.`)
       console.error('Order creation error:', err)
     }
@@ -78,14 +70,12 @@ const TradeSheet = ({ market, tradePrice, choice, onClose, tradeAction }) => {
 
   const handleConfirmSell = async () => {
     try {
-      // Prepare the order data with specific fields
-
       const orderData = {
-        market_id: marketId, // Market ID from URL params
-        order_type: tradeAction, // You can adjust this if needed
-        quantity: quantity, // Quantity of the trade
-        opinion_type: market.opinion_type, // 'YES' or 'NO'
-        amount: price, // Total amount of the trade
+        market_id: marketId,
+        order_type: tradeAction,
+        quantity: quantity,
+        opinion_type: choice,
+        amount: price,
         filled_quantity: 0,
         status: 'UNMATCHED',
       }
@@ -93,19 +83,14 @@ const TradeSheet = ({ market, tradePrice, choice, onClose, tradeAction }) => {
       console.log('90th:', orderData)
 
       const newSellOrder = await createDoc('Orders', orderData)
-      await updateDoc('Orders', market.name, {
-        sell_order_id: newSellOrder.name,
+      await updateDoc('Orders', previousOrderId, {
+        sell_order_id: previousOrderId,
       })
 
       toast.success(`Sell Order Placed.`)
 
       onClose()
     } catch (err) {
-      // Close the sheet
-      // Handle any errors
-      // toast.error('Failed to create order', {
-      //   description: error || 'Please try again',
-      // })
       console.error('Order creation error:', err)
       toast.error(`Error in placing the order.`)
     }
@@ -231,9 +216,7 @@ const TradeSheet = ({ market, tradePrice, choice, onClose, tradeAction }) => {
             <div className="flex items-center justify-between mb-2">
               <span className="text-lg font-medium">Price</span>
               <div className="flex items-center">
-                <span className="text-lg font-medium">
-                  ₹ {price.toFixed(1)}
-                </span>
+                <span className="text-lg font-medium">₹{price}</span>
                 {/* <span className="text-sm text-gray-500 ml-2">
                   109 qty available
                 </span> */}
@@ -291,10 +274,10 @@ const TradeSheet = ({ market, tradePrice, choice, onClose, tradeAction }) => {
             </div>
           )}
           <div className="flex justify-between mb-4 text-lg">
-            <div>
+            {/* <div>
               <p className="text-gray-500">You put</p>
               <p className="font-medium">₹{totalCost.toFixed(1)}</p>
-            </div>
+            </div> */}
             {/* <div className="text-right">
               <p className="text-gray-500">You get</p>
               <p className="font-medium text-green-600">

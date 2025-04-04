@@ -59,6 +59,7 @@ const SignUp = () => {
       }, 1500)
     } catch (err) {
       toast.error(`Error occured in the registration process.`)
+      setIsLoading(false)
     }
   }
 

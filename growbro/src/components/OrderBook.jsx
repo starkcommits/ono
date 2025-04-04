@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 
 const OrderBook = ({ marketId }) => {
   const [orderBook, setOrderBook] = useState({})
+  console.log(marketId)
 
   const { data: orderBookData, isLoading: orderBookLoading } = useFrappeGetCall(
     'rewardapp.engine.get_available_quantity',

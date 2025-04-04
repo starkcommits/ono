@@ -17,7 +17,7 @@ const Layout = () => {
   return (
     <div>
       <Outlet />
-      <div className="mt-20">{currentUser && <Navbar items={navItems} />}</div>
+      <div className="">{currentUser && <Navbar items={navItems} />}</div>
     </div>
   )
 }
