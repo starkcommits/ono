@@ -93,78 +93,87 @@ const Wallet = () => {
     currentUser ? undefined : null
   )
 
-  const { data: transactionHistory, isLoading: transactionHistoryLoading } =
-    useFrappeGetDocList(
-      'Transaction Logs',
-      {
-        fields: [
-          'name',
-          'transaction_amount',
-          'transaction_type',
-          'question',
-          'creation',
-          'transaction_method',
-          'transaction_status',
-        ],
-        filters: [['owner', '=', currentUser]],
-        limit: 10,
-        orderBy: {
-          field: 'creation',
-          order: 'desc',
-        },
+  const {
+    data: transactionHistory,
+    isLoading: transactionHistoryLoading,
+    mutate: refetchTransactionHistory,
+  } = useFrappeGetDocList(
+    'Transaction Logs',
+    {
+      fields: [
+        'name',
+        'transaction_amount',
+        'transaction_type',
+        'question',
+        'creation',
+        'transaction_method',
+        'transaction_status',
+      ],
+      filters: [['owner', '=', currentUser]],
+      limit: 10,
+      orderBy: {
+        field: 'creation',
+        order: 'desc',
       },
-      activeTab === 'all' && currentUser ? undefined : null
-    )
+    },
+    activeTab === 'all' && currentUser ? undefined : null
+  )
 
-  const { data: depositsHistory, isLoading: depositsHistoryLoading } =
-    useFrappeGetDocList(
-      'Transaction Logs',
-      {
-        fields: [
-          'name',
-          'transaction_amount',
-          'transaction_type',
-          'creation',
-          'transaction_status',
-          'transaction_method',
-        ],
-        filters: [
-          ['owner', '=', currentUser],
-          ['transaction_type', '=', 'RECHARGE'],
-        ],
-        limit: 10,
-        orderBy: {
-          field: 'creation',
-          order: 'desc',
-        },
+  const {
+    data: depositsHistory,
+    isLoading: depositsHistoryLoading,
+    mutate: refetchDepositsHistory,
+  } = useFrappeGetDocList(
+    'Transaction Logs',
+    {
+      fields: [
+        'name',
+        'transaction_amount',
+        'transaction_type',
+        'creation',
+        'transaction_status',
+        'transaction_method',
+      ],
+      filters: [
+        ['owner', '=', currentUser],
+        ['transaction_type', '=', 'RECHARGE'],
+      ],
+      limit: 10,
+      orderBy: {
+        field: 'creation',
+        order: 'desc',
       },
-      activeTab === 'deposits' && currentUser ? undefined : null
-    )
+    },
+    activeTab === 'deposits' && currentUser ? undefined : null
+  )
 
-  const { data: withdrawalsHistory, isLoading: withdrawalsHistoryLoading } =
-    useFrappeGetDocList(
-      'Transaction Logs',
-      {
-        fields: [
-          'name',
-          'transaction_amount',
-          'transaction_type',
-          'creation',
-          'transaction_status',
-          'transaction_method',
-        ],
-        filters: [
-          ['owner', '=', currentUser],
-          ['transaction_type', '=', 'WITHDRAWAL'],
-        ],
-        limit: 10,
-        orderBy: {
-          field: 'creation',
-          order: 'desc',
-        },
+  const {
+    data: withdrawalsHistory,
+    isLoading: withdrawalsHistoryLoading,
+    mutate: refetchWithdrawalsHistory,
+  } = useFrappeGetDocList(
+    'Transaction Logs',
+    {
+      fields: [
+        'name',
+        'transaction_amount',
+        'transaction_type',
+        'creation',
+        'transaction_status',
+        'transaction_method',
+      ],
+      filters: [
+        ['owner', '=', currentUser],
+        ['transaction_type', '=', 'WITHDRAWAL'],
+      ],
+      limit: 10,
+      orderBy: {
+        field: 'creation',
+        order: 'desc',
       },
-      activeTab === 'withdrawals' && currentUser ? undefined : null
-    )
+    },
+    activeTab === 'withdrawals' && currentUser ? undefined : null
+  )
 
   useEffect(() => {
     setUserHistory(transactionHistory)
@@ -228,6 +237,11 @@ const Wallet = () => {
 
       setAmount(0)
       refetchWalletData()
+      activeTab === 'all'
+        ? refetchTransactionHistory()
+        : activeTab === 'deposits'
+        ? refetchDepositsHistory()
+        : refetchWithdrawalsHistory()
       setOpen(false)
     } catch (err) {
       console.log(err)

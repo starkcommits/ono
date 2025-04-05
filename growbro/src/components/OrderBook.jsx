@@ -30,7 +30,7 @@ const OrderBook = ({ marketId }) => {
 
   console.log('Message: ', orderBookData?.message)
 
-  useFrappeEventListener('order_', (order) => {
+  useFrappeEventListener('order_book_event', (order) => {
     console.log('Received Order:', order)
     if (order.market_id !== marketId) return
 

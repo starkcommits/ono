@@ -16,6 +16,7 @@ const TradeSheet = ({
   previousOrderId,
   refetchActiveOrders,
 }) => {
+  console.log('Refetch: ', refetchActiveOrders)
   const { createDoc, isLoading: createDocLoading } = useFrappeCreateDoc()
   const { updateDoc } = useFrappeUpdateDoc()
   const { id } = useParams()
@@ -83,9 +84,10 @@ const TradeSheet = ({
 
       console.log('90th:', orderData)
 
-      await createDoc('Orders', orderData)
+      const newSellOrder = await createDoc('Orders', orderData)
+      console.log('sell order', newSellOrder)
       await updateDoc('Orders', previousOrderId, {
-        sell_order_id: previousOrderId,
+        sell_order_id: newSellOrder.name,
       })
       refetchActiveOrders()
 
