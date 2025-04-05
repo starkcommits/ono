@@ -48,6 +48,7 @@ import {
 import {
   useFrappeAuth,
   useFrappeCreateDoc,
+  useFrappeGetCall,
   useFrappeGetDoc,
   useFrappeGetDocList,
   useFrappeUpdateDoc,
@@ -94,6 +95,14 @@ const Wallet = () => {
   )
 
   const {
+    data: total,
+    isLoading: totalLoading,
+    mutate: refetchTotal,
+  } = useFrappeGetCall('rewardapp.wallet.get_deposit_and_withdrawal')
+
+  console.log('total: ', total)
+
+  const {
     data: transactionHistory,
     isLoading: transactionHistoryLoading,
     mutate: refetchTransactionHistory,
@@ -136,7 +145,7 @@ const Wallet = () => {
       ],
       filters: [
         ['owner', '=', currentUser],
-        ['transaction_type', '=', 'RECHARGE'],
+        ['transaction_type', '=', 'Recharge'],
       ],
       limit: 10,
       orderBy: {
@@ -164,7 +173,7 @@ const Wallet = () => {
       ],
       filters: [
         ['owner', '=', currentUser],
-        ['transaction_type', '=', 'WITHDRAWAL'],
+        ['transaction_type', '=', 'Withdrawal'],
       ],
       limit: 10,
       orderBy: {
@@ -226,7 +235,7 @@ const Wallet = () => {
       await createDoc('Transaction Logs', {
         user: currentUser,
         transaction_amount: amount,
-        transaction_type: 'RECHARGE',
+        transaction_type: 'Recharge',
         transaction_status: 'Success',
         transaction_method: 'UPI',
       })
@@ -236,6 +245,7 @@ const Wallet = () => {
       })
 
       setAmount(0)
+      refetchTotal()
       refetchWalletData()
       activeTab === 'all'
         ? refetchTransactionHistory()
@@ -292,11 +302,25 @@ const Wallet = () => {
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <div className="text-white/80 mb-1">Total Deposits</div>
-                <div className="text-white font-semibold"></div>
+                <div className="text-white font-semibold">
+                  {total?.message?.reduce((acc, value) => {
+                    if (value.transaction_type === 'Recharge') {
+                      return acc + value.total_amount
+                    }
+                    return acc
+                  }, 0)}
+                </div>
               </div>
               <div>
                 <div className="text-white/80 mb-1">Total Withdrawals</div>
-                <div className="text-white font-semibold">₹3,765.44</div>
+                <div className="text-white font-semibold">
+                  {total?.message?.reduce((acc, value) => {
+                    if (value.transaction_type === 'Withdrawal') {
+                      return acc + value.total_amount
+                    }
+                    return acc
+                  }, 0)}
+                </div>
               </div>
             </div>
           </div>
@@ -445,8 +469,8 @@ const Wallet = () => {
                   console.log('Transaction:', transaction)
 
                   if (
-                    transaction.transaction_type === 'WITHDRAWAL' ||
-                    transaction.transaction_type === 'RECHARGE'
+                    transaction.transaction_type === 'Withdrawal' ||
+                    transaction.transaction_type === 'Recharge'
                   ) {
                     return (
                       <div
@@ -477,7 +501,7 @@ const Wallet = () => {
                             </div>
                             <div className="text-right">
                               <div className={`font-medium `}>
-                                {transaction.transaction_type === 'RECHARGE'
+                                {transaction.transaction_type === 'Recharge'
                                   ? '+'
                                   : '-'}
                                 ₹{transaction.transaction_amount}

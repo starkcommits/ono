@@ -87,7 +87,7 @@ const Portfolio = () => {
       ],
       filters: [
         ['status', 'not in', ['SETTLED']],
-        ['sell_order_id', '=', ''],
+        ['linked_order_id', '=', ''],
         ['owner', '=', currentUser],
       ],
       orderBy: {
@@ -132,11 +132,7 @@ const Portfolio = () => {
   }
 
   useEffect(() => {
-    if (
-      !activeOrdersLoading &&
-      activeOrdersData?.length > 0 &&
-      Object.keys(activeOrders).length === 0
-    ) {
+    if (!activeOrdersLoading && activeOrdersData?.length > 0) {
       const activeOrdersMap = activeOrdersData.reduce((acc, order) => {
         acc[order.name] = order // ✅ Store as { "market_name": marketData }
         return acc

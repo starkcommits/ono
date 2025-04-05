@@ -57,6 +57,7 @@ const TradeSheet = ({
         quantity: quantity,
         opinion_type: choice,
         amount: price,
+        linked_order_id: '',
       }
 
       await createDoc('Orders', orderData)
@@ -80,6 +81,7 @@ const TradeSheet = ({
         amount: price,
         filled_quantity: 0,
         status: 'UNMATCHED',
+        linked_order_id: previousOrderId,
       }
 
       console.log('90th:', orderData)
@@ -87,9 +89,12 @@ const TradeSheet = ({
       const newSellOrder = await createDoc('Orders', orderData)
       console.log('sell order', newSellOrder)
       await updateDoc('Orders', previousOrderId, {
-        sell_order_id: newSellOrder.name,
+        linked_order_id: newSellOrder.name,
       })
-      refetchActiveOrders()
+      setTimeout(() => {
+        console.log('Executing refetch')
+        refetchActiveOrders()
+      }, 500)
 
       toast.success(`Sell Order Placed.`)
 
