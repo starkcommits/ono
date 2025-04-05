@@ -109,7 +109,7 @@ def update_order():
         # # Save the updated order
         order.save(ignore_permissions=True)
         frappe.db.commit()
-        if data.status = "CANCELLED":
+        if data.status == "CANCELED":
             order_book_data["quantity"] = -(order.quantity - data.filled_quantity)
         else:
             order_book_data["quantity"] = - data.filled_quantity
@@ -250,7 +250,8 @@ def close_market():
             "closing_time": doc.closing_time
         }
         
-        frappe.publish_realtime("market_event",update_data,user=frappe.session.user)}
+        frappe.publish_realtime("market_event",update_data,user=frappe.session.user)
+        
         return {
             "status":"success","message":"Market closed"
         }
