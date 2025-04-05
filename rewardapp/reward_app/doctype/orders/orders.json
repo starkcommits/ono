@@ -19,7 +19,8 @@
   "opinion_type",
   "amount",
   "sell_order_id",
-  "market_status"
+  "market_status",
+  "parent_order_id"
  ],
  "fields": [
   {
@@ -107,11 +108,17 @@
    "fieldname": "market_status",
    "fieldtype": "Read Only",
    "label": "Market Status"
+  },
+  {
+   "fieldname": "parent_order_id",
+   "fieldtype": "Link",
+   "label": "Parent Order ID",
+   "options": "Orders"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-04-05 11:42:25.393309",
+ "modified": "2025-04-05 15:23:47.197627",
  "modified_by": "Administrator",
  "module": "Reward App",
  "name": "Orders",

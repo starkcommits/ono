@@ -446,3 +446,14 @@ def get_available_quantity(market_id):
             res[amount_key]["noQty"] = temp.total_available_quantity
 
     return res if res else {}
+
+@frappe.whitelist(allow_guest=True)
+def get_open_buy_orders_without_active_sell():
+    result = frappe.db.sql("""
+        SELECT b.*
+        FROM `tabOrders` b
+        LEFT JOIN `tabOrders` s 
+            ON b.sell_order_id = s.name AND s.status != 'CANCELED'
+        WHERE b.order_type = 'BUY' AND s.name IS NULL
+    """, as_dict=True)
+    return result
