@@ -92,3 +92,25 @@ def update_wallet():
     except Exception as e:
         frappe.log_error(f"Wallet update failed:", f"{str(e)}")
         return {"status": "error", "message": str(e)}
+
+@frappe.whitelist(allow_guest=True)
+def get_deposit_and_withdrawal():
+    try:
+        current_user = frappe.session.user
+        query = """
+            SELECT 
+                user,
+                transaction_type,
+                SUM(CAST(transaction_amount AS DECIMAL(18,2))) AS total_amount
+            FROM `tabTransaction Logs`
+            WHERE transaction_type IN ('Recharge', 'Withdrawal')
+            AND user = %s
+            GROUP BY transaction_type
+        """
+        results = frappe.db.sql(query, (current_user,), as_dict=True)
+        return results
+    except Exception as e:
+        return {
+            "error":"Error in total deposit and withdrawal calculation",
+            "message":f"{str(e)}"
+        }

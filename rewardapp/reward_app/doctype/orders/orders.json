@@ -1,142 +1,149 @@
 {
- "actions": [],
- "allow_rename": 1,
- "autoname": "format:ORD_ONO_{######}",
- "creation": "2025-03-26 12:50:58.116812",
- "doctype": "DocType",
- "engine": "InnoDB",
- "field_order": [
-  "market_id",
-  "question",
-  "status",
-  "order_type",
-  "closing_time",
-  "yes_price",
-  "no_price",
-  "column_break_spdz",
-  "quantity",
-  "filled_quantity",
-  "opinion_type",
-  "amount",
-  "sell_order_id"
- ],
- "fields": [
-  {
-   "fieldname": "quantity",
-   "fieldtype": "Int",
-   "label": "Quantity"
-  },
-  {
-   "default": "0",
-   "fieldname": "filled_quantity",
-   "fieldtype": "Int",
-   "label": "Filled Quantity"
-  },
-  {
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Status",
-   "options": "UNMATCHED\nMATCHED\nPARTIAL\nCANCELED\nSETTLED"
-  },
-  {
-   "fieldname": "market_id",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Market ID",
-   "options": "Market",
-   "reqd": 1
-  },
-  {
-   "fetch_from": "market_id.question",
-   "fieldname": "question",
-   "fieldtype": "Read Only",
-   "label": "Question"
-  },
-  {
-   "fieldname": "column_break_spdz",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "order_type",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Order Type",
-   "options": "SELL\nBUY"
-  },
-  {
-   "fieldname": "opinion_type",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Opinion Type",
-   "options": "YES\nNO"
-  },
-  {
-   "fieldname": "amount",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Amount"
-  },
-  {
-   "fetch_from": "market_id.closing_time",
-   "fieldname": "closing_time",
-   "fieldtype": "Read Only",
-   "label": "Closing Time"
-  },
-  {
-   "fieldname": "sell_order_id",
-   "fieldtype": "Link",
-   "label": "Sell Order ID",
-   "options": "Orders"
-  },
-  {
-   "fetch_from": "market_id.yes_price",
-   "fieldname": "yes_price",
-   "fieldtype": "Read Only",
-   "label": "Yes Price"
-  },
-  {
-   "fetch_from": "market_id.no_price",
-   "fieldname": "no_price",
-   "fieldtype": "Read Only",
-   "label": "No Price"
-  }
- ],
- "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2025-04-04 17:22:03.915058",
- "modified_by": "Administrator",
- "module": "Reward App",
- "name": "Orders",
- "naming_rule": "Expression",
- "owner": "Administrator",
- "permissions": [
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "System Manager",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Trader",
-   "share": 1,
-   "write": 1
-  }
- ],
- "sort_field": "modified",
- "sort_order": "DESC",
- "states": []
+  "actions": [],
+  "allow_rename": 1,
+  "autoname": "format:ORD_ONO_{######}",
+  "creation": "2025-03-26 12:50:58.116812",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "market_id",
+    "question",
+    "status",
+    "order_type",
+    "closing_time",
+    "yes_price",
+    "no_price",
+    "column_break_spdz",
+    "quantity",
+    "filled_quantity",
+    "opinion_type",
+    "amount",
+    "sell_order_id",
+    "market_status"
+  ],
+  "fields": [
+    {
+      "fieldname": "quantity",
+      "fieldtype": "Int",
+      "label": "Quantity"
+    },
+    {
+      "default": "0",
+      "fieldname": "filled_quantity",
+      "fieldtype": "Int",
+      "label": "Filled Quantity"
+    },
+    {
+      "fieldname": "status",
+      "fieldtype": "Select",
+      "in_list_view": 1,
+      "label": "Status",
+      "options": "UNMATCHED\nMATCHED\nPARTIAL\nCANCELED\nSETTLED"
+    },
+    {
+      "fieldname": "market_id",
+      "fieldtype": "Link",
+      "in_list_view": 1,
+      "label": "Market ID",
+      "options": "Market",
+      "reqd": 1
+    },
+    {
+      "fetch_from": "market_id.question",
+      "fieldname": "question",
+      "fieldtype": "Read Only",
+      "label": "Question"
+    },
+    {
+      "fieldname": "column_break_spdz",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "order_type",
+      "fieldtype": "Select",
+      "in_list_view": 1,
+      "label": "Order Type",
+      "options": "SELL\nBUY"
+    },
+    {
+      "fieldname": "opinion_type",
+      "fieldtype": "Select",
+      "in_list_view": 1,
+      "label": "Opinion Type",
+      "options": "YES\nNO"
+    },
+    {
+      "fieldname": "amount",
+      "fieldtype": "Float",
+      "in_list_view": 1,
+      "label": "Amount"
+    },
+    {
+      "fetch_from": "market_id.closing_time",
+      "fieldname": "closing_time",
+      "fieldtype": "Read Only",
+      "label": "Closing Time"
+    },
+    {
+      "fieldname": "sell_order_id",
+      "fieldtype": "Link",
+      "label": "Sell Order ID",
+      "options": "Orders"
+    },
+    {
+      "fetch_from": "market_id.yes_price",
+      "fieldname": "yes_price",
+      "fieldtype": "Read Only",
+      "label": "Yes Price"
+    },
+    {
+      "fetch_from": "market_id.no_price",
+      "fieldname": "no_price",
+      "fieldtype": "Read Only",
+      "label": "No Price"
+    },
+    {
+      "fetch_from": "market_id.status",
+      "fieldname": "market_status",
+      "fieldtype": "Read Only",
+      "label": "Market Status"
+    }
+  ],
+  "index_web_pages_for_search": 1,
+  "links": [],
+  "modified": "2025-04-05 11:42:25.393309",
+  "modified_by": "Administrator",
+  "module": "Reward App",
+  "name": "Orders",
+  "naming_rule": "Expression",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "System Manager",
+      "share": 1,
+      "write": 1
+    },
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Trader",
+      "share": 1,
+      "write": 1
+    }
+  ],
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "states": []
 }
