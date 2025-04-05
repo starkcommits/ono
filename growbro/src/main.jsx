@@ -20,14 +20,6 @@ const getSiteName = () => {
 
 createRoot(document.getElementById('root')).render(
   <FrappeProvider
-    swrConfig={{
-      // This creates a new Map instance for each request, effectively disabling shared caching
-      provider: () => new Map(),
-      keepPreviousData: false,
-      revalidateOnMount: true,
-      revalidateOnFocus: false,
-      // Ensure data is always fetched from the network
-    }}
     socketPort={import.meta.env.VITE_SOCKET_PORT}
     siteName={getSiteName()}
   >

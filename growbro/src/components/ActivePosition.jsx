@@ -20,7 +20,12 @@ import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
 import { useFrappeDeleteDoc } from 'frappe-react-sdk'
 
-const ActivePosition = ({ position, setActiveOrders, handleTradeClick }) => {
+const ActivePosition = ({
+  position,
+  setActiveOrders,
+  handleTradeClick,
+  refetchActiveOrders,
+}) => {
   const [market, setMarket] = useState({})
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)

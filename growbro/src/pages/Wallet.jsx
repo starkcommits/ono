@@ -81,77 +81,90 @@ const Wallet = () => {
   const { createDoc } = useFrappeCreateDoc()
   const { updateDoc } = useFrappeUpdateDoc()
 
+  console.log(currentUser)
+
   const {
     data: userWalletData,
     isLoading: userWalletLoading,
     mutate: refetchWalletData,
-  } = useFrappeGetDoc('User Wallet', currentUser)
+  } = useFrappeGetDoc(
+    'User Wallet',
+    currentUser,
+    currentUser ? undefined : null
+  )
 
   const { data: transactionHistory, isLoading: transactionHistoryLoading } =
-    activeTab === 'all' &&
-    useFrappeGetDocList('Transaction Logs', {
-      fields: [
-        'name',
-        'transaction_amount',
-        'transaction_type',
-        'question',
-        'creation',
-        'transaction_method',
-        'transaction_status',
-      ],
-      filters: [['owner', '=', currentUser]],
-      limit: 10,
-      orderBy: {
-        field: 'creation',
-        order: 'desc',
+    useFrappeGetDocList(
+      'Transaction Logs',
+      {
+        fields: [
+          'name',
+          'transaction_amount',
+          'transaction_type',
+          'question',
+          'creation',
+          'transaction_method',
+          'transaction_status',
+        ],
+        filters: [['owner', '=', currentUser]],
+        limit: 10,
+        orderBy: {
+          field: 'creation',
+          order: 'desc',
+        },
       },
-    })
+      activeTab === 'all' && currentUser ? undefined : null
+    )
 
   const { data: depositsHistory, isLoading: depositsHistoryLoading } =
-    activeTab === 'deposits' &&
-    useFrappeGetDocList('Transaction Logs', {
-      fields: [
-        'name',
-        'transaction_amount',
-        'transaction_type',
-        'creation',
-        'transaction_status',
-        'transaction_method',
-      ],
-      filters: [
-        ['owner', '=', currentUser],
-        ['transaction_type', '=', 'RECHARGE'],
-      ],
-      limit: 10,
-      orderBy: {
-        field: 'creation',
-        order: 'desc',
+    useFrappeGetDocList(
+      'Transaction Logs',
+      {
+        fields: [
+          'name',
+          'transaction_amount',
+          'transaction_type',
+          'creation',
+          'transaction_status',
+          'transaction_method',
+        ],
+        filters: [
+          ['owner', '=', currentUser],
+          ['transaction_type', '=', 'RECHARGE'],
+        ],
+        limit: 10,
+        orderBy: {
+          field: 'creation',
+          order: 'desc',
+        },
       },
-    })
+      activeTab === 'deposits' && currentUser ? undefined : null
+    )
 
   const { data: withdrawalsHistory, isLoading: withdrawalsHistoryLoading } =
-    activeTab === 'withdrawals' &&
-    useFrappeGetDocList('Transaction Logs', {
-      fields: [
-        'name',
-        'transaction_amount',
-        'transaction_type',
-        'creation',
-        'transaction_status',
-        'transaction_method',
-      ],
-      filters: [
-        ['owner', '=', currentUser],
-        ['transaction_type', '=', 'WITHDRAWAL'],
-      ],
-      limit: 10,
-      orderBy: {
-        field: 'creation',
-        order: 'desc',
+    useFrappeGetDocList(
+      'Transaction Logs',
+      {
+        fields: [
+          'name',
+          'transaction_amount',
+          'transaction_type',
+          'creation',
+          'transaction_status',
+          'transaction_method',
+        ],
+        filters: [
+          ['owner', '=', currentUser],
+          ['transaction_type', '=', 'WITHDRAWAL'],
+        ],
+        limit: 10,
+        orderBy: {
+          field: 'creation',
+          order: 'desc',
+        },
       },
-    })
-
-  console.log('Deposits: ', depositsHistory)
+      activeTab === 'withdrawals' && currentUser ? undefined : null
+    )
 
   useEffect(() => {
     setUserHistory(transactionHistory)

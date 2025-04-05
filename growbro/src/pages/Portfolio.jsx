@@ -59,22 +59,15 @@ const Portfolio = () => {
   const [showTradeSheet, setShowTradeSheet] = useState(false)
   const [activeOrders, setActiveOrders] = useState({})
   const [completedOrders, setCompletedOrders] = useState({})
-  const { currentUser } = useFrappeAuth()
+  const { currentUser, isLoading } = useFrappeAuth()
 
-  const filters =
-    activeTab === 'active'
-      ? [
-          ['status', '!=', 'SETTLED'],
-          ['owner', '=', currentUser],
-        ]
-      : [
-          ['status', '=', 'SETTLED'],
-          ['owner', '=', currentUser],
-        ]
-
-  const { data: activeOrdersData, isLoading: activeOrdersLoading } =
-    activeTab === 'active' &&
-    useFrappeGetDocList('Orders', {
+  const {
+    data: activeOrdersData,
+    isLoading: activeOrdersLoading,
+    mutate: refetchActiveOrders,
+  } = useFrappeGetDocList(
+    'Orders',
+    {
       fields: [
         'name',
         'question',
@@ -82,6 +75,7 @@ const Portfolio = () => {
         'amount',
         'status',
         'filled_quantity',
+        'owner',
         'quantity',
         'opinion_type',
         'closing_time',
@@ -100,7 +94,11 @@ const Portfolio = () => {
         field: 'creation',
         order: 'desc',
       },
-    })
+    },
+    currentUser ? undefined : null
+  )
+
+  console.log(activeOrdersData)
 
   // const { data: completedOrdersData, isLoading: completedOrdersLoading } =
   //   activeTab === 'completed' &&
@@ -121,10 +119,13 @@ const Portfolio = () => {
   //   })
 
   const { data: completedOrdersData, isLoading: completedOrdersLoading } =
-    activeTab === 'completed' &&
-    useFrappeGetCall('rewardapp.engine.get_marketwise_transaction_summary', {
-      fields: ['*'],
-    })
+    useFrappeGetCall(
+      'rewardapp.engine.get_marketwise_transaction_summary',
+      {
+        fields: ['*'],
+      },
+      activeTab === 'completed' ? undefined : null
+    )
 
   if (!completedOrdersLoading) {
     console.log('Completed :', completedOrdersData?.message)
@@ -142,7 +143,7 @@ const Portfolio = () => {
       }, {})
       setActiveOrders(activeOrdersMap)
     }
-  }, [activeOrdersLoading])
+  }, [activeOrdersData])
 
   useEffect(() => {
     if (!completedOrdersLoading) {
@@ -405,6 +406,7 @@ const Portfolio = () => {
           marketId={marketId}
           sellQuantity={sellQuantity}
           previousOrderId={previousOrderId}
+          refetchActiveOrders={refetchActiveOrders}
         />
       )}
     </div>

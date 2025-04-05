@@ -162,7 +162,7 @@ const Home = () => {
       }, {})
       setMarkets(marketMap)
     }
-  }, [marketDataLoading]) // Depend only on loading state
+  }, [marketData]) // Depend only on loading state
 
   useFrappeEventListener('market_event', (updatedMarket) => {
     console.log('Updated Market:', updatedMarket)

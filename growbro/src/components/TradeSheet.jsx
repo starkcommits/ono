@@ -14,6 +14,7 @@ const TradeSheet = ({
   tradeAction,
   sellQuantity,
   previousOrderId,
+  refetchActiveOrders,
 }) => {
   const { createDoc, isLoading: createDocLoading } = useFrappeCreateDoc()
   const { updateDoc } = useFrappeUpdateDoc()
@@ -82,10 +83,11 @@ const TradeSheet = ({
 
       console.log('90th:', orderData)
 
-      const newSellOrder = await createDoc('Orders', orderData)
+      await createDoc('Orders', orderData)
       await updateDoc('Orders', previousOrderId, {
         sell_order_id: previousOrderId,
       })
+      refetchActiveOrders()
 
       toast.success(`Sell Order Placed.`)
 

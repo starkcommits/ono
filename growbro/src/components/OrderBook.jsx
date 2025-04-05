@@ -30,7 +30,7 @@ const OrderBook = ({ marketId }) => {
 
   console.log('Message: ', orderBookData?.message)
 
-  useFrappeEventListener('order_event', (order) => {
+  useFrappeEventListener('order_', (order) => {
     console.log('Received Order:', order)
     if (order.market_id !== marketId) return
 
@@ -50,64 +50,17 @@ const OrderBook = ({ marketId }) => {
         updatedOrderBook[priceKey] = { price: priceKey, yesQty: 0, noQty: 0 }
       }
 
-      const orderEntry = updatedOrderBook[priceKey]
-
-      switch (order.status) {
-        case 'UNMATCHED':
-        case 'EXITING':
-          console.log(`Adding unmatched quantity at price ${priceKey}`)
-          orderEntry.yesQty += isYesOrder ? remainingQty : 0
-          orderEntry.noQty += isYesOrder ? 0 : remainingQty
-          break
-
-        case 'PARTIAL':
-          console.log(`Updating partial order at price ${priceKey}`)
-          orderEntry.yesQty = isYesOrder ? remainingQty : orderEntry.yesQty
-          orderEntry.noQty = isYesOrder ? orderEntry.noQty : remainingQty
-          break
-
-        case 'MATCHED':
-        case 'EXITED':
-          console.log(`Removing matched quantity at price ${priceKey}`)
-          orderEntry.yesQty = isYesOrder
-            ? Math.max(0, orderEntry.yesQty - order.filled_quantity)
-            : orderEntry.yesQty
-          orderEntry.noQty = isYesOrder
-            ? orderEntry.noQty
-            : Math.max(0, orderEntry.noQty - order.filled_quantity)
-          break
-
-        case 'CANCELED':
-          console.log(`Cancelling order at price ${priceKey}`)
-          orderEntry.yesQty = Math.max(
-            0,
-            orderEntry.yesQty - (isYesOrder ? remainingQty : 0)
-          )
-          orderEntry.noQty = Math.max(
-            0,
-            orderEntry.noQty - (isYesOrder ? 0 : remainingQty)
-          )
-          break
+      updatedOrderBook[priceKey] = {
+        price: priceKey,
+        yesQty:
+          order.opinion_type === 'YES'
+            ? updatedOrderBook[priceKey].yesQty + order.quantity
+            : updatedOrderBook[priceKey].yesQty,
+        noQty:
+          order.opinion_type === 'NO'
+            ? updatedOrderBook[priceKey].noQty + order.quantity
+            : updatedOrderBook[priceKey].noQty,
       }
-
-      // Handle SELL orders separately
-      if (order.order_type === 'SELL') {
-        console.log(`Processing SELL order at price ${priceKey}`)
-        orderEntry.yesQty = isYesOrder
-          ? Math.max(0, orderEntry.yesQty - order.quantity)
-          : orderEntry.yesQty
-        orderEntry.noQty = isYesOrder
-          ? orderEntry.noQty
-          : Math.max(0, orderEntry.noQty - order.quantity)
-      }
-
-      // If both YES and NO quantities reach zero, remove the price level
-      if (orderEntry.yesQty <= 0 && orderEntry.noQty <= 0) {
-        console.log(`Removing empty price level ${priceKey}`)
-        delete updatedOrderBook[priceKey]
-      }
-
-      console.log('Updated OrderBook:', updatedOrderBook)
 
       return updatedOrderBook
     })
