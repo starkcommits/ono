@@ -7,7 +7,12 @@ def order(doc, method):
     """Send order from Frappe to Matching Engine."""
     user_id = frappe.session.user
     total_amount = doc.amount * doc.quantity  # Ensure total_amount is always defined
-    
+
+    order_book_data={
+        "market_id":doc.market_id,
+        "quantity":doc.quantity
+    }
+
     if doc.order_type=="BUY":
         wallet = frappe.db.sql("""
             SELECT name, balance FROM `tabUser Wallet`
@@ -21,6 +26,13 @@ def order(doc, method):
         if wallet[0]["balance"]<total_amount:
             frappe.msgprint("Insufficient balance")
             frappe.throw(f"Insufficient balance in {user_id}'s wallet")
+        
+        order_book_data["price"] = 10-doc.amount
+        order_book_data["opinion_type"] = "NO" if doc.opinion_type == "YES" else "YES"
+    else:
+        order_book_data["price"] = doc.amount
+        order_book_data["opinion_type"] = doc.opinion_type
+
 
     payload = {
         "user_id": user_id,
@@ -34,15 +46,15 @@ def order(doc, method):
         "order_type": doc.order_type
     }
     
-    frappe.publish_realtime('order_event',{
-        "order_id": doc.name,
-        "status": doc.status,
-        "market_id": doc.market_id,
-        "option_type": doc.opinion_type,
-        "price": doc.amount,
-        "quantity": doc.quantity,
-        "order_type": doc.order_type
-    })
+    # frappe.publish_realtime('order_event',{
+    #     "order_id": doc.name,
+    #     "status": doc.status,
+    #     "market_id": doc.market_id,
+    #     "option_type": doc.opinion_type,
+    #     "price": doc.amount,
+    #     "quantity": doc.quantity,
+    #     "order_type": doc.order_type
+    # })
     
     doc.save()
     frappe.db.commit()
@@ -56,6 +68,7 @@ def order(doc, method):
             frappe.log_error("Order API Error: ", f"{response.status_code} - {error_text}")
             frappe.throw(f"Error from API: {error_text}")
         else:
+            frappe.publish_realtime("order_book_event",order_book_data)
             frappe.msgprint("Order Created Successfully.")
     except requests.exceptions.RequestException as e:
         frappe.throw(f"Error sending order: {str(e)}")
@@ -77,22 +90,41 @@ def update_order():
         except Exception as e:
             if not order:
                 order= frappe.get_doc("Orders", data.order_id)
+
+        order_book_data = {
+            "market_id":order.market_id
+        }
+
+        if order.order_type == "BUY":
+            order_book_data["price"] = 10-order.amount
+            order_book_data["opinion_type"] = "NO" if doc.opinion_type == "YES" else "YES"
+        else:
+            order_book_data["price"] = order.amount
+            order_book_data["opinion_type"] = order.opinion_type
+
         # # Update fields
         order.status = data.status
         order.filled_quantity = data.filled_quantity
+
+        # # Save the updated order
+        order.save(ignore_permissions=True)
+        frappe.db.commit()
+        if data.status == "CANCELED":
+            order_book_data["quantity"] = -(order.quantity - data.filled_quantity)
+        else:
+            order_book_data["quantity"] = - data.filled_quantity
 
         frappe.publish_realtime('order_event',{
             "order_id":data.order_id,
             "status":data.status,
             "filled_quantity":data.filled_quantity
         },user=frappe.session.user)
-        # # Save the updated order
-        order.save(ignore_permissions=True)
-        frappe.db.commit()
+
+        frappe.publish_realtime("order_book_event",order_book_data)
 
         return {"status": "success", "message": "Order updated successfully", "order_id": order.name}
     except Exception as e:
-        frappe.log_error(f"Order update failed: {str(e)}", "update_order")
+        frappe.log_error(f"Order update failed:", f"{str(e)}")
         return {"status": "error", "message": str(e)}
 
 @frappe.whitelist(allow_guest=True)
@@ -207,6 +239,18 @@ def close_market():
         market.status="CLOSED"
         market.save(ignore_permissions=True)
         frappe.db.commit()
+        
+        update_data = {
+            "name": market.name,
+            "status": market.status,
+            "category": market.category,
+            "question": doc.question,
+            "yes_price": doc.yes_price,
+            "no_price": doc.no_price,
+            "closing_time": doc.closing_time
+        }
+        
+        frappe.publish_realtime("market_event",update_data,user=frappe.session.user)
         
         return {
             "status":"success","message":"Market closed"
