@@ -165,7 +165,8 @@ api = {
         "rewardapp.engine.market_settlements",
         "rewardapp.engine.update_market_price",
         "rewardapp.engine.get_marketwise_transaction_summary",
-        "rewardapp.engine.get_available_quantity"
+        "rewardapp.engine.get_available_quantity",
+        "rewardapp.wallet.get_deposit_and_withdrawal"
     ]
 }
 

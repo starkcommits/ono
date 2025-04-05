@@ -11,12 +11,15 @@
   "status",
   "order_type",
   "closing_time",
+  "yes_price",
+  "no_price",
   "column_break_spdz",
   "quantity",
   "filled_quantity",
   "opinion_type",
   "amount",
-  "sell_order_id"
+  "sell_order_id",
+  "market_status"
  ],
  "fields": [
   {
@@ -86,11 +89,29 @@
    "fieldtype": "Link",
    "label": "Sell Order ID",
    "options": "Orders"
+  },
+  {
+   "fetch_from": "market_id.yes_price",
+   "fieldname": "yes_price",
+   "fieldtype": "Read Only",
+   "label": "Yes Price"
+  },
+  {
+   "fetch_from": "market_id.no_price",
+   "fieldname": "no_price",
+   "fieldtype": "Read Only",
+   "label": "No Price"
+  },
+  {
+   "fetch_from": "market_id.status",
+   "fieldname": "market_status",
+   "fieldtype": "Read Only",
+   "label": "Market Status"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-04-03 14:29:16.432776",
+ "modified": "2025-04-05 11:42:25.393309",
  "modified_by": "Administrator",
  "module": "Reward App",
  "name": "Orders",
