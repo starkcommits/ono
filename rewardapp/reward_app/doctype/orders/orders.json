@@ -18,8 +18,9 @@
   "filled_quantity",
   "opinion_type",
   "amount",
-  "linked_order_id",
-  "market_status"
+  "sell_order_id",
+  "market_status",
+  "parent_order_id"
  ],
  "fields": [
   {
@@ -103,15 +104,15 @@
    "label": "Market Status"
   },
   {
-   "fieldname": "linked_order_id",
+   "fieldname": "parent_order_id",
    "fieldtype": "Link",
-   "label": "Linked Order ID",
+   "label": "Parent Order ID",
    "options": "Orders"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-04-05 14:26:52.414433",
+ "modified": "2025-04-05 15:23:47.197627",
  "modified_by": "Administrator",
  "module": "Reward App",
  "name": "Orders",
