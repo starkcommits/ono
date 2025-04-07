@@ -4,86 +4,117 @@ import json
 from frappe import _
 
 def order(doc, method):
-    """Send order from Frappe to Matching Engine."""
-    user_id = frappe.session.user
-    total_amount = doc.amount * doc.quantity  # Ensure total_amount is always defined
-
-    order_book_data={
-        "market_id":doc.market_id,
-        "quantity":doc.quantity
-    }
-
-    if doc.order_type=="BUY":
-        wallet = frappe.db.sql("""
-            SELECT name, balance FROM `tabUser Wallet`
-            WHERE user = %s AND is_active = 1
-        """, (user_id,), as_dict=True)
-
-        if not wallet:
-            frappe.msgprint("No active wallet found")
-            frappe.throw(f"No active wallet found for {user_id}")
-
-        if wallet[0]["balance"]<total_amount:
-            frappe.msgprint("Insufficient balance")
-            frappe.throw(f"Insufficient balance in {user_id}'s wallet")
+    # Only process if this is a new unmatched order or a cancellation
+    if doc.status == "UNMATCHED" and not getattr(doc, '_processed', False):
+        """Send order from Frappe to Matching Engine."""
+        # Mark as processed to prevent recursion
+        doc._processed = True
         
-        order_book_data["price"] = 10-doc.amount
-        order_book_data["opinion_type"] = "NO" if doc.opinion_type == "YES" else "YES"
-    else:
-        order_book_data["price"] = doc.amount
-        order_book_data["opinion_type"] = doc.opinion_type
+        user_id = frappe.session.user
+        total_amount = doc.amount * doc.quantity  # Ensure total_amount is always defined
 
+        order_book_data = {
+            "market_id": doc.market_id,
+            "quantity": doc.quantity
+        }
 
-    payload = {
-        "user_id": user_id,
-        "order_id": doc.name,
-        "filled_quantity": doc.filled_quantity,
-        "status": doc.status,
-        "market_id": doc.market_id,
-        "option_type": doc.opinion_type,
-        "price": doc.amount,
-        "quantity": doc.quantity,
-        "order_type": doc.order_type
-    }
-    
-    # frappe.publish_realtime('order_event',{
-    #     "order_id": doc.name,
-    #     "status": doc.status,
-    #     "market_id": doc.market_id,
-    #     "option_type": doc.opinion_type,
-    #     "price": doc.amount,
-    #     "quantity": doc.quantity,
-    #     "order_type": doc.order_type
-    # })
-    doc.user_id = user_id
-    doc.save()
-    frappe.db.commit()
+        if doc.order_type == "BUY":
+            wallet = frappe.db.sql("""
+                SELECT name, balance FROM `tabUser Wallet`
+                WHERE user = %s AND is_active = 1
+            """, (user_id,), as_dict=True)
 
-    frappe.log_error("Order Payload",payload)
-    try:
-        frappe.publish_realtime("order_book_event",order_book_data)
+            if not wallet:
+                frappe.msgprint("No active wallet found")
+                frappe.throw(f"No active wallet found for {user_id}")
 
-        query = """
-            SELECT 
-                COUNT(DISTINCT user_id) AS traders
-            FROM `tabOrders`
-            WHERE status NOT IN ("CANCELED", "SETTLED")
-                AND market_id = %s
-        """
-        result = frappe.db.sql(query, (doc.market_id,), as_dict=True)
-        
-        market = frappe.get_doc("Market",doc.market_id)
-        
-        if market.total_traders!=result[0]["traders"]:
-            market.total_traders=result[0]["traders"]
-            market.save(ignore_permissions=True)
+            if wallet[0]["balance"] < total_amount:
+                frappe.msgprint("Insufficient balance")
+                frappe.throw(f"Insufficient balance in {user_id}'s wallet")
             
+            order_book_data["price"] = 10 - doc.amount
+            order_book_data["opinion_type"] = "NO" if doc.opinion_type == "YES" else "YES"
+        else:
+            order_book_data["price"] = doc.amount
+            order_book_data["opinion_type"] = doc.opinion_type
+
+        payload = {
+            "user_id": user_id,
+            "order_id": doc.name,
+            "filled_quantity": doc.filled_quantity,
+            "status": doc.status,
+            "market_id": doc.market_id,
+            "option_type": doc.opinion_type,
+            "price": doc.amount,
+            "quantity": doc.quantity,
+            "order_type": doc.order_type
+        }
+        
+        # Set user_id without triggering save
+        if not doc.user_id:
+            frappe.db.set_value('Orders', doc.name, 'user_id', user_id, update_modified=False)
+        
+        # Commit the transaction to ensure user_id is saved
         frappe.db.commit()
 
-        frappe.msgprint("Order Created Successfully.")
-    except requests.exceptions.RequestException as e:
-        frappe.throw(f"Error sending order: {str(e)}")
-            
+        frappe.log_error("Order Payload", payload)
+        try:
+            url = "http://94.136.187.188:8086/orders/"
+            response = requests.post(url, json=payload)
+            if response.status_code != 201:
+                # Update status without triggering the hook again
+                frappe.db.set_value('Orders', doc.name, {
+                    'status': "CANCELED",
+                    'remark': "System canceled the order."
+                }, update_modified=False)
+                
+                frappe.db.commit()
+                
+                error_text = response.text
+                frappe.log_error("Order API Error: ", f"{response.status_code} - {error_text}")
+                frappe.throw(f"Error from API: {error_text}")
+            else:
+                frappe.publish_realtime("order_book_event", order_book_data)
+
+                query = """
+                    SELECT 
+                        COUNT(DISTINCT user_id) AS traders
+                    FROM `tabOrders`
+                    WHERE status NOT IN ("CANCELED", "SETTLED")
+                        AND market_id = %s
+                """
+                result = frappe.db.sql(query, (doc.market_id,), as_dict=True)
+                
+                market = frappe.get_doc("Market", doc.market_id)
+                
+                if market.total_traders != result[0]["traders"]:
+                    # Update market traders count directly without triggering hooks
+                    frappe.db.set_value('Market', doc.market_id, 'total_traders', result[0]["traders"], update_modified=False)
+                    
+                frappe.db.commit()
+
+                frappe.msgprint("Order Created Successfully.")
+        except requests.exceptions.RequestException as e:
+            frappe.throw(f"Error sending order: {str(e)}")
+
+    elif ((doc.status == "CANCELED" and not doc.remark) or 
+          (doc.status == "SETTLED" and doc.remark == "Sell order canceled in midway")) and not getattr(doc, '_cancel_processed', False):
+        # Mark as processed to prevent recursion
+        doc._cancel_processed = True
+        
+        try:
+            url = f"http://94.136.187.188:8086/orders/{doc.name}"
+            response = requests.delete(url)
+            if response.status_code != 200:
+                frappe.logger().error(f"Error response: {response.text}")
+                frappe.throw(f"Cancel Order API error: {response.status_code} - {response.text}")
+            else:
+                frappe.msgprint("Order cancelled successfully.")
+                
+        except Exception as e:
+            frappe.log_error("Error in order cancelling", f"{str(e)}")
+            frappe.throw(f"Error in order cancelling: {str(e)}")
+
 
 @frappe.whitelist(allow_guest=True)  # Allow external requests
 def update_order():
@@ -92,51 +123,53 @@ def update_order():
     try:
         # Parse incoming JSON data
         data = frappe._dict(frappe.request.get_json())
-
-        frappe.log_error("Order matching",data)
-
-        # # Fetch the existing order from Frappe
-        try:
-            order = frappe.get_doc("Orders", data.order_id)
-        except Exception as e:
-            if not order:
-                order= frappe.get_doc("Orders", data.order_id)
-
+        
+        frappe.log_error("Order matching", data)
+        
+        # Update fields directly using db_set to avoid modification conflicts
+        # This bypasses the document modified check
+        frappe.db.set_value('Orders', data.order_id, {
+            'status': data.status,
+            'filled_quantity': data.filled_quantity
+        }, update_modified=True)  # Update modified timestamp
+        
+        # Get order data for realtime updates, but don't modify it
+        order = frappe.get_doc("Orders", data.order_id)
+        
         order_book_data = {
-            "market_id":order.market_id
+            "market_id": order.market_id
         }
-
+        
         if order.order_type == "BUY":
-            order_book_data["price"] = 10-order.amount
+            order_book_data["price"] = 10 - order.amount
             order_book_data["opinion_type"] = "NO" if order.opinion_type == "YES" else "YES"
         else:
             order_book_data["price"] = order.amount
             order_book_data["opinion_type"] = order.opinion_type
-
-        # # Update fields
-        order.status = data.status
-        order.filled_quantity = data.filled_quantity
-
-        # # Save the updated order
-        order.save(ignore_permissions=True)
-        frappe.db.commit()
+        
         if data.status == "CANCELED":
             order_book_data["quantity"] = -(order.quantity - data.filled_quantity)
         else:
-            order_book_data["quantity"] = - data.filled_quantity
-
-        frappe.publish_realtime('order_event',{
-            "order_id":data.order_id,
-            "status":data.status,
-            "filled_quantity":data.filled_quantity
-        },user=frappe.session.user)
-
-        frappe.publish_realtime("order_book_event",order_book_data)
-
+            order_book_data["quantity"] = -data.filled_quantity
+        
+        # Commit the transaction to ensure changes are saved
+        frappe.db.commit()
+        
+        # Send realtime updates
+        frappe.publish_realtime('order_event', {
+            "order_id": data.order_id,
+            "status": data.status,
+            "filled_quantity": data.filled_quantity
+        }, user=order.user_id)  # Use order.user_id instead of frappe.session.user
+        
+        frappe.publish_realtime("order_book_event", order_book_data)
+        
         return {"status": "success", "message": "Order updated successfully", "order_id": order.name}
+    
     except Exception as e:
         frappe.log_error(f"Order update failed:", f"{str(e)}")
         return {"status": "error", "message": str(e)}
+
 
 @frappe.whitelist(allow_guest=True)
 def trades():
@@ -508,22 +541,13 @@ def get_open_buy_orders_without_active_sell():
     return result
 
 
-@frappe.whitelist()
-def cancel_order():
-    # data = frappe.request.get_json()
-    # try:
-    #     url=f"http://94.136.187.188:8086/orders/{order_id}"
-    #     response = requests.delete(url)
-    #     if response.status_code != 200:
-    #         frappe.logger().error(f"Error response: {response.text}")
-    #         frappe.throw(f"Cancel Order API error: {response.status_code} - {response.text}")
-    #     else:
-    #         frappe.msgprint("Order cancelled successfully.")
-
-    # except Exception as e:
-    #     frappe.log_error("Error in order cancelling", f"{str(e)}")
-    #     frappe.throw(f"Error in order cancelling: {str(e)}")
-    return True
+@frappe.whitelist(allow_guest=True)
+def cancel_order(order_id):
+    if not order_id:
+        return {
+            "error":"Order ID is required."
+        }
+    
 
 
 @frappe.whitelist()

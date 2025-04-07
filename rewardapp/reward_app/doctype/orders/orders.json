@@ -20,7 +20,8 @@
   "opinion_type",
   "amount",
   "sell_order_id",
-  "buy_order_id"
+  "buy_order_id",
+  "remark"
  ],
  "fields": [
   {
@@ -124,11 +125,16 @@
    "fieldtype": "Link",
    "label": "User ID",
    "options": "User"
+  },
+  {
+   "fieldname": "remark",
+   "fieldtype": "Data",
+   "label": "Remark"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-04-07 12:15:19.009532",
+ "modified": "2025-04-07 19:43:49.920522",
  "modified_by": "Administrator",
  "module": "Reward App",
  "name": "Orders",
