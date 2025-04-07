@@ -1,5 +1,5 @@
 import React, { cache, useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { redirect, useNavigate } from 'react-router-dom'
 import {
   ArrowLeft,
   TrendingUp,
@@ -10,6 +10,10 @@ import {
   Filter,
   XCircle,
   Plus,
+  CloudLightning,
+  ShieldEllipsis,
+  ArrowDown,
+  ArrowUp,
 } from 'lucide-react'
 import { Line } from 'react-chartjs-2'
 import {
@@ -24,7 +28,12 @@ import {
   Legend,
 } from 'chart.js'
 import TradeSheet from '../components/TradeSheet'
-import { useFrappeAuth, useFrappeGetDocList } from 'frappe-react-sdk'
+import {
+  useFrappeAuth,
+  useFrappeEventListener,
+  useFrappeGetCall,
+  useFrappeGetDocList,
+} from 'frappe-react-sdk'
 import ActivePosition from '../components/ActivePosition'
 import CompletedTrades from '../components/CompletedTrades'
 
@@ -42,70 +51,126 @@ ChartJS.register(
 const Portfolio = () => {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('active')
-  const [selectedPosition, setSelectedPosition] = useState(null)
-  const [tradeAction, setTradeAction] = useState(null)
+  const [tradePrice, setTradePrice] = useState(null)
+  const [selectedChoice, setSelectedChoice] = useState(null)
+  const [selectedAction, setSelectedAction] = useState(null)
+  const [marketPrice, setMarketPrice] = useState(null)
+  const [marketId, setMarketId] = useState(null)
+  const [sellQuantity, setSellQuantity] = useState(null)
+  const [previousOrderId, setPreviousOrderId] = useState(null)
   const [showTradeSheet, setShowTradeSheet] = useState(false)
-  const [activeOrders, setActiveOrders] = useState([])
-  const [completedOrders, setCompletedOrders] = useState([])
-  const { currentUser } = useFrappeAuth()
+  const [activeOrders, setActiveOrders] = useState({})
+  const [completedOrders, setCompletedOrders] = useState({})
+  const { currentUser, isLoading } = useFrappeAuth()
+  const [totalReturns, setTotalReturns] = useState(0)
 
-  const filters =
-    activeTab === 'active'
-      ? [
-          ['status', '!=', 'SETTLED'],
-          ['owner', '=', currentUser],
-        ]
-      : [
-          ['status', '=', 'SETTLED'],
-          ['owner', '=', currentUser],
-        ]
-
-  const { data: activeOrdersData, isLoading: activeOrdersLoading } =
-    activeTab === 'active' &&
-    useFrappeGetDocList('Orders', {
+  const {
+    data: activeOrdersData,
+    isLoading: activeOrdersLoading,
+    mutate: refetchActiveOrders,
+  } = useFrappeGetDocList(
+    'Orders',
+    {
       fields: [
         'name',
         'question',
+        'creation',
         'amount',
         'status',
+        'filled_quantity',
+        'owner',
         'quantity',
         'opinion_type',
+        'closing_time',
+        'order_type',
         'market_id',
+        'yes_price',
+        'no_price',
+        'buy_order_id',
+        'sell_order_id',
       ],
       filters: [
-        ['status', 'not in', ['SETTLED', 'CANCELED']],
+        ['status', 'not in', ['SETTLED']],
+        ['sell_order_id', '=', ''],
         ['owner', '=', currentUser],
       ],
-    })
+      orderBy: {
+        field: 'creation',
+        order: 'desc',
+      },
+    },
+    currentUser ? undefined : null
+  )
+
+  // const {
+  //   data: activeOrdersData,
+  //   isLoading: activeOrdersLoading,
+  //   mutate: refetchActiveOrders,
+  // } = useFrappeGetCall(
+  //   'rewardapp.engine.get_open_buy_orders_without_active_sell'
+  // )
+
+  console.log(activeOrdersData)
+
+  // const { data: completedOrdersData, isLoading: completedOrdersLoading } =
+  //   activeTab === 'completed' &&
+  //   useFrappeGetDocList('Orders', {
+  //     fields: [
+  //       'name',
+  //       'amount',
+  //       'quantity',
+  //       'status',
+  //       'opinion_type',
+  //       'market_id',
+  //       'closing_time',
+  //     ],
+  //     filters: [
+  //       ['status', 'in', ['SETTLED', 'CANCELED']],
+  //       ['owner', '=', currentUser],
+  //     ],
+  //   })
 
   const { data: completedOrdersData, isLoading: completedOrdersLoading } =
-    activeTab === 'completed' &&
-    useFrappeGetDocList('Orders', {
-      fields: [
-        'name',
-        'amount',
-        'quantity',
-        'status',
-        'opinion_type',
-        'market_id',
-        'closing_time',
-      ],
-      filters: [
-        ['status', 'in', ['SETTLED', 'CANCELED']],
-        ['owner', '=', currentUser],
-      ],
-    })
+    useFrappeGetCall(
+      'rewardapp.engine.get_marketwise_transaction_summary',
+      {
+        fields: ['*'],
+      },
+      activeTab === 'completed' ? undefined : null
+    )
+
+  if (!completedOrdersLoading) {
+    console.log('Completed :', completedOrdersData?.message)
+  }
 
   useEffect(() => {
-    if (activeOrdersData) setActiveOrders(activeOrdersData)
+    if (!activeOrdersLoading && activeOrdersData?.length > 0) {
+      const activeOrdersMap = activeOrdersData.reduce((acc, order) => {
+        acc[order.name] = order // ✅ Store as { "market_name": marketData }
+        return acc
+      }, {})
+      setActiveOrders(activeOrdersMap)
+    }
   }, [activeOrdersData])
 
+  console.log(activeOrders)
+
   useEffect(() => {
-    if (completedOrdersData) setCompletedOrders(completedOrdersData)
+    if (!completedOrdersLoading) {
+      setCompletedOrders(completedOrdersData?.message || {})
+    }
   }, [completedOrdersData])
 
-  console.log('Active: ', activeOrders)
-  console.log('Completed: ', completedOrders)
+  useFrappeEventListener('order_event', (updatedOrder) => {
+    console.log('Updated Order:', updatedOrder)
+    setActiveOrders((prev) => {
+      const updatedActiveOrders = {
+        ...prev,
+        [updatedOrder.name]: updatedOrder,
+      }
+      return updatedActiveOrders
+    })
+  })
 
   const performanceData = {
     labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
@@ -205,17 +270,46 @@ const Portfolio = () => {
     },
   ]
 
-  const handleTradeAction = (position, action) => {
-    setSelectedPosition(position)
-    setTradeAction(action)
+  const handleTradeClick = (
+    marketPrice,
+    choice,
+    tradeAction,
+    marketId,
+    sellQuantity,
+    previousOrderId
+  ) => {
+    setSelectedChoice(choice)
+    setSelectedAction(tradeAction)
+    setMarketPrice(marketPrice)
+    setMarketId(marketId)
+    setSellQuantity(sellQuantity)
+    setPreviousOrderId(previousOrderId)
     setShowTradeSheet(true)
   }
 
   const handleTradeComplete = () => {
     setShowTradeSheet(false)
-    setSelectedPosition(null)
-    setTradeAction(null)
+    setSelectedChoice(null)
+    setSelectedAction(null)
   }
+
+  const invested = Object.values(activeOrders).reduce((acc, order) => {
+    return acc + parseFloat(order.amount * order.quantity)
+  }, 0)
+
+  const currentValue = Object.values(activeOrders).reduce((acc, order) => {
+    return (
+      acc +
+      parseFloat(
+        (order.opinion_type === 'YES' ? order.yes_price : order.no_price) *
+          order.quantity
+      )
+    )
+  }, 0)
+
+  const profitLoss = currentValue - invested
+
+  console.log(profitLoss)
 
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
@@ -233,37 +327,62 @@ const Portfolio = () => {
           </div>
 
           {/* Portfolio Stats Card with better contrast */}
-          <div className="bg-white/30 backdrop-blur-lg rounded-3xl p-6 mb-6">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-white font-semibold">Portfolio Value</span>
-              <div className="flex items-center bg-emerald-500 bg-opacity-25 backdrop-blur-sm px-2.5 py-1 rounded-full">
+          <div className="flex justify-between bg-white/30 backdrop-blur-lg rounded-3xl p-6 mb-6">
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-between">
+                <span className="text-white font-semibold">
+                  Portfolio Value
+                </span>
+                {/* <div className="flex items-center bg-emerald-500 bg-opacity-25 backdrop-blur-sm px-2.5 py-1 rounded-full">
                 <TrendingUp className="h-4 w-4 text-white mr-1" />
                 <span className="text-sm font-semibold text-white">+12.5%</span>
+              </div> */}
+              </div>
+              <div className="text-3xl font-bold text-white flex items-center gap-4">
+                <div>
+                  ₹
+                  {Object.values(activeOrders).length > 0
+                    ? Object.values(activeOrders).reduce((acc, order) => {
+                        acc =
+                          acc +
+                          (order.opinion_type === 'YES'
+                            ? order.yes_price
+                            : order.no_price) *
+                            order.quantity
+
+                        return acc
+                      }, 0)
+                    : 0}
+                </div>
               </div>
             </div>
-            <div className="text-4xl font-bold text-white mb-4">₹2,345.67</div>
-            <div className="grid grid-cols-3 gap-4 text-sm">
-              <div>
-                <div className="text-white/90 font-medium mb-1">Invested</div>
-                <div className="text-white font-semibold">₹2,000.00</div>
+            <div className="flex flex-col gap-4 items-end">
+              <div className="flex items-center justify-between">
+                <span className="text-white font-semibold">Invested</span>
+                {/* <div className="flex items-center bg-emerald-500 bg-opacity-25 backdrop-blur-sm px-2.5 py-1 rounded-full">
+                <TrendingUp className="h-4 w-4 text-white mr-1" />
+                <span className="text-sm font-semibold text-white">+12.5%</span>
+              </div> */}
               </div>
-              <div>
-                <div className="text-white/90 font-medium mb-1">Returns</div>
-                <div className="text-emerald-300 font-semibold">+₹345.67</div>
-              </div>
-              <div>
-                <div className="text-white/90 font-medium mb-1">Win Rate</div>
-                <div className="text-white font-semibold">68%</div>
+              <div className="text-3xl font-bold text-white flex items-center gap-4">
+                <div>
+                  ₹
+                  {Object.values(activeOrders).length > 0
+                    ? Object.values(activeOrders).reduce((acc, order) => {
+                        return acc + parseFloat(order.amount * order.quantity)
+                      }, 0)
+                    : 0}
+                </div>
               </div>
             </div>
           </div>
 
           {/* Chart Card */}
-          <div className="bg-white rounded-3xl p-4 shadow-sm">
+          {/* <div className="bg-white rounded-3xl p-4 shadow-sm">
             <div className="h-40">
               <Line data={performanceData} options={chartOptions} />
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
 
@@ -298,8 +417,8 @@ const Portfolio = () => {
           <div className="p-4 flex items-center justify-between border-b border-gray-100">
             <div className="text-sm font-medium text-gray-700">
               {activeTab === 'active'
-                ? `${activeOrders.length} Active Position`
-                : `${completedOrders.length} Trades this month`}
+                ? `${Object.values(activeOrders).length} Active Position`
+                : `${Object.values(completedOrders).length} Trades this month`}
             </div>
             <button className="p-2 hover:bg-gray-50 rounded-lg transition-colors">
               <Filter className="h-4 w-4 text-gray-600" />
@@ -309,26 +428,32 @@ const Portfolio = () => {
           {/* Trades List */}
           <div className="divide-y divide-gray-100">
             {activeTab === 'active'
-              ? activeOrders.map((position) => (
+              ? Object.values(activeOrders).map((position) => (
                   <ActivePosition
                     key={position.name}
                     position={position}
-                    handleTradeAction={handleTradeAction}
+                    setActiveOrders={setActiveOrders}
+                    refetchActiveOrders={refetchActiveOrders}
+                    handleTradeClick={handleTradeClick}
                   />
                 ))
-              : completedOrders.map((trade) => (
+              : Object.values(completedOrders).map((trade) => (
                   <CompletedTrades key={trade.name} trade={trade} />
                 ))}
           </div>
         </div>
       </div>
 
-      {showTradeSheet && selectedPosition && (
+      {showTradeSheet && selectedChoice && (
         <TradeSheet
-          market={selectedPosition}
-          choice={selectedPosition.opinion_type}
+          marketPrice={marketPrice}
+          choice={selectedChoice}
+          tradeAction={selectedAction}
           onClose={handleTradeComplete}
-          tradeAction={tradeAction}
+          marketId={marketId}
+          sellQuantity={sellQuantity}
+          previousOrderId={previousOrderId}
+          refetchActiveOrders={refetchActiveOrders}
         />
       )}
     </div>
@@ -336,3 +461,15 @@ const Portfolio = () => {
 }
 
 export default Portfolio
+
+{
+  /* <div
+                className={`text-sm font-semibold flex items-center ${
+                  profitLoss > 0 && 'text-green-600'
+                } ${profitLoss < 0 && 'text-red-600'}`}
+              >
+                {profitLoss}
+                {profitLoss > 0 && <ArrowUp className="h-5 w-5" />}
+                {profitLoss < 0 && <ArrowDown className="h-5 w-5" />}
+              </div> */
+}

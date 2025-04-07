@@ -1,17 +1,29 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { 
-  X, User, Settings, Bell, HelpCircle, Shield, LogOut,
-  ChevronRight, Moon, Gift, Star
-} from 'lucide-react';
+import React from 'react'
+import { useNavigate } from 'react-router-dom'
+import {
+  X,
+  User,
+  Settings,
+  Bell,
+  HelpCircle,
+  Shield,
+  LogOut,
+  ChevronRight,
+  Moon,
+  Gift,
+  Star,
+} from 'lucide-react'
+import { useFrappeAuth, useFrappeGetDoc } from 'frappe-react-sdk'
 
-interface SlideMenuProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
+const SlideMenu = ({ isOpen, onClose }) => {
+  const { logout, currentUser } = useFrappeAuth()
 
-const SlideMenu: React.FC<SlideMenuProps> = ({ isOpen, onClose }) => {
-  const navigate = useNavigate();
+  const { data: currentUserData, isLoading: currentUserDataLoading } =
+    useFrappeGetDoc('User', currentUser)
+
+  console.log(currentUserData)
+
+  const navigate = useNavigate()
 
   const menuItems = [
     {
@@ -20,7 +32,7 @@ const SlideMenu: React.FC<SlideMenuProps> = ({ isOpen, onClose }) => {
         { icon: User, label: 'Profile', path: '/profile' },
         { icon: Settings, label: 'Settings', path: '/settings' },
         { icon: Bell, label: 'Notifications', path: '/notifications' },
-      ]
+      ],
     },
     {
       title: 'Preferences',
@@ -28,21 +40,21 @@ const SlideMenu: React.FC<SlideMenuProps> = ({ isOpen, onClose }) => {
         { icon: Moon, label: 'Dark Mode', toggle: true },
         { icon: Gift, label: 'Rewards', path: '/rewards' },
         { icon: Star, label: 'Premium', path: '/premium' },
-      ]
+      ],
     },
     {
       title: 'Support',
       items: [
         { icon: HelpCircle, label: 'Help Center', path: '/help' },
         { icon: Shield, label: 'Privacy Policy', path: '/privacy' },
-      ]
-    }
-  ];
+      ],
+    },
+  ]
 
   return (
     <>
       {/* Backdrop */}
-      <div 
+      <div
         className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity ${
           isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
@@ -50,15 +62,17 @@ const SlideMenu: React.FC<SlideMenuProps> = ({ isOpen, onClose }) => {
       />
 
       {/* Menu */}
-      <div className={`fixed top-0 left-0 bottom-0 w-[280px] bg-white z-50 transform transition-transform duration-300 ease-out ${
-        isOpen ? 'translate-x-0' : '-translate-x-full'
-      }`}>
+      <div
+        className={`fixed top-0 left-0 bottom-0 w-[280px] bg-white z-50 transform transition-transform duration-300 ease-out ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
         <div className="h-full flex flex-col">
           {/* Header */}
           <div className="pt-safe-top px-6 pb-4 border-b border-gray-100">
             <div className="flex items-center justify-between mb-6">
               <h1 className="text-xl font-semibold text-indigo-600">GrowBro</h1>
-              <button 
+              <button
                 onClick={onClose}
                 className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
               >
@@ -67,11 +81,16 @@ const SlideMenu: React.FC<SlideMenuProps> = ({ isOpen, onClose }) => {
             </div>
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-gradient-to-br from-indigo-400 to-indigo-500 rounded-full flex items-center justify-center">
-                <span className="text-lg font-medium text-white">JD</span>
+                <span className="text-lg font-medium text-white">
+                  {currentUserData?.full_name?.split(' ')[0]?.slice(0, 1)}
+                  {currentUserData?.full_name?.split(' ')[1]?.slice(0, 1)}
+                </span>
               </div>
               <div>
-                <h2 className="font-medium">John Doe</h2>
-                <p className="text-sm text-gray-500">john.doe@example.com</p>
+                <h2 className="font-medium">{currentUserData?.full_name}</h2>
+                <p className="text-sm text-gray-500">
+                  {currentUserData?.email}
+                </p>
               </div>
             </div>
           </div>
@@ -110,7 +129,12 @@ const SlideMenu: React.FC<SlideMenuProps> = ({ isOpen, onClose }) => {
 
           {/* Footer */}
           <div className="mt-auto border-t border-gray-100 p-6">
-            <button className="w-full flex items-center text-rose-600 font-medium">
+            <button
+              className="w-full flex items-center text-rose-600 font-medium"
+              onClick={() => {
+                logout()
+              }}
+            >
               <LogOut className="h-5 w-5 mr-3" />
               Sign Out
             </button>
@@ -118,7 +142,7 @@ const SlideMenu: React.FC<SlideMenuProps> = ({ isOpen, onClose }) => {
         </div>
       </div>
     </>
-  );
-};
+  )
+}
 
-export default SlideMenu;
+export default SlideMenu

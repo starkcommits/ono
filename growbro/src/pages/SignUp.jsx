@@ -1,15 +1,27 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { ArrowLeft, Mail, Lock, Eye, EyeOff, User, Phone } from 'lucide-react'
+import toast from 'react-hot-toast'
+import {
+  useFrappeCreateDoc,
+  useFrappeEventListener,
+  useFrappeGetCall,
+  useFrappePostCall,
+} from 'frappe-react-sdk'
 
 const SignUp = () => {
   const navigate = useNavigate()
+  const { call } = useFrappePostCall('rewardapp.api.signup')
+
+  // const { createDoc } = useFrappeCreateDoc()
+
   const [formData, setFormData] = useState({
-    name: '',
+    first_name: '',
+    last_name: '',
     email: '',
     phone: '',
     password: '',
-    confirmPassword: '',
+    confirm_password: '',
   })
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -21,18 +33,34 @@ const SignUp = () => {
 
   const handleSignUp = async (e) => {
     e.preventDefault()
-    if (formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match')
+
+    if (formData.password !== formData.confirm_password) {
+      toast.error(`Passwords do not match`)
       return
     }
 
-    setIsLoading(true)
+    try {
+      setIsLoading(true)
 
-    // TODO: Implement actual registration
-    setTimeout(() => {
+      // TODO: Implement actual registration
+      const { confirm_password, ...dataToSend } = formData
+
+      const response = await call(dataToSend)
+
+      // const response = await createDoc('User', dataToSend)
+
+      console.log('Response:', response)
+
+      toast.success('Account created successfully!')
+
+      setTimeout(() => {
+        setIsLoading(false)
+        navigate('/signin')
+      }, 1500)
+    } catch (err) {
+      toast.error(`Error occured in the registration process.`)
       setIsLoading(false)
-      navigate('/kyc')
-    }, 1500)
+    }
   }
 
   return (
@@ -60,14 +88,31 @@ const SignUp = () => {
           <form onSubmit={handleSignUp} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Full Name
+                First Name
               </label>
               <div className="relative">
                 <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <input
                   type="text"
-                  name="name"
-                  value={formData.name}
+                  name="first_name"
+                  value={formData.first_name}
+                  onChange={handleChange}
+                  className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                  placeholder="Enter your full name"
+                  required
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Last Name
+              </label>
+              <div className="relative">
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <input
+                  type="text"
+                  name="last_name"
+                  value={formData.last_name}
                   onChange={handleChange}
                   className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                   placeholder="Enter your full name"
@@ -149,8 +194,8 @@ const SignUp = () => {
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <input
                   type={showPassword ? 'text' : 'password'}
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
+                  name="confirm_password"
+                  value={formData.confirm_password}
                   onChange={handleChange}
                   className="w-full pl-12 pr-12 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                   placeholder="Confirm your password"

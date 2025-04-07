@@ -104,6 +104,17 @@
    "label": "No Price"
   },
   {
+   "fetch_from": "market_id.status",
+   "fieldname": "market_status",
+   "fieldtype": "Read Only",
+   "label": "Market Status"
+  },
+  {
+   "fieldname": "sell_order_id",
+   "fieldtype": "Data",
+   "label": "Sell Order ID"
+  },
+  {
    "fieldname": "buy_order_id",
    "fieldtype": "Link",
    "label": "Buy Order ID",

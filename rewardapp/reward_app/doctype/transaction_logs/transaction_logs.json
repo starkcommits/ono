@@ -14,12 +14,15 @@
   "column_break_rbct",
   "order_id",
   "transaction_amount",
-  "transaction_type"
+  "transaction_type",
+  "transaction_status",
+  "transaction_method"
  ],
  "fields": [
   {
    "fieldname": "user",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "User",
    "options": "User",
    "reqd": 1
@@ -58,8 +61,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Market Id",
-   "options": "Market",
-   "reqd": 1
+   "options": "Market"
   },
   {
    "fetch_from": "market_id.question",
@@ -72,11 +74,24 @@
    "fieldname": "winning_side",
    "fieldtype": "Read Only",
    "label": "Winning Side"
+  },
+  {
+   "fieldname": "transaction_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Transaction Status",
+   "options": "Success\nFailed\nPending"
+  },
+  {
+   "fieldname": "transaction_method",
+   "fieldtype": "Select",
+   "label": "Transaction Method",
+   "options": "UPI\nCARD"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-03-31 00:53:34.913731",
+ "modified": "2025-04-04 23:24:57.380071",
  "modified_by": "Administrator",
  "module": "Reward App",
  "name": "Transaction Logs",

@@ -2,18 +2,25 @@ import React, { useEffect, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, TrendingUp, Users, Timer, Zap } from 'lucide-react'
 import { useFrappeEventListener, useFrappeGetDocList } from 'frappe-react-sdk'
+import TradingViewWidget from '../components/TradingViewWidget'
 
 const CategoryPage = () => {
-  const location = useLocation()
   const navigate = useNavigate()
   const { id } = useParams()
-  const { category, markets } = location.state
 
   const [categoryMarkets, setCategoryMarkets] = useState({})
 
   const { data: categoryData, isLoading: categoryDataLoading } =
     useFrappeGetDocList('Market', {
-      fields: ['name', 'question', 'yes_price', 'no_price', 'closing_time'],
+      fields: [
+        'name',
+        'question',
+        'yes_price',
+        'no_price',
+        'closing_time',
+        'status',
+        'total_traders',
+      ],
       filters: [
         ['status', '=', 'OPEN'],
         ['category', '=', id],
@@ -66,7 +73,7 @@ const CategoryPage = () => {
       Sports: '⚽',
       Tech: '💻',
     }
-    return emojiMap[category] || '📊'
+    return emojiMap[id.toUpperCase()] || '📊'
   }
 
   const getCategoryGradient = () => {
@@ -80,11 +87,11 @@ const CategoryPage = () => {
       Sports: 'from-orange-400 to-orange-500',
       Tech: 'from-cyan-400 to-cyan-500',
     }
-    return gradientMap[category] || 'from-gray-400 to-gray-500'
+    return gradientMap[id.toUpperCase()] || 'from-gray-400 to-gray-500'
   }
 
   const handleMarketClick = (market) => {
-    navigate(`/event/${market.name}`, { state: { market } })
+    navigate(`/event/${market.name}`)
   }
 
   return (
@@ -98,11 +105,19 @@ const CategoryPage = () => {
             >
               <ArrowLeft className="h-6 w-6" />
             </button>
-            <h1 className="text-2xl font-bold text-white">{category}</h1>
+            <h1 className="text-2xl font-bold text-white">
+              {id.charAt(0).toUpperCase()}
+              {id.slice(1)}
+            </h1>
           </div>
 
           <div className="bg-white/20 backdrop-blur-lg rounded-3xl p-6 mb-6">
-            <div className="flex items-center gap-4">
+            {id === 'crypto' && (
+              <div className="h-[350px]">
+                <TradingViewWidget />
+              </div>
+            )}
+            <div className="flex items-center gap-4 mt-4">
               <div
                 className={`w-16 h-16 bg-gradient-to-br ${getCategoryGradient()} rounded-2xl shadow-sm flex items-center justify-center`}
               >
@@ -110,7 +125,8 @@ const CategoryPage = () => {
               </div>
               <div>
                 <h2 className="text-xl font-bold text-white mb-1">
-                  {category} Markets
+                  {id.charAt(0).toUpperCase()}
+                  {id.slice(1)} Markets
                 </h2>
                 <p className="text-white/80">
                   {Object.values(categoryMarkets || {})?.length} active{' '}
@@ -155,7 +171,7 @@ const CategoryPage = () => {
                   <div className="flex items-center text-xs text-gray-600">
                     <Users className="h-3.5 w-3.5 mr-1" />
                     {/* <span>{market.traders.toLocaleString()} traders</span> */}
-                    <span>4000 traders</span>
+                    <span>{market?.total_traders} traders</span>
                   </div>
                   <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-600">
                     <div className="w-1 h-1 bg-red-500 rounded-full animate-pulse mr-1"></div>
