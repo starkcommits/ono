@@ -457,3 +457,23 @@ def get_open_buy_orders_without_active_sell():
         WHERE b.order_type = 'BUY' AND s.name IS NULL
     """, as_dict=True)
     return result
+
+
+@frappe.whitelist(allow_guest=True)
+def cancel_order(order_id):
+    if not order_id:
+        return {
+            "error":"Order ID is required."
+        }
+    try:
+        url=f"http://94.136.187.188:8086/orders/{order_id}"
+        response = requests.delete(url)
+        if response.status_code != 200:
+            frappe.logger().error(f"Error response: {response.text}")
+            frappe.throw(f"Cancel Order API error: {response.status_code} - {response.text}")
+        else:
+            frappe.msgprint("Order cancelled successfully.")
+
+    except Exception as e:
+        frappe.log_error("Error in order cancelling", f"{str(e)}")
+        frappe.throw(f"Error in order cancelling: {str(e)}")

@@ -19,8 +19,7 @@
   "opinion_type",
   "amount",
   "sell_order_id",
-  "market_status",
-  "parent_order_id"
+  "buy_order_id"
  ],
  "fields": [
   {
@@ -87,9 +86,8 @@
   },
   {
    "fieldname": "sell_order_id",
-   "fieldtype": "Link",
-   "label": "Sell Order ID",
-   "options": "Orders"
+   "fieldtype": "Data",
+   "label": "Sell Order ID"
   },
   {
    "fetch_from": "market_id.yes_price",
@@ -104,21 +102,15 @@
    "label": "No Price"
   },
   {
-   "fetch_from": "market_id.status",
-   "fieldname": "market_status",
-   "fieldtype": "Read Only",
-   "label": "Market Status"
-  },
-  {
-   "fieldname": "parent_order_id",
+   "fieldname": "buy_order_id",
    "fieldtype": "Link",
-   "label": "Parent Order ID",
+   "label": "Buy Order ID",
    "options": "Orders"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-04-05 15:23:47.197627",
+ "modified": "2025-04-05 18:26:41.257311",
  "modified_by": "Administrator",
  "module": "Reward App",
  "name": "Orders",
