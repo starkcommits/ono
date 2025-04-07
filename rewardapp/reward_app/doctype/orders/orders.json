@@ -18,7 +18,6 @@
   "filled_quantity",
   "opinion_type",
   "amount",
-  "market_status",
   "sell_order_id",
   "buy_order_id"
  ],
@@ -86,6 +85,11 @@
    "label": "Closing Time"
   },
   {
+   "fieldname": "sell_order_id",
+   "fieldtype": "Data",
+   "label": "Sell Order ID"
+  },
+  {
    "fetch_from": "market_id.yes_price",
    "fieldname": "yes_price",
    "fieldtype": "Read Only",
@@ -116,7 +120,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-04-05 18:04:36.732470",
+ "modified": "2025-04-05 18:26:41.257311",
  "modified_by": "Administrator",
  "module": "Reward App",
  "name": "Orders",
