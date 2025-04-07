@@ -13,7 +13,8 @@
   "column_break_sgfb",
   "closing_time",
   "yes_price",
-  "no_price"
+  "no_price",
+  "total_traders"
  ],
  "fields": [
   {
@@ -66,12 +67,17 @@
    "label": "Category",
    "options": "Market Category",
    "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "total_traders",
+   "fieldtype": "Int",
+   "label": "Total Traders"
   }
  ],
- "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-03-28 18:14:39.318334",
+ "modified": "2025-04-07 12:57:20.317150",
  "modified_by": "Administrator",
  "module": "Reward App",
  "name": "Market",

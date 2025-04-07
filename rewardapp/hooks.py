@@ -149,7 +149,7 @@ doc_events = {
 		"after_insert": "rewardapp.engine.order"
 	},
     "Market": {
-        "on_update": "rewardapp.engine.market"
+        "after_insert": "rewardapp.engine.market"
     }
 }
 
@@ -161,6 +161,7 @@ api = {
         "rewardapp.engine.update_order",
         "rewardapp.engine.trades",
         "rewardapp.engine.close_market",
+        "rewardapp.engine.resolve_market",
         "rewardapp.engine.unmatched_orders",
         "rewardapp.engine.market_settlements",
         "rewardapp.engine.update_market_price",

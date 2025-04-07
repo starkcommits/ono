@@ -64,11 +64,34 @@ def order(doc, method):
         url = "http://94.136.187.188:8086/orders/"
         response = requests.post(url, json=payload)
         if response.status_code != 201:
+            doc.status = "CANCELED"
+            doc.remark = "System canceled the order."
+            doc.save(ignore_permissions=True)
+            frappe.db.commit()
+            
             error_text = response.text
             frappe.log_error("Order API Error: ", f"{response.status_code} - {error_text}")
             frappe.throw(f"Error from API: {error_text}")
         else:
             frappe.publish_realtime("order_book_event",order_book_data)
+
+            query = """
+                SELECT 
+                    COUNT(DISTINCT user_id) AS traders
+                FROM `tabOrders`
+                WHERE status NOT IN ("CANCELED", "SETTLED")
+                    AND market_id = %s
+            """
+            result = frappe.db.sql(query, (doc.market_id,), as_dict=True)
+            
+            market = frappe.get_doc("Market",doc.market_id)
+            
+            if market.total_traders!=result[0]["traders"]:
+                market.total_traders=result[0]["traders"]
+                market.save(ignore_permissions=True)
+                
+            frappe.db.commit()
+
             frappe.msgprint("Order Created Successfully.")
     except requests.exceptions.RequestException as e:
         frappe.throw(f"Error sending order: {str(e)}")
@@ -97,7 +120,7 @@ def update_order():
 
         if order.order_type == "BUY":
             order_book_data["price"] = 10-order.amount
-            order_book_data["opinion_type"] = "NO" if doc.opinion_type == "YES" else "YES"
+            order_book_data["opinion_type"] = "NO" if order.opinion_type == "YES" else "YES"
         else:
             order_book_data["price"] = order.amount
             order_book_data["opinion_type"] = order.opinion_type
@@ -199,28 +222,6 @@ def market(doc, method):
                 
                 frappe.publish_realtime("market_event",update_data,user=frappe.session.user)
                 frappe.msgprint("Market Created Successfully.")
-            
-        elif doc.status == "CLOSED":
-            payload = {
-                "winning_side":doc.end_result
-            }
-
-            url=f"http://94.136.187.188:8086/markets/{doc.name}/close"
-            response = requests.post(url, json=payload)
-            
-            if response.status_code != 200:
-                frappe.logger().error(f"Error response: {response.text}")
-                frappe.throw(f"API error: {response.status_code} - {response.text}")
-            else:
-                """Send real-time update via WebSockets"""
-                update_data = {
-                    "name": doc.name,
-                    "status": doc.status,
-                    "category": doc.category
-                }
-                
-                frappe.publish_realtime("market_event",update_data,user=frappe.session.user)
-                frappe.msgprint("Market Closed Successfully.")
     
     except Exception as e:
         frappe.log_error(f"Exception market: {str(e)}")
@@ -235,30 +236,80 @@ def close_market():
         if not data:
             return {"status": "error", "message": "Missing 'close market' key in request data"}
 
-        market = frappe.get_doc("Market",data["market_id"])
-        market.status="CLOSED"
-        market.save(ignore_permissions=True)
-        frappe.db.commit()
-        
-        update_data = {
-            "name": market.name,
-            "status": market.status,
-            "category": market.category,
-            "question": doc.question,
-            "yes_price": doc.yes_price,
-            "no_price": doc.no_price,
-            "closing_time": doc.closing_time
-        }
-        
-        frappe.publish_realtime("market_event",update_data,user=frappe.session.user)
-        
-        return {
-            "status":"success","message":"Market closed"
-        }
-        
+        url=f"http://94.136.187.188:8086/markets/{data.market_id}/close"
+        response = requests.post(url)
+            
+        if response.status_code != 200:
+            frappe.logger().error(f"Error response: {response.text}")
+            frappe.throw(f"API error: {response.status_code} - {response.text}")
+        else:
+            market = frappe.get_doc("Market",data.market_id)
+
+            market.status="CLOSED"
+            market.save(ignore_permissions=True)
+            frappe.db.commit()
+
+            frappe.msgprint("Market Closed Successfully.")
+
+            update_data = {
+                "name": market.name,
+                "status": market.status,
+                "category": market.category
+            }
+            
+            frappe.publish_realtime("market_event",update_data,user=frappe.session.user)
+            
+            return {
+                "status":"success","message":"Market closed"
+            }
     except Exception as e:
         frappe.log_error("Error Closing market", f"{str(e)}")
         return {"status": "error", "message": "Error in closing market"}
+
+
+@frappe.whitelist()
+def resolve_market():
+    try:
+        data = frappe._dict(frappe.request.get_json())
+
+        frappe.log_error("Market Resolve",data)
+        if not data:
+            return {"status": "error", "message": "Missing 'close market' key in request data"}
+        payload = {
+            "winning_side":data.winning_side
+        }
+        url=f"http://94.136.187.188:8086/markets/{data.market_id}/resolve"
+        response = requests.post(url, json=payload)
+            
+        if response.status_code != 200:
+            frappe.logger().error(f"Error response: {response.text}")
+            frappe.throw(f"API error: {response.status_code} - {response.text}")
+        else:
+            market = frappe.get_doc("Market",data.market_id)
+
+            """Send real-time update via WebSockets"""
+            update_data = {
+                "name": market.name,
+                "status": market.status,
+                "category": market.category
+            }
+            
+            frappe.publish_realtime("market_event",update_data,user=frappe.session.user)
+            
+            market.status="RESOLVED"
+            market.end_result=data.winning_side
+            market.save(ignore_permissions=True)
+            frappe.db.commit()
+
+            frappe.msgprint("Market resolved Successfully.")
+        
+            return {
+                "status":"success","message":"Market resolved"
+            }
+        
+    except Exception as e:
+        frappe.log_error("Error Closing market", f"{str(e)}")
+        return {"status": "error", "message": "Error in resolving market"}
 
 @frappe.whitelist(allow_guest=True)
 def unmatched_orders():
@@ -334,11 +385,11 @@ def update_market_price():
     try:
         data = frappe._dict(frappe.request.get_json())
 
-        market = frappe.get_doc("Market",data.market_id)
-        market.yes_price = data.yes_price
-        market.no_price = data.no_price
+        doc = frappe.get_doc("Market",data.market_id)
+        doc.yes_price = data.yes_price
+        doc.no_price = data.no_price
         
-        market.save(ignore_permissions=True)
+        doc.save(ignore_permissions=True)
         
         frappe.db.commit()
         """Send real-time update via WebSockets"""
