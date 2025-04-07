@@ -167,7 +167,9 @@ api = {
         "rewardapp.engine.get_marketwise_transaction_summary",
         "rewardapp.engine.get_available_quantity",
         "rewardapp.wallet.get_deposit_and_withdrawal",
-        "rewardapp.engine.get_open_buy_orders_without_active_sell"
+        "rewardapp.engine.get_open_buy_orders_without_active_sell",
+        "rewardapp.engine.cancel_order",
+        "rewardapp.engine.total_traders"
     ]
 }
 

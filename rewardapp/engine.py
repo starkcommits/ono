@@ -55,7 +55,7 @@ def order(doc, method):
     #     "quantity": doc.quantity,
     #     "order_type": doc.order_type
     # })
-    
+    doc.user_id = user_id
     doc.save()
     frappe.db.commit()
 
@@ -477,3 +477,15 @@ def cancel_order(order_id):
     except Exception as e:
         frappe.log_error("Error in order cancelling", f"{str(e)}")
         frappe.throw(f"Error in order cancelling: {str(e)}")
+
+
+@frappe.whitelist()
+def total_traders(market_id):
+    query = """
+        SELECT 
+            COUNT(DISTINCT user_id) AS traders
+        FROM `tabOrders`
+        WHERE status NOT IN ("CANCELED", "SETTLED")
+            AND market_id = %s
+    """
+    return frappe.db.sql(query, (market_id,), as_dict=True)
