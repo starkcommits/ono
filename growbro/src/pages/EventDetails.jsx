@@ -119,7 +119,7 @@ const EventDetails = () => {
           <div className="flex items-center gap-4 text-sm text-gray-600">
             <span className="flex items-center">
               <Users className="h-4 w-4 mr-1.5" />
-              4000
+              {market?.total_traders} traders
               {/* {market.traders.toLocaleString()} */}
             </span>
             {market?.status === 'OPEN' && (

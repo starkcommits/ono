@@ -328,10 +328,10 @@ const Portfolio = () => {
           <div className="bg-white/30 backdrop-blur-lg rounded-3xl p-6 mb-6">
             <div className="flex items-center justify-between mb-2">
               <span className="text-white font-semibold">Portfolio Value</span>
-              <div className="flex items-center bg-emerald-500 bg-opacity-25 backdrop-blur-sm px-2.5 py-1 rounded-full">
+              {/* <div className="flex items-center bg-emerald-500 bg-opacity-25 backdrop-blur-sm px-2.5 py-1 rounded-full">
                 <TrendingUp className="h-4 w-4 text-white mr-1" />
                 <span className="text-sm font-semibold text-white">+12.5%</span>
-              </div>
+              </div> */}
             </div>
             <div className="text-4xl font-bold text-white mb-4 flex items-center gap-4">
               <div>

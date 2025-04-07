@@ -19,6 +19,7 @@ const CategoryPage = () => {
         'no_price',
         'closing_time',
         'status',
+        'total_traders',
       ],
       filters: [
         ['status', '=', 'OPEN'],
@@ -124,8 +125,8 @@ const CategoryPage = () => {
               </div>
               <div>
                 <h2 className="text-xl font-bold text-white mb-1">
-                {id.charAt(0).toUpperCase()}
-                {id.slice(1)} Markets
+                  {id.charAt(0).toUpperCase()}
+                  {id.slice(1)} Markets
                 </h2>
                 <p className="text-white/80">
                   {Object.values(categoryMarkets || {})?.length} active{' '}
@@ -170,7 +171,7 @@ const CategoryPage = () => {
                   <div className="flex items-center text-xs text-gray-600">
                     <Users className="h-3.5 w-3.5 mr-1" />
                     {/* <span>{market.traders.toLocaleString()} traders</span> */}
-                    <span>4000 traders</span>
+                    <span>{market?.total_traders} traders</span>
                   </div>
                   <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-600">
                     <div className="w-1 h-1 bg-red-500 rounded-full animate-pulse mr-1"></div>

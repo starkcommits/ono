@@ -307,12 +307,10 @@ const TradeSheet = ({
             <button
               onClick={handleConfirmBuy}
               disabled={createDocLoading}
-              className={`w-full bg-blue-500 text-white py-4 rounded-xl font-medium transition-colors 
-        ${
-          createDocLoading
-            ? 'opacity-50 cursor-not-allowed'
-            : 'active:bg-blue-600'
-        }`}
+              className={`w-full ${
+                choice === 'YES' ? 'bg-blue-500' : 'bg-red-500'
+              } text-white py-4 rounded-xl font-medium transition-colors 
+        ${createDocLoading ? `opacity-50 cursor-not-allowed` : ``}`}
             >
               {createDocLoading
                 ? 'Processing...'
@@ -323,12 +321,10 @@ const TradeSheet = ({
             <button
               onClick={handleConfirmSell}
               disabled={createDocLoading}
-              className={`w-full bg-blue-500 text-white py-4 rounded-xl font-medium transition-colors 
-        ${
-          createDocLoading
-            ? 'opacity-50 cursor-not-allowed'
-            : 'active:bg-blue-600'
-        }`}
+              className={`w-full ${
+                choice === 'YES' ? 'bg-green-500' : 'bg-red-500'
+              } text-white py-4 rounded-xl font-medium transition-colors 
+        ${createDocLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {createDocLoading
                 ? 'Processing...'

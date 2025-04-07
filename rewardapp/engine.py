@@ -61,38 +61,26 @@ def order(doc, method):
 
     frappe.log_error("Order Payload",payload)
     try:
-        url = "http://94.136.187.188:8086/orders/"
-        response = requests.post(url, json=payload)
-        if response.status_code != 201:
-            doc.status = "CANCELED"
-            doc.remark = "System canceled the order."
-            doc.save(ignore_permissions=True)
-            frappe.db.commit()
-            
-            error_text = response.text
-            frappe.log_error("Order API Error: ", f"{response.status_code} - {error_text}")
-            frappe.throw(f"Error from API: {error_text}")
-        else:
-            frappe.publish_realtime("order_book_event",order_book_data)
+        frappe.publish_realtime("order_book_event",order_book_data)
 
-            query = """
-                SELECT 
-                    COUNT(DISTINCT user_id) AS traders
-                FROM `tabOrders`
-                WHERE status NOT IN ("CANCELED", "SETTLED")
-                    AND market_id = %s
-            """
-            result = frappe.db.sql(query, (doc.market_id,), as_dict=True)
+        query = """
+            SELECT 
+                COUNT(DISTINCT user_id) AS traders
+            FROM `tabOrders`
+            WHERE status NOT IN ("CANCELED", "SETTLED")
+                AND market_id = %s
+        """
+        result = frappe.db.sql(query, (doc.market_id,), as_dict=True)
+        
+        market = frappe.get_doc("Market",doc.market_id)
+        
+        if market.total_traders!=result[0]["traders"]:
+            market.total_traders=result[0]["traders"]
+            market.save(ignore_permissions=True)
             
-            market = frappe.get_doc("Market",doc.market_id)
-            
-            if market.total_traders!=result[0]["traders"]:
-                market.total_traders=result[0]["traders"]
-                market.save(ignore_permissions=True)
-                
-            frappe.db.commit()
+        frappe.db.commit()
 
-            frappe.msgprint("Order Created Successfully.")
+        frappe.msgprint("Order Created Successfully.")
     except requests.exceptions.RequestException as e:
         frappe.throw(f"Error sending order: {str(e)}")
             
