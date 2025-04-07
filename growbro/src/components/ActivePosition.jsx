@@ -1,8 +1,10 @@
 import {
   useFrappeAuth,
   useFrappeEventListener,
+  useFrappeGetCall,
   useFrappeGetDoc,
   useFrappeGetDocList,
+  useFrappePostCall,
   useFrappeUpdateDoc,
 } from 'frappe-react-sdk'
 import { Clock, Plus, TrendingDown, TrendingUp, XCircle } from 'lucide-react'
@@ -31,6 +33,8 @@ const ActivePosition = ({
   const [isOpen, setIsOpen] = useState(false)
   const { updateDoc } = useFrappeUpdateDoc()
   const { currentUser } = useFrappeAuth()
+
+  const { call } = useFrappePostCall()
 
   // console.log('Sell Order ID:', position.status === 'MATCHED' && position)
 
@@ -124,6 +128,9 @@ const ActivePosition = ({
     try {
       console.log(position)
       if (position.order_type === 'SELL') {
+        await call('rewardapp.engine.cancel_order', {
+          order_id: position.name,
+        })
         await updateDoc('Orders', position.buy_order_id, {
           sell_order_id: null,
         })
@@ -135,7 +142,7 @@ const ActivePosition = ({
           status: 'CANCELED',
         })
       }
-
+      call
       refetchActiveOrders()
       setIsOpen(false)
     } catch (err) {
