@@ -309,6 +309,8 @@ const Portfolio = () => {
 
   const profitLoss = currentValue - invested
 
+  console.log(profitLoss)
+
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
       {/* Header Section with improved contrast */}
@@ -325,47 +327,45 @@ const Portfolio = () => {
           </div>
 
           {/* Portfolio Stats Card with better contrast */}
-          <div className="bg-white/30 backdrop-blur-lg rounded-3xl p-6 mb-6">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-white font-semibold">Portfolio Value</span>
-              {/* <div className="flex items-center bg-emerald-500 bg-opacity-25 backdrop-blur-sm px-2.5 py-1 rounded-full">
+          <div className="flex justify-between bg-white/30 backdrop-blur-lg rounded-3xl p-6 mb-6">
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-between">
+                <span className="text-white font-semibold">
+                  Portfolio Value
+                </span>
+                {/* <div className="flex items-center bg-emerald-500 bg-opacity-25 backdrop-blur-sm px-2.5 py-1 rounded-full">
                 <TrendingUp className="h-4 w-4 text-white mr-1" />
                 <span className="text-sm font-semibold text-white">+12.5%</span>
               </div> */}
-            </div>
-            <div className="text-4xl font-bold text-white mb-4 flex items-center gap-4">
-              <div>
-                ₹
-                {Object.values(activeOrders).length > 0
-                  ? Object.values(activeOrders).reduce((acc, order) => {
-                      acc =
-                        acc +
-                        (order.opinion_type === 'YES'
-                          ? order.yes_price
-                          : order.no_price) *
-                          order.quantity
+              </div>
+              <div className="text-3xl font-bold text-white flex items-center gap-4">
+                <div>
+                  ₹
+                  {Object.values(activeOrders).length > 0
+                    ? Object.values(activeOrders).reduce((acc, order) => {
+                        acc =
+                          acc +
+                          (order.opinion_type === 'YES'
+                            ? order.yes_price
+                            : order.no_price) *
+                            order.quantity
 
-                      return acc
-                    }, 0)
-                  : 0}
-              </div>
-              <div
-                className={`text-sm font-semibold flex items-center ${
-                  profitLoss > 0 ? 'text-green-600' : 'text-red-600'
-                }`}
-              >
-                {profitLoss > 0 ? `${profitLoss}` : `${profitLoss}`}
-                {profitLoss > 0 ? (
-                  <ArrowUp className="h-5 w-5" />
-                ) : (
-                  <ArrowDown className="h-5 w-5" />
-                )}
+                        return acc
+                      }, 0)
+                    : 0}
+                </div>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <div className="text-white/90 font-medium mb-1">Invested</div>
-                <div className="text-white font-semibold">
+            <div className="flex flex-col gap-4 items-end">
+              <div className="flex items-center justify-between">
+                <span className="text-white font-semibold">Invested</span>
+                {/* <div className="flex items-center bg-emerald-500 bg-opacity-25 backdrop-blur-sm px-2.5 py-1 rounded-full">
+                <TrendingUp className="h-4 w-4 text-white mr-1" />
+                <span className="text-sm font-semibold text-white">+12.5%</span>
+              </div> */}
+              </div>
+              <div className="text-3xl font-bold text-white flex items-center gap-4">
+                <div>
                   ₹
                   {Object.values(activeOrders).length > 0
                     ? Object.values(activeOrders).reduce((acc, order) => {
@@ -374,18 +374,6 @@ const Portfolio = () => {
                     : 0}
                 </div>
               </div>
-              {/* <div className="place-items-end">
-                <div className="text-white/90 font-medium mb-1">
-                  Overall P/L
-                </div>
-                <div className="text-white font-semibold">
-                  {profitLoss > 0 ? `${profitLoss}` : `${profitLoss}`}
-                </div>
-              </div> */}
-              {/* <div>
-                <div className="text-white/90 font-medium mb-1">Win Rate</div>
-                <div className="text-white font-semibold">68%</div>
-              </div> */}
             </div>
           </div>
 
@@ -473,3 +461,15 @@ const Portfolio = () => {
 }
 
 export default Portfolio
+
+{
+  /* <div
+                className={`text-sm font-semibold flex items-center ${
+                  profitLoss > 0 && 'text-green-600'
+                } ${profitLoss < 0 && 'text-red-600'}`}
+              >
+                {profitLoss}
+                {profitLoss > 0 && <ArrowUp className="h-5 w-5" />}
+                {profitLoss < 0 && <ArrowDown className="h-5 w-5" />}
+              </div> */
+}

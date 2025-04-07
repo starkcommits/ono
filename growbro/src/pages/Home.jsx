@@ -293,14 +293,18 @@ const Home = () => {
           </div>
 
           <div className="space-y-4">
-            {Object.values(markets).map((market) => (
-              <div
-                key={market.name}
-                className="market-card cursor-pointer"
-                onClick={() => handleMarketClick(market)}
-              >
-                <>
-                  {/* <div className="relative h-32">
+            {Object.values(markets)
+              .sort((a, b) => {
+                return b.total_traders - a.total_traders
+              })
+              .map((market) => (
+                <div
+                  key={market.name}
+                  className="market-card cursor-pointer"
+                  onClick={() => handleMarketClick(market)}
+                >
+                  <>
+                    {/* <div className="relative h-32">
                     <img
                       src={market.image}
                       alt={market.title}
@@ -319,34 +323,34 @@ const Home = () => {
                     </div>
                   </div> */}
 
-                  <div className="p-4">
-                    <h3 className="text-base font-medium mb-2">
-                      {market?.question}
-                    </h3>
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="flex items-center text-xs text-gray-600">
-                        <Users className="h-3.5 w-3.5 mr-1" />
-                        {/* <span>{market.traders.toLocaleString()} traders</span> */}
-                        <span>{market?.total_traders} traders</span>
+                    <div className="p-4">
+                      <h3 className="text-base font-medium mb-2">
+                        {market?.question}
+                      </h3>
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="flex items-center text-xs text-gray-600">
+                          <Users className="h-3.5 w-3.5 mr-1" />
+                          {/* <span>{market.traders.toLocaleString()} traders</span> */}
+                          <span>{market?.total_traders} traders</span>
+                        </div>
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-600">
+                          <div className="w-1 h-1 bg-red-500 rounded-full animate-pulse mr-1"></div>
+                          LIVE
+                        </span>
                       </div>
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-600">
-                        <div className="w-1 h-1 bg-red-500 rounded-full animate-pulse mr-1"></div>
-                        LIVE
-                      </span>
+                      {/* <p className="text-xs text-gray-600 mb-4">{market.info}</p> */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="py-2 px-4 bg-green-50 text-green-600 rounded-xl text-sm font-medium">
+                          Yes ₹{market?.yes_price}
+                        </div>
+                        <div className="py-2 px-4 bg-rose-50 text-rose-600 rounded-xl text-sm font-medium">
+                          No ₹{market?.no_price}
+                        </div>
+                      </div>
                     </div>
-                    {/* <p className="text-xs text-gray-600 mb-4">{market.info}</p> */}
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="py-2 px-4 bg-green-50 text-green-600 rounded-xl text-sm font-medium">
-                        Yes ₹{market?.yes_price}
-                      </div>
-                      <div className="py-2 px-4 bg-rose-50 text-rose-600 rounded-xl text-sm font-medium">
-                        No ₹{market?.no_price}
-                      </div>
-                    </div>
-                  </div>
-                </>
-              </div>
-            ))}
+                  </>
+                </div>
+              ))}
           </div>
         </div>
       </div>

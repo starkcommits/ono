@@ -34,8 +34,6 @@ const ActivePosition = ({
   const { updateDoc } = useFrappeUpdateDoc()
   const { currentUser } = useFrappeAuth()
 
-  const { call } = useFrappePostCall()
-
   // console.log('Sell Order ID:', position.status === 'MATCHED' && position)
 
   // const { data: sellPosition, isLoading: sellPositionLoading } =
@@ -128,21 +126,21 @@ const ActivePosition = ({
     try {
       console.log(position)
       if (position.order_type === 'SELL') {
-        await call('rewardapp.engine.cancel_order', {
-          order_id: position.name,
-        })
+        console.log('Entered')
         await updateDoc('Orders', position.buy_order_id, {
           sell_order_id: null,
         })
         await updateDoc('Orders', position.name, {
           status: 'SETTLED',
+          remark: 'Sell order canceled in midway',
         })
       } else {
         await updateDoc('Orders', position.name, {
           status: 'CANCELED',
         })
       }
-      call
+      // Remove this stray 'call' line
+      // call  <-- This is causing the error
       refetchActiveOrders()
       setIsOpen(false)
     } catch (err) {
@@ -155,10 +153,17 @@ const ActivePosition = ({
   }
 
   return (
-    <div key={position.name} className="p-4 w-full">
+    <div key={position.name} className="p-4 w-full cursor-pointer">
       <div className="flex items-center justify-between mb-2">
         <div className="flex gap-2 items-center">
-          <h3 className="font-medium text-gray-900">{position.question}</h3>
+          <h3
+            className="font-medium text-gray-900"
+            onClick={() => {
+              navigate(`/event/${position.market_id}`)
+            }}
+          >
+            {position.question}
+          </h3>
           {position.status === 'UNMATCHED' &&
             position.order_type === 'SELL' && (
               <span className="bg-yellow-100 text-yellow-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">

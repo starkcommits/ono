@@ -6,6 +6,8 @@ import { Slider } from '@/components/ui/slider'
 import OrderBook from './OrderBook'
 import toast from 'react-hot-toast'
 
+import { motion, useMotionValue, useTransform } from 'framer-motion'
+
 const TradeSheet = ({
   marketId,
   marketPrice,
@@ -20,6 +22,20 @@ const TradeSheet = ({
   const { createDoc, isLoading: createDocLoading } = useFrappeCreateDoc()
   const { updateDoc } = useFrappeUpdateDoc()
   const { id } = useParams()
+
+  const x = useMotionValue(0)
+  const background = useTransform(x, [0, 200], ['#e0e0e0', '#4ade80']) // gray to green
+  const textOpacity = useTransform(x, [0, 100], [1, 0])
+
+  useEffect(() => {
+    const unsubscribe = x.onChange((latest) => {
+      if (latest > 500) {
+        onSwipeComplete()
+        x.set(0) // reset after complete
+      }
+    })
+    return () => unsubscribe()
+  }, [x])
 
   const sheetRef = useRef(null)
   const dragRef = useRef({
@@ -309,8 +325,8 @@ const TradeSheet = ({
               disabled={createDocLoading}
               className={`w-full ${
                 choice === 'YES' ? 'bg-blue-500' : 'bg-red-500'
-              } text-white py-4 rounded-xl font-medium transition-colors 
-        ${createDocLoading ? `opacity-50 cursor-not-allowed` : ``}`}
+              } text-white py-4 rounded-xl font-medium transition-colors
+            ${createDocLoading ? `opacity-50 cursor-not-allowed` : ``}`}
             >
               {createDocLoading
                 ? 'Processing...'
@@ -323,8 +339,8 @@ const TradeSheet = ({
               disabled={createDocLoading}
               className={`w-full ${
                 choice === 'YES' ? 'bg-green-500' : 'bg-red-500'
-              } text-white py-4 rounded-xl font-medium transition-colors 
-        ${createDocLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              } text-white py-4 rounded-xl font-medium transition-colors
+            ${createDocLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {createDocLoading
                 ? 'Processing...'
