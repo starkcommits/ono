@@ -145,6 +145,10 @@ const Home = () => {
       limit: 5,
     })
 
+
+  const { data, isLoading } = useFrappeGetCall('') 
+  
+
   const { data: userWallet, isLoading: userWalletLoading } = useFrappeGetDoc(
     'User Wallet',
     currentUser

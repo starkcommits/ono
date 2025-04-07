@@ -1,5 +1,5 @@
 import React, { cache, useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { redirect, useNavigate } from 'react-router-dom'
 import {
   ArrowLeft,
   TrendingUp,
@@ -12,6 +12,8 @@ import {
   Plus,
   CloudLightning,
   ShieldEllipsis,
+  ArrowDown,
+  ArrowUp,
 } from 'lucide-react'
 import { Line } from 'react-chartjs-2'
 import {
@@ -60,6 +62,7 @@ const Portfolio = () => {
   const [activeOrders, setActiveOrders] = useState({})
   const [completedOrders, setCompletedOrders] = useState({})
   const { currentUser, isLoading } = useFrappeAuth()
+  const [totalReturns, setTotalReturns] = useState(0)
 
   const {
     data: activeOrdersData,
@@ -290,6 +293,22 @@ const Portfolio = () => {
     setSelectedAction(null)
   }
 
+  const invested = Object.values(activeOrders).reduce((acc, order) => {
+    return acc + parseFloat(order.amount * order.quantity)
+  }, 0)
+
+  const currentValue = Object.values(activeOrders).reduce((acc, order) => {
+    return (
+      acc +
+      parseFloat(
+        (order.opinion_type === 'YES' ? order.yes_price : order.no_price) *
+          order.quantity
+      )
+    )
+  }, 0)
+
+  const profitLoss = currentValue - invested
+
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
       {/* Header Section with improved contrast */}
@@ -314,8 +333,36 @@ const Portfolio = () => {
                 <span className="text-sm font-semibold text-white">+12.5%</span>
               </div>
             </div>
-            <div className="text-4xl font-bold text-white mb-4">₹2,345.67</div>
-            <div className="grid grid-cols-3 gap-4 text-sm">
+            <div className="text-4xl font-bold text-white mb-4 flex items-center gap-4">
+              <div>
+                ₹
+                {Object.values(activeOrders).length > 0
+                  ? Object.values(activeOrders).reduce((acc, order) => {
+                      acc =
+                        acc +
+                        (order.opinion_type === 'YES'
+                          ? order.yes_price
+                          : order.no_price) *
+                          order.quantity
+
+                      return acc
+                    }, 0)
+                  : 0}
+              </div>
+              <div
+                className={`text-sm font-semibold flex items-center ${
+                  profitLoss > 0 ? 'text-green-600' : 'text-red-600'
+                }`}
+              >
+                {profitLoss > 0 ? `${profitLoss}` : `${profitLoss}`}
+                {profitLoss > 0 ? (
+                  <ArrowUp className="h-5 w-5" />
+                ) : (
+                  <ArrowDown className="h-5 w-5" />
+                )}
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <div className="text-white/90 font-medium mb-1">Invested</div>
                 <div className="text-white font-semibold">
@@ -327,23 +374,27 @@ const Portfolio = () => {
                     : 0}
                 </div>
               </div>
-              <div>
-                <div className="text-white/90 font-medium mb-1">Returns</div>
-                <div className="text-emerald-300 font-semibold">+₹345.67</div>
-              </div>
-              <div>
+              {/* <div className="place-items-end">
+                <div className="text-white/90 font-medium mb-1">
+                  Overall P/L
+                </div>
+                <div className="text-white font-semibold">
+                  {profitLoss > 0 ? `${profitLoss}` : `${profitLoss}`}
+                </div>
+              </div> */}
+              {/* <div>
                 <div className="text-white/90 font-medium mb-1">Win Rate</div>
                 <div className="text-white font-semibold">68%</div>
-              </div>
+              </div> */}
             </div>
           </div>
 
           {/* Chart Card */}
-          <div className="bg-white rounded-3xl p-4 shadow-sm">
+          {/* <div className="bg-white rounded-3xl p-4 shadow-sm">
             <div className="h-40">
               <Line data={performanceData} options={chartOptions} />
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
 
