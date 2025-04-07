@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "market_id",
+  "user_id",
   "question",
   "status",
   "order_type",
@@ -114,13 +115,20 @@
   },
   {
    "fieldname": "buy_order_id",
-   "fieldtype": "Data",
-   "label": "Buy Order ID"
+   "fieldtype": "Link",
+   "label": "Buy Order ID",
+   "options": "Orders"
+  },
+  {
+   "fieldname": "user_id",
+   "fieldtype": "Link",
+   "label": "User ID",
+   "options": "User"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-04-05 18:26:41.257311",
+ "modified": "2025-04-07 12:15:19.009532",
  "modified_by": "Administrator",
  "module": "Reward App",
  "name": "Orders",
