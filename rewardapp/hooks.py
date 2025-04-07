@@ -146,7 +146,7 @@ app_license = "mit"
 
 doc_events = {
 	"Orders": {
-		"after_insert": "rewardapp.engine.order"
+		"on_update": "rewardapp.engine.order"
 	},
     "Market": {
         "after_insert": "rewardapp.engine.market"
