@@ -449,11 +449,23 @@ def get_available_quantity(market_id):
 
 @frappe.whitelist(allow_guest=True)
 def get_open_buy_orders_without_active_sell():
-    result = frappe.db.sql("""
-        SELECT b.*
+    orders = frappe.db.sql("""
+        SELECT
+            COALESCE(s.name, b.name) AS name,
+            COALESCE(s.order_type, b.order_type) AS order_type,
+            COALESCE(s.status, b.status) AS status,
+            COALESCE(s.price, b.price) AS price,
+            COALESCE(s.quantity, b.quantity) AS quantity,
+            COALESCE(s.creation, b.creation) AS creation,
+            COALESCE(s.modified, b.modified) AS modified,
+            COALESCE(s.owner, b.owner) AS owner,
+            COALESCE(s.sell_order_id, b.sell_order_id) AS sell_order_id,
+            COALESCE(s.buy_order_id, b.buy_order_id) AS buy_order_id
         FROM `tabOrders` b
-        LEFT JOIN `tabOrders` s 
+        LEFT JOIN `tabOrders` s
             ON b.sell_order_id = s.name AND s.status != 'CANCELED'
-        WHERE b.order_type = 'BUY' AND s.name IS NULL
-    """, as_dict=True)
-    return result
+        WHERE b.order_type = 'BUY' AND (
+            s.name IS NULL OR s.status != 'CANCELED'
+        )
+        """, as_dict=True)
+    return orders

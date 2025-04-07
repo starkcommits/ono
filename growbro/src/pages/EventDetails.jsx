@@ -136,14 +136,12 @@ const EventDetails = () => {
             )}
           </div>
         </div>
-
         <div className="bg-amber-50 p-4 rounded-xl mb-6">
           <div className="flex items-center">
             <span className="text-2xl mr-2">💡</span>
             <p className="text-sm text-amber-800">{market?.question}</p>
           </div>
         </div>
-
         <div className="flex gap-3 mb-6">
           <button
             onClick={() => handleTradeClick('YES', 'BUY')}
@@ -159,6 +157,7 @@ const EventDetails = () => {
             No ₹{market?.no_price}
           </button>
         </div>
+
         {/* <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
@@ -190,15 +189,15 @@ const EventDetails = () => {
             <Line data={probabilityData} options={chartOptions} />
           </div>
         </div> */}
-
-        <OrderBook marketId={id} />
-
+        {market?.status === 'OPEN' && <OrderBook marketId={id} />}
         {/* ... other existing content ... */}
       </div>
 
-      {showTradeSheet && selectedChoice && (
+      {market?.status === 'OPEN' && showTradeSheet && selectedChoice && (
         <TradeSheet
-          marketPrice={selectedChoice === 'YES' ? market.yes_price : market.no_price}
+          marketPrice={
+            selectedChoice === 'YES' ? market.yes_price : market.no_price
+          }
           choice={selectedChoice}
           onClose={closeTradeSheet}
           tradeAction={selectedAction}

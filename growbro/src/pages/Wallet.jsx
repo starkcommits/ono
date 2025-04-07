@@ -398,11 +398,12 @@ const Wallet = () => {
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>
-                    Are you sure you want to add money in your wallet?
-                  </DialogTitle>
+                  <DialogTitle>Add Money to Wallet</DialogTitle>
                   <DialogDescription>
-                    Press the button to confirm it.
+                    You're about to add ₹{amount} to your wallet. This amount
+                    will be available for placing orders immediately after a
+                    successful transaction. <br />
+                    Do you want to proceed?
                   </DialogDescription>
 
                   <DialogFooter>

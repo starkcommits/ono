@@ -122,10 +122,21 @@ const ActivePosition = ({
 
   const handleCancelOrder = async () => {
     try {
-      const order = await updateDoc('Orders', position.name, {
-        status: 'CANCELED',
-      })
-      console.log(order)
+      console.log(position)
+      if (position.order_type === 'SELL') {
+        await updateDoc('Orders', position.buy_order_id, {
+          sell_order_id: null,
+        })
+        await updateDoc('Orders', position.name, {
+          status: 'SETTLED',
+        })
+      } else {
+        await updateDoc('Orders', position.name, {
+          status: 'CANCELED',
+        })
+      }
+
+      refetchActiveOrders()
       setIsOpen(false)
     } catch (err) {
       console.log(err)

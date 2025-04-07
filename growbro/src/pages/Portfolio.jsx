@@ -83,11 +83,12 @@ const Portfolio = () => {
         'market_id',
         'yes_price',
         'no_price',
+        'buy_order_id',
         'sell_order_id',
       ],
       filters: [
         ['status', 'not in', ['SETTLED']],
-        ['linked_order_id', '=', ''],
+        ['sell_order_id', '=', ''],
         ['owner', '=', currentUser],
       ],
       orderBy: {
@@ -97,6 +98,14 @@ const Portfolio = () => {
     },
     currentUser ? undefined : null
   )
+
+  // const {
+  //   data: activeOrdersData,
+  //   isLoading: activeOrdersLoading,
+  //   mutate: refetchActiveOrders,
+  // } = useFrappeGetCall(
+  //   'rewardapp.engine.get_open_buy_orders_without_active_sell'
+  // )
 
   console.log(activeOrdersData)
 
@@ -140,6 +149,8 @@ const Portfolio = () => {
       setActiveOrders(activeOrdersMap)
     }
   }, [activeOrdersData])
+
+  console.log(activeOrders)
 
   useEffect(() => {
     if (!completedOrdersLoading) {
@@ -383,6 +394,7 @@ const Portfolio = () => {
                     key={position.name}
                     position={position}
                     setActiveOrders={setActiveOrders}
+                    refetchActiveOrders={refetchActiveOrders}
                     handleTradeClick={handleTradeClick}
                   />
                 ))

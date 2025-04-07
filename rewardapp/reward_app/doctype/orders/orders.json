@@ -18,9 +18,9 @@
   "filled_quantity",
   "opinion_type",
   "amount",
-  "sell_order_id",
   "market_status",
-  "parent_order_id"
+  "sell_order_id",
+  "buy_order_id"
  ],
  "fields": [
   {
@@ -104,15 +104,19 @@
    "label": "Market Status"
   },
   {
-   "fieldname": "parent_order_id",
-   "fieldtype": "Link",
-   "label": "Parent Order ID",
-   "options": "Orders"
+   "fieldname": "sell_order_id",
+   "fieldtype": "Data",
+   "label": "Sell Order ID"
+  },
+  {
+   "fieldname": "buy_order_id",
+   "fieldtype": "Data",
+   "label": "Buy Order ID"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-04-05 15:23:47.197627",
+ "modified": "2025-04-05 18:04:36.732470",
  "modified_by": "Administrator",
  "module": "Reward App",
  "name": "Orders",
