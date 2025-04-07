@@ -144,14 +144,14 @@ app_license = "mit"
 # 	}
 # }
 
-# doc_events = {
-# 	"Orders": {
-# 		"after_insert": "rewardapp.engine.order"
-# 	},
-#     "Market": {
-#         "on_update": "rewardapp.engine.market"
-#     }
-# }
+doc_events = {
+	"Orders": {
+		"after_insert": "rewardapp.engine.order"
+	},
+    "Market": {
+        "after_insert": "rewardapp.engine.market"
+    }
+}
 
 api = {
     "methods" : [
@@ -161,6 +161,7 @@ api = {
         "rewardapp.engine.update_order",
         "rewardapp.engine.trades",
         "rewardapp.engine.close_market",
+        "rewardapp.engine.resolve_market",
         "rewardapp.engine.unmatched_orders",
         "rewardapp.engine.market_settlements",
         "rewardapp.engine.update_market_price",
