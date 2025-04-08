@@ -246,7 +246,6 @@ def market(doc, method):
     
     except Exception as e:
         frappe.log_error(f"Exception market: {str(e)}")
-        frappe.throw(f"Error market: {str(e)}")
 
 @frappe.whitelist()
 def close_market():
