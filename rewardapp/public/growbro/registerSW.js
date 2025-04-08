@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/assets/rewardapp/growbro/sw.js', { scope: '/assets/rewardapp/growbro/' })})}

@@ -27,7 +27,6 @@ import {
   useFrappeGetCall,
   useFrappeGetDoc,
 } from 'frappe-react-sdk'
-import TradingViewWidget from '../components/TradingViewWidget'
 import OrderBook from '../components/OrderBook'
 
 ChartJS.register(

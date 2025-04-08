@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, memo } from 'react'
-function TradingViewWidget() {
+function TradingViewWidgetBTC() {
   const container = useRef()
   useEffect(() => {
     const script = document.createElement('script')
@@ -45,4 +45,4 @@ function TradingViewWidget() {
     </div>
   )
 }
-export default memo(TradingViewWidget)
+export default memo(TradingViewWidgetBTC)

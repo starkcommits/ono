@@ -144,35 +144,35 @@ app_license = "mit"
 # 	}
 # }
 
-doc_events = {
-	"Orders": {
-		"on_update": "rewardapp.engine.order"
-	},
-    "Market": {
-        "after_insert": "rewardapp.engine.market"
-    }
-}
+# doc_events = {
+# 	"Orders": {
+# 		"on_update": "rewardapp.engine.order"
+# 	},
+#     "Market": {
+#         "after_insert": "rewardapp.engine.market"
+#     }
+# }
 
-api = {
-    "methods" : [
-        "rewardapp.api.signup",
-        "rewardapp.wallet.get_balance",
-        "rewardapp.wallet.update_wallet",
-        "rewardapp.engine.update_order",
-        "rewardapp.engine.trades",
-        "rewardapp.engine.close_market",
-        "rewardapp.engine.resolve_market",
-        "rewardapp.engine.unmatched_orders",
-        "rewardapp.engine.market_settlements",
-        "rewardapp.engine.update_market_price",
-        "rewardapp.engine.get_marketwise_transaction_summary",
-        "rewardapp.engine.get_available_quantity",
-        "rewardapp.wallet.get_deposit_and_withdrawal",
-        "rewardapp.engine.get_open_buy_orders_without_active_sell",
-        "rewardapp.engine.cancel_order",
-        "rewardapp.engine.total_traders"
-    ]
-}
+# api = {
+#     "methods" : [
+#         "rewardapp.api.signup",
+#         "rewardapp.wallet.get_balance",
+#         "rewardapp.wallet.update_wallet",
+#         "rewardapp.engine.update_order",
+#         "rewardapp.engine.trades",
+#         "rewardapp.engine.close_market",
+#         "rewardapp.engine.resolve_market",
+#         "rewardapp.engine.unmatched_orders",
+#         "rewardapp.engine.market_settlements",
+#         "rewardapp.engine.update_market_price",
+#         "rewardapp.engine.get_marketwise_transaction_summary",
+#         "rewardapp.engine.get_available_quantity",
+#         "rewardapp.wallet.get_deposit_and_withdrawal",
+#         "rewardapp.engine.get_open_buy_orders_without_active_sell",
+#         "rewardapp.engine.cancel_order",
+#         "rewardapp.engine.total_traders"
+#     ]
+# }
 
 # scheduler_events = {
 #     "cron": {
