@@ -21,7 +21,8 @@
   "amount",
   "sell_order_id",
   "buy_order_id",
-  "remark"
+  "remark",
+  "market_status"
  ],
  "fields": [
   {
@@ -134,7 +135,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-04-07 19:43:49.920522",
+ "modified": "2025-04-08 10:42:17.752521",
  "modified_by": "Administrator",
  "module": "Reward App",
  "name": "Orders",
