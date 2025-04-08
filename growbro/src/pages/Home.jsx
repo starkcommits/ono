@@ -30,8 +30,14 @@ const categories = [
     color: 'from-orange-400 to-orange-500',
   },
   {
-    id: 'crypto',
-    name: 'Crypto',
+    id: 'ethereum',
+    name: 'Ethereum',
+    icon: '🇪🇹🇭',
+    color: 'from-orange-400 to-orange-500',
+  },
+  {
+    id: 'bitcoin',
+    name: 'Bitcoin',
     icon: '₿',
     color: 'from-amber-400 to-amber-500',
   },

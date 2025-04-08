@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, TrendingUp, Users, Timer, Zap } from 'lucide-react'
 import { useFrappeEventListener, useFrappeGetDocList } from 'frappe-react-sdk'
-import TradingViewWidget from '../components/TradingViewWidget'
+import TradingViewWidgetBTC from '../components/TradingViewWidgetBTC'
+import TradingViewWidgetETH from '../components/TradingViewWidgetETH'
 
 const CategoryPage = () => {
   const navigate = useNavigate()
@@ -112,9 +113,14 @@ const CategoryPage = () => {
           </div>
 
           <div className="bg-white/20 backdrop-blur-lg rounded-3xl p-6 mb-6">
-            {id === 'crypto' && (
+            {id === 'bitcoin' && (
               <div className="h-[350px]">
-                <TradingViewWidget />
+                <TradingViewWidgetBTC />
+              </div>
+            )}
+            {id === 'ethereum' && (
+              <div className="h-[350px]">
+                <TradingViewWidgetETH />
               </div>
             )}
             <div className="flex items-center gap-4 mt-4">
