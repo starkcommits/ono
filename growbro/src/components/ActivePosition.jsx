@@ -19,6 +19,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { useEffect, useState } from 'react'
 import { useFrappeDeleteDoc } from 'frappe-react-sdk'
 
@@ -33,49 +34,6 @@ const ActivePosition = ({
   const [isOpen, setIsOpen] = useState(false)
   const { updateDoc } = useFrappeUpdateDoc()
   const { currentUser } = useFrappeAuth()
-
-  // console.log('Sell Order ID:', position.status === 'MATCHED' && position)
-
-  // const { data: sellPosition, isLoading: sellPositionLoading } =
-  //   position.sell_order_id
-  //     ? useFrappeGetDocList('Orders', {
-  //         fields: [
-  //           'name',
-  //           'question',
-  //           'creation',
-  //           'amount',
-  //           'status',
-  //           'quantity',
-  //           'opinion_type',
-  //           'market_id',
-  //           'sell_order_id',
-  //         ],
-  //         filters: [
-  //           ['order_type', '=', 'SELL'],
-  //           ['name', '=', position.sell_order_id],
-  //           ['owner', '=', currentUser],
-  //         ],
-  //       })
-  //     : []
-
-  console.log('Position: ', position)
-
-  // useEffect(() => {
-  //   if (position.sell_order_id && sellPosition?.length > 0) {
-  //     position = sellPosition[0]
-  //   }
-  // }, [sellPosition])
-
-  // const { data: marketData, isLoading: marketDataLoading } =
-  //   useFrappeGetDocList('Market', {
-  //     /** SWR Configuration Options - Optional **/
-  //     fields: ['name', 'yes_price', 'no_price', 'closing_time'], // Specify the fields you want
-  //     filters: [['name', '=', position.market_id]],
-  //   })
-
-  // useEffect(() => {
-  //   if (marketData?.length > 0) setMarket(marketData[0])
-  // }, [marketDataLoading])
 
   useFrappeEventListener('market_event', (updatedMarket) => {
     console.log('Hello')
@@ -154,16 +112,20 @@ const ActivePosition = ({
 
   return (
     <div key={position.name} className="p-4 w-full cursor-pointer">
+      <Badge className="text-xs font-semibold mb-2 hover:underline">
+        #{position.name}
+      </Badge>
+
       <div className="flex items-center justify-between mb-2">
-        <div className="flex gap-2 items-center">
-          <h3
+        <div className="flex gap-2 items-center justify-between w-full">
+          <div
             className="font-medium text-gray-900"
             onClick={() => {
               navigate(`/event/${position.market_id}`)
             }}
           >
             {position.question}
-          </h3>
+          </div>
           {position.status === 'UNMATCHED' &&
             position.order_type === 'SELL' && (
               <span className="bg-yellow-100 text-yellow-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
@@ -176,14 +138,20 @@ const ActivePosition = ({
             </span>
           )}
           {position.status === 'UNMATCHED' && position.order_type === 'BUY' && (
-            <span className="bg-yellow-100 text-yellow-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
-              {position.status}
-            </span>
+            <div className="flex items-center gap-2">
+              <span>{`${position.filled_quantity}/${position.quantity}`}</span>
+              <span className="bg-yellow-100 text-yellow-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
+                {position.status}
+              </span>
+            </div>
           )}
           {position.status === 'PARTIAL' && position.order_type === 'BUY' && (
-            <span className="bg-yellow-100 text-yellow-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
-              {position.status}
-            </span>
+            <div className="flex items-center gap-2">
+              <span>{`${position.filled_quantity}/${position.quantity}`}</span>
+              <span className="bg-yellow-100 text-yellow-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
+                {position.status}
+              </span>
+            </div>
           )}
           {position.status === 'MATCHED' && position.order_type === 'SELL' && (
             <span className="bg-emerald-100 text-emerald-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
@@ -202,7 +170,7 @@ const ActivePosition = ({
             </span>
           )}
         </div>
-        <div
+        {/* <div
           className={`flex items-center ${
             position.profit >= 0 ? 'text-emerald-600' : 'text-rose-600'
           }`}
@@ -216,7 +184,7 @@ const ActivePosition = ({
             {position.profitPercentage >= 0 ? '+' : ''}
             {position.profitPercentage}%
           </span>
-        </div>
+        </div> */}
       </div>
       <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
         <span

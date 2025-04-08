@@ -77,7 +77,8 @@ const TradeSheet = ({
         buy_order_id: '',
       }
 
-      await createDoc('Orders', orderData)
+      const result = await createDoc('Orders', orderData)
+
       toast.success(`Buy Order Placed.`)
       console.log(orderData)
 

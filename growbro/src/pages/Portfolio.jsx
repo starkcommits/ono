@@ -1,4 +1,4 @@
-import React, { cache, useEffect, useState } from 'react'
+import React, { cache, useEffect, useMemo, useState } from 'react'
 import { redirect, useNavigate } from 'react-router-dom'
 import {
   ArrowLeft,
@@ -64,6 +64,70 @@ const Portfolio = () => {
   const { currentUser, isLoading } = useFrappeAuth()
   const [totalReturns, setTotalReturns] = useState(0)
 
+  const { data: userOrders, isLoading: userOrdersLoading } =
+    useFrappeGetDocList(
+      'Orders',
+      {
+        filters: [['owner', '=', currentUser]], // Replace with logged-in user
+        fields: [
+          'name',
+          'question',
+          'creation',
+          'amount',
+          'status',
+          'filled_quantity',
+          'owner',
+          'quantity',
+          'opinion_type',
+          'closing_time',
+          'order_type',
+          'market_id',
+          'yes_price',
+          'no_price',
+          'buy_order_id',
+          'sell_order_id',
+        ],
+      },
+      currentUser ? undefined : null
+    )
+
+  const marketSummaries = useMemo(() => {
+    if (!userOrders) return []
+
+    const grouped = {}
+
+    for (const order of userOrders) {
+      const { market_id, amount } = order
+
+      if (!grouped[market_id]) {
+        grouped[market_id] = {
+          market_id,
+          total_investment: 0,
+          // total_return: 0,
+          orders: [],
+        }
+      }
+
+      grouped[market_id].total_investment += amount
+      // grouped[market_id].total_return += payout || 0
+      grouped[market_id].orders.push(order)
+    }
+
+    return Object.values(grouped)
+  }, [userOrders])
+
+  const marketNames = marketSummaries.map((m) => m.market_id)
+
+  console.log(marketNames)
+
+  const { data: marketData, isLoading: marketDataLoading } =
+    useFrappeGetDocList('Market', {
+      fields: ['name', 'question', 'yes_price', 'no_price', 'closing_time'],
+      filters: [['name', 'in', marketNames]],
+    })
+
+  console.log(marketData)
+
   const {
     data: activeOrdersData,
     isLoading: activeOrdersLoading,
@@ -102,34 +166,6 @@ const Portfolio = () => {
     currentUser ? undefined : null
   )
 
-  // const {
-  //   data: activeOrdersData,
-  //   isLoading: activeOrdersLoading,
-  //   mutate: refetchActiveOrders,
-  // } = useFrappeGetCall(
-  //   'rewardapp.engine.get_open_buy_orders_without_active_sell'
-  // )
-
-  console.log(activeOrdersData)
-
-  // const { data: completedOrdersData, isLoading: completedOrdersLoading } =
-  //   activeTab === 'completed' &&
-  //   useFrappeGetDocList('Orders', {
-  //     fields: [
-  //       'name',
-  //       'amount',
-  //       'quantity',
-  //       'status',
-  //       'opinion_type',
-  //       'market_id',
-  //       'closing_time',
-  //     ],
-  //     filters: [
-  //       ['status', 'in', ['SETTLED', 'CANCELED']],
-  //       ['owner', '=', currentUser],
-  //     ],
-  //   })
-
   const { data: completedOrdersData, isLoading: completedOrdersLoading } =
     useFrappeGetCall(
       'rewardapp.engine.get_marketwise_transaction_summary',
@@ -138,10 +174,6 @@ const Portfolio = () => {
       },
       activeTab === 'completed' ? undefined : null
     )
-
-  if (!completedOrdersLoading) {
-    console.log('Completed :', completedOrdersData?.message)
-  }
 
   useEffect(() => {
     if (!activeOrdersLoading && activeOrdersData?.length > 0) {
@@ -153,13 +185,13 @@ const Portfolio = () => {
     }
   }, [activeOrdersData])
 
-  console.log(activeOrders)
-
   useEffect(() => {
     if (!completedOrdersLoading) {
       setCompletedOrders(completedOrdersData?.message || {})
     }
   }, [completedOrdersData])
+
+  console.log(completedOrders)
 
   useFrappeEventListener('order_event', (updatedOrder) => {
     console.log('Updated Order:', updatedOrder)
@@ -308,8 +340,6 @@ const Portfolio = () => {
   }, 0)
 
   const profitLoss = currentValue - invested
-
-  console.log(profitLoss)
 
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
