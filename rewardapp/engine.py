@@ -47,7 +47,8 @@ def order(doc, method):
             "option_type": doc.opinion_type,
             "price": doc.amount,
             "quantity": doc.quantity,
-            "order_type": doc.order_type
+            "order_type": doc.order_type,
+            "linked_order_id": doc.buy_order_id
         }
         
         # Set user_id without triggering save
@@ -74,7 +75,7 @@ def order(doc, method):
                 frappe.log_error("Order API Error: ", f"{response.status_code} - {error_text}")
                 frappe.throw(f"Error from API: {error_text}")
             else:
-                frappe.publish_realtime("order_book_event", order_book_data)
+                frappe.publish_realtime("order_book_event", order_book_data,after_commit=True)
 
                 query = """
                     SELECT 
@@ -130,6 +131,7 @@ def update_order():
         # This bypasses the document modified check
         frappe.db.set_value('Orders', data.order_id, {
             'status': data.status,
+            'quantity': data.quantity,
             'filled_quantity': data.filled_quantity
         }, update_modified=True)  # Update modified timestamp
         
@@ -160,9 +162,9 @@ def update_order():
             "order_id": data.order_id,
             "status": data.status,
             "filled_quantity": data.filled_quantity
-        }, user=order.user_id)  # Use order.user_id instead of frappe.session.user
+        }, user=order.user_id,after_commit=True)  # Use order.user_id instead of frappe.session.user
         
-        frappe.publish_realtime("order_book_event", order_book_data)
+        frappe.publish_realtime("order_book_event", order_book_data,after_commit=True)
         
         return {"status": "success", "message": "Order updated successfully", "order_id": order.name}
     
@@ -241,13 +243,13 @@ def market(doc, method):
                     "closing_time": doc.closing_time
                 }
                 
-                frappe.publish_realtime("market_event",update_data,user=frappe.session.user)
+                frappe.publish_realtime("market_event",update_data,user=frappe.session.user,after_commit=True)
                 frappe.msgprint("Market Created Successfully.")
     
     except Exception as e:
         frappe.log_error(f"Exception market: {str(e)}")
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def close_market():
     try:
         data = frappe._dict(frappe.request.get_json())
@@ -277,7 +279,7 @@ def close_market():
                 "category": market.category
             }
             
-            frappe.publish_realtime("market_event",update_data,user=frappe.session.user)
+            frappe.publish_realtime("market_event",update_data,user=frappe.session.user,after_commit=True)
             
             return {
                 "status":"success","message":"Market closed"
@@ -287,7 +289,7 @@ def close_market():
         return {"status": "error", "message": "Error in closing market"}
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def resolve_market():
     try:
         data = frappe._dict(frappe.request.get_json())
@@ -314,7 +316,7 @@ def resolve_market():
                 "category": market.category
             }
             
-            frappe.publish_realtime("market_event",update_data,user=frappe.session.user)
+            frappe.publish_realtime("market_event",update_data,user=frappe.session.user,after_commit=True)
             
             market.status="RESOLVED"
             market.end_result=data.winning_side
@@ -351,7 +353,7 @@ def unmatched_orders():
                 "order_id":order.name,
                 "status":order.status,
                 "filled_quantity":order.filled_quantity
-            },user=frappe.session.user)
+            },user=frappe.session.user,after_commit=True)
 
             wallet_data = frappe.db.sql("""
                 SELECT name, balance FROM `tabUser Wallet`
@@ -384,7 +386,7 @@ def unmatched_orders():
         frappe.log_error("Error updating unmatched orders", frappe.get_traceback())  # Better logging
         return {"status": "error", "message": f"Error: {str(e)}"}
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def market_settlements():
     try:
         data = frappe._dict(frappe.request.get_json())
@@ -400,7 +402,7 @@ def market_settlements():
             "message":"Error in settling order"
         }
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def update_market_price():
     try:
         data = frappe._dict(frappe.request.get_json())
@@ -423,7 +425,7 @@ def update_market_price():
             "closing_time": doc.closing_time
         }
         
-        frappe.publish_realtime("market_event",update_data,user=frappe.session.user)
+        frappe.publish_realtime("market_event",update_data,user=frappe.session.user,after_commit=True)
         
         return True
     except Exception as e:
@@ -431,7 +433,7 @@ def update_market_price():
         return False
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def get_marketwise_transaction_summary():
     """
     Fetch total debited and credited amounts per user in each market,
@@ -484,12 +486,13 @@ def get_marketwise_transaction_summary():
 
     return summary
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def get_available_quantity(market_id):
     query = """
         SELECT 
             amount,
             opinion_type,
+            order_type,
             SUM(
                 CASE 
                     WHEN status = 'UNMATCHED' THEN quantity
@@ -499,22 +502,31 @@ def get_available_quantity(market_id):
             ) AS total_available_quantity
         FROM `tabOrders`
         WHERE market_id = %s
-        GROUP BY amount, opinion_type
+        GROUP BY amount, opinion_type, order_type
     """
 
     result = frappe.db.sql(query, (market_id,), as_dict=True)
     res = {}
-
+    BASE_PRICE = 10.0
+    frappe.log_error("Quantity",result)
+    
     for temp in result:
-        amount_key = f"{temp.amount}"
+        order_type = temp.order_type.upper()
+        amount_key = f"{BASE_PRICE - temp.amount}" if order_type == "BUY" else f"{temp.amount}"
 
         if amount_key not in res:
-            res[amount_key] = {"price": temp.amount, "yesQty": 0, "noQty": 0}
+            res[amount_key] = {"price": float(amount_key), "yesQty": 0, "noQty": 0}
 
-        if temp.opinion_type == "YES":
-            res[amount_key]["yesQty"] = temp.total_available_quantity
+        if order_type == "BUY":
+            if temp.opinion_type == "YES":
+                res[amount_key]["noQty"] += temp.total_available_quantity
+            else:
+                res[amount_key]["yesQty"] += temp.total_available_quantity
         else:
-            res[amount_key]["noQty"] = temp.total_available_quantity
+            if temp.opinion_type == "YES":
+                res[amount_key]["yesQty"] += temp.total_available_quantity
+            else:
+                res[amount_key]["noQty"] += temp.total_available_quantity
 
     return res if res else {}
 
