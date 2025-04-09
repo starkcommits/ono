@@ -1,5 +1,6 @@
 import { useFrappeEventListener, useFrappeGetCall } from 'frappe-react-sdk'
 import { Book, LucideMousePointerBan } from 'lucide-react'
+import { type } from 'os'
 import React, { useEffect, useState } from 'react'
 
 const OrderBook = ({ marketId }) => {
@@ -110,8 +111,11 @@ const OrderBook = ({ marketId }) => {
     if (order.market_id !== marketId) return
 
     console.log('entered')
+    console.log('Type Order Price: ', typeof order.price)
+
+    console.log('Type of order:', typeof order.quantity, typeof order.price)
     setOrderBook((prevOrderBook) => {
-      const priceKey = parseFloat(order.amount).toFixed(1) // Ensure consistent price format
+      const priceKey = parseFloat(order.price).toFixed(1) // Ensure consistent price format
 
       console.log('Previous OrderBook:', prevOrderBook)
 
@@ -122,17 +126,22 @@ const OrderBook = ({ marketId }) => {
       if (!updatedOrderBook[priceKey]) {
         updatedOrderBook[priceKey] = { price: priceKey, yesQty: 0, noQty: 0 }
       }
+      const currentYesQty = Number(updatedOrderBook[priceKey].yesQty) || 0
+      const currentNoQty = Number(updatedOrderBook[priceKey].noQty) || 0
+      const orderQuantity = Number(order.quantity) || 0
+
+      console.log(currentYesQty, currentNoQty, orderQuantity)
 
       updatedOrderBook[priceKey] = {
         price: priceKey,
         yesQty:
           order.opinion_type === 'YES'
-            ? updatedOrderBook[priceKey].yesQty + order.quantity
-            : updatedOrderBook[priceKey].yesQty,
+            ? currentYesQty + orderQuantity
+            : currentYesQty,
         noQty:
           order.opinion_type === 'NO'
-            ? updatedOrderBook[priceKey].noQty + order.quantity
-            : updatedOrderBook[priceKey].noQty,
+            ? currentNoQty + orderQuantity
+            : currentNoQty,
       }
 
       return updatedOrderBook

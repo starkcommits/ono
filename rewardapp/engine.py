@@ -59,7 +59,7 @@ def order(doc, method):
 
         frappe.log_error("Order Payload", payload)
         try:
-            url = "http://94.136.187.188:8086/orders/"
+            url = "http://127.0.0.1:8086/orders/"
             response = requests.post(url, json=payload)
             if response.status_code != 201:
                 # Update status without triggering the hook again
@@ -74,7 +74,7 @@ def order(doc, method):
                 frappe.log_error("Order API Error: ", f"{response.status_code} - {error_text}")
                 frappe.throw(f"Error from API: {error_text}")
             else:
-                frappe.publish_realtime("order_book_event", order_book_data)
+                frappe.publish_realtime("order_book_event", order_book_data ,after_commit=True)
 
                 query = """
                     SELECT 
@@ -103,7 +103,7 @@ def order(doc, method):
         doc._cancel_processed = True
         
         try:
-            url = f"http://94.136.187.188:8086/orders/{doc.name}"
+            url = f"http://127.0.0.1:8086/orders/{doc.name}"
             response = requests.delete(url)
             if response.status_code != 200:
                 frappe.logger().error(f"Error response: {response.text}")
@@ -160,9 +160,9 @@ def update_order():
             "order_id": data.order_id,
             "status": data.status,
             "filled_quantity": data.filled_quantity
-        }, user=order.user_id)  # Use order.user_id instead of frappe.session.user
+        }, user=order.user_id,after_commit=True)  # Use order.user_id instead of frappe.session.user
         
-        frappe.publish_realtime("order_book_event", order_book_data)
+        frappe.publish_realtime("order_book_event", order_book_data,after_commit=True)
         
         return {"status": "success", "message": "Order updated successfully", "order_id": order.name}
     
@@ -223,7 +223,7 @@ def market(doc, method):
             # For debugging
             frappe.logger().info(f"Sending payload to market engine: {payload}")
             
-            url = "http://94.136.187.188:8086/markets/"
+            url = "http://127.0.0.1:8086/markets/"
             response = requests.post(url, json=payload)
             
             if response.status_code != 201:
@@ -241,7 +241,7 @@ def market(doc, method):
                     "closing_time": doc.closing_time
                 }
                 
-                frappe.publish_realtime("market_event",update_data,user=frappe.session.user)
+                frappe.publish_realtime("market_event",update_data,user=frappe.session.user,after_commit=True)
                 frappe.msgprint("Market Created Successfully.")
     
     except Exception as e:
@@ -256,7 +256,7 @@ def close_market():
         if not data:
             return {"status": "error", "message": "Missing 'close market' key in request data"}
 
-        url=f"http://94.136.187.188:8086/markets/{data.market_id}/close"
+        url=f"http://127.0.0.1:8086/markets/{data.market_id}/close"
         response = requests.post(url)
             
         if response.status_code != 200:
@@ -277,7 +277,7 @@ def close_market():
                 "category": market.category
             }
             
-            frappe.publish_realtime("market_event",update_data,user=frappe.session.user)
+            frappe.publish_realtime("market_event",update_data,user=frappe.session.user,after_commit=True)
             
             return {
                 "status":"success","message":"Market closed"
@@ -298,7 +298,7 @@ def resolve_market():
         payload = {
             "winning_side":data.winning_side
         }
-        url=f"http://94.136.187.188:8086/markets/{data.market_id}/resolve"
+        url=f"http://127.0.0.1:8086/markets/{data.market_id}/resolve"
         response = requests.post(url, json=payload)
             
         if response.status_code != 200:
@@ -314,7 +314,7 @@ def resolve_market():
                 "category": market.category
             }
             
-            frappe.publish_realtime("market_event",update_data,user=frappe.session.user)
+            frappe.publish_realtime("market_event",update_data,user=frappe.session.user,after_commit=True)
             
             market.status="RESOLVED"
             market.end_result=data.winning_side
@@ -351,7 +351,7 @@ def unmatched_orders():
                 "order_id":order.name,
                 "status":order.status,
                 "filled_quantity":order.filled_quantity
-            },user=frappe.session.user)
+            },user=frappe.session.user,after_commit=True)
 
             wallet_data = frappe.db.sql("""
                 SELECT name, balance FROM `tabUser Wallet`
@@ -423,7 +423,7 @@ def update_market_price():
             "closing_time": doc.closing_time
         }
         
-        frappe.publish_realtime("market_event",update_data,user=frappe.session.user)
+        frappe.publish_realtime("market_event",update_data,user=frappe.session.user,after_commit=True)
         
         return True
     except Exception as e:

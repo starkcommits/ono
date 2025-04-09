@@ -259,18 +259,29 @@ const TradeSheet = ({
             /> */}
 
             <div className="flex justify-between mt-2">
-              <button
+              {/* <button
                 onClick={() => handlePriceChange(price - 0.5)}
                 className="p-2 active:bg-gray-100 rounded-lg transition-colors"
               >
                 <Minus className="h-4 w-4" />
-              </button>
-              <button
+              </button> */}
+              <Slider
+                defaultValue={[1]}
+                max={9.5}
+                min={0.5}
+                step={0.5}
+                value={[price]}
+                className={``}
+                onValueChange={(values) => {
+                  setPrice(values[0])
+                }}
+              />
+              {/* <button
                 onClick={() => handlePriceChange(price + 0.5)}
                 className="p-2 active:bg-gray-100 rounded-lg transition-colors"
               >
                 <Plus className="h-4 w-4" />
-              </button>
+              </button> */}
             </div>
           </div>
 
