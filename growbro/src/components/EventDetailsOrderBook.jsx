@@ -1,8 +1,8 @@
 import { useFrappeEventListener, useFrappeGetCall } from 'frappe-react-sdk'
-import { Book, LucideMousePointerBan } from 'lucide-react'
+import { Book } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 
-const OrderBook = ({ marketId }) => {
+const EventDetailsOrderBook = ({ marketId }) => {
   const [orderBook, setOrderBook] = useState({})
   console.log(marketId)
 
@@ -112,17 +112,15 @@ const OrderBook = ({ marketId }) => {
     console.log('Received Order:', order)
     if (order.market_id !== marketId) return
 
-    console.log('entered')
+    console.log('Event Order Book entered')
     console.log('Type Order Price: ', typeof order.price)
 
     console.log('Type of order:', typeof order.quantity, typeof order.price)
-
     refetchOrderBook()
-
     // setOrderBook((prevOrderBook) => {
     //   const priceKey = parseFloat(order.price).toFixed(1) // Ensure consistent price format
 
-    //   console.log('Previous OrderBook:', prevOrderBook)
+    //   console.log('Previous Event OrderBook :', prevOrderBook)
 
     //   // Clone the order book
     //   const updatedOrderBook = { ...prevOrderBook }
@@ -149,14 +147,14 @@ const OrderBook = ({ marketId }) => {
     //         : currentNoQty,
     //   }
 
-    //   console.log('Updated OrderBook:', updatedOrderBook)
+    //   console.log('Updated Event OrderBook:', updatedOrderBook)
 
     //   return updatedOrderBook
     // })
   })
 
   useEffect(() => {
-    console.log('Order book state changed:', orderBook)
+    console.log('Event Order book state changed:', orderBook)
   }, [orderBook])
 
   // console.log('Sorted Entries:', sortedYesEntries, sortedNoEntries)
@@ -219,4 +217,4 @@ const OrderBook = ({ marketId }) => {
   )
 }
 
-export default OrderBook
+export default EventDetailsOrderBook

@@ -111,66 +111,61 @@ const ActivePosition = ({
   }
 
   return (
-    <div key={position.name} className="p-4 w-full cursor-pointer">
-      <Badge className="text-xs font-semibold mb-2 hover:underline">
-        #{position.name}
-      </Badge>
+    <>
+      {position.market_status === 'OPEN' && position.status !== 'SETTLED' && (
+        <div key={position.name} className="p-4 w-full cursor-pointer">
+          <Badge className="text-xs font-semibold mb-2 hover:underline">
+            #{position.name}
+          </Badge>
 
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex gap-2 items-center justify-between w-full">
-          <div
-            className="font-medium text-gray-900"
-            onClick={() => {
-              navigate(`/event/${position.market_id}`)
-            }}
-          >
-            {position.question}
-          </div>
-          {position.status === 'UNMATCHED' &&
-            position.order_type === 'SELL' && (
-              <span className="bg-yellow-100 text-yellow-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
-                EXITING
-              </span>
-            )}
-          {position.status === 'PARTIAL' && position.order_type === 'SELL' && (
-            <span className="bg-yellow-100 text-yellow-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
-              EXITING
-            </span>
-          )}
-          {position.status === 'UNMATCHED' && position.order_type === 'BUY' && (
-            <div className="flex items-center gap-2">
-              <span>{`${position.filled_quantity}/${position.quantity}`}</span>
-              <span className="bg-yellow-100 text-yellow-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
-                {position.status}
-              </span>
-            </div>
-          )}
-          {position.status === 'PARTIAL' && position.order_type === 'BUY' && (
-            <div className="flex items-center gap-2">
-              <span>{`${position.filled_quantity}/${position.quantity}`}</span>
-              <span className="bg-yellow-100 text-yellow-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
-                {position.status}
-              </span>
-            </div>
-          )}
-          {position.status === 'MATCHED' && position.order_type === 'SELL' && (
-            <span className="bg-emerald-100 text-emerald-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
-              EXITED
-            </span>
-          )}
-          {position.status === 'MATCHED' && position.order_type === 'BUY' && (
-            <span className="bg-emerald-100 text-emerald-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
-              {position.status}
-            </span>
-          )}
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex gap-2 items-center justify-between w-full">
+              <div
+                className="font-medium text-gray-900"
+                onClick={() => {
+                  navigate(`/event/${position.market_id}`)
+                }}
+              >
+                {position.question}
+              </div>
+              {(position.status === 'UNMATCHED' ||
+                position.status === 'PARTIAL') &&
+                position.order_type === 'SELL' && (
+                  <span className="bg-yellow-100 text-yellow-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
+                    EXITING
+                  </span>
+                )}
+              {(position.status === 'UNMATCHED' ||
+                position.status === 'PARTIAL') &&
+                position.order_type === 'BUY' && (
+                  <div className="flex items-center gap-2">
+                    <span>{`${position.filled_quantity}/${position.quantity}`}</span>
+                    <span className="bg-yellow-100 text-yellow-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
+                      {position.status}
+                    </span>
+                  </div>
+                )}
 
-          {position.status === 'CANCELED' && (
-            <span className="bg-red-100 text-red-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
-              {position.status}
-            </span>
-          )}
-        </div>
-        {/* <div
+              {position.status === 'MATCHED' &&
+                position.order_type === 'SELL' && (
+                  <span className="bg-emerald-100 text-emerald-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
+                    EXITED
+                  </span>
+                )}
+              {position.status === 'MATCHED' &&
+                position.order_type === 'BUY' && (
+                  <span className="bg-emerald-100 text-emerald-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
+                    {position.status}
+                  </span>
+                )}
+
+              {position.status === 'CANCELED' && (
+                <span className="bg-red-100 text-red-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
+                  {position.status}
+                </span>
+              )}
+            </div>
+            {/* <div
           className={`flex items-center ${
             position.profit >= 0 ? 'text-emerald-600' : 'text-rose-600'
           }`}
@@ -185,162 +180,172 @@ const ActivePosition = ({
             {position.profitPercentage}%
           </span>
         </div> */}
-      </div>
-      <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
-        <span
-          className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-            position.opinion_type === 'YES'
-              ? 'bg-blue-100 text-blue-700'
-              : 'bg-rose-100 text-rose-700'
-          }`}
-        >
-          {position.opinion_type}
-        </span>
-        <span>•</span>
-        <span className="flex items-center">
-          <Clock className="h-3.5 w-3.5 mr-1" />
-          End at {formatDate(position.closing_time)}
-        </span>
-      </div>
-      <div className="grid grid-cols-3 gap-4 text-sm mb-4">
-        <div>
-          <div className="text-gray-600 font-medium">Amount</div>
-          <div className="font-semibold text-gray-900">
-            ₹{position.quantity * position.amount}
           </div>
-        </div>
-        <div>
-          <div className="text-gray-600 font-medium">Qty @ Price</div>
-          <div className="font-semibold text-gray-900">
-            {position.quantity} @ ₹{position.amount}
+          <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
+            <span
+              className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                position.opinion_type === 'YES'
+                  ? 'bg-blue-100 text-blue-700'
+                  : 'bg-rose-100 text-rose-700'
+              }`}
+            >
+              {position.opinion_type}
+            </span>
+            <span>•</span>
+            <span className="flex items-center">
+              <Clock className="h-3.5 w-3.5 mr-1" />
+              End at {formatDate(position.closing_time)}
+            </span>
           </div>
-        </div>
-        <div>
-          <div className="text-gray-600 font-medium">Current</div>
-          <div className="font-semibold text-gray-900">
-            ₹
-            {position.opinion_type === 'YES'
-              ? String(position.yes_price)
-              : String(position.no_price)}
+          <div className="grid grid-cols-3 gap-4 text-sm mb-4">
+            <div>
+              <div className="text-gray-600 font-medium">Amount</div>
+              <div className="font-semibold text-gray-900">
+                ₹{position.quantity * position.amount}
+              </div>
+            </div>
+            <div>
+              <div className="text-gray-600 font-medium">Qty @ Price</div>
+              <div className="font-semibold text-gray-900">
+                {position.quantity} @ ₹{position.amount}
+              </div>
+            </div>
+            <div>
+              <div className="text-gray-600 font-medium">Current</div>
+              <div className="font-semibold text-gray-900">
+                ₹
+                {position.opinion_type === 'YES'
+                  ? String(position.yes_price)
+                  : String(position.no_price)}
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-      {position.status !== 'CANCELED' && position.order_type === 'BUY' && (
-        <div className="flex gap-2 w-full items-center justify-between">
-          <div className="w-[50%]">
-            {(position.status === 'PARTIAL' ||
-              position.status === 'UNMATCHED') && (
-              <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                <DialogTrigger className="w-full">
-                  <Button className="w-full bg-rose-50 text-rose-600 rounded-xl text-sm font-medium hover:bg-rose-100 transition-colors">
-                    <XCircle className="h-4 w-4" />
-                    Cancel Order
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="">
-                  <DialogHeader>
-                    <DialogTitle>Are you absolutely sure?</DialogTitle>
-                    <DialogDescription>
-                      This action cannot be undone. This will permanently delete
-                      your account and remove your data from our servers.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <DialogFooter>
+          {position.status !== 'CANCELED' &&
+            position.order_type === 'BUY' &&
+            position.market_status === 'OPEN' && (
+              <div className="flex gap-2 w-full items-center justify-between">
+                <div className="w-[50%]">
+                  {position.status === 'UNMATCHED' && (
+                    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                      <DialogTrigger className="w-full">
+                        <Button className="w-full bg-rose-50 text-rose-600 rounded-xl text-sm font-medium hover:bg-rose-100 transition-colors">
+                          <XCircle className="h-4 w-4" />
+                          Cancel Order
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="">
+                        <DialogHeader>
+                          <DialogTitle>Are you absolutely sure?</DialogTitle>
+                          <DialogDescription>
+                            This action cannot be undone. This will permanently
+                            delete your account and remove your data from our
+                            servers.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter>
+                          <Button
+                            className="bg-white hover:bg-white/90"
+                            variant="outline"
+                            onClick={() => setIsOpen(false)}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            className="bg-neutral-900 text-white hover:text-neutral-800 hover:bg-neutral-800/40"
+                            onClick={() => handleCancelOrder(position)}
+                          >
+                            Submit
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  )}
+                  {(position.status === 'MATCHED' ||
+                    position.status === 'PARTIAL') && (
                     <Button
-                      className="bg-white hover:bg-white/90"
-                      variant="outline"
-                      onClick={() => setIsOpen(false)}
+                      onClick={() =>
+                        handleTradeClick(
+                          position.opinion_type === 'YES'
+                            ? position.yes_price
+                            : position.no_price,
+                          position.opinion_type,
+                          'SELL',
+                          position.market_id,
+                          position.status === 'MATCHED'
+                            ? position.quantity
+                            : position.filled_quantity,
+                          position.name
+                        )
+                      }
+                      className="w-full bg-rose-50 text-rose-600 rounded-xl text-sm font-medium hover:bg-rose-100 transition-colors"
                     >
-                      Cancel
+                      <XCircle className="h-4 w-4" />
+                      Exit Position
                     </Button>
-                    <Button
-                      className="bg-neutral-900 text-white hover:text-neutral-800 hover:bg-neutral-800/40"
-                      onClick={() => handleCancelOrder(position)}
-                    >
-                      Submit
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            )}
-            {position.status === 'MATCHED' && (
-              <Button
-                onClick={() =>
-                  handleTradeClick(
-                    position.opinion_type === 'YES'
-                      ? position.yes_price
-                      : position.no_price,
-                    position.opinion_type,
-                    'SELL',
-                    position.market_id,
-                    position.quantity,
-                    position.name
-                  )
-                }
-                className="w-full bg-rose-50 text-rose-600 rounded-xl text-sm font-medium hover:bg-rose-100 transition-colors"
-              >
-                <XCircle className="h-4 w-4" />
-                Exit Position
-              </Button>
-            )}
-          </div>
+                  )}
+                </div>
 
-          <Button
-            onClick={() => {
-              handleMarketClick(position)
-            }}
-            className="w-[50%] bg-blue-50 text-blue-600 rounded-xl text-sm font-medium hover:bg-blue-100 transition-colors"
-          >
-            <Plus className="h-4 w-4" />
-            Invest More
-          </Button>
-        </div>
-      )}
-      {position.status !== 'CANCELED' && position.order_type === 'SELL' && (
-        <div className="flex gap-2 w-full items-center justify-between">
-          <div className="flex flex-col gap-2 justify-center text-neutral-800 py-1.5 text-center text-md font-bold">
-            {`Qty ${position.filled_quantity}/${position.quantity} matched`}
-          </div>
-          <div className="w-[50%]">
-            {(position.status === 'PARTIAL' ||
-              position.status === 'UNMATCHED') && (
-              <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                <DialogTrigger className="w-full">
-                  <Button className="w-full bg-rose-50 text-rose-600 rounded-xl text-sm font-medium hover:bg-rose-100 transition-colors">
-                    <XCircle className="h-4 w-4" />
-                    Cancel Order
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="">
-                  <DialogHeader>
-                    <DialogTitle>Are you absolutely sure?</DialogTitle>
-                    <DialogDescription>
-                      This action cannot be undone. This will permanently delete
-                      your account and remove your data from our servers.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <DialogFooter>
-                    <Button
-                      className="bg-white hover:bg-white/90"
-                      variant="outline"
-                      onClick={() => setIsOpen(false)}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      className="bg-neutral-900 text-white hover:text-neutral-800 hover:bg-neutral-800/40"
-                      onClick={() => handleCancelOrder(position)}
-                    >
-                      Submit
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
+                <Button
+                  onClick={() => {
+                    handleMarketClick(position)
+                  }}
+                  className="w-[50%] bg-blue-50 text-blue-600 rounded-xl text-sm font-medium hover:bg-blue-100 transition-colors"
+                >
+                  <Plus className="h-4 w-4" />
+                  Invest More
+                </Button>
+              </div>
             )}
-          </div>
+          {position.status !== 'CANCELED' &&
+            position.order_type === 'SELL' &&
+            position.market_status === 'OPEN' && (
+              <div className="flex gap-2 w-full items-center justify-between">
+                <div className="flex flex-col gap-2 justify-center text-neutral-800 py-1.5 text-center text-md font-bold">
+                  {`Qty ${position.filled_quantity}/${position.quantity} matched`}
+                </div>
+                <div className="w-[50%]">
+                  {(position.status === 'PARTIAL' ||
+                    position.status === 'UNMATCHED') && (
+                    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                      <DialogTrigger className="w-full">
+                        <Button className="w-full bg-rose-50 text-rose-600 rounded-xl text-sm font-medium hover:bg-rose-100 transition-colors">
+                          <XCircle className="h-4 w-4" />
+                          Cancel Order
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="">
+                        <DialogHeader>
+                          <DialogTitle>Are you absolutely sure?</DialogTitle>
+                          <DialogDescription>
+                            This action cannot be undone. This will permanently
+                            delete your account and remove your data from our
+                            servers.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter>
+                          <Button
+                            className="bg-white hover:bg-white/90"
+                            variant="outline"
+                            onClick={() => setIsOpen(false)}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            className="bg-neutral-900 text-white hover:text-neutral-800 hover:bg-neutral-800/40"
+                            onClick={() => handleCancelOrder(position)}
+                          >
+                            Submit
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  )}
+                </div>
+              </div>
+            )}
         </div>
       )}
-    </div>
+    </>
   )
 }
 

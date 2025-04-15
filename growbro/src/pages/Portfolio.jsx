@@ -1,5 +1,11 @@
 import React, { cache, useEffect, useMemo, useState } from 'react'
-import { redirect, useNavigate } from 'react-router-dom'
+import {
+  redirect,
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from 'react-router-dom'
 import {
   ArrowLeft,
   TrendingUp,
@@ -50,7 +56,10 @@ ChartJS.register(
 
 const Portfolio = () => {
   const navigate = useNavigate()
-  const [activeTab, setActiveTab] = useState('active')
+  const location = useLocation()
+  const searchParams = new URLSearchParams(location.search)
+  const tab = searchParams.get('tab')
+  const [activeTab, setActiveTab] = useState(tab)
   const [tradePrice, setTradePrice] = useState(null)
   const [selectedChoice, setSelectedChoice] = useState(null)
   const [selectedAction, setSelectedAction] = useState(null)
@@ -148,6 +157,7 @@ const Portfolio = () => {
         'closing_time',
         'order_type',
         'market_id',
+        'market_status',
         'yes_price',
         'no_price',
         'buy_order_id',
@@ -163,7 +173,7 @@ const Portfolio = () => {
         order: 'desc',
       },
     },
-    currentUser ? undefined : null
+    currentUser && tab === 'active' ? undefined : null
   )
 
   const { data: completedOrdersData, isLoading: completedOrdersLoading } =
@@ -172,7 +182,7 @@ const Portfolio = () => {
       {
         fields: ['*'],
       },
-      activeTab === 'completed' ? undefined : null
+      tab === 'completed' ? undefined : null
     )
 
   useEffect(() => {
@@ -195,13 +205,14 @@ const Portfolio = () => {
 
   useFrappeEventListener('order_event', (updatedOrder) => {
     console.log('Updated Order:', updatedOrder)
-    setActiveOrders((prev) => {
-      const updatedActiveOrders = {
-        ...prev,
-        [updatedOrder.name]: updatedOrder,
-      }
-      return updatedActiveOrders
-    })
+    refetchActiveOrders()
+    // setActiveOrders((prev) => {
+    //   const updatedActiveOrders = {
+    //     ...prev,
+    //     [updatedOrder.name]: updatedOrder,
+    //   }
+    //   return updatedActiveOrders
+    // })
   })
 
   const performanceData = {
@@ -422,7 +433,10 @@ const Portfolio = () => {
           {/* Tabs */}
           <div className="flex p-2">
             <button
-              onClick={() => setActiveTab('active')}
+              onClick={() => {
+                navigate('/portfolio?tab=active')
+                setActiveTab('active')
+              }}
               className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-medium transition-colors ${
                 activeTab === 'active'
                   ? 'bg-indigo-50 text-indigo-600'
@@ -432,7 +446,10 @@ const Portfolio = () => {
               Active Positions
             </button>
             <button
-              onClick={() => setActiveTab('completed')}
+              onClick={() => {
+                navigate('/portfolio?tab=completed')
+                setActiveTab('completed')
+              }}
               className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-medium transition-colors ${
                 activeTab === 'completed'
                   ? 'bg-indigo-50 text-indigo-600'

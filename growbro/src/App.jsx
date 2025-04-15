@@ -19,6 +19,7 @@ import Layout from './components/Layout'
 import PublicRoute from './components/PublicRoute'
 import { Route, Routes } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
+import Overview from './pages/Overview'
 
 const navItems = [
   { icon: Home, label: 'Home', path: '/' },
@@ -32,13 +33,16 @@ function App() {
   return (
     <div className="">
       <div className="w-full bg-gray-50">
-        <div className="max-w-lg mx-auto">
+        <div className="">
           <Toaster />
           <Routes>
             <Route element={<PublicRoute />}>
               <Route path="/signin" element={<SignIn />} />
               <Route path="/signup" element={<SignUp />} />
             </Route>
+
+            <Route path="/overview" element={<Overview />} />
+
             <Route element={<ProtectedRoute />}>
               <Route element={<Layout />}>
                 <Route path="/" element={<HomePage />} />
