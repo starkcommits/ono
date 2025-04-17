@@ -1,21 +1,41 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/assets/rewardapp/growbro/vite.svg" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="/assets/rewardapp/growbro/vite.svg"
+    />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite + React</title>
-    <script type="module" crossorigin src="/assets/rewardapp/growbro/assets/index-DDM7XXkr.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/rewardapp/growbro/assets/index-y-y-KuTk.css">
-  <link rel="manifest" href="/assets/rewardapp/growbro/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/assets/rewardapp/growbro/registerSW.js"></script></head>
+    <script
+      type="module"
+      crossorigin
+      src="/assets/rewardapp/growbro/assets/index-DDM7XXkr.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      crossorigin
+      href="/assets/rewardapp/growbro/assets/index-y-y-KuTk.css"
+    />
+    <link
+      rel="manifest"
+      href="/assets/rewardapp/growbro/manifest.webmanifest"
+    />
+    <script
+      id="vite-plugin-pwa:register-sw"
+      src="/assets/rewardapp/growbro/registerSW.js"
+    ></script>
+  </head>
   <body>
     <div id="root"></div>
-    <script>window.csrf_token = '{{ frappe.session.csrf_token }}';
- 
-      if (!window.frappe) window.frappe = {};
-  
-      frappe.boot = JSON.parse({{ boot }});
-  
+    <script>
+      window.csrf_token = '{{ frappe.session.csrf_token }}';
+
+            if (!window.frappe) window.frappe = {};
+
+            frappe.boot = JSON.parse({{ boot }});
     </script>
   </body>
 </html>

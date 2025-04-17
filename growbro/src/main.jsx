@@ -5,18 +5,18 @@ import App from './App.jsx'
 import { FrappeProvider } from 'frappe-react-sdk'
 import { BrowserRouter as Router } from 'react-router-dom'
 
-// if ('serviceWorker' in navigator) {
-//   window.addEventListener('load', () => {
-//     navigator.serviceWorker
-//       .register('/sw.js', { scope: '/' })
-//       .then((registration) => {
-//         console.log('ServiceWorker registration successful')
-//       })
-//       .catch((err) => {
-//         console.log('ServiceWorker registration failed: ', err)
-//       })
-//   })
-// }
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('/sw.js', { scope: '/growbro/' })
+      .then((registration) => {
+        console.log('ServiceWorker registration successful')
+      })
+      .catch((err) => {
+        console.log('ServiceWorker registration failed: ', err)
+      })
+  })
+}
 
 const getSiteName = () => {
   // @ts-ignore

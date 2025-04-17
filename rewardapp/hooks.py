@@ -150,6 +150,9 @@ doc_events = {
 	},
     "Market": {
         "after_insert": "rewardapp.engine.market"
+    },
+    "Holding": {
+        "on_update": "rewardapp.engine.holding"
     }
 }
 
