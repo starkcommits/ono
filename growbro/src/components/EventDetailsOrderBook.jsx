@@ -162,10 +162,6 @@ const EventDetailsOrderBook = ({ marketId }) => {
   return (
     <div className="mb-4">
       <div className="bg-white rounded-xl border-gray-100 overflow-hidden">
-        <div className="flex items-center px-4 py-1 bg-gray-50">
-          <Book className="h-5 w-5 mr-2" />
-          <span className="font-medium">Order Book</span>
-        </div>
         <div className="grid grid-cols-2">
           <div className="divide-y divide-gray-100">
             <div className="grid grid-cols-2 gap-4 px-4 py-1 bg-gray-50 text-[0.800rem] sm:text-sm font-medium">

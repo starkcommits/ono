@@ -104,6 +104,7 @@ const Overview = () => {
   const categoryParam = searchParams.get('category')
   const marketParam = searchParams.get('market')
   const navigate = useNavigate()
+  const hasMarket = searchParams.has('market')
 
   const [categoryFilter, setCategoryFilter] = useState(categoryParam || 'all')
   // const [sortBy, setSortBy] = useState('traders')
@@ -141,6 +142,10 @@ const Overview = () => {
       categoryFilter === 'all'
         ? undefined
         : [['category', '=', categoryFilter]],
+    orderBy: {
+      field: 'total_traders',
+      order: 'desc',
+    },
   })
 
   const {
@@ -257,7 +262,14 @@ const Overview = () => {
           {/* Left Sidebar - Markets List */}
           <div className="w-full lg:w-1/3 xl:w-1/4 border-r p-4 flex flex-col">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold">Prediction Markets</h2>
+              <h2
+                className="text-xl font-bold cursor-pointer"
+                onClick={() => {
+                  navigate('/overview')
+                }}
+              >
+                Prediction Markets
+              </h2>
               <Badge variant="outline" className="px-3 py-1">
                 <Activity className="w-4 h-4 mr-2" />
                 Live
@@ -354,8 +366,108 @@ const Overview = () => {
           </div>
 
           {/* Right Content - Market Details */}
+
           <div className="w-full lg:w-2/3 xl:w-3/4 p-6 overflow-auto">
-            {marketData && (
+            {!hasMarket && (
+              <div className="flex flex-col gap-2">
+                <div className="grid grid-cols-4 gap-2">
+                  <Card>
+                    <CardHeader className="w-full">
+                      <CardTitle className="text-center text-2xl">0</CardTitle>
+                      <CardDescription className="text-center text-lg font-bold">
+                        Total Markets
+                      </CardDescription>
+                    </CardHeader>
+                  </Card>
+                  <Card>
+                    <CardHeader className="w-full">
+                      <CardTitle className="text-center text-2xl">0</CardTitle>
+                      <CardDescription className="text-center text-lg font-bold">
+                        Total Orders
+                      </CardDescription>
+                    </CardHeader>
+                  </Card>
+                  <Card>
+                    <CardHeader className="w-full">
+                      <CardTitle className="text-center text-2xl">0</CardTitle>
+                      <CardDescription className="text-center text-lg font-bold">
+                        Total Trades
+                      </CardDescription>
+                    </CardHeader>
+                  </Card>
+                  <Card>
+                    <CardHeader className="w-full">
+                      <CardTitle className="text-center text-2xl">0</CardTitle>
+                      <CardDescription className="text-center text-lg font-bold">
+                        Total Traders
+                      </CardDescription>
+                    </CardHeader>
+                  </Card>
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Trending Markets</CardTitle>
+                      <CardDescription>
+                        The most active markets based on recent trades and user
+                        engagement.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      {marketsData.length > 0 &&
+                        marketsData?.map((market) => {
+                          return (
+                            <div
+                              key={market.name}
+                              className="market-card cursor-pointer"
+                            >
+                              <>
+                                <div className="p-4">
+                                  <h3 className="text-base font-medium mb-2">
+                                    {market?.question}
+                                  </h3>
+                                  <div className="flex items-center gap-3 mb-3">
+                                    <div className="flex items-center text-xs text-gray-600">
+                                      <Users className="h-3.5 w-3.5 mr-1" />
+                                      {/* <span>{market.traders.toLocaleString()} traders</span> */}
+                                      <span>
+                                        {market?.total_traders} traders
+                                      </span>
+                                    </div>
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-600">
+                                      <div className="w-1 h-1 bg-red-500 rounded-full animate-pulse mr-1"></div>
+                                      LIVE
+                                    </span>
+                                  </div>
+                                  {/* <p className="text-xs text-gray-600 mb-4">{market.info}</p> */}
+                                  <div className="grid grid-cols-2 gap-3">
+                                    <div className="py-2 px-4 bg-green-50 text-green-600 rounded-xl text-sm font-medium">
+                                      Yes ₹{market?.yes_price}
+                                    </div>
+                                    <div className="py-2 px-4 bg-rose-50 text-rose-600 rounded-xl text-sm font-medium">
+                                      No ₹{market?.no_price}
+                                    </div>
+                                  </div>
+                                </div>
+                              </>
+                            </div>
+                          )
+                        })}
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Recent Activity</CardTitle>
+                      <CardDescription>
+                        A live feed of the latest trades, orders, and user
+                        actions across all markets.
+                      </CardDescription>
+                    </CardHeader>
+                  </Card>
+                </div>
+              </div>
+            )}
+            {hasMarket && marketData && (
               <div className="space-y-6">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div>
@@ -402,6 +514,9 @@ const Overview = () => {
                     <Card>
                       <CardHeader>
                         <CardTitle>Order Book</CardTitle>
+                        <CardDescription>
+                          Open buy and sell orders placed in the market.
+                        </CardDescription>
                       </CardHeader>
                       <CardContent className="-mt-2">
                         <AdminViewOrderBook marketId={marketData?.name} />
@@ -451,6 +566,9 @@ const Overview = () => {
                     <Card className="">
                       <CardHeader>
                         <CardTitle>Recent Trades</CardTitle>
+                        <CardDescription>
+                          List of completed trades with price and volume.
+                        </CardDescription>
                       </CardHeader>
                       <CardContent>
                         <ScrollArea className="">
@@ -464,32 +582,41 @@ const Overview = () => {
                                 <TableHead>Date</TableHead>
                               </TableRow>
                             </TableHeader>
+                            {!tradesLoading && tradesData?.length === 0 && (
+                              <TableRow>
+                                <TableCell
+                                  colSpan={5}
+                                  className="text-center py-8 font-medium"
+                                >
+                                  Looks like this market is waiting for its
+                                  first trade.
+                                </TableCell>
+                              </TableRow>
+                            )}
                             <TableBody>
-                              {tradesData?.length > 0
-                                ? tradesData
-                                    ?.slice(0, 10)
-                                    .map((trade, index) => (
-                                      <TableRow key={trade.name}>
-                                        <TableCell>{`#${
-                                          trade.name.split('_')[2]
-                                        }`}</TableCell>
-                                        <TableCell className="text-blue-500">
-                                          {trade?.yes_price}
-                                        </TableCell>
-                                        <TableCell className="text-red-500">
-                                          {trade?.no_price}
-                                        </TableCell>
-                                        <TableCell>{trade?.quantity}</TableCell>
-                                        <TableCell>
-                                          {trade?.creation
-                                            .split(' ')[0]
-                                            .split('-')
-                                            .reverse()
-                                            .join('-')}
-                                        </TableCell>
-                                      </TableRow>
-                                    ))
-                                : null}
+                              {!tradesLoading &&
+                                tradesData?.length > 0 &&
+                                tradesData?.slice(0, 10).map((trade, index) => (
+                                  <TableRow key={trade.name}>
+                                    <TableCell>{`#${
+                                      trade.name.split('_')[2]
+                                    }`}</TableCell>
+                                    <TableCell className="text-blue-500">
+                                      {trade?.yes_price}
+                                    </TableCell>
+                                    <TableCell className="text-red-500">
+                                      {trade?.no_price}
+                                    </TableCell>
+                                    <TableCell>{trade?.quantity}</TableCell>
+                                    <TableCell>
+                                      {trade?.creation
+                                        .split(' ')[0]
+                                        .split('-')
+                                        .reverse()
+                                        .join('-')}
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
                             </TableBody>
                           </Table>
                         </ScrollArea>
@@ -499,45 +626,95 @@ const Overview = () => {
                 </div>
 
                 {/* <Tabs defaultValue="orderbook" className="w-full">
-                  <TabsList className="w-full">
-                    <TabsTrigger value="orderbook" className="flex-1">
-                      <BookOpen className="w-4 h-4 mr-2" />
-                      Order Book
-                    </TabsTrigger>
-                    <TabsTrigger value="orders" className="flex-1">
-                      <ArrowUpDown className="w-4 h-4 mr-2" />
-                      Active Orders
-                    </TabsTrigger>
-                    <TabsTrigger value="trades" className="flex-1">
-                      <DollarSign className="w-4 h-4 mr-2" />
-                      Recent Trades
-                    </TabsTrigger>
-                  </TabsList>
+                    <TabsList className="w-full">
+                      <TabsTrigger value="orderbook" className="flex-1">
+                        <BookOpen className="w-4 h-4 mr-2" />
+                        Order Book
+                      </TabsTrigger>
+                      <TabsTrigger value="orders" className="flex-1">
+                        <ArrowUpDown className="w-4 h-4 mr-2" />
+                        Active Orders
+                      </TabsTrigger>
+                      <TabsTrigger value="trades" className="flex-1">
+                        <DollarSign className="w-4 h-4 mr-2" />
+                        Recent Trades
+                      </TabsTrigger>
+                    </TabsList>
 
-                  <TabsContent value="orderbook">
-                    <OrderBook marketId={selectedMarketData.name} />
-                  </TabsContent>
+                    <TabsContent value="orderbook">
+                      <OrderBook marketId={selectedMarketData.name} />
+                    </TabsContent>
 
-                  <TabsContent value="orders">
-                    <Card>
-                      <CardContent className="p-6">
-                        <ScrollArea className="h-[500px]">
+                    <TabsContent value="orders">
+                      <Card>
+                        <CardContent className="p-6">
+                          <ScrollArea className="h-[500px]">
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>ID</TableHead>
+                                  <TableHead>Position</TableHead>
+                                  <TableHead>Price</TableHead>
+                                  <TableHead>Amount</TableHead>
+                                  <TableHead>Total</TableHead>
+                                  <TableHead>Status</TableHead>
+                                  <TableHead>Time</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {marketOrders.map((order) => (
+                                  <TableRow key={order.name}>
+                                    <TableCell>{order.name}</TableCell>
+                                    <TableCell>
+                                      <Badge
+                                        variant={
+                                          order.position === 'yes'
+                                            ? 'default'
+                                            : 'destructive'
+                                        }
+                                      >
+                                        {order.position.toUpperCase()}
+                                      </Badge>
+                                    </TableCell>
+                                    <TableCell>
+                                      ${order.price.toFixed(2)}
+                                    </TableCell>
+                                    <TableCell>{order.quantity}</TableCell>
+                                    <TableCell>
+                                      ${(order.price * order.quantity).toFixed(2)}
+                                    </TableCell>
+                                    <TableCell>
+                                      <Badge variant="outline">
+                                        {order.status}
+                                      </Badge>
+                                    </TableCell>
+                                    <TableCell>
+                                      {new Date(order.creation).toLocaleString()}
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          </ScrollArea>
+                        </CardContent>
+                      </Card>
+                    </TabsContent>
+
+                    <TabsContent value="trades">
+                      <Card>
+                        <CardContent className="p-6">
                           <Table>
                             <TableHeader>
                               <TableRow>
-                                <TableHead>ID</TableHead>
                                 <TableHead>Position</TableHead>
                                 <TableHead>Price</TableHead>
                                 <TableHead>Amount</TableHead>
-                                <TableHead>Total</TableHead>
-                                <TableHead>Status</TableHead>
                                 <TableHead>Time</TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
-                              {marketOrders.map((order) => (
-                                <TableRow key={order.name}>
-                                  <TableCell>{order.name}</TableCell>
+                              {marketOrders.slice(0, 10).map((order, index) => (
+                                <TableRow key={`trade-${index}`}>
                                   <TableCell>
                                     <Badge
                                       variant={
@@ -549,18 +726,16 @@ const Overview = () => {
                                       {order.position.toUpperCase()}
                                     </Badge>
                                   </TableCell>
-                                  <TableCell>
+                                  <TableCell
+                                    className={
+                                      order.position === 'yes'
+                                        ? 'text-green-500'
+                                        : 'text-red-500'
+                                    }
+                                  >
                                     ${order.price.toFixed(2)}
                                   </TableCell>
                                   <TableCell>{order.quantity}</TableCell>
-                                  <TableCell>
-                                    ${(order.price * order.quantity).toFixed(2)}
-                                  </TableCell>
-                                  <TableCell>
-                                    <Badge variant="outline">
-                                      {order.status}
-                                    </Badge>
-                                  </TableCell>
                                   <TableCell>
                                     {new Date(order.creation).toLocaleString()}
                                   </TableCell>
@@ -568,58 +743,10 @@ const Overview = () => {
                               ))}
                             </TableBody>
                           </Table>
-                        </ScrollArea>
-                      </CardContent>
-                    </Card>
-                  </TabsContent>
-
-                  <TabsContent value="trades">
-                    <Card>
-                      <CardContent className="p-6">
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Position</TableHead>
-                              <TableHead>Price</TableHead>
-                              <TableHead>Amount</TableHead>
-                              <TableHead>Time</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {marketOrders.slice(0, 10).map((order, index) => (
-                              <TableRow key={`trade-${index}`}>
-                                <TableCell>
-                                  <Badge
-                                    variant={
-                                      order.position === 'yes'
-                                        ? 'default'
-                                        : 'destructive'
-                                    }
-                                  >
-                                    {order.position.toUpperCase()}
-                                  </Badge>
-                                </TableCell>
-                                <TableCell
-                                  className={
-                                    order.position === 'yes'
-                                      ? 'text-green-500'
-                                      : 'text-red-500'
-                                  }
-                                >
-                                  ${order.price.toFixed(2)}
-                                </TableCell>
-                                <TableCell>{order.quantity}</TableCell>
-                                <TableCell>
-                                  {new Date(order.creation).toLocaleString()}
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </CardContent>
-                    </Card>
-                  </TabsContent>
-                </Tabs> */}
+                        </CardContent>
+                      </Card>
+                    </TabsContent>
+                  </Tabs> */}
               </div>
             )}
           </div>

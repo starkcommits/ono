@@ -1,6 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Share2, Users, Timer, CalendarClock } from 'lucide-react'
+import {
+  ArrowLeft,
+  Share2,
+  Users,
+  Timer,
+  CalendarClock,
+  Book,
+  BookOpen,
+} from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Chart as ChartJS,
@@ -20,6 +28,7 @@ import {
   useFrappeGetDocList,
 } from 'frappe-react-sdk'
 import EventDetailsOrderBook from '../components/EventDetailsOrderBook'
+import OrdersTab from '../components/OrdersTab'
 
 ChartJS.register(
   CategoryScale,
@@ -233,16 +242,19 @@ const EventDetails = () => {
         >
           <TabsList className="w-full">
             <TabsTrigger value="activity" className="w-full">
-              Account
+              Activity
             </TabsTrigger>
             <TabsTrigger value="order book" className="w-full">
               Order Book
+            </TabsTrigger>
+            <TabsTrigger value="orders" className="w-full">
+              Orders
             </TabsTrigger>
           </TabsList>
           <TabsContent value="activity">
             <div className="bg-white rounded-xl shadow-sm">
               <div className="px-4 py-3 border-b border-gray-100">
-                <h3 className="font-medium text-center">
+                <h3 className="font-medium text-left">
                   {tradesData?.length > 0
                     ? 'Matched Users'
                     : 'No Users matched yet.'}
@@ -323,9 +335,16 @@ const EventDetails = () => {
             </div>
           </TabsContent>
           <TabsContent value="order book">
+            <div className="flex items-center gap-2 px-4 py-4 bg-gray-50">
+              <BookOpen className="h-5 w-5" />
+              <span className="font-medium">Order Book</span>
+            </div>
             {market?.status === 'OPEN' && (
               <EventDetailsOrderBook marketId={id} />
             )}
+          </TabsContent>
+          <TabsContent value="orders">
+            <OrdersTab />
           </TabsContent>
         </Tabs>
 

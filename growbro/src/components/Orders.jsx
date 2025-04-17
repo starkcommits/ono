@@ -33,15 +33,15 @@ import {
   Filler,
   Legend,
 } from 'chart.js'
-import TradeSheet from '../components/TradeSheet'
+import TradeSheet from './TradeSheet'
 import {
   useFrappeAuth,
   useFrappeEventListener,
   useFrappeGetCall,
   useFrappeGetDocList,
 } from 'frappe-react-sdk'
-import ActivePosition from '../components/ActivePosition'
-import CompletedTrades from '../components/CompletedTrades'
+import ActivePosition from './ActivePositions'
+import CompletedTrades from './CompletedTrades'
 
 ChartJS.register(
   CategoryScale,
@@ -54,7 +54,7 @@ ChartJS.register(
   Legend
 )
 
-const Portfolio = () => {
+const Orders = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const searchParams = new URLSearchParams(location.search)
@@ -507,7 +507,7 @@ const Portfolio = () => {
   )
 }
 
-export default Portfolio
+export default Orders
 
 {
   /* <div

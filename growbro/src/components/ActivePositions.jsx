@@ -23,7 +23,7 @@ import { Badge } from '@/components/ui/badge'
 import { useEffect, useState } from 'react'
 import { useFrappeDeleteDoc } from 'frappe-react-sdk'
 
-const ActivePosition = ({
+const ActivePositions = ({
   position,
   setActiveOrders,
   handleTradeClick,
@@ -349,4 +349,4 @@ const ActivePosition = ({
   )
 }
 
-export default ActivePosition
+export default ActivePositions

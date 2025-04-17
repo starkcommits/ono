@@ -3,7 +3,7 @@ import Navbar from './components/Navbar'
 import HomePage from './pages/Home'
 import WalletPage from './pages/Wallet'
 import EventDetails from './pages/EventDetails'
-import Portfolio from './pages/Portfolio'
+import Orders from './components/Orders'
 import News from './pages/News'
 import CategoryPage from './pages/CategoryPage'
 import SearchPage from './pages/Search'
@@ -48,7 +48,7 @@ function App() {
                 <Route path="/" element={<HomePage />} />
                 <Route path="/kyc" element={<KYC />} />
                 <Route path="/wallet" element={<WalletPage />} />
-                <Route path="/portfolio" element={<Portfolio />} />
+                <Route path="/portfolio" element={<Orders />} />
                 <Route path="/news" element={<News />} />
                 <Route path="/search" element={<SearchPage />} />
                 <Route path="/event/:id" element={<EventDetails />} />
