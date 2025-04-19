@@ -15,7 +15,10 @@
   "price",
   "opinion_type",
   "exit_price",
-  "filled_quantity"
+  "filled_quantity",
+  "closing_time",
+  "market_yes_price",
+  "market_no_price"
  ],
  "fields": [
   {
@@ -47,7 +50,7 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "Hold\nExit\nCancel"
+   "options": "ACTIVE\nEXITING\nEXITED"
   },
   {
    "fieldname": "exit_price",
@@ -56,7 +59,7 @@
   },
   {
    "fieldname": "filled_quantity",
-   "fieldtype": "Data",
+   "fieldtype": "Int",
    "label": "Filled Quantity"
   },
   {
@@ -69,12 +72,31 @@
    "fieldname": "user_id",
    "fieldtype": "Data",
    "label": "User ID"
+  },
+  {
+   "fetch_from": "market_id.closing_time",
+   "fieldname": "closing_time",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "label": "Closing Time"
+  },
+  {
+   "fetch_from": "market_id.yes_price",
+   "fieldname": "market_yes_price",
+   "fieldtype": "Read Only",
+   "label": "Market Yes Price"
+  },
+  {
+   "fetch_from": "market_id.no_price",
+   "fieldname": "market_no_price",
+   "fieldtype": "Read Only",
+   "label": "Market No Price"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-04-16 18:35:49.826789",
+ "modified": "2025-04-17 15:52:27.324544",
  "modified_by": "Administrator",
  "module": "Reward App",
  "name": "Holding",
@@ -94,7 +116,6 @@
    "write": 1
   }
  ],
- "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

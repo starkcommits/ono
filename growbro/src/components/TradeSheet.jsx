@@ -91,28 +91,33 @@ const TradeSheet = ({
 
   const handleConfirmSell = async () => {
     try {
-      const orderData = {
-        market_id: marketId,
-        order_type: tradeAction,
-        quantity: quantity,
-        opinion_type: choice,
-        amount: price,
-        filled_quantity: 0,
-        status: 'UNMATCHED',
-        buy_order_id: previousOrderId,
-      }
+      // const orderData = {
+      //   market_id: marketId,
+      //   order_type: tradeAction,
+      //   quantity: quantity,
+      //   opinion_type: choice,
+      //   amount: price,
+      //   filled_quantity: 0,
+      //   status: 'UNMATCHED',
+      //   buy_order_id: previousOrderId,
+      // }
 
-      console.log('90th:', orderData)
+      // console.log('90th:', orderData)
 
-      const newSellOrder = await createDoc('Orders', orderData)
-      console.log('sell order', newSellOrder)
-      await updateDoc('Orders', previousOrderId, {
-        sell_order_id: newSellOrder.name,
-      })
+      // const newSellOrder = await createDoc('Orders', orderData)
+      // console.log('sell order', newSellOrder)
+      // await updateDoc('Orders', previousOrderId, {
+      //   sell_order_id: newSellOrder.name,
+      // })
       setTimeout(() => {
         console.log('Executing refetch')
         refetchActiveOrders()
       }, 500)
+
+      await updateDoc('Holding', previousOrderId, {
+        exit_price: price,
+        status: 'EXITING',
+      })
 
       toast.success(`Sell Order Placed.`)
 

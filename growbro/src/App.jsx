@@ -3,7 +3,7 @@ import Navbar from './components/Navbar'
 import HomePage from './pages/Home'
 import WalletPage from './pages/Wallet'
 import EventDetails from './pages/EventDetails'
-import Orders from './components/Orders'
+
 import News from './pages/News'
 import CategoryPage from './pages/CategoryPage'
 import SearchPage from './pages/Search'
@@ -20,6 +20,8 @@ import PublicRoute from './components/PublicRoute'
 import { Route, Routes } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import Overview from './pages/Overview'
+import Portfolio from './pages/Portfolio'
+import MarketHolding from './pages/MarketHolding'
 
 const navItems = [
   { icon: Home, label: 'Home', path: '/' },
@@ -48,7 +50,8 @@ function App() {
                 <Route path="/" element={<HomePage />} />
                 <Route path="/kyc" element={<KYC />} />
                 <Route path="/wallet" element={<WalletPage />} />
-                <Route path="/portfolio" element={<Orders />} />
+                <Route path="/portfolio" element={<Portfolio />} />
+                <Route path="/portfolio/:id" element={<MarketHolding />} />
                 <Route path="/news" element={<News />} />
                 <Route path="/search" element={<SearchPage />} />
                 <Route path="/event/:id" element={<EventDetails />} />

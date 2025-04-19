@@ -454,6 +454,9 @@ def market_settlements():
         # for order_detail in data.settlements:
         #     # Fetch the order
         #     order = frappe.get_doc("Orders", order_detail["order_id"])
+    except Exception as e:
+        frappe.log_error("Error in market settlements", f"{str(e)}")
+        return {"status": "error", "message": "Error in market settlements"}
 
 @frappe.whitelist(allow_guest=True)
 def update_market_price():
