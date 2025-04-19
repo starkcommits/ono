@@ -21,12 +21,14 @@
   {
    "fieldname": "market_id",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Market ID",
    "options": "Market"
   },
   {
    "fieldname": "quantity",
    "fieldtype": "Int",
+   "in_list_view": 1,
    "label": "Quantity"
   },
   {
@@ -36,27 +38,31 @@
   {
    "fieldname": "price",
    "fieldtype": "Float",
+   "in_list_view": 1,
    "label": "Price"
   },
   {
    "fieldname": "opinion_type",
-   "fieldtype": "Data",
-   "label": "Opinion Type"
+   "fieldtype": "Select",
+   "label": "Opinion Type",
+   "options": "YES\nNO"
   },
   {
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "Hold\nExit\nCancel"
+   "options": "ACTIVE\nEXITING\nEXITED"
   },
   {
+   "default": "0",
    "fieldname": "exit_price",
-   "fieldtype": "Data",
+   "fieldtype": "Float",
    "label": "Exit Price"
   },
   {
+   "default": "0",
    "fieldname": "filled_quantity",
-   "fieldtype": "Data",
+   "fieldtype": "Int",
    "label": "Filled Quantity"
   },
   {
@@ -68,13 +74,14 @@
   {
    "fieldname": "user_id",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "User ID"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-04-16 18:35:49.826789",
+ "modified": "2025-04-17 16:01:22.103382",
  "modified_by": "Administrator",
  "module": "Reward App",
  "name": "Holding",
