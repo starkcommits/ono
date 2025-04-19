@@ -48,6 +48,16 @@ def wallet_operation(doc, method):
                 order_book_data["price"] = 10 - doc.amount
                 order_book_data["opinion_type"] = "NO" if doc.opinion_type == "YES" else "YES"
             else:
+                if not doc.holding_id:
+                    frappe.db.sql("""
+                        UPDATE `tabHolding`
+                        SET status = 'EXITING', order_id = %s, exit_price = %s
+                        WHERE market_id = %s
+                        AND user_id = %s
+                        AND status = 'ACTIVE'
+                        AND opinion_type = %s
+                    """, (doc.name, doc.amount, doc.market_id, doc.user_id, doc.opinion_type))
+
                 order_book_data["price"] = doc.amount
                 order_book_data["opinion_type"] = doc.opinion_type
 
@@ -159,7 +169,18 @@ def wallet_operation(doc, method):
                     WHERE name = %s
                 """, (new_balance, wallet_name))
             else:
-                frappe.db.set_value("Holding",doc.holding_id,'status','ACTIVE','order_id','',update_modified=False)
+                if not doc.holding_id:
+                    frappe.db.sql("""
+                        UPDATE `tabHolding`
+                        SET status = 'ACTIVE', order_id = "", exit_price = 0
+                        WHERE market_id = %s
+                        AND status = 'EXITING'
+                        AND order_id = %s
+                        AND user_id = %s
+                    """, (doc.market_id, doc.name, doc.user_id,))
+                    
+                else:
+                    frappe.db.set_value("Holding",doc.holding_id,'status','ACTIVE','order_id','',update_modified=False)
                 
                 order_book_data["price"] = doc.amount
                 order_book_data["opinion_type"] = doc.opinion_type
