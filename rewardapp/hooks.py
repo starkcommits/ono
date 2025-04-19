@@ -146,10 +146,10 @@ doc_events = {
 
 doc_events = {
 	"Orders": {
-		"on_update": "rewardapp.engine.order"
+		"on_update": "rewardapp.wallet.wallet_operation"
 	},
     "Market": {
-        "after_insert": "rewardapp.engine.market"
+        "on_update": "rewardapp.engine.market"
     },
     "Holding": {
         "on_update": "rewardapp.engine.holding"
@@ -173,7 +173,8 @@ api = {
         "rewardapp.wallet.get_deposit_and_withdrawal",
         "rewardapp.engine.get_open_buy_orders_without_active_sell",
         "rewardapp.engine.cancel_order",
-        "rewardapp.engine.total_traders"
+        "rewardapp.engine.total_traders",
+        "rewardapp.engine.get_marketwise_holding"
     ]
 }
 
