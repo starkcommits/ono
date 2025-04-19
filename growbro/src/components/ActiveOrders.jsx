@@ -161,7 +161,7 @@ const ActiveOrders = ({
             </div>
           </div>
         </div>
-        {order.status !== 'CANCELED' ? (
+        {order.status === 'UNMATCHED' || order.status === 'PARTIAL' ? (
           <div className="flex gap-2 w-full items-center justify-between">
             <div className="w-[50%]">
               <Dialog open={isOpen} onOpenChange={setIsOpen}>

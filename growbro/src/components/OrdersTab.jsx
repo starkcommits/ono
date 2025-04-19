@@ -84,7 +84,7 @@ const OrdersTab = () => {
         'no_price',
       ],
       filters: [
-        ['status', 'not in', ['SETTLED', 'MATCHED']],
+        ['status', 'not in', ['SETTLED']],
         ['owner', '=', currentUser],
       ],
       orderBy: {

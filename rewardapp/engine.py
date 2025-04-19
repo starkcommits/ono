@@ -194,7 +194,7 @@ def market(doc, method):
 
             frappe.db.commit()
 
-            url=f"http://94.136.187.188:8086/markets/{doc.name}/close"
+            url=f"http://127.0.0.1:8086/markets/{doc.name}/close"
             response = requests.post(url)
                 
             if response.status_code != 200:

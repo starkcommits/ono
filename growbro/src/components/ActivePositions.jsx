@@ -8,6 +8,18 @@ import {
   useFrappeUpdateDoc,
 } from 'frappe-react-sdk'
 import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from '@/components/ui/drawer'
+import { Slider } from '@/components/ui/slider'
+import {
+  ArrowRight,
   Clock,
   LucideMousePointerSquareDashed,
   Plus,
@@ -36,9 +48,13 @@ const ActivePositions = ({
   handleTradeClick,
   refetchActiveHoldings,
 }) => {
-  const [market, setMarket] = useState({})
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
+
+  console.log(position)
+
+  const [yesPrice, setYesPrice] = useState(position.market_yes_price)
+  const [noPrice, setNoPrice] = useState(position.market_no_price)
   const { updateDoc } = useFrappeUpdateDoc()
   const { currentUser } = useFrappeAuth()
 
@@ -117,16 +133,21 @@ const ActivePositions = ({
     navigate(`/event/${position.market_id}`)
   }
 
-  console.log('Enetered:', position)
+  console.log('Entered:', position)
 
   return (
     <>
-      <div key={position.name} className="p-4 w-full cursor-pointer">
-        <Badge className="text-xs font-semibold mb-2 hover:underline">
-          #{position.name}
+      <div key={position.market_id} className="p-4 w-full cursor-pointer">
+        <Badge
+          className="text-xs font-semibold mb-2 hover:underline"
+          onClick={() => {
+            navigate(`/portfolio/${position.market_id}`)
+          }}
+        >
+          #{position.market_id}
         </Badge>
 
-        <div className="flex items-center justify-between mb-2">
+        {/* <div className="flex items-center justify-between mb-2">
           <div className="flex gap-2 items-center w-full">
             <div
               className="font-medium text-gray-900"
@@ -153,36 +174,31 @@ const ActivePositions = ({
                 )}
             </div>
           </div>
-        </div>
-        <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
-          {/* <span
-            className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-              position.opinion_type === 'YES'
-                ? 'bg-blue-100 text-blue-700'
-                : 'bg-rose-100 text-rose-700'
-            }`}
-          >
-            {position.opinion_type}
-          </span>
-          <span>•</span> */}
+        </div> */}
+        {/* <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
           <span className="flex items-center">
             <Clock className="h-3.5 w-3.5 mr-1" />
             End at {formatDate(position.closing_time)}
           </span>
-        </div>
+        </div> */}
         <div className="flex justify-between gap-4 text-sm mb-4">
           <div>
             <div className="text-gray-600 font-medium">Invested</div>
             <div className="font-semibold text-gray-900">
-              ₹{position.quantity * position.price}
+              ₹{position.invested_amount}
             </div>
           </div>
           <div>
-            <div className="text-gray-600 font-medium">Returns</div>
+            <div className="text-gray-600 font-medium">Total Quantity</div>
             <div className="font-semibold text-gray-900">
-              {(position.opinion_type === 'YES'
-                ? position.market_yes_price
-                : position.market_no_price) - position.price}
+              {position.total_quantity}
+            </div>
+          </div>
+          <div>
+            <div className="text-gray-600 font-medium">Avg. Price</div>
+            <div className="font-semibold text-gray-900">
+              &#8377;
+              {(position.invested_amount / position.total_quantity).toFixed(2)}
             </div>
           </div>
           {/* <div>
@@ -195,54 +211,78 @@ const ActivePositions = ({
             </div>
           </div> */}
         </div>
-        {position.status === 'ACTIVE' && (
-          <div className="flex gap-2 w-full items-center justify-between">
-            <div className="w-full flex gap-2 items-center ">
-              <Button
-                onClick={() =>
-                  handleTradeClick(
-                    position.opinion_type === 'YES'
-                      ? position.market_yes_price
-                      : position.market_no_price,
-                    position.opinion_type,
-                    'SELL',
-                    position.market_id,
-                    position.quantity,
-                    position.name
-                  )
-                }
-                className="w-[50%] bg-rose-50 text-rose-600 rounded-xl text-sm font-medium hover:bg-rose-100 transition-colors"
-              >
-                <XCircle className="h-4 w-4" />
-                Exit Position
-              </Button>
+        <div className="w-full flex items-center justify-end cursor-default">
+          <Drawer className="w-full">
+            <DrawerTrigger>
+              <button className="rounded-lg p-1.5 border flex items-center justify-center gap-2">
+                <span>Exit Position</span>
+                <ArrowRight strokeWidth={1.5} className="h-4 w-4" />
+              </button>
+            </DrawerTrigger>
+            <DrawerContent className="mx-auto w-full">
+              <DrawerHeader className="flex items-center justify-center">
+                <DrawerTitle className="w-full flex justify-center">
+                  Exit All Positions
+                </DrawerTitle>
+              </DrawerHeader>
+              <div className="w-full flex flex-col gap-4">
+                <div className="mb-6 px-10">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-lg font-medium">Yes Price</span>
+                    <div className="flex items-center">
+                      <span className="text-lg font-medium">₹{yesPrice}</span>
+                    </div>
+                  </div>
 
-              <Button
-                onClick={() => {
-                  handleMarketClick(position)
-                }}
-                className="w-[50%] bg-blue-50 text-blue-600 rounded-xl text-sm font-medium hover:bg-blue-100 transition-colors"
-              >
-                <Plus className="h-4 w-4" />
-                Invest More
-              </Button>
-            </div>
-          </div>
-        )}
-        {position.status === 'EXITING' && (
-          <div className="flex gap-2 w-full items-center justify-between">
-            <div className="w-[50%] flex justify-center font-medium tracking-wide">{`Qty ${position.filled_quantity}/${position.quantity} Matched`}</div>
-            <Button
-              onClick={() => {
-                handleMarketClick(position)
-              }}
-              className="w-[50%] bg-blue-50 text-blue-600 rounded-xl text-sm font-medium hover:bg-blue-100 transition-colors"
-            >
-              <Plus className="h-4 w-4" />
-              Invest More
-            </Button>
-          </div>
-        )}
+                  <div className="flex justify-between mt-2">
+                    <Slider
+                      defaultValue={[1]}
+                      max={9.5}
+                      min={0.5}
+                      step={0.5}
+                      value={[yesPrice]}
+                      className={``}
+                      onValueChange={(values) => {
+                        setYesPrice(values[0])
+                      }}
+                    />
+                  </div>
+                </div>
+                <div className="mb-6 px-10">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-lg font-medium">No Price</span>
+                    <div className="flex items-center">
+                      <span className="text-lg font-medium">₹{noPrice}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between mt-2">
+                    <Slider
+                      defaultValue={[1]}
+                      max={9.5}
+                      min={0.5}
+                      step={0.5}
+                      value={[noPrice]}
+                      className={``}
+                      onValueChange={(values) => {
+                        setYesPrice(values[0])
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+              <DrawerFooter className="w-full px-10">
+                <Button>Submit</Button>
+
+                <DrawerClose className=" w-full">
+                  <Button variant="outline" className="w-full">
+                    Cancel
+                  </Button>
+                </DrawerClose>
+              </DrawerFooter>
+            </DrawerContent>
+          </Drawer>
+        </div>
       </div>
     </>
   )

@@ -70,7 +70,7 @@ const Portfolio = () => {
   const [showTradeSheet, setShowTradeSheet] = useState(false)
   const [activeOrders, setActiveOrders] = useState({})
   const [completedOrders, setCompletedOrders] = useState({})
-  const { currentUser, isLoading } = useFrappeAuth()
+  const { currentUser, isLoading: currentUserLoading } = useFrappeAuth()
   const [totalReturns, setTotalReturns] = useState(0)
   const [activeHoldings, setActiveHoldings] = useState({})
   const [completedTrades, setCompletedTrades] = useState({})
@@ -79,30 +79,17 @@ const Portfolio = () => {
     data: holdingData,
     isLoading: holdingDataLoading,
     mutate: refetchActiveHoldings,
-  } = useFrappeGetDocList(
-    'Holding',
-    {
-      fields: [
-        'name',
-        'market_id',
-        'price',
-        'quantity',
-        'opinion_type',
-        'status',
-        'exit_price',
-        'market_yes_price',
-        'market_no_price',
-        'closing_time',
-        'order_id',
-        'filled_quantity',
-      ],
-      filters: [
-        ['owner', '=', currentUser],
-        ['status', 'in', ['ACTIVE', 'EXITING']],
-      ],
-    },
-    currentUser && tab === 'active' ? undefined : null
-  )
+  } = useFrappeGetCall('rewardapp.engine.get_marketwise_holding')
+
+  useEffect(() => {
+    if (!holdingDataLoading && holdingData.message.length > 0) {
+      const holdingDataMap = holdingData.message.reduce((acc, holding) => {
+        acc[holding.name] = holding // ✅ Store as { "market_name": marketData }
+        return acc
+      }, {})
+      setActiveHoldings(holdingDataMap)
+    }
+  }, [holdingData])
 
   const {
     data: completedTradesData,
@@ -134,15 +121,6 @@ const Portfolio = () => {
   )
 
   // console.log('Holdings: ', activeHoldings)
-  useEffect(() => {
-    if (!holdingDataLoading && holdingData?.length > 0) {
-      const holdingDataMap = holdingData.reduce((acc, holding) => {
-        acc[holding.name] = holding // ✅ Store as { "market_name": marketData }
-        return acc
-      }, {})
-      setActiveHoldings(holdingDataMap)
-    }
-  }, [holdingData])
 
   useEffect(() => {
     if (!completedTradesLoading && completedTradesData?.length > 0) {
@@ -405,7 +383,7 @@ const Portfolio = () => {
             {activeTab === 'active'
               ? Object.values(activeHoldings).map((position) => (
                   <ActivePosition
-                    key={position.name}
+                    key={position.market_id}
                     position={position}
                     setActiveHoldings={setActiveHoldings}
                     refetchActiveHoldings={refetchActiveHoldings}
