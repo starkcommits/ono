@@ -203,20 +203,50 @@ def market(doc, method):
         else:
             result = frappe.db.sql("""
                 SELECT
+                    user_id,
+                    opinion_type,
                     SUM(quantity - filled_quantity) AS total_quantity
                 FROM `tabHolding`
                 WHERE market_id = %s
                 AND status IN ('ACTIVE', 'EXITING')
-                AND opinion_type = %s
-                GROUP BY user_id
-            """, (doc.name, doc.end_result), as_dict = True)
+                GROUP BY user_id, opinion_type
+            """, (doc.name,), as_dict=True)
 
             for row in result:
-                user = row["user_id"]
-                qty = row["total_quantity"] or 0
                 
-                
-            
+                if row["opinion_type"] == doc.winning_side:
+                    user_id = row["user_id"]
+                    qty = row["total_quantity"] or 0
+                    wallet_data = frappe.db.sql("""
+                        SELECT name, balance FROM `tabUser Wallet`
+                        WHERE user = %s AND is_active = 1
+                        FOR UPDATE
+                    """, (user_id,), as_dict=True)
+
+                    if not wallet_data:
+                        frappe.msgprint("No active wallet found")
+                        frappe.throw(f"No active wallet found for {user_id}")
+
+                    wallet_name = wallet_data[0]["name"]
+                    available_balance = wallet_data[0]["balance"]
+
+                    # Calculate new balance
+                    new_balance = available_balance + qty * 10
+                    
+                    # Update wallet balance
+                    frappe.db.sql("""
+                        UPDATE `tabUser Wallet`
+                        SET balance = %s
+                        WHERE name = %s
+                    """, (new_balance, wallet_name))
+
+            frappe.db.sql("""
+                UPDATE `tabHolding`
+                SET status = 'EXITED'
+                WHERE market_id = %s
+                AND status IN ('ACTIVE', 'EXITING')
+            """, (doc.name,))    
+            frappe.db.commit()
     except Exception as e:
         frappe.log_error(f"Exception market: {str(e)}")
 
@@ -337,17 +367,23 @@ def get_marketwise_holding():
 
     result = frappe.db.sql("""
         SELECT
-            market_id,
-            SUM(quantity - filled_quantity) AS total_quantity,
+            h.market_id,
+            m.question,
+            m.yes_price,
+            m.no_price,
+            SUM(h.quantity - h.filled_quantity) AS total_quantity,
             CASE 
-                WHEN SUM(quantity - filled_quantity) > 0 THEN
-                    SUM((quantity - filled_quantity) * price)
+                WHEN SUM(h.quantity - h.filled_quantity) > 0 THEN
+                    SUM((h.quantity - h.filled_quantity) * h.price)
                 ELSE 0
-            END AS invested_amount
-        FROM `tabHolding`
-        WHERE user_id = %s
-        AND status IN ('ACTIVE', 'EXITING')
-        GROUP BY market_id
+            END AS invested_amount,
+            SUM(CASE WHEN h.opinion_type = 'yes' THEN h.quantity - h.filled_quantity ELSE 0 END) AS yes_quantity,
+            SUM(CASE WHEN h.opinion_type = 'no' THEN h.quantity - h.filled_quantity ELSE 0 END) AS no_quantity
+        FROM `tabHolding` h
+        JOIN `tabMarket` m ON h.market_id = m.name
+        WHERE h.user_id = %s
+        AND h.status IN ('ACTIVE', 'EXITING')
+        GROUP BY h.market_id, m.question, m.yes_price, m.no_price
     """, (user_id,), as_dict=True)
 
     return result
