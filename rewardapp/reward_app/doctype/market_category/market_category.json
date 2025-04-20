@@ -7,6 +7,8 @@
  "engine": "InnoDB",
  "field_order": [
   "category_name",
+  "column_break_alfv",
+  "category_image",
   "column_break_kmlc",
   "is_active"
  ],
@@ -27,12 +29,21 @@
   {
    "fieldname": "column_break_kmlc",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_alfv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "category_image",
+   "fieldtype": "Attach Image",
+   "label": "Category Image"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-03-28 12:50:46.581267",
+ "modified": "2025-04-20 10:46:42.230757",
  "modified_by": "Administrator",
  "module": "Reward App",
  "name": "Market Category",
@@ -52,6 +63,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []
