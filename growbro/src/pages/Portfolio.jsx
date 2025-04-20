@@ -288,15 +288,12 @@ const Portfolio = () => {
               <div className="text-3xl font-bold text-white flex items-center gap-4">
                 <div>
                   ₹
-                  {Object.values(activeOrders).length > 0
-                    ? Object.values(activeOrders).reduce((acc, order) => {
+                  {Object.values(activeHoldings).length > 0
+                    ? Object.values(activeHoldings).reduce((acc, holding) => {
                         acc =
                           acc +
-                          (order.opinion_type === 'YES'
-                            ? order.yes_price
-                            : order.no_price) *
-                            order.quantity
-
+                          parseFloat(holding.yes_price) * holding.yes_quantity +
+                          parseFloat(holding.no_price) * holding.no_quantity
                         return acc
                       }, 0)
                     : 0}
@@ -314,9 +311,10 @@ const Portfolio = () => {
               <div className="text-3xl font-bold text-white flex items-center gap-4">
                 <div>
                   ₹
-                  {Object.values(activeOrders).length > 0
-                    ? Object.values(activeOrders).reduce((acc, order) => {
-                        return acc + parseFloat(order.amount * order.quantity)
+                  {Object.values(activeHoldings).length > 0
+                    ? Object.values(activeHoldings).reduce((acc, holding) => {
+                        acc = acc + parseFloat(holding.invested_amount)
+                        return acc
                       }, 0)
                     : 0}
                 </div>

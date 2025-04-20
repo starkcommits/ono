@@ -75,14 +75,14 @@ const MarketHolding = () => {
   const [completedOrders, setCompletedOrders] = useState({})
   const { currentUser, isLoading } = useFrappeAuth()
   const [totalReturns, setTotalReturns] = useState(0)
-  const [yesHoldings, setYesHoldings] = useState({})
-  const [noHoldings, setNoHoldings] = useState({})
+  const [activeHoldings, setActiveHoldings] = useState({})
+
   const [completedTrades, setCompletedTrades] = useState({})
 
   const {
-    data: yesHoldingData,
-    isLoading: yesHoldingDataLoading,
-    mutate: refetchYesHoldingData,
+    data: holdingData,
+    isLoading: holdingDataLoading,
+    mutate: refetcHoldingData,
   } = useFrappeGetDocList(
     'Holding',
     {
@@ -104,66 +104,22 @@ const MarketHolding = () => {
         ['owner', '=', currentUser],
         ['status', 'in', ['ACTIVE', 'EXITING']],
         ['market_id', '=', id],
-        ['opinion_type', '=', 'YES'],
       ],
     },
-    currentUser && activeTab === 'Yes' ? undefined : null
+    currentUser ? undefined : null
   )
 
   useEffect(() => {
-    if (!yesHoldingDataLoading && yesHoldingData?.length > 0) {
-      const holdingDataMap = yesHoldingData.reduce((acc, holding) => {
+    if (!holdingDataLoading && holdingData?.length > 0) {
+      const holdingDataMap = holdingData.reduce((acc, holding) => {
         acc[holding.name] = holding // ✅ Store as { "market_name": marketData }
         return acc
       }, {})
-      setYesHoldings(holdingDataMap)
+      setActiveHoldings(holdingDataMap)
     }
-  }, [yesHoldingData])
+  }, [holdingData])
 
-  console.log('Yes Holding Data:', yesHoldingData)
-
-  const {
-    data: noHoldingData,
-    isLoading: noHoldingDataLoading,
-    mutate: refetchNoHoldingData,
-  } = useFrappeGetDocList(
-    'Holding',
-    {
-      fields: [
-        'name',
-        'market_id',
-        'price',
-        'quantity',
-        'opinion_type',
-        'status',
-        'exit_price',
-        'market_yes_price',
-        'market_no_price',
-        'closing_time',
-        'order_id',
-        'filled_quantity',
-      ],
-      filters: [
-        ['owner', '=', currentUser],
-        ['status', 'in', ['ACTIVE', 'EXITING']],
-        ['market_id', '=', id],
-        ['opinion_type', '=', 'NO'],
-      ],
-    },
-    currentUser && activeTab === 'No' ? undefined : null
-  )
-
-  useEffect(() => {
-    if (!noHoldingDataLoading && noHoldingData?.length > 0) {
-      const holdingDataMap = noHoldingData.reduce((acc, holding) => {
-        acc[holding.name] = holding // ✅ Store as { "market_name": marketData }
-        return acc
-      }, {})
-      setNoHoldings(holdingDataMap)
-    }
-  }, [noHoldingData])
-
-  console.log('No Holding Data:', noHoldingData)
+  console.log('Active Holding Data:', activeHoldings)
 
   useFrappeEventListener('order_event', (updatedOrder) => {
     console.log('Updated Order:', updatedOrder)
@@ -302,14 +258,14 @@ const MarketHolding = () => {
               <div className="text-3xl font-bold text-white flex items-center gap-4">
                 <div>
                   ₹
-                  {Object.values(activeOrders).length > 0
-                    ? Object.values(activeOrders).reduce((acc, order) => {
+                  {Object.values(activeHoldings).length > 0
+                    ? Object.values(activeHoldings).reduce((acc, holding) => {
                         acc =
                           acc +
-                          (order.opinion_type === 'YES'
-                            ? order.yes_price
-                            : order.no_price) *
-                            order.quantity
+                          (holding.opinion_type === 'YES'
+                            ? holding.market_yes_price
+                            : holding.market_no_price) *
+                            holding.quantity
 
                         return acc
                       }, 0)
@@ -328,9 +284,11 @@ const MarketHolding = () => {
               <div className="text-3xl font-bold text-white flex items-center gap-4">
                 <div>
                   ₹
-                  {Object.values(activeOrders).length > 0
-                    ? Object.values(activeOrders).reduce((acc, order) => {
-                        return acc + parseFloat(order.amount * order.quantity)
+                  {Object.values(activeHoldings).length > 0
+                    ? Object.values(activeHoldings).reduce((acc, holding) => {
+                        return (
+                          acc + parseFloat(holding.price * holding.quantity)
+                        )
                       }, 0)
                     : 0}
                 </div>
@@ -351,7 +309,7 @@ const MarketHolding = () => {
       <div className="px-6 -mt-4">
         <div className="bg-white rounded-3xl shadow-sm">
           {/* Tabs */}
-          <div className="flex p-2">
+          {/* <div className="flex p-2">
             <button
               onClick={() => {
                 navigate(`/portfolio/${id}?tab=Yes`)
@@ -378,93 +336,87 @@ const MarketHolding = () => {
             >
               NO
             </button>
-          </div>
-
-          {/* Filter Bar */}
-          {/* <div className="p-4 flex items-center justify-between border-b border-gray-100">
-            <div className="text-sm font-medium text-gray-700">
-              {activeTab === 'Yes'
-                ? `${Object.values(activeHoldings).length} Active Position`
-                : `${Object.values(completedTrades).length} Trades this month`}
-            </div>
-            <button className="p-2 hover:bg-gray-50 rounded-lg transition-colors">
-              <Filter className="h-4 w-4 text-gray-600" />
-            </button>
           </div> */}
 
           {/* Trades List */}
           <div className="divide-y divide-gray-100">
-            {activeTab === 'Yes'
-              ? Object.values(yesHoldings).map((position) => (
-                  <div
-                    key={position.name}
-                    className="p-4 w-full cursor-pointer"
-                  >
-                    <Badge className="text-xs font-semibold mb-2 hover:underline">
-                      #{position.market_id}
-                    </Badge>
+            {Object.values(activeHoldings).map((position) => (
+              <div key={position.name} className="p-4 w-full cursor-pointer">
+                <Badge className="text-xs font-semibold mb-2 hover:underline">
+                  #{position.market_id}
+                </Badge>
 
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex gap-2 items-center w-full">
-                        <div
-                          className="font-medium text-gray-900"
-                          // onClick={() => {
-                          //   navigate(`/event/${position.market_id}`)
-                          // }}
-                        >
-                          {position.market_id}
-                        </div>
-                        <div>
-                          {position.status === 'ACTIVE' &&
-                            position.filled_quantity === 0 && (
-                              <span className="bg-yellow-100 text-yellow-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
-                                {position.status}
-                              </span>
-                            )}
-
-                          {position.filled_quantity >= 0 &&
-                            position.filled_quantity < position.quantity &&
-                            position.status === 'EXITING' && (
-                              <span className="bg-emerald-100 text-emerald-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
-                                {position.status}
-                              </span>
-                            )}
-                        </div>
-                      </div>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex gap-2 items-center w-full">
+                    <div
+                      className="font-medium text-gray-900"
+                      // onClick={() => {
+                      //   navigate(`/event/${position.market_id}`)
+                      // }}
+                    >
+                      {position.market_id}
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
-                      <span className="flex items-center">
-                        <Clock className="h-3.5 w-3.5 mr-1" />
-                        End at {formatDate(position.closing_time)}
+                    <div>
+                      {position.status === 'ACTIVE' &&
+                        position.filled_quantity === 0 && (
+                          <span className="bg-yellow-100 text-yellow-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
+                            {position.status}
+                          </span>
+                        )}
+
+                      {position.filled_quantity >= 0 &&
+                        position.filled_quantity < position.quantity &&
+                        position.status === 'EXITING' && (
+                          <span className="bg-emerald-100 text-emerald-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
+                            {position.status}
+                          </span>
+                        )}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
+                  <span className="flex items-center justify-between w-full">
+                    {position.opinion_type === 'YES' && (
+                      <span className="rounded-full bg-blue-200 text-blue-600 px-4 py-1">
+                        {position.opinion_type}
                       </span>
+                    )}
+                    {position.opinion_type === 'NO' && (
+                      <span className="rounded-full bg-red-200 text-red-600 px-4 py-1">
+                        {position.opinion_type}
+                      </span>
+                    )}
+                    <div className="flex items-center">
+                      <Clock className="h-3.5 w-3.5 mr-1" />
+                      End at {formatDate(position.closing_time)}
                     </div>
-                    <div className="flex justify-between gap-4 text-sm mb-4">
-                      <div>
-                        <div className="text-gray-600 font-medium">
-                          Invested
-                        </div>
-                        <div className="font-semibold text-gray-900">
-                          ₹{position.price * position.quantity}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-gray-600 font-medium">
-                          Total Quantity
-                        </div>
-                        <div className="font-semibold text-gray-900">
-                          {position.quantity}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-gray-600 font-medium">Returns</div>
-                        <div className="font-semibold text-gray-900">
-                          &#8377;
-                          {position.opinion_type === 'YES'
-                            ? position.market_yes_price * position.quantity
-                            : position.market_no_price * position.quantity}
-                        </div>
-                      </div>
-                      {/* <div>
+                  </span>
+                </div>
+                <div className="flex justify-between gap-4 text-sm mb-4">
+                  <div>
+                    <div className="text-gray-600 font-medium">Invested</div>
+                    <div className="font-semibold text-gray-900">
+                      ₹{position.price * position.quantity}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-gray-600 font-medium">
+                      Total Quantity
+                    </div>
+                    <div className="font-semibold text-gray-900">
+                      {position.quantity}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-gray-600 font-medium">Current</div>
+                    <div className="font-semibold text-gray-900">
+                      &#8377;
+                      {position.opinion_type === 'YES'
+                        ? position.market_yes_price * position.quantity
+                        : position.market_no_price * position.quantity}
+                    </div>
+                  </div>
+                  {/* <div>
                               <div className="text-gray-600 font-medium">Current</div>
                               <div className="font-semibold text-gray-900">
                                 ₹
@@ -473,186 +425,57 @@ const MarketHolding = () => {
                                   : parseFloat(position.market_no_price).toFixed(1)}
                               </div>
                             </div> */}
-                    </div>
-                    {position.status === 'ACTIVE' && (
-                      <div className="flex gap-2 w-full items-center justify-between">
-                        <div className="w-full flex gap-2 items-center ">
-                          <Button
-                            onClick={() =>
-                              handleTradeClick(
-                                position.opinion_type === 'YES'
-                                  ? position.market_yes_price
-                                  : position.market_no_price,
-                                position.opinion_type,
-                                'SELL',
-                                position.market_id,
-                                position.quantity,
-                                position.name
-                              )
-                            }
-                            className="w-[50%] bg-rose-50 text-rose-600 rounded-xl text-sm font-medium hover:bg-rose-100 transition-colors"
-                          >
-                            <XCircle className="h-4 w-4" />
-                            Exit Position
-                          </Button>
+                </div>
+                {position.status === 'ACTIVE' && (
+                  <div className="flex gap-2 w-full items-center justify-between">
+                    <div className="w-full flex gap-2 items-center ">
+                      <Button
+                        onClick={() =>
+                          handleTradeClick(
+                            position.opinion_type === 'YES'
+                              ? position.market_yes_price
+                              : position.market_no_price,
+                            position.opinion_type,
+                            'SELL',
+                            position.market_id,
+                            position.quantity,
+                            position.name
+                          )
+                        }
+                        className="w-[50%] bg-rose-50 text-rose-600 rounded-xl text-sm font-medium hover:bg-rose-100 transition-colors"
+                      >
+                        <XCircle className="h-4 w-4" />
+                        Exit Position
+                      </Button>
 
-                          <Button
-                            onClick={() => {
-                              handleMarketClick(position)
-                            }}
-                            className="w-[50%] bg-blue-50 text-blue-600 rounded-xl text-sm font-medium hover:bg-blue-100 transition-colors"
-                          >
-                            <Plus className="h-4 w-4" />
-                            Invest More
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                    {position.status === 'EXITING' && (
-                      <div className="flex gap-2 w-full items-center justify-between">
-                        <div className="w-[50%] flex justify-center font-medium tracking-wide">{`Qty ${position.filled_quantity}/${position.quantity} Matched`}</div>
-                        <Button
-                          onClick={() => {
-                            handleMarketClick(position)
-                          }}
-                          className="w-[50%] bg-blue-50 text-blue-600 rounded-xl text-sm font-medium hover:bg-blue-100 transition-colors"
-                        >
-                          <Plus className="h-4 w-4" />
-                          Invest More
-                        </Button>
-                      </div>
-                    )}
+                      <Button
+                        onClick={() => {
+                          handleMarketClick(position)
+                        }}
+                        className="w-[50%] bg-blue-50 text-blue-600 rounded-xl text-sm font-medium hover:bg-blue-100 transition-colors"
+                      >
+                        <Plus className="h-4 w-4" />
+                        Invest More
+                      </Button>
+                    </div>
                   </div>
-                ))
-              : Object.values(noHoldings).map((position) => (
-                  <div
-                    key={position.name}
-                    className="p-4 w-full cursor-pointer"
-                  >
-                    <Badge className="text-xs font-semibold mb-2 hover:underline">
-                      #{position.market_id}
-                    </Badge>
-
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex gap-2 items-center w-full">
-                        <div
-                          className="font-medium text-gray-900"
-                          // onClick={() => {
-                          //   navigate(`/event/${position.market_id}`)
-                          // }}
-                        >
-                          {position.market_id}
-                        </div>
-                        <div>
-                          {position.status === 'ACTIVE' &&
-                            position.filled_quantity === 0 && (
-                              <span className="bg-yellow-100 text-yellow-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
-                                {position.status}
-                              </span>
-                            )}
-
-                          {position.filled_quantity >= 0 &&
-                            position.filled_quantity < position.quantity &&
-                            position.status === 'EXITING' && (
-                              <span className="bg-emerald-100 text-emerald-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
-                                {position.status}
-                              </span>
-                            )}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
-                      <span className="flex items-center">
-                        <Clock className="h-3.5 w-3.5 mr-1" />
-                        End at {formatDate(position.closing_time)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between gap-4 text-sm mb-4">
-                      <div>
-                        <div className="text-gray-600 font-medium">
-                          Invested
-                        </div>
-                        <div className="font-semibold text-gray-900">
-                          ₹{position.price * position.quantity}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-gray-600 font-medium">
-                          Total Quantity
-                        </div>
-                        <div className="font-semibold text-gray-900">
-                          {position.quantity}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-gray-600 font-medium">Returns</div>
-                        <div className="font-semibold text-gray-900">
-                          &#8377;
-                          {position.opinion_type === 'YES'
-                            ? position.market_yes_price * position.quantity
-                            : position.market_no_price * position.quantity}
-                        </div>
-                      </div>
-                      {/* <div>
-                          <div className="text-gray-600 font-medium">Current</div>
-                          <div className="font-semibold text-gray-900">
-                            ₹
-                            {position.opinion_type === 'YES'
-                              ? parseFloat(position.market_yes_price).toFixed(1)
-                              : parseFloat(position.market_no_price).toFixed(1)}
-                          </div>
-                        </div> */}
-                    </div>
-                    {position.status === 'ACTIVE' && (
-                      <div className="flex gap-2 w-full items-center justify-between">
-                        <div className="w-full flex gap-2 items-center ">
-                          <Button
-                            onClick={() =>
-                              handleTradeClick(
-                                position.opinion_type === 'YES'
-                                  ? position.market_yes_price
-                                  : position.market_no_price,
-                                position.opinion_type,
-                                'SELL',
-                                position.market_id,
-                                position.quantity,
-                                position.name
-                              )
-                            }
-                            className="w-[50%] bg-rose-50 text-rose-600 rounded-xl text-sm font-medium hover:bg-rose-100 transition-colors"
-                          >
-                            <XCircle className="h-4 w-4" />
-                            Exit Position
-                          </Button>
-
-                          <Button
-                            onClick={() => {
-                              handleMarketClick(position)
-                            }}
-                            className="w-[50%] bg-blue-50 text-blue-600 rounded-xl text-sm font-medium hover:bg-blue-100 transition-colors"
-                          >
-                            <Plus className="h-4 w-4" />
-                            Invest More
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                    {position.status === 'EXITING' && (
-                      <div className="flex gap-2 w-full items-center justify-between">
-                        <div className="w-[50%] flex justify-center font-medium tracking-wide">{`Qty ${position.filled_quantity}/${position.quantity} Matched`}</div>
-                        <Button
-                          onClick={() => {
-                            handleMarketClick(position)
-                          }}
-                          className="w-[50%] bg-blue-50 text-blue-600 rounded-xl text-sm font-medium hover:bg-blue-100 transition-colors"
-                        >
-                          <Plus className="h-4 w-4" />
-                          Invest More
-                        </Button>
-                      </div>
-                    )}
+                )}
+                {position.status === 'EXITING' && (
+                  <div className="flex gap-2 w-full items-center justify-between">
+                    <div className="w-[50%] flex justify-center font-medium tracking-wide">{`Qty ${position.filled_quantity}/${position.quantity} Matched`}</div>
+                    <Button
+                      onClick={() => {
+                        handleMarketClick(position)
+                      }}
+                      className="w-[50%] bg-blue-50 text-blue-600 rounded-xl text-sm font-medium hover:bg-blue-100 transition-colors"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Invest More
+                    </Button>
                   </div>
-                ))}
+                )}
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -666,7 +489,7 @@ const MarketHolding = () => {
           marketId={marketId}
           sellQuantity={sellQuantity}
           previousOrderId={previousOrderId}
-          refetchActiveHoldings={refetchActiveHoldings}
+          refetchActiveHoldings={refetcHoldingData}
         />
       )}
     </div>

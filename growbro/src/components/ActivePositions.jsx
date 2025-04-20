@@ -1,5 +1,6 @@
 import {
   useFrappeAuth,
+  useFrappeCreateDoc,
   useFrappeEventListener,
   useFrappeGetCall,
   useFrappeGetDoc,
@@ -41,6 +42,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useEffect, useState } from 'react'
 import { useFrappeDeleteDoc } from 'frappe-react-sdk'
+import toast from 'react-hot-toast'
 
 const ActivePositions = ({
   position,
@@ -50,13 +52,15 @@ const ActivePositions = ({
 }) => {
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
   console.log(position)
 
-  const [yesPrice, setYesPrice] = useState(position.market_yes_price)
-  const [noPrice, setNoPrice] = useState(position.market_no_price)
-  const { updateDoc } = useFrappeUpdateDoc()
+  const [yesPrice, setYesPrice] = useState(position.yes_price)
+  const [noPrice, setNoPrice] = useState(position.no_price)
   const { currentUser } = useFrappeAuth()
+  const { createDoc } = useFrappeCreateDoc()
+  const { updateDoc } = useFrappeUpdateDoc()
 
   //   useFrappeEventListener('market_event', (updatedMarket) => {
   //     console.log('Hello')
@@ -129,6 +133,36 @@ const ActivePositions = ({
     }
   }
 
+  const handleExitPositions = async () => {
+    try {
+      await createDoc('Orders', {
+        market_id: position.market_id,
+        quantity: position.yes_quantity,
+        opinion_type: 'YES',
+        status: 'UNMATCHED',
+        amount: yesPrice,
+        filled_quantity: 0,
+        order_type: 'SELL',
+      })
+      await createDoc('Orders', {
+        market_id: position.market_id,
+        quantity: position.no_quantity,
+        opinion_type: 'NO',
+        status: 'UNMATCHED',
+        amount: noPrice,
+        filled_quantity: 0,
+        order_type: 'SELL',
+      })
+      toast.success('All positions exited from this market', {
+        top: 0,
+      })
+      setIsDrawerOpen(false)
+    } catch (err) {
+      console.log(err)
+      setIsDrawerOpen(false)
+    }
+  }
+
   const handleMarketClick = (position) => {
     navigate(`/event/${position.market_id}`)
   }
@@ -175,12 +209,11 @@ const ActivePositions = ({
             </div>
           </div>
         </div> */}
-        {/* <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
-          <span className="flex items-center">
-            <Clock className="h-3.5 w-3.5 mr-1" />
-            End at {formatDate(position.closing_time)}
+        <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
+          <span className="flex items-center font-medium text-lg">
+            {position.question}
           </span>
-        </div> */}
+        </div>
         <div className="flex justify-between gap-4 text-sm mb-4">
           <div>
             <div className="text-gray-600 font-medium">Invested</div>
@@ -212,67 +245,77 @@ const ActivePositions = ({
           </div> */}
         </div>
         <div className="w-full flex items-center justify-end cursor-default">
-          <Drawer className="w-full">
+          <Drawer
+            className="w-full"
+            open={isDrawerOpen}
+            onOpenChange={setIsDrawerOpen}
+          >
             <DrawerTrigger>
-              <button className="rounded-lg p-1.5 border flex items-center justify-center gap-2">
-                <span>Exit Position</span>
+              <button className="rounded-lg p-1.5 border flex items-center justify-center">
+                <span className="text-xs font-medium">Exit Position</span>
                 <ArrowRight strokeWidth={1.5} className="h-4 w-4" />
               </button>
             </DrawerTrigger>
             <DrawerContent className="mx-auto w-full">
               <DrawerHeader className="flex items-center justify-center">
                 <DrawerTitle className="w-full flex justify-center">
-                  Exit All Positions
+                  Exit all positions in this particular market
                 </DrawerTitle>
               </DrawerHeader>
               <div className="w-full flex flex-col gap-4">
-                <div className="mb-6 px-10">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-lg font-medium">Yes Price</span>
-                    <div className="flex items-center">
-                      <span className="text-lg font-medium">₹{yesPrice}</span>
+                {position.yes_quantity && (
+                  <div className="mb-6 px-10">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-lg font-medium">Yes Price</span>
+                      <div className="flex items-center">
+                        <span className="text-lg font-medium">₹{yesPrice}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between mt-2">
+                      <Slider
+                        defaultValue={[1]}
+                        max={9.5}
+                        min={0.5}
+                        step={0.5}
+                        value={[yesPrice]}
+                        className={``}
+                        onValueChange={(values) => {
+                          setYesPrice(values[0])
+                        }}
+                      />
                     </div>
                   </div>
+                )}
+                {position.no_quantity && (
+                  <div className="mb-6 px-10">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-lg font-medium">No Price</span>
+                      <div className="flex items-center">
+                        <span className="text-lg font-medium">₹{noPrice}</span>
+                      </div>
+                    </div>
 
-                  <div className="flex justify-between mt-2">
-                    <Slider
-                      defaultValue={[1]}
-                      max={9.5}
-                      min={0.5}
-                      step={0.5}
-                      value={[yesPrice]}
-                      className={``}
-                      onValueChange={(values) => {
-                        setYesPrice(values[0])
-                      }}
-                    />
-                  </div>
-                </div>
-                <div className="mb-6 px-10">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-lg font-medium">No Price</span>
-                    <div className="flex items-center">
-                      <span className="text-lg font-medium">₹{noPrice}</span>
+                    <div className="flex justify-between mt-2">
+                      <Slider
+                        defaultValue={[1]}
+                        max={9.5}
+                        min={0.5}
+                        step={0.5}
+                        value={[noPrice]}
+                        className={``}
+                        onValueChange={(values) => {
+                          setNoPrice(values[0])
+                        }}
+                      />
                     </div>
                   </div>
-
-                  <div className="flex justify-between mt-2">
-                    <Slider
-                      defaultValue={[1]}
-                      max={9.5}
-                      min={0.5}
-                      step={0.5}
-                      value={[noPrice]}
-                      className={``}
-                      onValueChange={(values) => {
-                        setYesPrice(values[0])
-                      }}
-                    />
-                  </div>
-                </div>
+                )}
               </div>
-              <DrawerFooter className="w-full px-10">
-                <Button>Submit</Button>
+              <DrawerFooter className="w-full px-10 text-xs">
+                <Button onClick={handleExitPositions}>
+                  Exit All Positions
+                </Button>
 
                 <DrawerClose className=" w-full">
                   <Button variant="outline" className="w-full">

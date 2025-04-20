@@ -17,7 +17,7 @@ const Navbar = ({ items }) => {
                 key={item.path}
                 className={`nav-item ${
                   isActive ? 'active' : ''
-                } cursor-pointer`}
+                } cursor-pointer flex flex-col items-center`}
                 onClick={() => {
                   if (item.path === '/portfolio') {
                     return navigate(`/portfolio?tab=active`)
