@@ -25,12 +25,11 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval: doc.status == 'RESOLVED';",
+   "depends_on": "eval: doc.status == 'RESOLVED'",
    "fieldname": "end_result",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "End Result",
-   "reqd": 1
+   "label": "End Result"
   },
   {
    "fieldname": "column_break_sgfb",
@@ -79,7 +78,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-04-17 23:36:03.789876",
+ "modified": "2025-04-19 18:17:43.267608",
  "modified_by": "Administrator",
  "module": "Reward App",
  "name": "Market",
