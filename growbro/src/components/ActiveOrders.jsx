@@ -78,21 +78,14 @@ const ActiveOrders = ({
 
   const handleCancelOrder = async () => {
     try {
-      console.log(order)
-      if (order.order_type === 'SELL') {
-        console.log('Entered')
-        await updateDoc('Orders', order.buy_order_id, {
-          sell_order_id: null,
-        })
-        await updateDoc('Orders', order.name, {
-          status: 'SETTLED',
-          remark: 'Sell order canceled in midway',
-        })
-      } else {
-        await updateDoc('Orders', order.name, {
-          status: 'CANCELED',
-        })
-      }
+      await updateDoc('Orders', order.name, {
+        status: 'CANCELED',
+      })
+      //  else {
+      //   await updateDoc('Orders', order.name, {
+      //     status: 'CANCELED',
+      //   })
+      // }
       // Remove this stray 'call' line
       // call  <-- This is causing the error
       refetchActiveOrders()
@@ -117,9 +110,26 @@ const ActiveOrders = ({
           <div className="flex gap-2 items-center justify-between w-full">
             <div className="font-medium text-gray-900">{order.question}</div>
 
-            <span className="bg-yellow-100 text-yellow-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
-              {order.status}
-            </span>
+            {order.status === 'MATCHED' && (
+              <span className="bg-green-100 text-green-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
+                {order.status}
+              </span>
+            )}
+            {order.status === 'PARTIAL' && (
+              <span className="bg-yellow-100 text-yellow-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
+                {order.status}
+              </span>
+            )}
+            {order.status === 'UNMATCHED' && (
+              <span className="bg-white rounded-xl p-1 text-xs text-[0.7rem] font-medium">
+                {order.status}
+              </span>
+            )}
+            {order.status === 'CANCELED' && (
+              <span className="bg-red-200 text-red-600 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
+                {order.status}
+              </span>
+            )}
           </div>
         </div>
         <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">

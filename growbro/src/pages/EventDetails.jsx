@@ -63,12 +63,12 @@ const EventDetails = () => {
       fields: [
         'name',
         'creation',
-        'no_order_id',
-        'no_price',
-        'no_user_id',
-        'yes_order_id',
-        'yes_price',
-        'yes_user_id',
+        'first_user_order_id',
+        'first_user_price',
+        'first_user_id',
+        'second_user_order_id',
+        'second_user_price',
+        'second_user_id',
         'quantity',
       ],
       filters: { market_id: id },
@@ -273,14 +273,14 @@ const EventDetails = () => {
                             src={match.user1.avatar}
                             alt={match.user1.name}
                           />   */}
-                            {match?.yes_user_id.slice(0, 1).toUpperCase()}
+                            {match?.first_user_id.slice(0, 1).toUpperCase()}
                           </div>
                           {/* <span className="text-sm font-medium text-blue-600">
                             &#8377;{match?.yes_price}
                           </span> */}
                         </div>
                         <span className="text-sm font-medium">
-                          {match?.yes_user_id}
+                          {match?.first_user_id}
                         </span>
                       </div>
 
@@ -290,15 +290,19 @@ const EventDetails = () => {
                         <div className="flex h-full">
                           <div
                             className="bg-blue-500 h-full flex items-center justify-center text-xs text-white font-bold p-4"
-                            style={{ width: `${match?.yes_price * 10}%` }}
+                            style={{
+                              width: `${match?.first_user_price * 10}%`,
+                            }}
                           >
-                            {match?.yes_price}
+                            {match?.first_user_price}
                           </div>
                           <div
                             className="bg-rose-500 h-full flex items-center justify-center text-xs text-white font-bold p-4"
-                            style={{ width: `${match?.no_price * 10}%` }}
+                            style={{
+                              width: `${match?.second_user_price * 10}%`,
+                            }}
                           >
-                            {match?.no_price}
+                            {match?.second_user_price}
                           </div>
                         </div>
                       </div>
@@ -314,11 +318,11 @@ const EventDetails = () => {
                             src={match.user2.avatar}
                             alt={match.user2.name}
                           /> */}
-                            {match?.no_user_id.slice(0, 1).toUpperCase()}
+                            {match?.second_user_id.slice(0, 1).toUpperCase()}
                           </div>
                         </div>
                         <span className="text-sm font-medium mr-2">
-                          {match?.no_user_id}
+                          {match?.second_user_id}
                         </span>
                       </div>
                     </div>

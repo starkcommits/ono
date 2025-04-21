@@ -114,10 +114,12 @@ const TradeSheet = ({
         refetchActiveOrders()
       }, 500)
 
-      await updateDoc('Holding', previousOrderId, {
+      const res = await updateDoc('Holding', previousOrderId, {
         exit_price: price,
         status: 'EXITING',
       })
+
+      console.log('Resssssssssssss', res)
 
       toast.success(`Sell Order Placed.`)
 

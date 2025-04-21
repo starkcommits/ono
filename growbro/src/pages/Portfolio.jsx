@@ -134,44 +134,44 @@ const Portfolio = () => {
 
   console.log('Active Holdings: ', activeHoldings)
 
-  const { data: userOrders, isLoading: userOrdersLoading } =
-    useFrappeGetDocList(
-      'Orders',
-      {
-        filters: [['owner', '=', currentUser]], // Replace with logged-in user
-        fields: [
-          'name',
-          'question',
-          'creation',
-          'amount',
-          'status',
-          'filled_quantity',
-          'owner',
-          'quantity',
-          'opinion_type',
-          'closing_time',
-          'order_type',
-          'market_id',
-          'yes_price',
-          'no_price',
-          'buy_order_id',
-          'sell_order_id',
-        ],
-      },
-      currentUser ? undefined : null
-    )
+  // const { data: userOrders, isLoading: userOrdersLoading } =
+  //   useFrappeGetDocList(
+  //     'Orders',
+  //     {
+  //       filters: [['owner', '=', currentUser]], // Replace with logged-in user
+  //       fields: [
+  //         'name',
+  //         'question',
+  //         'creation',
+  //         'amount',
+  //         'status',
+  //         'filled_quantity',
+  //         'owner',
+  //         'quantity',
+  //         'opinion_type',
+  //         'closing_time',
+  //         'order_type',
+  //         'market_id',
+  //         'yes_price',
+  //         'no_price',
+  //         'buy_order_id',
+  //         'sell_order_id',
+  //       ],
+  //     },
+  //     currentUser ? undefined : null
+  //   )
 
-  useFrappeEventListener('order_event', (updatedOrder) => {
-    console.log('Updated Order:', updatedOrder)
+  // useFrappeEventListener('order_event', (updatedOrder) => {
+  //   console.log('Updated Order:', updatedOrder)
 
-    // setActiveOrders((prev) => {
-    //   const updatedActiveOrders = {
-    //     ...prev,
-    //     [updatedOrder.name]: updatedOrder,
-    //   }
-    //   return updatedActiveOrders
-    // })
-  })
+  //   setActiveOrders((prev) => {
+  //     const updatedActiveOrders = {
+  //       ...prev,
+  //       [updatedOrder.name]: updatedOrder,
+  //     }
+  //     return updatedActiveOrders
+  //   })
+  // })
 
   const performanceData = {
     labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],

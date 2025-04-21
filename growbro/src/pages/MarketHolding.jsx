@@ -97,17 +97,17 @@ const MarketHolding = () => {
         'market_yes_price',
         'market_no_price',
         'closing_time',
-        'order_id',
         'filled_quantity',
       ],
       filters: [
-        ['owner', '=', currentUser],
-        ['status', 'in', ['ACTIVE', 'EXITING']],
+        ['user_id', '=', currentUser],
         ['market_id', '=', id],
       ],
     },
     currentUser ? undefined : null
   )
+
+  console.log('Holding Data:', holdingData)
 
   useEffect(() => {
     if (!holdingDataLoading && holdingData?.length > 0) {
@@ -118,6 +118,8 @@ const MarketHolding = () => {
       setActiveHoldings(holdingDataMap)
     }
   }, [holdingData])
+
+  console.log('Holding Data:', holdingData)
 
   console.log('Active Holding Data:', activeHoldings)
 

@@ -135,24 +135,29 @@ const ActivePositions = ({
 
   const handleExitPositions = async () => {
     try {
-      await createDoc('Orders', {
-        market_id: position.market_id,
-        quantity: position.yes_quantity,
-        opinion_type: 'YES',
-        status: 'UNMATCHED',
-        amount: yesPrice,
-        filled_quantity: 0,
-        order_type: 'SELL',
-      })
-      await createDoc('Orders', {
-        market_id: position.market_id,
-        quantity: position.no_quantity,
-        opinion_type: 'NO',
-        status: 'UNMATCHED',
-        amount: noPrice,
-        filled_quantity: 0,
-        order_type: 'SELL',
-      })
+      if (position.yes_quantity > 0) {
+        await createDoc('Orders', {
+          market_id: position.market_id,
+          quantity: position.yes_quantity,
+          opinion_type: 'YES',
+          status: 'UNMATCHED',
+          user_id: currentUser,
+          amount: yesPrice,
+          filled_quantity: 0,
+          order_type: 'SELL',
+        })
+      }
+      if (position.no_quantity > 0)
+        await createDoc('Orders', {
+          market_id: position.market_id,
+          quantity: position.no_quantity,
+          opinion_type: 'NO',
+          status: 'UNMATCHED',
+          user_id: currentUser,
+          amount: noPrice,
+          filled_quantity: 0,
+          order_type: 'SELL',
+        })
       toast.success('All positions exited from this market', {
         top: 0,
       })
@@ -263,7 +268,7 @@ const ActivePositions = ({
                 </DrawerTitle>
               </DrawerHeader>
               <div className="w-full flex flex-col gap-4">
-                {position.yes_quantity && (
+                {position.yes_quantity ? (
                   <div className="mb-6 px-10">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-lg font-medium">Yes Price</span>
@@ -286,8 +291,8 @@ const ActivePositions = ({
                       />
                     </div>
                   </div>
-                )}
-                {position.no_quantity && (
+                ) : null}
+                {position.no_quantity ? (
                   <div className="mb-6 px-10">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-lg font-medium">No Price</span>
@@ -310,7 +315,7 @@ const ActivePositions = ({
                       />
                     </div>
                   </div>
-                )}
+                ) : null}
               </div>
               <DrawerFooter className="w-full px-10 text-xs">
                 <Button onClick={handleExitPositions}>
