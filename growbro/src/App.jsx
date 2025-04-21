@@ -3,7 +3,7 @@ import Navbar from './components/Navbar'
 import HomePage from './pages/Home'
 import WalletPage from './pages/Wallet'
 import EventDetails from './pages/EventDetails'
-import Portfolio from './pages/Portfolio'
+
 import News from './pages/News'
 import CategoryPage from './pages/CategoryPage'
 import SearchPage from './pages/Search'
@@ -19,6 +19,9 @@ import Layout from './components/Layout'
 import PublicRoute from './components/PublicRoute'
 import { Route, Routes } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
+import Overview from './pages/Overview'
+import Portfolio from './pages/Portfolio'
+import MarketHolding from './pages/MarketHolding'
 
 const navItems = [
   { icon: Home, label: 'Home', path: '/' },
@@ -32,19 +35,23 @@ function App() {
   return (
     <div className="">
       <div className="w-full bg-gray-50">
-        <div className="max-w-lg mx-auto">
+        <div className="">
           <Toaster />
           <Routes>
             <Route element={<PublicRoute />}>
               <Route path="/signin" element={<SignIn />} />
               <Route path="/signup" element={<SignUp />} />
             </Route>
+
+            <Route path="/overview" element={<Overview />} />
+
             <Route element={<ProtectedRoute />}>
               <Route element={<Layout />}>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/kyc" element={<KYC />} />
                 <Route path="/wallet" element={<WalletPage />} />
                 <Route path="/portfolio" element={<Portfolio />} />
+                <Route path="/portfolio/:id" element={<MarketHolding />} />
                 <Route path="/news" element={<News />} />
                 <Route path="/search" element={<SearchPage />} />
                 <Route path="/event/:id" element={<EventDetails />} />

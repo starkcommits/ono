@@ -23,7 +23,7 @@ def update_order():
         # Update fields directly using db_set to avoid modification conflicts
         # This bypasses the document modified check
         frappe.db.set_value('Orders', data.order_id, {
-            'status': order_status,
+            'status': data.status,
             'quantity': data.quantity,
             'filled_quantity': data.filled_quantity
         }, update_modified=True)  # Update modified timestamp
@@ -198,7 +198,7 @@ def market(doc, method):
             # For debugging
             frappe.logger().info(f"Sending payload to market engine: {payload}")
             
-            url = "http://94.136.187.188:8086/markets/"
+            url = "http://127.0.0.1:8086/markets/"
             response = requests.post(url, json=payload)
             
             if response.status_code != 201:
@@ -216,7 +216,7 @@ def market(doc, method):
                     "closing_time": doc.closing_time
                 }
                 
-                frappe.publish_realtime("market_event",update_data,after_commit=True)
+                frappe.publish_realtime("market_event",update_data,user=frappe.session.user,after_commit=True)
                 frappe.msgprint("Market Created Successfully.")
         elif doc.status == "CLOSED":
             frappe.db.sql("""
@@ -227,7 +227,7 @@ def market(doc, method):
 
             frappe.db.commit()
 
-            url=f"http://94.136.187.188:8086/markets/{doc.name}/close"
+            url=f"http://127.0.0.1:8086/markets/{doc.name}/close"
             response = requests.post(url)
                 
             if response.status_code != 200:
@@ -333,7 +333,7 @@ def update_market_price():
             "no_price": data.no_price
         }
         
-        frappe.publish_realtime("market_event",update_data,after_commit=True)
+        frappe.publish_realtime("market_event",update_data,user=frappe.session.user,after_commit=True)
         
         return True
     except Exception as e:

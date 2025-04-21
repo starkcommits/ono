@@ -15,7 +15,10 @@
   "price",
   "opinion_type",
   "exit_price",
-  "filled_quantity"
+  "filled_quantity",
+  "closing_time",
+  "market_yes_price",
+  "market_no_price"
  ],
  "fields": [
   {
@@ -76,6 +79,25 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "User ID"
+  },
+  {
+   "fetch_from": "market_id.closing_time",
+   "fieldname": "closing_time",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "label": "Closing Time"
+  },
+  {
+   "fetch_from": "market_id.yes_price",
+   "fieldname": "market_yes_price",
+   "fieldtype": "Read Only",
+   "label": "Market Yes Price"
+  },
+  {
+   "fetch_from": "market_id.no_price",
+   "fieldname": "market_no_price",
+   "fieldtype": "Read Only",
+   "label": "Market No Price"
   }
  ],
  "grid_page_length": 50,
@@ -101,7 +123,6 @@
    "write": 1
   }
  ],
- "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

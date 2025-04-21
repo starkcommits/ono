@@ -3,64 +3,46 @@ import { AlertCircle, CheckCircle } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 
 const CompletedTrades = ({ trade }) => {
-  const [market, setMarket] = useState({})
-
-  const { data: marketData, isLoading: marketDataLoading } =
-    useFrappeGetDocList('Market', {
-      /** SWR Configuration Options - Optional **/
-      fields: [
-        'name',
-        'yes_price',
-        'no_price',
-        'closing_time',
-        'end_result',
-        'question',
-      ], // Specify the fields you want
-      filters: [['name', '=', trade.market_id]],
+  const formatDate = (dateString) => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
     })
-
-  console.log(trade)
-
-  useEffect(() => {
-    if (marketData?.length > 0) setMarket(marketData[0])
-  }, [marketDataLoading])
-
+  }
   return (
     <div key={trade.question} className="p-4">
       <div className="flex items-center justify-between mb-2">
-        <h3 className="font-medium text-gray-900">{trade.question}</h3>
-        <div className="bg-blue-200 text-blue-600 rounded-xl p-1.5">
-          {trade.winning_side}
+        <h3 className="font-medium text-gray-900">{trade.market_id}</h3>
+        <div className="bg-green-200 text-green-600 rounded-xl px-3">
+          {trade.status}
         </div>
       </div>
       <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
-        <span>
-          {trade?.closing_time?.split(' ')[0].split('-').reverse().join('-')}{' '}
-          {trade?.closing_time?.split(' ')[1].split(':').join(':')}
-        </span>
+        <span>{formatDate(trade.closing_time)}</span>
       </div>
       <div className="grid grid-cols-2 gap-4 text-sm">
         <div>
           <div className="text-gray-600 font-medium">Amount Invested</div>
-          <div className="font-semibold text-gray-900">
-            ₹{trade?.debited_amount}
-          </div>
+          <div className="font-semibold text-gray-900">₹{trade?.price}</div>
         </div>
         <div className="grid place-content-end">
           <div className="text-gray-600 font-medium">Returns</div>
-          {trade.credited_amount - trade.debited_amount > 0 && (
+          {trade.exit_price - trade.price > 0 && (
             <div className={`font-bold text-green-700`}>
-              +₹{trade.credited_amount - trade.debited_amount}
+              +₹{(trade.exit_price - trade.price) * 10}
             </div>
           )}{' '}
-          {trade.credited_amount - trade.debited_amount === 0 && (
+          {trade.exit_price - trade.price === 0 && (
             <div className={`font-bold text-neutral-700`}>
-              ₹{trade.credited_amount}
+              ₹{(trade.exit_price - trade.price) * 10}
             </div>
           )}{' '}
-          {trade.credited_amount - trade.debited_amount < 0 && (
+          {trade.exit_price - trade.price < 0 && (
             <div className={`font-bold text-red-700`}>
-              ₹{trade.credited_amount - trade.debited_amount}
+              ₹{(trade.exit_price - trade.price) * 10}
             </div>
           )}{' '}
           {/* <div

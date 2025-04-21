@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import {
   ArrowLeft,
   Wallet as WalletIcon,
@@ -70,8 +70,11 @@ const formSchema = z.object({
 
 const Wallet = () => {
   const navigate = useNavigate()
+  const location = useLocation()
+  const searchParams = new URLSearchParams(location.search)
+  const tab = searchParams.get('tab')
   const [amount, setAmount] = useState('')
-  const [activeTab, setActiveTab] = useState('all')
+  const [activeTab, setActiveTab] = useState(tab)
   const quickAmounts = [100, 500, 1000, 5000]
   const [userWallet, setUserWallet] = useState({})
   const [userHistory, setUserHistory] = useState([])
@@ -125,7 +128,7 @@ const Wallet = () => {
         order: 'desc',
       },
     },
-    activeTab === 'all' && currentUser ? undefined : null
+    tab === 'all' && currentUser ? undefined : null
   )
 
   const {
@@ -153,7 +156,7 @@ const Wallet = () => {
         order: 'desc',
       },
     },
-    activeTab === 'deposits' && currentUser ? undefined : null
+    tab === 'deposits' && currentUser ? undefined : null
   )
 
   const {
@@ -181,7 +184,7 @@ const Wallet = () => {
         order: 'desc',
       },
     },
-    activeTab === 'withdrawals' && currentUser ? undefined : null
+    tab === 'withdrawals' && currentUser ? undefined : null
   )
 
   useEffect(() => {
@@ -424,7 +427,10 @@ const Wallet = () => {
           <div>
             <div className="flex p-2">
               <button
-                onClick={() => setActiveTab('all')}
+                onClick={() => {
+                  navigate(`/wallet?tab=all`)
+                  setActiveTab('all')
+                }}
                 className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-medium transition-colors ${
                   activeTab === 'all'
                     ? 'bg-indigo-50 text-indigo-600'
@@ -434,7 +440,10 @@ const Wallet = () => {
                 All
               </button>
               <button
-                onClick={() => setActiveTab('deposits')}
+                onClick={() => {
+                  navigate('/wallet?tab=deposits')
+                  setActiveTab('deposits')
+                }}
                 className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-medium transition-colors ${
                   activeTab === 'deposits'
                     ? 'bg-indigo-50 text-indigo-600'
@@ -444,7 +453,10 @@ const Wallet = () => {
                 Deposits
               </button>
               <button
-                onClick={() => setActiveTab('withdrawals')}
+                onClick={() => {
+                  navigate('/wallet?tab=withdrawals')
+                  setActiveTab('withdrawals')
+                }}
                 className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-medium transition-colors ${
                   activeTab === 'withdrawals'
                     ? 'bg-indigo-50 text-indigo-600'

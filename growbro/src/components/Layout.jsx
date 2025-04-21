@@ -15,7 +15,7 @@ const navItems = [
 const Layout = () => {
   const { currentUser } = useFrappeAuth()
   return (
-    <div>
+    <div className="max-w-lg mx-auto">
       <Outlet />
       <div className="">{currentUser && <Navbar items={navItems} />}</div>
     </div>

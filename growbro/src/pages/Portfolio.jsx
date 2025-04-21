@@ -1,5 +1,11 @@
 import React, { cache, useEffect, useMemo, useState } from 'react'
-import { redirect, useNavigate } from 'react-router-dom'
+import {
+  redirect,
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from 'react-router-dom'
 import {
   ArrowLeft,
   TrendingUp,
@@ -34,7 +40,7 @@ import {
   useFrappeGetCall,
   useFrappeGetDocList,
 } from 'frappe-react-sdk'
-import ActivePosition from '../components/ActivePosition'
+import ActivePosition from '../components/ActivePositions'
 import CompletedTrades from '../components/CompletedTrades'
 
 ChartJS.register(
@@ -50,7 +56,10 @@ ChartJS.register(
 
 const Portfolio = () => {
   const navigate = useNavigate()
-  const [activeTab, setActiveTab] = useState('active')
+  const location = useLocation()
+  const searchParams = new URLSearchParams(location.search)
+  const tab = searchParams.get('tab')
+  const [activeTab, setActiveTab] = useState(tab)
   const [tradePrice, setTradePrice] = useState(null)
   const [selectedChoice, setSelectedChoice] = useState(null)
   const [selectedAction, setSelectedAction] = useState(null)
@@ -61,148 +70,108 @@ const Portfolio = () => {
   const [showTradeSheet, setShowTradeSheet] = useState(false)
   const [activeOrders, setActiveOrders] = useState({})
   const [completedOrders, setCompletedOrders] = useState({})
-  const { currentUser, isLoading } = useFrappeAuth()
+  const { currentUser, isLoading: currentUserLoading } = useFrappeAuth()
   const [totalReturns, setTotalReturns] = useState(0)
-
-  const { data: userOrders, isLoading: userOrdersLoading } =
-    useFrappeGetDocList(
-      'Orders',
-      {
-        filters: [['owner', '=', currentUser]], // Replace with logged-in user
-        fields: [
-          'name',
-          'question',
-          'creation',
-          'amount',
-          'status',
-          'filled_quantity',
-          'owner',
-          'quantity',
-          'opinion_type',
-          'closing_time',
-          'order_type',
-          'market_id',
-          'yes_price',
-          'no_price',
-          'buy_order_id',
-          'sell_order_id',
-        ],
-      },
-      currentUser ? undefined : null
-    )
-
-  const marketSummaries = useMemo(() => {
-    if (!userOrders) return []
-
-    const grouped = {}
-
-    for (const order of userOrders) {
-      const { market_id, amount } = order
-
-      if (!grouped[market_id]) {
-        grouped[market_id] = {
-          market_id,
-          total_investment: 0,
-          // total_return: 0,
-          orders: [],
-        }
-      }
-
-      grouped[market_id].total_investment += amount
-      // grouped[market_id].total_return += payout || 0
-      grouped[market_id].orders.push(order)
-    }
-
-    return Object.values(grouped)
-  }, [userOrders])
-
-  const marketNames = marketSummaries.map((m) => m.market_id)
-
-  console.log(marketNames)
-
-  const { data: marketData, isLoading: marketDataLoading } =
-    useFrappeGetDocList('Market', {
-      fields: ['name', 'question', 'yes_price', 'no_price', 'closing_time'],
-      filters: [['name', 'in', marketNames]],
-    })
-
-  console.log(marketData)
+  const [activeHoldings, setActiveHoldings] = useState({})
+  const [completedTrades, setCompletedTrades] = useState({})
 
   const {
-    data: activeOrdersData,
-    isLoading: activeOrdersLoading,
-    mutate: refetchActiveOrders,
+    data: holdingData,
+    isLoading: holdingDataLoading,
+    mutate: refetchActiveHoldings,
+  } = useFrappeGetCall('rewardapp.engine.get_marketwise_holding')
+
+  useEffect(() => {
+    if (!holdingDataLoading && holdingData.message.length > 0) {
+      const holdingDataMap = holdingData.message.reduce((acc, holding) => {
+        acc[holding.name] = holding // ✅ Store as { "market_name": marketData }
+        return acc
+      }, {})
+      setActiveHoldings(holdingDataMap)
+    }
+  }, [holdingData])
+
+  const {
+    data: completedTradesData,
+    isLoading: completedTradesLoading,
+    mutate: refetchCompletedTrades,
   } = useFrappeGetDocList(
-    'Orders',
+    'Holding',
     {
       fields: [
         'name',
-        'question',
-        'creation',
-        'amount',
-        'status',
-        'filled_quantity',
-        'owner',
+        'market_id',
+        'price',
         'quantity',
         'opinion_type',
+        'status',
+        'exit_price',
+        'market_yes_price',
+        'market_no_price',
         'closing_time',
-        'order_type',
-        'market_id',
-        'yes_price',
-        'no_price',
-        'buy_order_id',
-        'sell_order_id',
+        'order_id',
+        'filled_quantity',
       ],
       filters: [
-        ['status', 'not in', ['SETTLED']],
-        ['sell_order_id', '=', ''],
         ['owner', '=', currentUser],
+        ['status', '=', 'EXITED'],
       ],
-      orderBy: {
-        field: 'creation',
-        order: 'desc',
-      },
     },
-    currentUser ? undefined : null
+    currentUser && tab === 'completed' ? undefined : null
   )
 
-  const { data: completedOrdersData, isLoading: completedOrdersLoading } =
-    useFrappeGetCall(
-      'rewardapp.engine.get_marketwise_transaction_summary',
-      {
-        fields: ['*'],
-      },
-      activeTab === 'completed' ? undefined : null
-    )
+  // console.log('Holdings: ', activeHoldings)
 
   useEffect(() => {
-    if (!activeOrdersLoading && activeOrdersData?.length > 0) {
-      const activeOrdersMap = activeOrdersData.reduce((acc, order) => {
-        acc[order.name] = order // ✅ Store as { "market_name": marketData }
+    if (!completedTradesLoading && completedTradesData?.length > 0) {
+      const completedTradesMap = completedTradesData.reduce((acc, trade) => {
+        acc[trade.name] = trade // ✅ Store as { "market_name": marketData }
         return acc
       }, {})
-      setActiveOrders(activeOrdersMap)
+      setCompletedTrades(completedTradesMap)
     }
-  }, [activeOrdersData])
+  }, [completedTradesData])
 
-  useEffect(() => {
-    if (!completedOrdersLoading) {
-      setCompletedOrders(completedOrdersData?.message || {})
-    }
-  }, [completedOrdersData])
+  console.log('Active Holdings: ', activeHoldings)
 
-  console.log(completedOrders)
+  // const { data: userOrders, isLoading: userOrdersLoading } =
+  //   useFrappeGetDocList(
+  //     'Orders',
+  //     {
+  //       filters: [['owner', '=', currentUser]], // Replace with logged-in user
+  //       fields: [
+  //         'name',
+  //         'question',
+  //         'creation',
+  //         'amount',
+  //         'status',
+  //         'filled_quantity',
+  //         'owner',
+  //         'quantity',
+  //         'opinion_type',
+  //         'closing_time',
+  //         'order_type',
+  //         'market_id',
+  //         'yes_price',
+  //         'no_price',
+  //         'buy_order_id',
+  //         'sell_order_id',
+  //       ],
+  //     },
+  //     currentUser ? undefined : null
+  //   )
 
-  useFrappeEventListener('order_event', (updatedOrder) => {
-    console.log('Updated Order:', updatedOrder)
-    setActiveOrders((prev) => {
-      const updatedActiveOrders = {
-        ...prev,
-        [updatedOrder.name]: updatedOrder,
-      }
-      return updatedActiveOrders
-    })
-  })
+  // useFrappeEventListener('order_event', (updatedOrder) => {
+  //   console.log('Updated Order:', updatedOrder)
+
+  //   setActiveOrders((prev) => {
+  //     const updatedActiveOrders = {
+  //       ...prev,
+  //       [updatedOrder.name]: updatedOrder,
+  //     }
+  //     return updatedActiveOrders
+  //   })
+  // })
 
   const performanceData = {
     labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
@@ -249,58 +218,6 @@ const Portfolio = () => {
       },
     },
   }
-
-  const activePositions = [
-    {
-      id: '1',
-      title: 'Bitcoin to reach $50,000',
-      choice: 'yes',
-      amount: 500,
-      quantity: 50,
-      price: 4.5,
-      currentPrice: 5.2,
-      profit: 70,
-      profitPercentage: 14,
-      timeLeft: '2d 5h',
-      odds: { yes: 5.2, no: 4.8 },
-    },
-    {
-      id: '2',
-      title: 'India vs England - 5th Test',
-      choice: 'no',
-      amount: 1000,
-      quantity: 100,
-      price: 6.0,
-      currentPrice: 5.5,
-      profit: -50,
-      profitPercentage: -5,
-      timeLeft: '5d',
-      odds: { yes: 5.5, no: 4.5 },
-    },
-  ]
-
-  const completedTrades = [
-    {
-      id: '3',
-      title: 'MrBeast to hit 200M subscribers',
-      choice: 'yes',
-      amount: 750,
-      profit: 125,
-      profitPercentage: 16.67,
-      completedAt: '2024-03-01',
-      status: 'won',
-    },
-    {
-      id: '4',
-      title: 'Tesla Q4 Earnings Beat',
-      choice: 'no',
-      amount: 500,
-      profit: -500,
-      profitPercentage: -100,
-      completedAt: '2024-02-28',
-      status: 'lost',
-    },
-  ]
 
   const handleTradeClick = (
     marketPrice,
@@ -371,15 +288,12 @@ const Portfolio = () => {
               <div className="text-3xl font-bold text-white flex items-center gap-4">
                 <div>
                   ₹
-                  {Object.values(activeOrders).length > 0
-                    ? Object.values(activeOrders).reduce((acc, order) => {
+                  {Object.values(activeHoldings).length > 0
+                    ? Object.values(activeHoldings).reduce((acc, holding) => {
                         acc =
                           acc +
-                          (order.opinion_type === 'YES'
-                            ? order.yes_price
-                            : order.no_price) *
-                            order.quantity
-
+                          parseFloat(holding.yes_price) * holding.yes_quantity +
+                          parseFloat(holding.no_price) * holding.no_quantity
                         return acc
                       }, 0)
                     : 0}
@@ -397,9 +311,10 @@ const Portfolio = () => {
               <div className="text-3xl font-bold text-white flex items-center gap-4">
                 <div>
                   ₹
-                  {Object.values(activeOrders).length > 0
-                    ? Object.values(activeOrders).reduce((acc, order) => {
-                        return acc + parseFloat(order.amount * order.quantity)
+                  {Object.values(activeHoldings).length > 0
+                    ? Object.values(activeHoldings).reduce((acc, holding) => {
+                        acc = acc + parseFloat(holding.invested_amount)
+                        return acc
                       }, 0)
                     : 0}
                 </div>
@@ -422,7 +337,10 @@ const Portfolio = () => {
           {/* Tabs */}
           <div className="flex p-2">
             <button
-              onClick={() => setActiveTab('active')}
+              onClick={() => {
+                navigate('/portfolio?tab=active')
+                setActiveTab('active')
+              }}
               className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-medium transition-colors ${
                 activeTab === 'active'
                   ? 'bg-indigo-50 text-indigo-600'
@@ -432,7 +350,10 @@ const Portfolio = () => {
               Active Positions
             </button>
             <button
-              onClick={() => setActiveTab('completed')}
+              onClick={() => {
+                navigate('/portfolio?tab=completed')
+                setActiveTab('completed')
+              }}
               className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-medium transition-colors ${
                 activeTab === 'completed'
                   ? 'bg-indigo-50 text-indigo-600'
@@ -447,8 +368,8 @@ const Portfolio = () => {
           <div className="p-4 flex items-center justify-between border-b border-gray-100">
             <div className="text-sm font-medium text-gray-700">
               {activeTab === 'active'
-                ? `${Object.values(activeOrders).length} Active Position`
-                : `${Object.values(completedOrders).length} Trades this month`}
+                ? `${Object.values(activeHoldings).length} Active Position`
+                : `${Object.values(completedTrades).length} Trades this month`}
             </div>
             <button className="p-2 hover:bg-gray-50 rounded-lg transition-colors">
               <Filter className="h-4 w-4 text-gray-600" />
@@ -458,16 +379,16 @@ const Portfolio = () => {
           {/* Trades List */}
           <div className="divide-y divide-gray-100">
             {activeTab === 'active'
-              ? Object.values(activeOrders).map((position) => (
+              ? Object.values(activeHoldings).map((position) => (
                   <ActivePosition
-                    key={position.name}
+                    key={position.market_id}
                     position={position}
-                    setActiveOrders={setActiveOrders}
-                    refetchActiveOrders={refetchActiveOrders}
+                    setActiveHoldings={setActiveHoldings}
+                    refetchActiveHoldings={refetchActiveHoldings}
                     handleTradeClick={handleTradeClick}
                   />
                 ))
-              : Object.values(completedOrders).map((trade) => (
+              : Object.values(completedTrades).map((trade) => (
                   <CompletedTrades key={trade.name} trade={trade} />
                 ))}
           </div>
@@ -483,7 +404,7 @@ const Portfolio = () => {
           marketId={marketId}
           sellQuantity={sellQuantity}
           previousOrderId={previousOrderId}
-          refetchActiveOrders={refetchActiveOrders}
+          refetchActiveHoldings={refetchActiveHoldings}
         />
       )}
     </div>

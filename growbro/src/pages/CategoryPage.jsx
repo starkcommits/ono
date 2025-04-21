@@ -95,6 +95,14 @@ const CategoryPage = () => {
     navigate(`/event/${market.name}`)
   }
 
+  if (categoryDataLoading) {
+    return (
+      <div className="w-full h-screen flex justify-center items-center">
+        <div className="spinner w-14 h-14 rounded-full border-4 border-gray-200 border-r-blue-500 animate-spin"></div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="bg-indigo-600 pt-safe-top pb-8">

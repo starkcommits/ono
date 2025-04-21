@@ -64,7 +64,7 @@ const SignUp = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 max-w-lg mx-auto">
       <div className="bg-indigo-600 pt-safe-top pb-8">
         <div className="px-6">
           <button

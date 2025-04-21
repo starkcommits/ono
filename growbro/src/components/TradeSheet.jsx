@@ -91,28 +91,35 @@ const TradeSheet = ({
 
   const handleConfirmSell = async () => {
     try {
-      const orderData = {
-        market_id: marketId,
-        order_type: tradeAction,
-        quantity: quantity,
-        opinion_type: choice,
-        amount: price,
-        filled_quantity: 0,
-        status: 'UNMATCHED',
-        buy_order_id: previousOrderId,
-      }
+      // const orderData = {
+      //   market_id: marketId,
+      //   order_type: tradeAction,
+      //   quantity: quantity,
+      //   opinion_type: choice,
+      //   amount: price,
+      //   filled_quantity: 0,
+      //   status: 'UNMATCHED',
+      //   buy_order_id: previousOrderId,
+      // }
 
-      console.log('90th:', orderData)
+      // console.log('90th:', orderData)
 
-      const newSellOrder = await createDoc('Orders', orderData)
-      console.log('sell order', newSellOrder)
-      await updateDoc('Orders', previousOrderId, {
-        sell_order_id: newSellOrder.name,
-      })
+      // const newSellOrder = await createDoc('Orders', orderData)
+      // console.log('sell order', newSellOrder)
+      // await updateDoc('Orders', previousOrderId, {
+      //   sell_order_id: newSellOrder.name,
+      // })
       setTimeout(() => {
         console.log('Executing refetch')
         refetchActiveOrders()
       }, 500)
+
+      const res = await updateDoc('Holding', previousOrderId, {
+        exit_price: price,
+        status: 'EXITING',
+      })
+
+      console.log('Resssssssssssss', res)
 
       toast.success(`Sell Order Placed.`)
 
@@ -259,18 +266,29 @@ const TradeSheet = ({
             /> */}
 
             <div className="flex justify-between mt-2">
-              <button
+              {/* <button
                 onClick={() => handlePriceChange(price - 0.5)}
                 className="p-2 active:bg-gray-100 rounded-lg transition-colors"
               >
                 <Minus className="h-4 w-4" />
-              </button>
-              <button
+              </button> */}
+              <Slider
+                defaultValue={[1]}
+                max={9.5}
+                min={0.5}
+                step={0.5}
+                value={[price]}
+                className={``}
+                onValueChange={(values) => {
+                  setPrice(values[0])
+                }}
+              />
+              {/* <button
                 onClick={() => handlePriceChange(price + 0.5)}
                 className="p-2 active:bg-gray-100 rounded-lg transition-colors"
               >
                 <Plus className="h-4 w-4" />
-              </button>
+              </button> */}
             </div>
           </div>
 

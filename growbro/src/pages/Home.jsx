@@ -22,120 +22,20 @@ import {
   useFrappeGetCall,
 } from 'frappe-react-sdk'
 
-const categories = [
-  {
-    id: 'sports',
-    name: 'Sports',
-    icon: '⚽',
-    color: 'from-orange-400 to-orange-500',
-  },
-  {
-    id: 'ethereum',
-    name: 'Ethereum',
-    icon: '🇪🇹🇭',
-    color: 'from-orange-400 to-orange-500',
-  },
-  {
-    id: 'bitcoin',
-    name: 'Bitcoin',
-    icon: '₿',
-    color: 'from-amber-400 to-amber-500',
-  },
-  {
-    id: 'youtube',
-    name: 'Youtube',
-    icon: '▶️',
-    color: 'from-blue-400 to-blue-500',
-  },
-  {
-    id: 'stocks',
-    name: 'Stocks',
-    icon: '📈',
-    color: 'from-green-400 to-green-500',
-  },
-  {
-    id: 'politics',
-    name: 'Politics',
-    icon: '🗳️',
-    color: 'from-purple-400 to-purple-500',
-  },
-  {
-    id: 'entertainment',
-    name: 'Entertainment',
-    icon: '🎬',
-    color: 'from-pink-400 to-pink-500',
-  },
-  {
-    id: 'tech',
-    name: 'Tech',
-    icon: '💻',
-    color: 'from-cyan-400 to-cyan-500',
-  },
-]
-
-const trendingMarkets = [
-  {
-    id: '1',
-    category: 'Sports',
-    title: 'New Zealand to win the 3rd T20I vs Pakistan?',
-    traders: 3349,
-    info: 'H2H last 5 T20: New Zealand 4, PAK 1',
-    odds: { yes: 8.0, no: 2.0 },
-    trend: '+12%',
-    image:
-      'https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=400&h=300&fit=crop',
-    type: 'featured',
-  },
-  {
-    id: '2',
-    category: 'Crypto',
-    title: 'Bitcoin to reach $50,000 by end of March?',
-    traders: 2891,
-    info: 'Current price: $48,235.21 (+2.4%)',
-    odds: { yes: 3.5, no: 1.5 },
-    trend: '+28%',
-    type: 'compact',
-  },
-  {
-    id: '3',
-    category: 'Youtube',
-    title: 'MrBeast to hit 250M subscribers by April?',
-    traders: 1567,
-    info: 'Current: 247M, Growth rate: 100k/day',
-    odds: { yes: 4.2, no: 1.8 },
-    trend: '+15%',
-    image:
-      'https://images.unsplash.com/photo-1611162616475-46b635cb6868?w=400&h=300&fit=crop',
-    type: 'featured',
-  },
-  {
-    id: '4',
-    category: 'Stocks',
-    title: 'Tesla to announce new AI chip in Q2?',
-    traders: 4231,
-    info: 'Recent hints from Elon about AI advancement',
-    odds: { yes: 5.5, no: 1.6 },
-    trend: '+32%',
-    type: 'compact',
-  },
-  {
-    id: '6',
-    category: 'Politics',
-    title: 'US Presidential Election 2024 Winner?',
-    traders: 12543,
-    info: 'Latest polls showing tight race',
-    odds: { yes: 2.1, no: 3.8 },
-    trend: '+45%',
-    type: 'compact',
-  },
-]
-
 const Home = () => {
   const navigate = useNavigate()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { currentUser, logout } = useFrappeAuth()
 
   const [markets, setMarkets] = useState({})
+
+  const { data: marketCategories, isLoading: marketCategoriesLoading } =
+    useFrappeGetDocList('Market Category', {
+      fields: ['name', 'category_name'],
+      filters: [['is_active', '=', 1]],
+    })
+
+  console.log(marketCategories)
 
   const { data: marketData, isLoading: marketDataLoading } =
     useFrappeGetDocList('Market', {
@@ -149,6 +49,10 @@ const Home = () => {
         'total_traders',
       ],
       filters: [['status', '=', 'OPEN']],
+      orderBy: {
+        field: 'total_traders',
+        order: 'desc',
+      },
       limit: 5,
     })
 
@@ -196,7 +100,7 @@ const Home = () => {
   }
 
   const handleCategoryClick = (category) => {
-    navigate(`/category/${category.id}`)
+    navigate(`/category/${category}`)
   }
 
   return (
@@ -237,26 +141,27 @@ const Home = () => {
       </header>
 
       <div className="pt-[calc(env(safe-area-inset-top)+4rem)] max-w-lg mx-auto px-6">
-        <div className="mb-8 mt-6">
+        <div className=" mt-6">
           <h2 className="text-lg font-semibold mb-4">Categories</h2>
           <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide -mx-6 px-6">
-            {categories.map((category) => (
-              <button
-                key={category.id}
-                onClick={() => handleCategoryClick(category)}
-                className="flex-shrink-0 group"
-              >
-                <div
-                  className={`w-16 h-16 bg-gradient-to-br ${category.color} rounded-2xl shadow-sm flex flex-col items-center justify-center relative overflow-hidden`}
+            {!marketCategoriesLoading &&
+              marketCategories?.map((category) => (
+                <button
+                  key={category.name}
+                  onClick={() => handleCategoryClick(category.category_name)}
+                  className="flex-shrink-0 group"
                 >
-                  <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                  <span className="text-2xl mb-1">{category.icon}</span>
-                  <span className="text-[10px] font-medium text-white/90">
-                    {category.name}
-                  </span>
-                </div>
-              </button>
-            ))}
+                  <div
+                    className={`w-16 h-16 bg-gradient-to-br rounded-2xl border border-neutral-600 shadow-sm flex flex-col items-center justify-center relative overflow-hidden`}
+                  >
+                    <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    {/* <span className="text-2xl mb-1">{category.icon}</span> */}
+                    <span className="text-xs font-medium text-black/90">
+                      {category.category_name}
+                    </span>
+                  </div>
+                </button>
+              ))}
           </div>
         </div>
 
@@ -298,66 +203,74 @@ const Home = () => {
             </button> */}
           </div>
 
-          <div className="space-y-4">
-            {Object.values(markets)
-              .sort((a, b) => {
-                return b.total_traders - a.total_traders
-              })
-              .map((market) => (
-                <div
-                  key={market.name}
-                  className="market-card cursor-pointer"
-                  onClick={() => handleMarketClick(market)}
-                >
-                  <>
-                    {/* <div className="relative h-32">
-                    <img
-                      src={market.image}
-                      alt={market.title}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                    <div className="absolute bottom-3 left-3 right-3">
-                      <div className="flex items-center justify-between text-white">
-                        <span className="text-xs font-medium bg-white/20 backdrop-blur-md px-2.5 py-1 rounded-full">
-                          {market.category}
-                        </span>
-                        <span className="flex items-center text-xs font-medium bg-green-500/20 backdrop-blur-md px-2.5 py-1 rounded-full">
-                          <TrendingUp className="h-3 w-3 mr-1" /> {market.trend}
-                        </span>
-                      </div>
-                    </div>
-                  </div> */}
+          {marketDataLoading && (
+            <div className="w-full h-screen flex justify-center items-center">
+              <div className="spinner w-14 h-14 rounded-full border-4 border-gray-200 border-r-blue-500 animate-spin"></div>
+            </div>
+          )}
 
-                    <div className="p-4">
-                      <h3 className="text-base font-medium mb-2">
-                        {market?.question}
-                      </h3>
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="flex items-center text-xs text-gray-600">
-                          <Users className="h-3.5 w-3.5 mr-1" />
-                          {/* <span>{market.traders.toLocaleString()} traders</span> */}
-                          <span>{market?.total_traders} traders</span>
+          {!marketDataLoading && (
+            <div className="space-y-4">
+              {Object.values(markets)
+                .sort((a, b) => {
+                  return b.total_traders - a.total_traders
+                })
+                .map((market) => (
+                  <div
+                    key={market.name}
+                    className="market-card cursor-pointer"
+                    onClick={() => handleMarketClick(market)}
+                  >
+                    <>
+                      {/* <div className="relative h-32">
+                     <img
+                       src={market.image}
+                       alt={market.title}
+                       className="w-full h-full object-cover"
+                     />
+                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                     <div className="absolute bottom-3 left-3 right-3">
+                       <div className="flex items-center justify-between text-white">
+                         <span className="text-xs font-medium bg-white/20 backdrop-blur-md px-2.5 py-1 rounded-full">
+                           {market.category}
+                         </span>
+                         <span className="flex items-center text-xs font-medium bg-green-500/20 backdrop-blur-md px-2.5 py-1 rounded-full">
+                           <TrendingUp className="h-3 w-3 mr-1" /> {market.trend}
+                         </span>
+                       </div>
+                     </div>
+                   </div> */}
+
+                      <div className="p-4">
+                        <h3 className="text-base font-medium mb-2">
+                          {market?.question}
+                        </h3>
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="flex items-center text-xs text-gray-600">
+                            <Users className="h-3.5 w-3.5 mr-1" />
+                            {/* <span>{market.traders.toLocaleString()} traders</span> */}
+                            <span>{market?.total_traders} traders</span>
+                          </div>
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-600">
+                            <div className="w-1 h-1 bg-red-500 rounded-full animate-pulse mr-1"></div>
+                            LIVE
+                          </span>
                         </div>
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-600">
-                          <div className="w-1 h-1 bg-red-500 rounded-full animate-pulse mr-1"></div>
-                          LIVE
-                        </span>
+                        {/* <p className="text-xs text-gray-600 mb-4">{market.info}</p> */}
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="py-2 px-4 bg-green-50 text-green-600 rounded-xl text-sm font-medium">
+                            Yes ₹{market?.yes_price}
+                          </div>
+                          <div className="py-2 px-4 bg-rose-50 text-rose-600 rounded-xl text-sm font-medium">
+                            No ₹{market?.no_price}
+                          </div>
+                        </div>
                       </div>
-                      {/* <p className="text-xs text-gray-600 mb-4">{market.info}</p> */}
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="py-2 px-4 bg-green-50 text-green-600 rounded-xl text-sm font-medium">
-                          Yes ₹{market?.yes_price}
-                        </div>
-                        <div className="py-2 px-4 bg-rose-50 text-rose-600 rounded-xl text-sm font-medium">
-                          No ₹{market?.no_price}
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                </div>
-              ))}
-          </div>
+                    </>
+                  </div>
+                ))}
+            </div>
+          )}
         </div>
       </div>
 

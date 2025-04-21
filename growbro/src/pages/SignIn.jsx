@@ -29,16 +29,16 @@ const SignIn = () => {
     }
   }
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 max-w-lg mx-auto">
       <div className="bg-indigo-600 pt-safe-top pb-8">
-        <div className="px-6">
+        {/* <div className="px-6">
           <button
             onClick={() => navigate('/')}
             className="p-2 -ml-2 text-white/90 hover:bg-white/10 rounded-full transition-colors"
           >
             <ArrowLeft className="h-6 w-6" />
           </button>
-        </div>
+        </div> */}
       </div>
       <div className="px-6 -mt-4">
         <div className="bg-white rounded-3xl p-6 shadow-sm">

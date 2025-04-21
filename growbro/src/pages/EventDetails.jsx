@@ -5,11 +5,11 @@ import {
   Share2,
   Users,
   Timer,
+  CalendarClock,
   Book,
-  ChevronDown,
-  ChevronUp,
+  BookOpen,
 } from 'lucide-react'
-import { Line } from 'react-chartjs-2'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -23,11 +23,12 @@ import {
 } from 'chart.js'
 import TradeSheet from '../components/TradeSheet'
 import {
-  useFrappeEventListener,
-  useFrappeGetCall,
+  useFrappeDocTypeEventListener,
   useFrappeGetDoc,
+  useFrappeGetDocList,
 } from 'frappe-react-sdk'
-import OrderBook from '../components/OrderBook'
+import EventDetailsOrderBook from '../components/EventDetailsOrderBook'
+import OrdersTab from '../components/OrdersTab'
 
 ChartJS.register(
   CategoryScale,
@@ -42,11 +43,48 @@ ChartJS.register(
 
 const EventDetails = () => {
   const navigate = useNavigate()
+  const location = useLocation()
+  const searchParams = new URLSearchParams(location.search)
+  const tab = searchParams.get('tab')
+  const [activeTab, setActiveTab] = useState(tab || 'activity')
   const { id } = useParams()
   const [market, setMarket] = useState({})
   const [showTradeSheet, setShowTradeSheet] = useState(false)
   const [selectedChoice, setSelectedChoice] = useState(null)
   const [selectedAction, setSelectedAction] = useState(null)
+
+  const {
+    data: tradesData,
+    isLoading: tradesLoading,
+    mutate: refetchTrades,
+  } = useFrappeGetDocList(
+    'Trades',
+    {
+      fields: [
+        'name',
+        'creation',
+        'first_user_order_id',
+        'first_user_price',
+        'first_user_id',
+        'second_user_order_id',
+        'second_user_price',
+        'second_user_id',
+        'quantity',
+      ],
+      filters: { market_id: id },
+      orderBy: {
+        field: 'creation',
+        order: 'desc',
+      },
+    },
+    activeTab === 'activity' ? undefined : null
+  )
+
+  useFrappeDocTypeEventListener('Trades', (updatedTrade) => {
+    refetchTrades()
+  })
+
+  console.log('Trades: ', tradesData)
 
   const formatDate = (dateString) => {
     const date = new Date(dateString)
@@ -58,10 +96,7 @@ const EventDetails = () => {
     })
   }
 
-  const { data: marketData, isLoading: marketDataLoading } = useFrappeGetDoc(
-    'Market',
-    id
-  )
+  const { data: marketData } = useFrappeGetDoc('Market', id)
 
   useEffect(() => {
     setMarket(marketData)
@@ -73,6 +108,18 @@ const EventDetails = () => {
   //     setMarket((prev) => ({ ...prev, ...updatedMarket }))
   //   }
   // })
+  const handleTabChange = (value) => {
+    setActiveTab(value)
+
+    // Update URL with the new tab parameter
+    const newSearchParams = new URLSearchParams(location.search)
+    newSearchParams.set('tab', value)
+
+    // Update URL without refreshing the page
+    navigate(`${location.pathname}?${newSearchParams.toString()}`, {
+      replace: true,
+    })
+  }
 
   const handleTradeClick = (choice, action) => {
     setSelectedChoice(choice)
@@ -188,7 +235,123 @@ const EventDetails = () => {
             <Line data={probabilityData} options={chartOptions} />
           </div>
         </div> */}
-        {market?.status === 'OPEN' && <OrderBook marketId={id} />}
+        <Tabs
+          value={activeTab}
+          onValueChange={handleTabChange}
+          className="w-full"
+        >
+          <TabsList className="w-full">
+            <TabsTrigger value="activity" className="w-full">
+              Activity
+            </TabsTrigger>
+            <TabsTrigger value="order book" className="w-full">
+              Order Book
+            </TabsTrigger>
+            <TabsTrigger value="orders" className="w-full">
+              Orders
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="activity">
+            <div className="bg-white rounded-xl shadow-sm">
+              <div className="px-4 py-3 border-b border-gray-100">
+                <h3 className="font-medium text-left">
+                  {tradesData?.length > 0
+                    ? 'Matched Users'
+                    : 'No Users matched yet.'}
+                </h3>
+              </div>
+
+              <div className="divide-y divide-gray-100">
+                {tradesData?.map((match) => (
+                  <div key={match?.name} className="px-4 py-3">
+                    <div className="flex items-center justify-between">
+                      {/* User 1 */}
+                      <div className="flex flex-col items-center">
+                        <div className="flex gap-2 items-center">
+                          <div className="h-8 w-8 rounded-full bg-blue-200 flex justify-center items-center">
+                            {/* <img
+                            src={match.user1.avatar}
+                            alt={match.user1.name}
+                          />   */}
+                            {match?.first_user_id.slice(0, 1).toUpperCase()}
+                          </div>
+                          {/* <span className="text-sm font-medium text-blue-600">
+                            &#8377;{match?.yes_price}
+                          </span> */}
+                        </div>
+                        <span className="text-sm font-medium">
+                          {match?.first_user_id}
+                        </span>
+                      </div>
+
+                      {/* Connection indicator */}
+                      {/* <div className="flex-1 mx-2 border-t border-dashed border-gray-300"></div> */}
+                      <div className="h-8 mb-4 w-full bg-gray-100 rounded-xl overflow-hidden">
+                        <div className="flex h-full">
+                          <div
+                            className="bg-blue-500 h-full flex items-center justify-center text-xs text-white font-bold p-4"
+                            style={{
+                              width: `${match?.first_user_price * 10}%`,
+                            }}
+                          >
+                            {match?.first_user_price}
+                          </div>
+                          <div
+                            className="bg-rose-500 h-full flex items-center justify-center text-xs text-white font-bold p-4"
+                            style={{
+                              width: `${match?.second_user_price * 10}%`,
+                            }}
+                          >
+                            {match?.second_user_price}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* User 2 */}
+                      <div className="flex flex-col items-center">
+                        <div className="flex items-center gap-2">
+                          {/* <span className="text-sm font-medium text-red-600">
+                            &#8377;{match?.no_price}
+                          </span> */}
+                          <div className="h-8 w-8 rounded-full bg-red-200 flex justify-center items-center">
+                            {/* <img
+                            src={match.user2.avatar}
+                            alt={match.user2.name}
+                          /> */}
+                            {match?.second_user_id.slice(0, 1).toUpperCase()}
+                          </div>
+                        </div>
+                        <span className="text-sm font-medium mr-2">
+                          {match?.second_user_id}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-center mb-3">
+                      <div className="flex items-center text-sm text-gray-500">
+                        <CalendarClock className="h-4 w-4 mr-1" />
+                        <span>{formatDate(match?.creation)}</span>
+                      </div>
+                      {/* <div className="text-sm font-medium">₹{match.amount}</div> */}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </TabsContent>
+          <TabsContent value="order book">
+            <div className="flex items-center gap-2 px-4 py-4 bg-gray-50">
+              <BookOpen className="h-5 w-5" />
+              <span className="font-medium">Order Book</span>
+            </div>
+            {market?.status === 'OPEN' && (
+              <EventDetailsOrderBook marketId={id} />
+            )}
+          </TabsContent>
+          <TabsContent value="orders">
+            <OrdersTab />
+          </TabsContent>
+        </Tabs>
+
         {/* ... other existing content ... */}
       </div>
 
