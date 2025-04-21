@@ -172,7 +172,7 @@ def wallet_operation(doc, method):
                 if not doc.holding_id:
                     frappe.db.sql("""
                         UPDATE `tabHolding`
-                        SET status = 'ACTIVE', order_id = "", exit_price = 0
+                        SET status = 'ACTIVE', order_id = '', exit_price = 0
                         WHERE market_id = %s
                         AND status = 'EXITING'
                         AND order_id = %s
