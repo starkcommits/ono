@@ -481,4 +481,5 @@ def holding(doc,method):
 
         order.insert(ignore_permissions = True)
         doc.order_id = order.name
+        doc.save(ignore_permissions=True)
         frappe.db.commit()
