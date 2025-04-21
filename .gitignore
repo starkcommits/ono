@@ -6,6 +6,6 @@ tags
 node_modules
 __pycache__
 
-# rewardapp/public/growbro
-# rewardapp/public/node_modules
-# rewardapp/www/growbro.html
+rewardapp/public/growbro
+rewardapp/public/node_modules
+rewardapp/www/growbro.html

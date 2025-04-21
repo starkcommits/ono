@@ -96,7 +96,7 @@ const MarketHolding = () => {
         'exit_price',
         'market_yes_price',
         'market_no_price',
-        'closing_time',
+        'creation',
         'filled_quantity',
       ],
       filters: [
@@ -107,7 +107,7 @@ const MarketHolding = () => {
     currentUser ? undefined : null
   )
 
-  console.log('Holding Data:', holdingData)
+  console.log('Active Holdings:', activeHoldings.market_id)
 
   useEffect(() => {
     if (!holdingDataLoading && holdingData?.length > 0) {
@@ -237,7 +237,7 @@ const MarketHolding = () => {
         <div className="px-6">
           <div className="flex items-center gap-4 mb-6">
             <button
-              onClick={() => navigate('/')}
+              onClick={() => navigate(-1)}
               className="p-2 -ml-2 text-white/90 hover:bg-white/10 rounded-full transition-colors"
             >
               <ArrowLeft className="h-6 w-6" />
@@ -359,12 +359,11 @@ const MarketHolding = () => {
                       {position.market_id}
                     </div>
                     <div>
-                      {position.status === 'ACTIVE' &&
-                        position.filled_quantity === 0 && (
-                          <span className="bg-yellow-100 text-yellow-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
-                            {position.status}
-                          </span>
-                        )}
+                      {position.status === 'ACTIVE' && (
+                        <span className="bg-yellow-100 text-yellow-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
+                          {position.status}
+                        </span>
+                      )}
 
                       {position.filled_quantity >= 0 &&
                         position.filled_quantity < position.quantity &&
@@ -390,7 +389,7 @@ const MarketHolding = () => {
                     )}
                     <div className="flex items-center">
                       <Clock className="h-3.5 w-3.5 mr-1" />
-                      End at {formatDate(position.closing_time)}
+                      Created at {formatDate(position.creation)}
                     </div>
                   </span>
                 </div>
@@ -402,11 +401,9 @@ const MarketHolding = () => {
                     </div>
                   </div>
                   <div>
-                    <div className="text-gray-600 font-medium">
-                      Total Quantity
-                    </div>
+                    <div className="text-gray-600 font-medium">Quantity</div>
                     <div className="font-semibold text-gray-900">
-                      {position.quantity}
+                      {`${position.filled_quantity}/${position.quantity}`}
                     </div>
                   </div>
                   <div>
@@ -452,7 +449,7 @@ const MarketHolding = () => {
 
                       <Button
                         onClick={() => {
-                          handleMarketClick(position)
+                          navigate(`/event/${id}`)
                         }}
                         className="w-[50%] bg-blue-50 text-blue-600 rounded-xl text-sm font-medium hover:bg-blue-100 transition-colors"
                       >
@@ -467,7 +464,7 @@ const MarketHolding = () => {
                     <div className="w-[50%] flex justify-center font-medium tracking-wide">{`Qty ${position.filled_quantity}/${position.quantity} Matched`}</div>
                     <Button
                       onClick={() => {
-                        handleMarketClick(position)
+                        navigate(`/event/${activeHoldings.market_id}`)
                       }}
                       className="w-[50%] bg-blue-50 text-blue-600 rounded-xl text-sm font-medium hover:bg-blue-100 transition-colors"
                     >
