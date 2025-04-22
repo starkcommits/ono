@@ -22,6 +22,7 @@ import { Slider } from '@/components/ui/slider'
 import {
   ArrowRight,
   Clock,
+  LogOut,
   LucideMousePointerSquareDashed,
   Plus,
   TrendingDown,
@@ -135,10 +136,12 @@ const ActivePositions = ({
 
   const handleExitPositions = async () => {
     try {
-      if (position.yes_quantity > 0) {
+      if (position.ACTIVE.YES.total_quantity > 0) {
         await createDoc('Orders', {
           market_id: position.market_id,
-          quantity: position.yes_quantity,
+          quantity:
+            position.ACTIVE.YES.total_quantity -
+            position.ACTIVE.YES.total_filled_quantity,
           opinion_type: 'YES',
           status: 'UNMATCHED',
           user_id: currentUser,
@@ -147,10 +150,12 @@ const ActivePositions = ({
           order_type: 'SELL',
         })
       }
-      if (position.no_quantity > 0)
+      if (position.ACTIVE.NO.total_quantity > 0)
         await createDoc('Orders', {
           market_id: position.market_id,
-          quantity: position.no_quantity,
+          quantity:
+            position.ACTIVE.NO.total_quantity -
+            position.ACTIVE.NO.total_filled_quantity,
           opinion_type: 'NO',
           status: 'UNMATCHED',
           user_id: currentUser,
@@ -236,7 +241,25 @@ const ActivePositions = ({
         </div>
 
         <div className="w-full flex items-center justify-between cursor-default">
-          <div>{'EXITING' in position ? null : null}</div>
+          <div>
+            {'EXITING' in position ? (
+              <div className="flex gap-1">
+                <span className="flex gap-1">
+                  <span>
+                    <LogOut className="w-4 h-4" />
+                  </span>
+                  <span>Exited</span>
+                </span>
+                <span>{`${
+                  position.EXITING.NO.total_filled_quantity +
+                  position.EXITING.YES.total_filled_quantity
+                }/${
+                  position.EXITING.YES.total_quantity +
+                  position.EXITING.YES.total_quantity
+                }`}</span>
+              </div>
+            ) : null}
+          </div>
           <div>
             {'EXITING' in position ? null : (
               <Drawer
@@ -246,10 +269,10 @@ const ActivePositions = ({
               >
                 <DrawerTrigger asChild>
                   <button
-                    className="rounded-lg p-1.5 border flex items-center justify-center"
+                    className="rounded-lg p-1.5 border flex gap-1 items-center justify-center"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <span className="text-xs font-medium">Exit Position</span>
+                    <span className="text-xs font-medium">Exit</span>
                     <ArrowRight strokeWidth={1.5} className="h-4 w-4" />
                   </button>
                 </DrawerTrigger>
@@ -260,7 +283,7 @@ const ActivePositions = ({
                     </DrawerTitle>
                   </DrawerHeader>
                   <div className="w-full flex flex-col gap-4">
-                    {position.yes_quantity ? (
+                    {position?.ACTIVE?.YES?.total_quantity ? (
                       <div className="mb-6 px-10">
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-lg font-medium">Yes Price</span>
@@ -286,7 +309,7 @@ const ActivePositions = ({
                         </div>
                       </div>
                     ) : null}
-                    {position.no_quantity ? (
+                    {position?.ACTIVE?.NO?.total_quantity ? (
                       <div className="mb-6 px-10">
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-lg font-medium">No Price</span>
