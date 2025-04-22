@@ -537,7 +537,7 @@ def holding(doc,method):
         doc.save(ignore_permissions=True)
         frappe.db.commit()
 
-@frappe.whitelist(allow_guest=true)
+@frappe.whitelist(allow_guest=True)
 def cancel_order(market_id, user_id):
     frappe.db.sql("""
         UPDATE `tabOrders`
