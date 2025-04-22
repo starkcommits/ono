@@ -53,6 +53,7 @@ const ActivePositions = ({
 }) => {
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
+  const [isCancelOpen, setIsCancelOpen] = useState(false)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
   console.log(position)
@@ -62,6 +63,7 @@ const ActivePositions = ({
   const { currentUser } = useFrappeAuth()
   const { createDoc } = useFrappeCreateDoc()
   const { updateDoc } = useFrappeUpdateDoc()
+  const { call } = useFrappePostCall()
 
   //   useFrappeEventListener('market_event', (updatedMarket) => {
   //     console.log('Hello')
@@ -110,25 +112,11 @@ const ActivePositions = ({
 
   const handleCancelOrder = async () => {
     try {
-      console.log(position)
-      if (position.order_type === 'SELL') {
-        console.log('Entered')
-        await updateDoc('Orders', position.buy_order_id, {
-          sell_order_id: null,
-        })
-        await updateDoc('Orders', position.name, {
-          status: 'SETTLED',
-          remark: 'Sell order canceled in midway',
-        })
-      } else {
-        await updateDoc('Orders', position.name, {
-          status: 'CANCELED',
-        })
-      }
-      // Remove this stray 'call' line
-      // call  <-- This is causing the error
-      refetchActiveOrders()
-      setIsOpen(false)
+      call('', {
+        field1: 'value1',
+        field2: 'value2',
+      })
+      setIsCancelOpen(false)
     } catch (err) {
       console.log(err)
     }
@@ -229,20 +217,33 @@ const ActivePositions = ({
               {position.question}
             </span>
           </div>
-          <div className="flex justify-between gap-4 text-sm mb-4">
-            <div>
-              <div className="text-gray-600 font-medium">Invested</div>
-              <div className="font-semibold text-gray-900">
-                ₹{position.invested_amount}
+          {'EXITING' in position ? null : (
+            <div className="flex justify-between gap-4 text-sm mb-4">
+              <div>
+                <div className="text-gray-600 font-medium">Invested</div>
+                <div className="font-semibold text-gray-900">
+                  ₹{position.total_invested}
+                </div>
+              </div>
+              <div>
+                <div className="text-gray-600 font-medium">Total Quantity</div>
+                <div className="font-semibold text-gray-900">
+                  {position?.ACTIVE?.NO && !position?.ACTIVE?.YES
+                    ? position?.ACTIVE?.NO?.total_quantity
+                    : null}
+                  {position?.ACTIVE?.NO && position?.ACTIVE?.YES
+                    ? `${
+                        position?.ACTIVE?.NO?.total_quantity +
+                        position?.ACTIVE?.YES?.total_quantity
+                      }`
+                    : null}
+                  {position?.ACTIVE?.YES && !position?.ACTIVE?.NO
+                    ? position?.ACTIVE?.YES?.total_quantity
+                    : null}
+                </div>
               </div>
             </div>
-            <div>
-              <div className="text-gray-600 font-medium">Total Quantity</div>
-              <div className="font-semibold text-gray-900">
-                {position.total_quantity}
-              </div>
-            </div>
-          </div>
+          )}
         </div>
 
         <div className="w-full flex items-center justify-between cursor-default">
@@ -255,18 +256,67 @@ const ActivePositions = ({
                   </span>
                   <span>Exited</span>
                 </span>
-                <span>{`${
-                  position?.EXITING?.NO?.total_filled_quantity +
-                  position?.EXITING?.YES?.total_filled_quantity
-                }/${
-                  position?.EXITING?.YES?.total_quantity +
-                  position?.EXITING?.YES?.total_quantity
-                }`}</span>
+                <span>
+                  {position?.EXITING?.NO && !position?.EXITING?.YES
+                    ? position?.EXITING?.NO?.total_filled_quantity
+                    : null}
+                  {position?.EXITING?.YES && !position?.EXITING?.NO
+                    ? position?.EXITING?.YES?.total_filled_quantity
+                    : null}
+                  {position?.EXITING?.NO && position?.EXITING?.YES
+                    ? position?.EXITING?.NO?.total_filled_quantity +
+                      position?.EXITING?.YES?.total_filled_quantity
+                    : null}
+                  /
+                  {position?.EXITING?.NO && !position?.EXITING?.YES
+                    ? position?.EXITING?.NO?.total_quantity
+                    : null}
+                  {position?.EXITING?.YES && !position?.EXITING?.NO
+                    ? position?.EXITING?.YES?.total_quantity
+                    : null}
+                  {position?.EXITING?.NO && position?.EXITING?.YES
+                    ? position?.EXITING?.NO?.total_quantity +
+                      position?.EXITING?.YES?.total_quantity
+                    : null}
+                </span>
               </div>
             ) : null}
           </div>
           <div>
-            {'EXITING' in position ? null : (
+            {'EXITING' in position ? (
+              <Dialog open={isCancelOpen} onOpenChange={setIsCancelOpen}>
+                <DialogTrigger className="w-full">
+                  <button className="flex gap-1 items-center">
+                    <span>Cancel</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="">
+                  <DialogHeader>
+                    <DialogTitle>Are you absolutely sure?</DialogTitle>
+                    <DialogDescription>
+                      This action cannot be undone. This will permanently delete
+                      your account and remove your data from our servers.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <DialogFooter>
+                    <Button
+                      className="bg-white hover:bg-white/90"
+                      variant="outline"
+                      onClick={() => setIsCancelOpen(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      className="bg-neutral-900 text-white hover:text-neutral-800 hover:bg-neutral-800/40"
+                      onClick={() => handleCancelOrder()}
+                    >
+                      Submit
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            ) : (
               <Drawer
                 className="w-full"
                 open={isDrawerOpen}
@@ -274,7 +324,7 @@ const ActivePositions = ({
               >
                 <DrawerTrigger asChild>
                   <button
-                    className="rounded-lg p-1.5 border flex gap-1 items-center justify-center"
+                    className="flex gap-1 items-center justify-center"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <span className="text-xs font-medium">Exit</span>
