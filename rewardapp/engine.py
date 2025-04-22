@@ -536,3 +536,15 @@ def holding(doc,method):
         doc.order_id = order.name
         doc.save(ignore_permissions=True)
         frappe.db.commit()
+
+@frappe.whitelist(allow_guest=true)
+def cancel_order(market_id, user_id):
+    frappe.db.sql("""
+        UPDATE `tabOrders`
+        SET status = 'CANCELED'
+        WHERE market_id = %s
+        AND user_id = %s
+        AND order_type = 'SELL'
+    """, (market_event, user_id))
+
+    frappe.db.commit()
