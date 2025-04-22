@@ -427,6 +427,7 @@ def get_marketwise_holding():
             h.status,
             SUM(h.quantity) AS total_quantity,
             SUM(h.filled_quantity) AS total_filled_quantity,
+            SUM((h.quantity - h.filled_quantity) * h.price) AS total_invested,
             m.question,
             m.yes_price,
             m.no_price
@@ -452,12 +453,21 @@ def get_marketwise_holding():
         status = row['status']
         opinion = row['opinion_type']
 
-        output.setdefault(market, {
-            "market_id": row['market_id'],
-            "question": row["question"],
-            "yes_price": row["yes_price"],
-            "no_price": row["no_price"]
-        }).setdefault(status, {})[opinion] = {
+        # Set basic market-level info
+        if market not in output:
+            output[market] = {
+                "market_id": market,
+                "question": row["question"],
+                "yes_price": row["yes_price"],
+                "no_price": row["no_price"],
+                "total_invested": 0  # Init here
+            }
+
+        # Accumulate invested amount
+        output[market]["total_invested"] += row["total_invested"]
+
+        # Set opinion-type breakdown
+        output[market].setdefault(status, {})[opinion] = {
             "total_quantity": row["total_quantity"],
             "total_filled_quantity": row["total_filled_quantity"]
         }
