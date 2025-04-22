@@ -232,111 +232,102 @@ const ActivePositions = ({
                 {position.total_quantity}
               </div>
             </div>
-            <div>
-              <div className="text-gray-600 font-medium">Avg. Price</div>
-              <div className="font-semibold text-gray-900">
-                &#8377;
-                {(position.invested_amount / position.total_quantity).toFixed(
-                  2
-                )}
-              </div>
-            </div>
-            {/* <div>
-            <div className="text-gray-600 font-medium">Current</div>
-            <div className="font-semibold text-gray-900">
-              ₹
-              {position.opinion_type === 'YES'
-                ? parseFloat(position.market_yes_price).toFixed(1)
-                : parseFloat(position.market_no_price).toFixed(1)}
-            </div>
-          </div> */}
           </div>
         </div>
 
-        <div className="w-full flex items-center justify-end cursor-default">
-          <Drawer
-            className="w-full"
-            open={isDrawerOpen}
-            onOpenChange={setIsDrawerOpen}
-          >
-            <DrawerTrigger asChild>
-              <button
-                className="rounded-lg p-1.5 border flex items-center justify-center"
-                onClick={(e) => e.stopPropagation()}
+        <div className="w-full flex items-center justify-between cursor-default">
+          <div>{'EXITING' in position ? null : null}</div>
+          <div>
+            {'EXITING' in position ? null : (
+              <Drawer
+                className="w-full"
+                open={isDrawerOpen}
+                onOpenChange={setIsDrawerOpen}
               >
-                <span className="text-xs font-medium">Exit Position</span>
-                <ArrowRight strokeWidth={1.5} className="h-4 w-4" />
-              </button>
-            </DrawerTrigger>
-            <DrawerContent className="mx-auto w-full">
-              <DrawerHeader className="flex items-center justify-center">
-                <DrawerTitle className="w-full flex justify-center">
-                  Exit all positions in this particular market
-                </DrawerTitle>
-              </DrawerHeader>
-              <div className="w-full flex flex-col gap-4">
-                {position.yes_quantity ? (
-                  <div className="mb-6 px-10">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-lg font-medium">Yes Price</span>
-                      <div className="flex items-center">
-                        <span className="text-lg font-medium">₹{yesPrice}</span>
+                <DrawerTrigger asChild>
+                  <button
+                    className="rounded-lg p-1.5 border flex items-center justify-center"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <span className="text-xs font-medium">Exit Position</span>
+                    <ArrowRight strokeWidth={1.5} className="h-4 w-4" />
+                  </button>
+                </DrawerTrigger>
+                <DrawerContent className="mx-auto w-full">
+                  <DrawerHeader className="flex items-center justify-center">
+                    <DrawerTitle className="w-full flex justify-center">
+                      Exit all positions in this particular market
+                    </DrawerTitle>
+                  </DrawerHeader>
+                  <div className="w-full flex flex-col gap-4">
+                    {position.yes_quantity ? (
+                      <div className="mb-6 px-10">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-lg font-medium">Yes Price</span>
+                          <div className="flex items-center">
+                            <span className="text-lg font-medium">
+                              ₹{yesPrice}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex justify-between mt-2">
+                          <Slider
+                            defaultValue={[1]}
+                            max={9.5}
+                            min={0.5}
+                            step={0.5}
+                            value={[yesPrice]}
+                            className={``}
+                            onValueChange={(values) => {
+                              setYesPrice(values[0])
+                            }}
+                          />
+                        </div>
                       </div>
-                    </div>
+                    ) : null}
+                    {position.no_quantity ? (
+                      <div className="mb-6 px-10">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-lg font-medium">No Price</span>
+                          <div className="flex items-center">
+                            <span className="text-lg font-medium">
+                              ₹{noPrice}
+                            </span>
+                          </div>
+                        </div>
 
-                    <div className="flex justify-between mt-2">
-                      <Slider
-                        defaultValue={[1]}
-                        max={9.5}
-                        min={0.5}
-                        step={0.5}
-                        value={[yesPrice]}
-                        className={``}
-                        onValueChange={(values) => {
-                          setYesPrice(values[0])
-                        }}
-                      />
-                    </div>
-                  </div>
-                ) : null}
-                {position.no_quantity ? (
-                  <div className="mb-6 px-10">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-lg font-medium">No Price</span>
-                      <div className="flex items-center">
-                        <span className="text-lg font-medium">₹{noPrice}</span>
+                        <div className="flex justify-between mt-2">
+                          <Slider
+                            defaultValue={[1]}
+                            max={9.5}
+                            min={0.5}
+                            step={0.5}
+                            value={[noPrice]}
+                            className={``}
+                            onValueChange={(values) => {
+                              setNoPrice(values[0])
+                            }}
+                          />
+                        </div>
                       </div>
-                    </div>
-
-                    <div className="flex justify-between mt-2">
-                      <Slider
-                        defaultValue={[1]}
-                        max={9.5}
-                        min={0.5}
-                        step={0.5}
-                        value={[noPrice]}
-                        className={``}
-                        onValueChange={(values) => {
-                          setNoPrice(values[0])
-                        }}
-                      />
-                    </div>
+                    ) : null}
                   </div>
-                ) : null}
-              </div>
-              <DrawerFooter className="w-full px-10 text-xs">
-                <Button onClick={handleExitPositions}>
-                  Exit All Positions
-                </Button>
+                  <DrawerFooter className="w-full px-10 text-xs">
+                    <Button onClick={handleExitPositions}>
+                      Exit All Positions
+                    </Button>
 
-                <DrawerClose className=" w-full">
-                  <Button variant="outline" className="w-full">
-                    Cancel
-                  </Button>
-                </DrawerClose>
-              </DrawerFooter>
-            </DrawerContent>
-          </Drawer>
+                    <DrawerClose className=" w-full">
+                      <Button variant="outline" className="w-full">
+                        Cancel
+                      </Button>
+                    </DrawerClose>
+                  </DrawerFooter>
+                </DrawerContent>
+              </Drawer>
+            )}
+          </div>
         </div>
       </div>
     </>

@@ -84,6 +84,8 @@ const Portfolio = () => {
     activeTab === 'active' ? undefined : null
   )
 
+  console.log(holdingData)
+
   useEffect(() => {
     const tab = searchParams.get('tab')
     if (!tab) {
@@ -93,11 +95,14 @@ const Portfolio = () => {
   }, [])
 
   useEffect(() => {
-    if (!holdingDataLoading && holdingData.message.length > 0) {
-      const holdingDataMap = holdingData.message.reduce((acc, holding) => {
-        acc[holding.name] = holding // ✅ Store as { "market_name": marketData }
-        return acc
-      }, {})
+    if (!holdingDataLoading && Object.values(holdingData.message).length > 0) {
+      const holdingDataMap = Object.values(holdingData.message).reduce(
+        (acc, holding) => {
+          acc[holding.name] = holding // ✅ Store as { "market_name": marketData }
+          return acc
+        },
+        {}
+      )
       setActiveHoldings(holdingDataMap)
     }
   }, [holdingData])
