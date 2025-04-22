@@ -96,6 +96,9 @@ const Portfolio = () => {
   }, [])
 
   useEffect(() => {
+    if (!holdingDataLoading && holdingData.message === undefined) {
+      return
+    }
     if (!holdingDataLoading && Object.values(holdingData.message).length > 0) {
       const holdingDataMap = Object.values(holdingData.message).reduce(
         (acc, holding) => {

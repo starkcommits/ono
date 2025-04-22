@@ -110,11 +110,11 @@ const ActivePositions = ({
     })
   }
 
-  const handleCancelOrder = async () => {
+  const handleCancelOrder = async (market_id) => {
     try {
-      call('', {
-        field1: 'value1',
-        field2: 'value2',
+      call('rewardapp.engine.cancel_order', {
+        market_id: market_id,
+        user_id: currentUser,
       })
       setIsCancelOpen(false)
     } catch (err) {
@@ -309,7 +309,7 @@ const ActivePositions = ({
                     </Button>
                     <Button
                       className="bg-neutral-900 text-white hover:text-neutral-800 hover:bg-neutral-800/40"
-                      onClick={() => handleCancelOrder()}
+                      onClick={() => handleCancelOrder(position.market_id)}
                     >
                       Submit
                     </Button>
