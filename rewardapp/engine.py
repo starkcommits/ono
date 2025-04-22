@@ -453,6 +453,7 @@ def get_marketwise_holding():
         opinion = row['opinion_type']
 
         output.setdefault(market, {
+            "market_id": row['market_id'],
             "question": row["question"],
             "yes_price": row["yes_price"],
             "no_price": row["no_price"]
