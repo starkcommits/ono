@@ -545,6 +545,6 @@ def cancel_order(market_id, user_id):
         WHERE market_id = %s
         AND user_id = %s
         AND order_type = 'SELL'
-    """, (market_event, user_id))
+    """, (market_id, user_id))
 
     frappe.db.commit()
