@@ -198,7 +198,7 @@ def market(doc, method):
             # For debugging
             frappe.logger().info(f"Sending payload to market engine: {payload}")
             
-            url = "http://127.0.0.1:8086/markets/"
+            url = "http://94.136.187.188:8086/markets/"
             response = requests.post(url, json=payload)
             
             if response.status_code != 201:
@@ -227,7 +227,7 @@ def market(doc, method):
 
             frappe.db.commit()
 
-            url=f"http://127.0.0.1:8086/markets/{doc.name}/close"
+            url=f"http://94.136.187.188:8086/markets/{doc.name}/close"
             response = requests.post(url)
                 
             if response.status_code != 200:
@@ -323,8 +323,10 @@ def update_market_price():
     try:
         data = frappe._dict(frappe.request.get_json())
 
-        frappe.db.set_value("Market",data.market_id,'yes_price',data.yes_price,'no_price',data.no_price,update_modified=False)
-        
+        frappe.db.set_value("Market", data.market_id, {
+            'yes_price': data.yes_price,
+            'no_price': data.no_price
+        }, update_modified=False)
         frappe.db.commit()
         """Send real-time update via WebSockets"""
         update_data = {

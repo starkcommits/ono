@@ -1,129 +1,137 @@
 {
- "actions": [],
- "allow_rename": 1,
- "autoname": "hash",
- "creation": "2025-04-16 15:31:26.382052",
- "doctype": "DocType",
- "engine": "InnoDB",
- "field_order": [
-  "market_id",
-  "quantity",
-  "status",
-  "order_id",
-  "user_id",
-  "column_break_znim",
-  "price",
-  "opinion_type",
-  "exit_price",
-  "filled_quantity",
-  "closing_time",
-  "market_yes_price",
-  "market_no_price"
- ],
- "fields": [
-  {
-   "fieldname": "market_id",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Market ID",
-   "options": "Market"
-  },
-  {
-   "fieldname": "quantity",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "label": "Quantity"
-  },
-  {
-   "fieldname": "column_break_znim",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "price",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Price"
-  },
-  {
-   "fieldname": "opinion_type",
-   "fieldtype": "Select",
-   "label": "Opinion Type",
-   "options": "YES\nNO"
-  },
-  {
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "label": "Status",
-   "options": "ACTIVE\nEXITING\nEXITED"
-  },
-  {
-   "default": "0",
-   "fieldname": "exit_price",
-   "fieldtype": "Float",
-   "label": "Exit Price"
-  },
-  {
-   "default": "0",
-   "fieldname": "filled_quantity",
-   "fieldtype": "Int",
-   "label": "Filled Quantity"
-  },
-  {
-   "fieldname": "order_id",
-   "fieldtype": "Link",
-   "label": "Order ID",
-   "options": "Orders"
-  },
-  {
-   "fieldname": "user_id",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "User ID"
-  },
-  {
-   "fetch_from": "market_id.closing_time",
-   "fieldname": "closing_time",
-   "fieldtype": "Read Only",
-   "in_list_view": 1,
-   "label": "Closing Time"
-  },
-  {
-   "fetch_from": "market_id.yes_price",
-   "fieldname": "market_yes_price",
-   "fieldtype": "Read Only",
-   "label": "Market Yes Price"
-  },
-  {
-   "fetch_from": "market_id.no_price",
-   "fieldname": "market_no_price",
-   "fieldtype": "Read Only",
-   "label": "Market No Price"
-  }
- ],
- "grid_page_length": 50,
- "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2025-04-17 16:01:22.103382",
- "modified_by": "Administrator",
- "module": "Reward App",
- "name": "Holding",
- "naming_rule": "Random",
- "owner": "Administrator",
- "permissions": [
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "System Manager",
-   "share": 1,
-   "write": 1
-  }
- ],
- "sort_field": "modified",
- "sort_order": "DESC",
- "states": []
+  "actions": [],
+  "allow_rename": 1,
+  "autoname": "hash",
+  "creation": "2025-04-16 15:31:26.382052",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "market_id",
+    "quantity",
+    "status",
+    "order_id",
+    "user_id",
+    "question",
+    "column_break_znim",
+    "price",
+    "opinion_type",
+    "exit_price",
+    "filled_quantity",
+    "closing_time",
+    "market_yes_price",
+    "market_no_price"
+  ],
+  "fields": [
+    {
+      "fieldname": "market_id",
+      "fieldtype": "Link",
+      "in_list_view": 1,
+      "label": "Market ID",
+      "options": "Market"
+    },
+    {
+      "fieldname": "quantity",
+      "fieldtype": "Int",
+      "in_list_view": 1,
+      "label": "Quantity"
+    },
+    {
+      "fieldname": "column_break_znim",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "price",
+      "fieldtype": "Float",
+      "in_list_view": 1,
+      "label": "Price"
+    },
+    {
+      "fieldname": "opinion_type",
+      "fieldtype": "Select",
+      "label": "Opinion Type",
+      "options": "YES\nNO"
+    },
+    {
+      "fieldname": "status",
+      "fieldtype": "Select",
+      "label": "Status",
+      "options": "ACTIVE\nEXITING\nEXITED"
+    },
+    {
+      "default": "0",
+      "fieldname": "exit_price",
+      "fieldtype": "Float",
+      "label": "Exit Price"
+    },
+    {
+      "default": "0",
+      "fieldname": "filled_quantity",
+      "fieldtype": "Int",
+      "label": "Filled Quantity"
+    },
+    {
+      "fieldname": "order_id",
+      "fieldtype": "Link",
+      "label": "Order ID",
+      "options": "Orders"
+    },
+    {
+      "fieldname": "user_id",
+      "fieldtype": "Data",
+      "in_list_view": 1,
+      "label": "User ID"
+    },
+    {
+      "fetch_from": "market_id.closing_time",
+      "fieldname": "closing_time",
+      "fieldtype": "Read Only",
+      "in_list_view": 1,
+      "label": "Closing Time"
+    },
+    {
+      "fetch_from": "market_id.yes_price",
+      "fieldname": "market_yes_price",
+      "fieldtype": "Read Only",
+      "label": "Market Yes Price"
+    },
+    {
+      "fetch_from": "market_id.no_price",
+      "fieldname": "market_no_price",
+      "fieldtype": "Read Only",
+      "label": "Market No Price"
+    },
+    {
+      "fetch_from": "market_id.question",
+      "fieldname": "question",
+      "fieldtype": "Read Only",
+      "label": "Question"
+    }
+  ],
+  "grid_page_length": 50,
+  "index_web_pages_for_search": 1,
+  "links": [],
+  "modified": "2025-04-21 17:59:09.357510",
+  "modified_by": "Administrator",
+  "module": "Reward App",
+  "name": "Holding",
+  "naming_rule": "Random",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "System Manager",
+      "share": 1,
+      "write": 1
+    }
+  ],
+  "row_format": "Dynamic",
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "states": []
 }

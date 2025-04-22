@@ -82,7 +82,7 @@ def wallet_operation(doc, method):
 
             frappe.log_error("Order Payload", payload)
             try:
-                url = "http://127.0.0.1:8086/orders/"
+                url = "http://94.136.187.188:8086/orders/"
                 response = requests.post(url, json=payload)
                 if response.status_code != 201:
                     # Update status without triggering the hook again
@@ -180,7 +180,10 @@ def wallet_operation(doc, method):
                     """, (doc.market_id, doc.name, doc.user_id,))
                     
                 else:
-                    frappe.db.set_value("Holding",doc.holding_id,'status','ACTIVE','order_id','',update_modified=False)
+                    frappe.db.set_value("Holding",doc.holding_id,{
+                        'status':'ACTIVE',
+                        'order_id':''
+                    },update_modified=False)
                 
                 order_book_data["price"] = doc.amount
                 order_book_data["opinion_type"] = doc.opinion_type
@@ -190,7 +193,7 @@ def wallet_operation(doc, method):
 
             if doc.market_status != "CLOSE":
                 try:
-                    url = f"http://127.0.0.1:8086/orders/{doc.name}"
+                    url = f"http://94.136.187.188:8086/orders/{doc.name}"
                     response = requests.delete(url)
                     if response.status_code != 200:
                         frappe.logger().error(f"Error response: {response.text}")
