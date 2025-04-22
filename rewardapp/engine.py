@@ -400,28 +400,57 @@ def get_marketwise_transaction_summary():
 def get_marketwise_holding():
     user_id = frappe.session.user  # replace this with actual user ID
 
-    result = frappe.db.sql("""
+    # result = frappe.db.sql("""
+    #     SELECT
+    #         h.market_id,
+    #         m.question,
+    #         m.yes_price,
+    #         m.no_price,
+    #         SUM(h.quantity - h.filled_quantity) AS total_quantity,
+    #         CASE 
+    #             WHEN SUM(h.quantity - h.filled_quantity) > 0 THEN
+    #                 SUM((h.quantity - h.filled_quantity) * h.price)
+    #             ELSE 0
+    #         END AS invested_amount,
+    #         SUM(CASE WHEN h.opinion_type = 'yes' THEN h.quantity - h.filled_quantity ELSE 0 END) AS yes_quantity,
+    #         SUM(CASE WHEN h.opinion_type = 'no' THEN h.quantity - h.filled_quantity ELSE 0 END) AS no_quantity
+    #     FROM `tabHolding` h
+    #     JOIN `tabMarket` m ON h.market_id = m.name
+    #     WHERE h.user_id = %s
+    #     AND h.status = 'ACTIVE'
+    #     GROUP BY h.market_id, m.question, m.yes_price, m.no_price
+    # """, (user_id,), as_dict=True)
+    results = frappe.db.sql("""
         SELECT
-            h.market_id,
-            m.question,
-            m.yes_price,
-            m.no_price,
-            SUM(h.quantity - h.filled_quantity) AS total_quantity,
-            CASE 
-                WHEN SUM(h.quantity - h.filled_quantity) > 0 THEN
-                    SUM((h.quantity - h.filled_quantity) * h.price)
-                ELSE 0
-            END AS invested_amount,
-            SUM(CASE WHEN h.opinion_type = 'yes' THEN h.quantity - h.filled_quantity ELSE 0 END) AS yes_quantity,
-            SUM(CASE WHEN h.opinion_type = 'no' THEN h.quantity - h.filled_quantity ELSE 0 END) AS no_quantity
-        FROM `tabHolding` h
-        JOIN `tabMarket` m ON h.market_id = m.name
-        WHERE h.user_id = %s
-        AND h.status = 'ACTIVE'
-        GROUP BY h.market_id, m.question, m.yes_price, m.no_price
+            market_id,
+            opinion_type,
+            status,
+            SUM(quantity) AS total_quantity,
+            SUM(filled_quantity) AS total_filled_quantity
+        FROM
+            `tabHolding`
+        WHERE
+            status IN ('ACTIVE', 'EXITING')
+            AND user_id = %s
+        GROUP BY
+            market_id,
+            opinion_type,
+            status
     """, (user_id,), as_dict=True)
 
-    return result
+    # Transform to nested dict
+    output = {}
+    for row in results:
+        market = row['market_id']
+        status = row['status']
+        opinion = row['opinion_type']
+        
+        output.setdefault(market, {}).setdefault(status, {})[opinion] = {
+            "total_quantity": row["total_quantity"],
+            "total_filled_quantity": row["total_filled_quantity"]
+        }
+
+    return output
 
 @frappe.whitelist(allow_guest=True)
 def get_available_quantity(market_id):
