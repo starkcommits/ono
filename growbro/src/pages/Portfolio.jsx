@@ -42,6 +42,7 @@ import {
 } from 'frappe-react-sdk'
 import ActivePosition from '../components/ActivePositions'
 import CompletedTrades from '../components/CompletedTrades'
+import PortfolioActiveValues from '../components/PortfolioActiveValues'
 
 ChartJS.register(
   CategoryScale,
@@ -290,53 +291,7 @@ const Portfolio = () => {
           </div>
 
           {/* Portfolio Stats Card with better contrast */}
-          <div className="flex justify-between bg-white/30 backdrop-blur-lg rounded-3xl p-6 mb-6">
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center justify-between">
-                <span className="text-white font-semibold">
-                  Portfolio Value
-                </span>
-                {/* <div className="flex items-center bg-emerald-500 bg-opacity-25 backdrop-blur-sm px-2.5 py-1 rounded-full">
-                <TrendingUp className="h-4 w-4 text-white mr-1" />
-                <span className="text-sm font-semibold text-white">+12.5%</span>
-              </div> */}
-              </div>
-              <div className="text-3xl font-bold text-white flex items-center gap-4">
-                <div>
-                  ₹
-                  {Object.values(activeHoldings).length > 0
-                    ? Object.values(activeHoldings).reduce((acc, holding) => {
-                        acc =
-                          acc +
-                          parseFloat(holding.yes_price) * holding.yes_quantity +
-                          parseFloat(holding.no_price) * holding.no_quantity
-                        return acc
-                      }, 0)
-                    : 0}
-                </div>
-              </div>
-            </div>
-            <div className="flex flex-col gap-4 items-end">
-              <div className="flex items-center justify-between">
-                <span className="text-white font-semibold">Invested</span>
-                {/* <div className="flex items-center bg-emerald-500 bg-opacity-25 backdrop-blur-sm px-2.5 py-1 rounded-full">
-                <TrendingUp className="h-4 w-4 text-white mr-1" />
-                <span className="text-sm font-semibold text-white">+12.5%</span>
-              </div> */}
-              </div>
-              <div className="text-3xl font-bold text-white flex items-center gap-4">
-                <div>
-                  ₹
-                  {Object.values(activeHoldings).length > 0
-                    ? Object.values(activeHoldings).reduce((acc, holding) => {
-                        acc = acc + parseFloat(holding.invested_amount)
-                        return acc
-                      }, 0)
-                    : 0}
-                </div>
-              </div>
-            </div>
-          </div>
+          <PortfolioActiveValues />
 
           {/* Chart Card */}
           {/* <div className="bg-white rounded-3xl p-4 shadow-sm">

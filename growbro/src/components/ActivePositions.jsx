@@ -136,12 +136,13 @@ const ActivePositions = ({
 
   const handleExitPositions = async () => {
     try {
-      if (position.ACTIVE.YES.total_quantity > 0) {
+      if (position?.ACTIVE?.YES?.total_quantity > 0) {
+        console.log('Yes')
         await createDoc('Orders', {
           market_id: position.market_id,
           quantity:
-            position.ACTIVE.YES.total_quantity -
-            position.ACTIVE.YES.total_filled_quantity,
+            position?.ACTIVE?.YES?.total_quantity -
+            position?.ACTIVE?.YES?.total_filled_quantity,
           opinion_type: 'YES',
           status: 'UNMATCHED',
           user_id: currentUser,
@@ -150,12 +151,14 @@ const ActivePositions = ({
           order_type: 'SELL',
         })
       }
-      if (position.ACTIVE.NO.total_quantity > 0)
+      if (position?.ACTIVE?.NO?.total_quantity > 0) {
+        console.log('No')
+
         await createDoc('Orders', {
           market_id: position.market_id,
           quantity:
-            position.ACTIVE.NO.total_quantity -
-            position.ACTIVE.NO.total_filled_quantity,
+            position?.ACTIVE?.NO?.total_quantity -
+            position?.ACTIVE?.NO?.total_filled_quantity,
           opinion_type: 'NO',
           status: 'UNMATCHED',
           user_id: currentUser,
@@ -163,6 +166,8 @@ const ActivePositions = ({
           filled_quantity: 0,
           order_type: 'SELL',
         })
+      }
+
       toast.success('All positions exited from this market', {
         top: 0,
       })
@@ -243,19 +248,19 @@ const ActivePositions = ({
         <div className="w-full flex items-center justify-between cursor-default">
           <div>
             {'EXITING' in position ? (
-              <div className="flex gap-1">
-                <span className="flex gap-1">
+              <div className="flex gap-1 items-center">
+                <span className="flex gap-1 items-center">
                   <span>
                     <LogOut className="w-4 h-4" />
                   </span>
                   <span>Exited</span>
                 </span>
                 <span>{`${
-                  position.EXITING.NO.total_filled_quantity +
-                  position.EXITING.YES.total_filled_quantity
+                  position?.EXITING?.NO?.total_filled_quantity +
+                  position?.EXITING?.YES?.total_filled_quantity
                 }/${
-                  position.EXITING.YES.total_quantity +
-                  position.EXITING.YES.total_quantity
+                  position?.EXITING?.YES?.total_quantity +
+                  position?.EXITING?.YES?.total_quantity
                 }`}</span>
               </div>
             ) : null}
