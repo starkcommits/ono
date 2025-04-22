@@ -57,9 +57,9 @@ ChartJS.register(
 const Portfolio = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const searchParams = new URLSearchParams(location.search)
+  const [searchParams, setSearchParams] = useSearchParams()
   const tab = searchParams.get('tab')
-  const [activeTab, setActiveTab] = useState(tab)
+  const [activeTab, setActiveTab] = useState(tab || 'active')
   const [tradePrice, setTradePrice] = useState(null)
   const [selectedChoice, setSelectedChoice] = useState(null)
   const [selectedAction, setSelectedAction] = useState(null)
@@ -79,7 +79,18 @@ const Portfolio = () => {
     data: holdingData,
     isLoading: holdingDataLoading,
     mutate: refetchActiveHoldings,
-  } = useFrappeGetCall('rewardapp.engine.get_marketwise_holding')
+  } = useFrappeGetCall(
+    'rewardapp.engine.get_marketwise_holding',
+    activeTab === 'active' ? undefined : null
+  )
+
+  useEffect(() => {
+    const tab = searchParams.get('tab')
+    if (!tab) {
+      searchParams.set('tab', 'active')
+      setSearchParams(searchParams)
+    }
+  }, [])
 
   useEffect(() => {
     if (!holdingDataLoading && holdingData.message.length > 0) {
@@ -117,7 +128,7 @@ const Portfolio = () => {
         ['status', '=', 'EXITED'],
       ],
     },
-    currentUser && tab === 'completed' ? undefined : null
+    currentUser && activeTab === 'completed' ? undefined : null
   )
 
   // console.log('Holdings: ', activeHoldings)

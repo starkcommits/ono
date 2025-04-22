@@ -177,16 +177,16 @@ const ActivePositions = ({
   return (
     <>
       <div key={position.market_id} className="p-4 w-full cursor-pointer">
-        <Badge
-          className="text-xs font-semibold mb-2 hover:underline"
+        <div
           onClick={() => {
             navigate(`/portfolio/${position.market_id}`)
           }}
         >
-          #{position.market_id}
-        </Badge>
+          <Badge className="text-xs font-semibold mb-2 hover:underline">
+            #{position.market_id}
+          </Badge>
 
-        {/* <div className="flex items-center justify-between mb-2">
+          {/* <div className="flex items-center justify-between mb-2">
           <div className="flex gap-2 items-center w-full">
             <div
               className="font-medium text-gray-900"
@@ -214,32 +214,34 @@ const ActivePositions = ({
             </div>
           </div>
         </div> */}
-        <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
-          <span className="flex items-center font-medium text-lg">
-            {position.question}
-          </span>
-        </div>
-        <div className="flex justify-between gap-4 text-sm mb-4">
-          <div>
-            <div className="text-gray-600 font-medium">Invested</div>
-            <div className="font-semibold text-gray-900">
-              ₹{position.invested_amount}
-            </div>
+          <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
+            <span className="flex items-center font-medium text-lg">
+              {position.question}
+            </span>
           </div>
-          <div>
-            <div className="text-gray-600 font-medium">Total Quantity</div>
-            <div className="font-semibold text-gray-900">
-              {position.total_quantity}
+          <div className="flex justify-between gap-4 text-sm mb-4">
+            <div>
+              <div className="text-gray-600 font-medium">Invested</div>
+              <div className="font-semibold text-gray-900">
+                ₹{position.invested_amount}
+              </div>
             </div>
-          </div>
-          <div>
-            <div className="text-gray-600 font-medium">Avg. Price</div>
-            <div className="font-semibold text-gray-900">
-              &#8377;
-              {(position.invested_amount / position.total_quantity).toFixed(2)}
+            <div>
+              <div className="text-gray-600 font-medium">Total Quantity</div>
+              <div className="font-semibold text-gray-900">
+                {position.total_quantity}
+              </div>
             </div>
-          </div>
-          {/* <div>
+            <div>
+              <div className="text-gray-600 font-medium">Avg. Price</div>
+              <div className="font-semibold text-gray-900">
+                &#8377;
+                {(position.invested_amount / position.total_quantity).toFixed(
+                  2
+                )}
+              </div>
+            </div>
+            {/* <div>
             <div className="text-gray-600 font-medium">Current</div>
             <div className="font-semibold text-gray-900">
               ₹
@@ -248,15 +250,20 @@ const ActivePositions = ({
                 : parseFloat(position.market_no_price).toFixed(1)}
             </div>
           </div> */}
+          </div>
         </div>
+
         <div className="w-full flex items-center justify-end cursor-default">
           <Drawer
             className="w-full"
             open={isDrawerOpen}
             onOpenChange={setIsDrawerOpen}
           >
-            <DrawerTrigger>
-              <button className="rounded-lg p-1.5 border flex items-center justify-center">
+            <DrawerTrigger asChild>
+              <button
+                className="rounded-lg p-1.5 border flex items-center justify-center"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <span className="text-xs font-medium">Exit Position</span>
                 <ArrowRight strokeWidth={1.5} className="h-4 w-4" />
               </button>
