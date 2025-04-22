@@ -111,6 +111,7 @@ const ActivePositions = ({
   }
 
   const handleCancelOrder = async (market_id) => {
+    console.log(market_id)
     try {
       call('rewardapp.engine.cancel_order', {
         market_id: market_id,

@@ -570,10 +570,10 @@ const MarketHolding = () => {
               >
                 <DrawerTrigger asChild>
                   <button
-                    className="flex gap-1 items-center justify-center w-[50%] bg-white"
+                    className="flex gap-1 rounded-md p-2 items-center justify-center w-[50%] bg-white"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <span className="text-xs font-medium">Exit</span>
+                    <span className="text-sm font-medium">Exit</span>
                     <ArrowRight strokeWidth={1.5} className="h-4 w-4" />
                   </button>
                 </DrawerTrigger>
