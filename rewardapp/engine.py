@@ -422,30 +422,41 @@ def get_marketwise_holding():
     # """, (user_id,), as_dict=True)
     results = frappe.db.sql("""
         SELECT
-            market_id,
-            opinion_type,
-            status,
-            SUM(quantity) AS total_quantity,
-            SUM(filled_quantity) AS total_filled_quantity
+            h.market_id,
+            h.opinion_type,
+            h.status,
+            SUM(h.quantity) AS total_quantity,
+            SUM(h.filled_quantity) AS total_filled_quantity,
+            m.question,
+            m.yes_price,
+            m.no_price
         FROM
-            `tabHolding`
+            `tabHolding` h
+        JOIN
+            `tabMarket` m ON h.market_id = m.name
         WHERE
-            status IN ('ACTIVE', 'EXITING')
-            AND user_id = %s
+            h.status IN ('ACTIVE', 'EXITING')
+            AND h.user_id = %(user_id)s
         GROUP BY
-            market_id,
-            opinion_type,
-            status
-    """, (user_id,), as_dict=True)
+            h.market_id,
+            h.opinion_type,
+            h.status,
+            m.question,
+            m.yes_price,
+            m.no_price
+    """, {"user_id": user_id}, as_dict=True)
 
-    # Transform to nested dict
     output = {}
     for row in results:
         market = row['market_id']
         status = row['status']
         opinion = row['opinion_type']
-        
-        output.setdefault(market, {}).setdefault(status, {})[opinion] = {
+
+        output.setdefault(market, {
+            "question": row["question"],
+            "yes_price": row["yes_price"],
+            "no_price": row["no_price"]
+        }).setdefault(status, {})[opinion] = {
             "total_quantity": row["total_quantity"],
             "total_filled_quantity": row["total_filled_quantity"]
         }
