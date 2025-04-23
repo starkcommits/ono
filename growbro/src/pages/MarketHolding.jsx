@@ -73,6 +73,7 @@ import ActivePosition from '../components/ActivePositions'
 import CompletedTrades from '../components/CompletedTrades'
 import Portfolio from './Portfolio'
 import PortfolioActiveValues from '../components/PortfolioActiveValues'
+import toast from 'react-hot-toast'
 
 ChartJS.register(
   CategoryScale,
@@ -352,18 +353,23 @@ const MarketHolding = () => {
   //     }
   //   }, [exitedHoldingData])
 
-  //   useFrappeDocTypeEventListener('Holding', (event) => {
-  //     switch (tab) {
-  //       case 'All':
-  //         refetcHoldingData()
-  //       case 'Matched':
-  //         refetchMatchedHoldingData()
-  //       case 'Exiting':
-  //         refetchExitingHoldingData()
-  //       case 'Exited':
-  //         refetchExitedHoldingData()
-  //     }
-  //   })
+  useFrappeDocTypeEventListener('Holding', (event) => {
+    console.log('Hlding event entered')
+    switch (tab) {
+      case 'all':
+        console.log('1')
+        refetcHoldingData()
+      case 'matched':
+        console.log('2')
+        refetchMatchedHoldingData()
+      case 'exiting':
+        console.log('3')
+        refetchExitingHoldingData()
+      case 'exited':
+        console.log('4')
+        refetchExitedHoldingData()
+    }
+  })
 
   //   useFrappeEventListener('order_event', (updatedOrder) => {
   //     console.log('Updated Order:', updatedOrder)
@@ -503,9 +509,11 @@ const MarketHolding = () => {
       // }
       // Remove this stray 'call' line
       // call  <-- This is causing the error
+      toast.success('Order Canceled Successfully.')
       setIsCancelOpen(false)
     } catch (err) {
       console.log(err)
+      toast.error('Error occured in canceling the order.')
     }
   }
 
@@ -585,9 +593,8 @@ const MarketHolding = () => {
                   </DrawerHeader>
                   <div className="w-full flex flex-col gap-4">
                     {exitData?.reduce((acc, value) => {
-                      return acc + value.opinion_type === 'YES'
-                        ? value.quantity
-                        : 0
+                      return (acc +=
+                        value.opinion_type === 'YES' ? value.quantity : 0)
                     }, 0).length > 0 ? (
                       <div className="mb-6 px-10">
                         <div className="flex items-center justify-between mb-2">
@@ -615,9 +622,8 @@ const MarketHolding = () => {
                       </div>
                     ) : null}
                     {exitData?.reduce((acc, value) => {
-                      return acc + value.opinion_type === 'NO'
-                        ? value.quantity
-                        : 0
+                      acc += value.opinion_type === 'NO' ? value.quantity : 0
+                      return acc
                     }, 0).length > 0 ? (
                       <div className="mb-6 px-10">
                         <div className="flex items-center justify-between mb-2">
@@ -842,7 +848,7 @@ const MarketHolding = () => {
                       </div> */}
                       <div>
                         <div className="text-gray-600 font-medium">Current</div>
-                        <div className="font-semibold text-gray-900">
+                        <div className="font-semibold text-gray-900 text-end">
                           &#8377;
                           {position.opinion_type === 'YES'
                             ? position.market_yes_price * position.quantity
@@ -992,11 +998,11 @@ const MarketHolding = () => {
                        {`${position.filled_quantity}/${position.quantity}`}
                      </div>
                    </div> */}
-                        <div>
+                        <div className="">
                           <div className="text-gray-600 font-medium">
                             Current
                           </div>
-                          <div className="font-semibold text-gray-900">
+                          <div className="font-semibold text-gray-900 text-end">
                             &#8377;
                             {position.opinion_type === 'YES'
                               ? position.market_yes_price * position.quantity
@@ -1295,7 +1301,7 @@ const MarketHolding = () => {
                             <div className="text-gray-600 font-medium">
                               Current
                             </div>
-                            <div className="font-semibold text-gray-900">
+                            <div className="font-semibold text-gray-900 text-end">
                               &#8377;
                               {position.opinion_type === 'YES'
                                 ? position.market_yes_price * position.quantity

@@ -6,6 +6,7 @@ import {
   useFrappeGetDoc,
   useFrappeGetDocList,
   useFrappePostCall,
+  useFrappePutCall,
   useFrappeUpdateDoc,
 } from 'frappe-react-sdk'
 import {
@@ -25,6 +26,7 @@ import {
   LogOut,
   LucideMousePointerSquareDashed,
   Plus,
+  TabletSmartphone,
   TrendingDown,
   TrendingUp,
   XCircle,
@@ -62,8 +64,7 @@ const ActivePositions = ({
   const [noPrice, setNoPrice] = useState(position.no_price)
   const { currentUser } = useFrappeAuth()
   const { createDoc } = useFrappeCreateDoc()
-  const { updateDoc } = useFrappeUpdateDoc()
-  const { call } = useFrappePostCall()
+  const { call } = useFrappePostCall('rewardapp.engine.cancel_order')
 
   //   useFrappeEventListener('market_event', (updatedMarket) => {
   //     console.log('Hello')
@@ -113,13 +114,15 @@ const ActivePositions = ({
   const handleCancelOrder = async (market_id) => {
     console.log(market_id)
     try {
-      call('rewardapp.engine.cancel_order', {
+      call({
         market_id: market_id,
         user_id: currentUser,
       })
+      toast.success('Exit Orders Canceled Successfully.')
       setIsCancelOpen(false)
     } catch (err) {
       console.log(err)
+      toast.error('Error occured in canceling the order.')
     }
   }
 
@@ -328,7 +331,7 @@ const ActivePositions = ({
                     className="flex gap-1 items-center justify-center"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <span className="text-xs font-medium">Exit</span>
+                    <span className="text-xs font-medium">EXIT</span>
                     <ArrowRight strokeWidth={1.5} className="h-4 w-4" />
                   </button>
                 </DrawerTrigger>

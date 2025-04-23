@@ -98,7 +98,7 @@ const SignUp = () => {
                   value={formData.first_name}
                   onChange={handleChange}
                   className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                  placeholder="Enter your full name"
+                  placeholder="Enter your first name"
                   required
                 />
               </div>
@@ -115,7 +115,7 @@ const SignUp = () => {
                   value={formData.last_name}
                   onChange={handleChange}
                   className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                  placeholder="Enter your full name"
+                  placeholder="Enter your last name"
                   required
                 />
               </div>
