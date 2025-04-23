@@ -284,12 +284,20 @@ def market(doc, method):
 
             frappe.db.commit()
 
-            frappe.db.sql("""
-                UPDATE `tabHolding`
-                SET status = 'EXITED'
-                WHERE market_id = %s
-                AND status IN ('ACTIVE', 'EXITING')
-            """, (doc.name,))    
+            holdings = frappe.get_all(
+                "Holding",
+                filters={
+                    "market_id": doc.name,
+                    "status": ["in", ["ACTIVE", "EXITING"]]
+                },
+                pluck="name"
+            )
+
+            for holding_name in holdings:
+                holding = frappe.get_doc("Holding", holding_name)
+                holding.status = "EXITED"
+                holding.save()  # Triggers validation + on_update
+                   
             frappe.db.commit()
     except Exception as e:
         frappe.log_error(f"Exception market: {str(e)}")
