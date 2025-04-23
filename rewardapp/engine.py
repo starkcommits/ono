@@ -296,6 +296,7 @@ def market(doc, method):
             for holding_name in holdings:
                 holding = frappe.get_doc("Holding", holding_name)
                 holding.status = "EXITED"
+                holding.remark = "Market Resolved"
                 holding.save()  # Triggers validation + on_update
                    
             frappe.db.commit()

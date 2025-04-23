@@ -21,7 +21,8 @@
   "filled_quantity",
   "returns",
   "market_status",
-  "closing_time"
+  "closing_time",
+  "remark"
  ],
  "fields": [
   {
@@ -117,12 +118,17 @@
    "fieldname": "closing_time",
    "fieldtype": "Read Only",
    "label": "Closing Time"
+  },
+  {
+   "fieldname": "remark",
+   "fieldtype": "Data",
+   "label": "Remark"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-04-23 12:07:55.729128",
+ "modified": "2025-04-23 14:56:52.289506",
  "modified_by": "Administrator",
  "module": "Reward App",
  "name": "Holding",
