@@ -127,6 +127,10 @@ def trades():
                         holding_doc.filled_quantity += trade_quantity
                         trade_quantity = 0
 
+                    # Reward logic
+                    reward = quantity * (holding_doc.exit_price - holding_doc.price)
+                    holding_doc.returns += reward
+
                     holding_doc.save(ignore_permissions=True)
 
                     # Lock and fetch wallet
@@ -143,8 +147,6 @@ def trades():
                     wallet_name = wallet_data[0]["name"]
                     available_balance = wallet_data[0]["balance"]
 
-                    # Reward logic
-                    reward = quantity * (holding_doc.exit_price - holding_doc.price)
                     new_balance = available_balance + reward
 
                     # Update wallet
@@ -272,6 +274,15 @@ def market(doc, method):
                         SET balance = %s
                         WHERE name = %s
                     """, (new_balance, wallet_name))
+            
+            frappe.db.sql("""
+                UPDATE `tabHolding`
+                SET returns = returns + ((quantity - filled_quantity) * 10)
+                WHERE market_id = %s
+                AND opinion_type = %s
+            """, (doc.market_id, doc.end_result))
+
+            frappe.db.commit()
 
             frappe.db.sql("""
                 UPDATE `tabHolding`
@@ -594,3 +605,21 @@ def total_exit(market_id,user_id):
         output["no_price"] = row["no_price"]
         
     return output
+
+@frappe.whitelist(allow_guest=True)
+def total_returns(user_id):
+    result = frappe.db.sql("""
+        SELECT
+            market_id,
+            question,
+            SUM(quantity * price) AS total_invested,
+            SUM(returns) AS total_returns
+        FROM
+            `tabHolding`
+        WHERE
+            user_id = %s
+        GROUP BY
+            market_id
+    """, (user_id,), as_dict=True)
+
+    return result
