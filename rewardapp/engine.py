@@ -549,7 +549,7 @@ def cancel_order(market_id, user_id):
 
     orders = frappe.get_all("Orders", 
         filters={
-            "market_id": market_event,
+            "market_id": market_id,
             "user_id": user_id,
             "order_type": "SELL"
         },
