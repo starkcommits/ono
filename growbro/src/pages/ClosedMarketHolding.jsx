@@ -67,6 +67,7 @@ import {
   useFrappeDocTypeEventListener,
   useFrappeEventListener,
   useFrappeGetCall,
+  useFrappeGetDoc,
   useFrappeGetDocList,
   useFrappeUpdateDoc,
 } from 'frappe-react-sdk'
@@ -122,6 +123,11 @@ const ClosedMarketHolding = () => {
 
   const [yesPrice, setYesPrice] = useState(5)
   const [noPrice, setNoPrice] = useState(5)
+
+  const { data: marketData, isLoading: marketLoading } = useFrappeGetDoc(
+    'Market',
+    id
+  )
 
   const {
     data: closedHoldingData,
@@ -264,6 +270,10 @@ const ClosedMarketHolding = () => {
               <ArrowLeft className="h-6 w-6" />
             </button>
             <h1 className="text-2xl font-bold text-white">Portfolio</h1>
+          </div>
+
+          <div className="text-white text-2xl p-4 text-center font-medium">
+            {marketData?.question}
           </div>
 
           {/* Portfolio Stats Card with better contrast */}
