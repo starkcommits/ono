@@ -1,8 +1,13 @@
-import { useFrappeGetDocList } from 'frappe-react-sdk'
+import {
+  useFrappeAuth,
+  useFrappeGetCall,
+  useFrappeGetDocList,
+} from 'frappe-react-sdk'
 import { AlertCircle, CheckCircle } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 
 const CompletedTrades = ({ trade }) => {
+  console.log('Completed Trades: ', completedTrades)
   const formatDate = (dateString) => {
     const date = new Date(dateString)
     return date.toLocaleDateString('en-US', {

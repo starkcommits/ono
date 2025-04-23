@@ -85,6 +85,15 @@ const Portfolio = () => {
     activeTab === 'active' ? undefined : null
   )
 
+  const { data: completedTradesData, isLoading: completedTradesDataLoading } =
+    useFrappeGetCall(
+      'rewardapp.engine.total_returns',
+      {
+        user_id: currentUser,
+      },
+      currentUser && activeTab === 'completed' ? undefined : null
+    )
+
   console.log(holdingData)
 
   useEffect(() => {
@@ -111,46 +120,20 @@ const Portfolio = () => {
     }
   }, [holdingData])
 
-  const {
-    data: completedTradesData,
-    isLoading: completedTradesLoading,
-    mutate: refetchCompletedTrades,
-  } = useFrappeGetDocList(
-    'Holding',
-    {
-      fields: [
-        'name',
-        'market_id',
-        'price',
-        'quantity',
-        'opinion_type',
-        'status',
-        'exit_price',
-        'market_yes_price',
-        'market_no_price',
-        'closing_time',
-        'order_id',
-        'filled_quantity',
-      ],
-      filters: [
-        ['owner', '=', currentUser],
-        ['status', '=', 'EXITED'],
-      ],
-    },
-    currentUser && activeTab === 'completed' ? undefined : null
-  )
-
   // console.log('Holdings: ', activeHoldings)
 
-  useEffect(() => {
-    if (!completedTradesLoading && completedTradesData?.length > 0) {
-      const completedTradesMap = completedTradesData.reduce((acc, trade) => {
-        acc[trade.name] = trade // ✅ Store as { "market_name": marketData }
-        return acc
-      }, {})
-      setCompletedTrades(completedTradesMap)
-    }
-  }, [completedTradesData])
+  console.log('Completeddddd: ', completedTradesData)
+
+  // useEffect(() => {
+  //   if (!completedTradesDataLoading && completedTradesData === undefined) return
+  //   if (!completedTradesDataLoading && completedTradesData?.length > 0) {
+  //     const completedTradesMap = completedTradesData.reduce((acc, trade) => {
+  //       acc[trade.name] = trade // ✅ Store as { "market_name": marketData }
+  //       return acc
+  //     }, {})
+  //     setCompletedTrades(completedTradesMap)
+  //   }
+  // }, [completedTradesData])
 
   console.log('Active Holdings: ', activeHoldings)
 
