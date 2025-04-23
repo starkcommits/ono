@@ -249,7 +249,7 @@ def market(doc, method):
 
             for row in result:
                 
-                if row["opinion_type"] == doc.winning_side:
+                if row["opinion_type"] == doc.end_result:
                     user_id = row["user_id"]
                     qty = row["total_quantity"] or 0
                     wallet_data = frappe.db.sql("""
