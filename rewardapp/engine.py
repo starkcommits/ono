@@ -539,12 +539,47 @@ def holding(doc,method):
 
 @frappe.whitelist(allow_guest=True)
 def cancel_order(market_id, user_id):
-    frappe.db.sql("""
-        UPDATE `tabOrders`
-        SET status = 'CANCELED'
-        WHERE market_id = %s
-        AND user_id = %s
-        AND order_type = 'SELL'
-    """, (market_id, user_id))
+    # frappe.db.sql("""
+    #     UPDATE `tabOrders`
+    #     SET status = 'CANCELED'
+    #     WHERE market_id = %s
+    #     AND user_id = %s
+    #     AND order_type = 'SELL'
+    # """, (market_id, user_id))
+
+    orders = frappe.get_all("Orders", 
+        filters={
+            "market_id": market_event,
+            "user_id": user_id,
+            "order_type": "SELL"
+        },
+        pluck="name"
+    )
+
+    for order_name in orders:
+        order = frappe.get_doc("Orders", order_name)
+        order.status = "CANCELED"
+        order.save()  # Triggers on_update
 
     frappe.db.commit()
+
+@frappe.whitelist(ignore_permissions=True)
+def total_exit(market_id,user_id):
+    result = frappe.db.sql(
+        """
+        SELECT 
+            opinion_type,
+            SUM(quantity - filled_quantity) AS total_quantity
+        FROM 
+            `tabHolding`
+        WHERE 
+            market_id = %s
+            AND user_id = %s
+            AND status = 'ACTIVE'
+        GROUP BY 
+            opinion_type
+        """,
+        (market_id, user_id),
+        as_dict=True
+    )
+    return result
