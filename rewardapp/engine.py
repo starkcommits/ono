@@ -280,7 +280,7 @@ def market(doc, method):
                 SET returns = returns + ((quantity - filled_quantity) * 10)
                 WHERE market_id = %s
                 AND opinion_type = %s
-            """, (doc.market_id, doc.end_result))
+            """, (doc.name, doc.end_result))
 
             frappe.db.commit()
 
