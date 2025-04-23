@@ -563,7 +563,7 @@ def cancel_order(market_id, user_id):
 
     frappe.db.commit()
 
-@frappe.whitelist(ignore_permissions=True)
+@frappe.whitelist(allow_guest=True)
 def total_exit(market_id,user_id):
     result = frappe.db.sql(
         """
