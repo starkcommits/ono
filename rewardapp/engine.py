@@ -200,7 +200,7 @@ def market(doc, method):
             # For debugging
             frappe.logger().info(f"Sending payload to market engine: {payload}")
             
-            url = "http://127.0.0.1:8086/markets/"
+            url = "http://94.136.187.188:8086/markets/"
             response = requests.post(url, json=payload)
             
             if response.status_code != 201:
@@ -228,8 +228,7 @@ def market(doc, method):
             """, (doc.name,))
 
             frappe.db.commit()
-
-            url=f"http://127.0.0.1:8086/markets/{doc.name}/close"
+            url=f"http://94.136.187.188:8086/markets/{doc.name}/close"
             response = requests.post(url)
                 
             if response.status_code != 200:
@@ -539,7 +538,6 @@ def get_available_quantity(market_id):
     return res if res else {}
 
 def holding(doc,method):
-
     if doc.status == "EXITING" and not doc.order_id:
         order = frappe.get_doc({
             "doctype":"Orders",
@@ -571,7 +569,8 @@ def cancel_order(market_id, user_id):
         filters={
             "market_id": market_id,
             "user_id": user_id,
-            "order_type": "SELL"
+            "order_type": "SELL",
+            "status": ["!=", "MATCHED"]
         },
         pluck="name"
     )
