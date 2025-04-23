@@ -284,7 +284,8 @@ const EventDetails = () => {
                             .split('@')[0]
                             .charAt(0)
                             .toUpperCase() +
-                            match?.first_user_id.split('@')[0].slice(1)}
+                            match?.first_user_id.split('@')[0].slice(1, 10) +
+                            '...'}
                         </span>
                       </div>
 
@@ -326,11 +327,28 @@ const EventDetails = () => {
                           </div>
                         </div>
                         <span className="text-sm font-medium">
-                          {match?.second_user_id
-                            .split('@')[0]
-                            .charAt(0)
-                            .toUpperCase() +
-                            match?.second_user_id.split('@')[0].slice(1)}
+                          {match?.second_user_id.split('@')[0].length > 10
+                            ? match?.second_user_id
+                                .split('@')[0]
+                                .charAt(0)
+                                .toUpperCase() +
+                              match?.second_user_id
+                                .split('@')[0]
+                                .slice(
+                                  1,
+                                  match?.second_user_id.split('@')[0].length
+                                ) +
+                              '...'
+                            : match?.second_user_id
+                                .split('@')[0]
+                                .charAt(0)
+                                .toUpperCase() +
+                              match?.second_user_id
+                                .split('@')[0]
+                                .slice(
+                                  1,
+                                  match?.second_user_id.split('@')[0].length
+                                )}
                         </span>
                       </div>
                     </div>
