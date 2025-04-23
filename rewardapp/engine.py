@@ -618,6 +618,7 @@ def total_returns(user_id):
             `tabHolding`
         WHERE
             user_id = %s
+        AND market_status = 'RESOLVED'
         GROUP BY
             market_id
     """, (user_id,), as_dict=True)
