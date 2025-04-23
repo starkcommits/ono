@@ -63,6 +63,7 @@ import {
 import TradeSheet from '../components/TradeSheet'
 import {
   useFrappeAuth,
+  useFrappeCreateDoc,
   useFrappeDocTypeEventListener,
   useFrappeEventListener,
   useFrappeGetCall,
@@ -73,6 +74,8 @@ import ActivePosition from '../components/ActivePositions'
 import CompletedTrades from '../components/CompletedTrades'
 import Portfolio from './Portfolio'
 import PortfolioActiveValues from '../components/PortfolioActiveValues'
+import { Slider } from '@/components/ui/slider'
+
 import toast from 'react-hot-toast'
 
 ChartJS.register(
@@ -86,7 +89,7 @@ ChartJS.register(
   Legend
 )
 
-const MarketHolding = () => {
+const ActiveMarketHolding = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const location = useLocation()
@@ -114,6 +117,35 @@ const MarketHolding = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
   const [completedTrades, setCompletedTrades] = useState({})
+
+  const { createDoc } = useFrappeCreateDoc()
+
+  const [yesPrice, setYesPrice] = useState(5)
+  const [noPrice, setNoPrice] = useState(5)
+
+  const { data: totalExitData, isLoading: totalExitLoading } = useFrappeGetCall(
+    'rewardapp.engine.total_exit',
+    {
+      market_id: id,
+      user_id: currentUser,
+    },
+    currentUser ? undefined : null
+  )
+
+  useEffect(() => {
+    if (!totalExitLoading && totalExitData === undefined) return
+
+    if (!totalExitLoading && Object.keys(totalExitData?.message)?.length > 0) {
+      if (totalExitData?.message?.yes_price) {
+        setYesPrice(totalExitData?.message?.yes_price)
+      }
+      if (totalExitData?.message?.no_price) {
+        setNoPrice(totalExitData?.message?.no_price)
+      }
+    }
+  }, [totalExitData])
+
+  console.log('DDDDDDDDD', totalExitData)
 
   const {
     data: exitData,
@@ -454,13 +486,11 @@ const MarketHolding = () => {
 
   const handleExitPositions = async () => {
     try {
-      if (position?.ACTIVE?.YES?.total_quantity > 0) {
+      if (totalExitData?.message?.YES > 0) {
         console.log('Yes')
         await createDoc('Orders', {
-          market_id: position.market_id,
-          quantity:
-            position?.ACTIVE?.YES?.total_quantity -
-            position?.ACTIVE?.YES?.total_filled_quantity,
+          market_id: id,
+          quantity: totalExitData?.message?.YES,
           opinion_type: 'YES',
           status: 'UNMATCHED',
           user_id: currentUser,
@@ -469,14 +499,12 @@ const MarketHolding = () => {
           order_type: 'SELL',
         })
       }
-      if (position?.ACTIVE?.NO?.total_quantity > 0) {
-        console.log('No')
 
+      if (totalExitData?.message?.NO > 0) {
+        console.log('Yes')
         await createDoc('Orders', {
-          market_id: position.market_id,
-          quantity:
-            position?.ACTIVE?.NO?.total_quantity -
-            position?.ACTIVE?.NO?.total_filled_quantity,
+          market_id: id,
+          quantity: totalExitData?.message?.NO,
           opinion_type: 'NO',
           status: 'UNMATCHED',
           user_id: currentUser,
@@ -492,6 +520,7 @@ const MarketHolding = () => {
       setIsDrawerOpen(false)
     } catch (err) {
       console.log(err)
+      toast.error('Error occured in exiting the positions frm the market.')
       setIsDrawerOpen(false)
     }
   }
@@ -502,13 +531,6 @@ const MarketHolding = () => {
       await updateDoc('Orders', order_id, {
         status: 'CANCELED',
       })
-      //  else {
-      //   await updateDoc('Orders', order.name, {
-      //     status: 'CANCELED',
-      //   })
-      // }
-      // Remove this stray 'call' line
-      // call  <-- This is causing the error
       toast.success('Order Canceled Successfully.')
       setIsCancelOpen(false)
     } catch (err) {
@@ -571,99 +593,99 @@ const MarketHolding = () => {
               >
                 Invest
               </Button>
-              <Drawer
-                className="w-full"
-                open={isDrawerOpen}
-                onOpenChange={setIsDrawerOpen}
-              >
-                <DrawerTrigger asChild>
-                  <button
-                    className="flex gap-1 rounded-md p-2 items-center justify-center w-[50%] bg-white"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <span className="text-sm font-medium">Exit</span>
-                    <ArrowRight strokeWidth={1.5} className="h-4 w-4" />
-                  </button>
-                </DrawerTrigger>
-                <DrawerContent className="mx-auto w-full">
-                  <DrawerHeader className="flex items-center justify-center">
-                    <DrawerTitle className="w-full flex justify-center">
-                      Exit all positions in this particular market
-                    </DrawerTitle>
-                  </DrawerHeader>
-                  <div className="w-full flex flex-col gap-4">
-                    {exitData?.reduce((acc, value) => {
-                      return (acc +=
-                        value.opinion_type === 'YES' ? value.quantity : 0)
-                    }, 0).length > 0 ? (
-                      <div className="mb-6 px-10">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-lg font-medium">Yes Price</span>
-                          <div className="flex items-center">
+              {totalExitData?.message?.NO + totalExitData?.message?.YES > 0 ? (
+                <Drawer
+                  className="w-full"
+                  open={isDrawerOpen}
+                  onOpenChange={setIsDrawerOpen}
+                >
+                  <DrawerTrigger asChild>
+                    <button
+                      className="flex gap-1 rounded-md p-2 items-center justify-center w-[50%] bg-white"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <span className="text-sm font-medium">Exit</span>
+                      <ArrowRight strokeWidth={1.5} className="h-4 w-4" />
+                    </button>
+                  </DrawerTrigger>
+                  <DrawerContent className="mx-auto w-full">
+                    <DrawerHeader className="flex items-center justify-center">
+                      <DrawerTitle className="w-full flex justify-center">
+                        Exit all positions in this particular market
+                      </DrawerTitle>
+                    </DrawerHeader>
+                    <div className="w-full flex flex-col gap-4">
+                      {totalExitData?.message?.YES > 0 ? (
+                        <div className="mb-6 px-10">
+                          <div className="flex items-center justify-between mb-2">
                             <span className="text-lg font-medium">
-                              ₹{yesPrice}
+                              Yes Price
                             </span>
+                            <div className="flex items-center">
+                              <span className="text-lg font-medium">
+                                ₹{yesPrice}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex justify-between mt-2">
+                            <Slider
+                              defaultValue={[1]}
+                              max={9.5}
+                              min={0.5}
+                              step={0.5}
+                              value={[yesPrice]}
+                              className={``}
+                              onValueChange={(values) => {
+                                setYesPrice(values[0])
+                              }}
+                            />
                           </div>
                         </div>
-
-                        <div className="flex justify-between mt-2">
-                          <Slider
-                            defaultValue={[1]}
-                            max={9.5}
-                            min={0.5}
-                            step={0.5}
-                            value={[yesPrice]}
-                            className={``}
-                            onValueChange={(values) => {
-                              setYesPrice(values[0])
-                            }}
-                          />
-                        </div>
-                      </div>
-                    ) : null}
-                    {exitData?.reduce((acc, value) => {
-                      acc += value.opinion_type === 'NO' ? value.quantity : 0
-                      return acc
-                    }, 0).length > 0 ? (
-                      <div className="mb-6 px-10">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-lg font-medium">No Price</span>
-                          <div className="flex items-center">
+                      ) : null}
+                      {totalExitData?.message?.NO > 0 ? (
+                        <div className="mb-6 px-10">
+                          <div className="flex items-center justify-between mb-2">
                             <span className="text-lg font-medium">
-                              ₹{noPrice}
+                              No Price
                             </span>
+                            <div className="flex items-center">
+                              <span className="text-lg font-medium">
+                                ₹{noPrice}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex justify-between mt-2">
+                            <Slider
+                              defaultValue={[1]}
+                              max={9.5}
+                              min={0.5}
+                              step={0.5}
+                              value={[noPrice]}
+                              className={``}
+                              onValueChange={(values) => {
+                                setNoPrice(values[0])
+                              }}
+                            />
                           </div>
                         </div>
-
-                        <div className="flex justify-between mt-2">
-                          <Slider
-                            defaultValue={[1]}
-                            max={9.5}
-                            min={0.5}
-                            step={0.5}
-                            value={[noPrice]}
-                            className={``}
-                            onValueChange={(values) => {
-                              setNoPrice(values[0])
-                            }}
-                          />
-                        </div>
-                      </div>
-                    ) : null}
-                  </div>
-                  <DrawerFooter className="w-full px-10 text-xs">
-                    <Button onClick={handleExitPositions}>
-                      Exit All Positions
-                    </Button>
-
-                    <DrawerClose className=" w-full">
-                      <Button variant="outline" className="w-full">
-                        Cancel
+                      ) : null}
+                    </div>
+                    <DrawerFooter className="w-full px-10 text-xs">
+                      <Button onClick={handleExitPositions}>
+                        Exit All Positions
                       </Button>
-                    </DrawerClose>
-                  </DrawerFooter>
-                </DrawerContent>
-              </Drawer>
+
+                      <DrawerClose className=" w-full">
+                        <Button variant="outline" className="w-full">
+                          Cancel
+                        </Button>
+                      </DrawerClose>
+                    </DrawerFooter>
+                  </DrawerContent>
+                </Drawer>
+              ) : null}
             </div>
           </div>
 
@@ -1393,4 +1415,4 @@ const MarketHolding = () => {
   )
 }
 
-export default MarketHolding
+export default ActiveMarketHolding

@@ -181,7 +181,7 @@ const ActivePositions = ({
       <div key={position.market_id} className="p-4 w-full cursor-pointer">
         <div
           onClick={() => {
-            navigate(`/portfolio/${position.market_id}`)
+            navigate(`/portfolio/active/${position.market_id}`)
           }}
         >
           <Badge className="text-xs font-semibold mb-2 hover:underline">

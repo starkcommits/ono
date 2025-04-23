@@ -89,7 +89,7 @@ ChartJS.register(
   Legend
 )
 
-const MarketHolding = () => {
+const ClosedMarketHolding = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const location = useLocation()
@@ -122,59 +122,6 @@ const MarketHolding = () => {
 
   const [yesPrice, setYesPrice] = useState(5)
   const [noPrice, setNoPrice] = useState(5)
-
-  const { data: totalExitData, isLoading: totalExitLoading } = useFrappeGetCall(
-    'rewardapp.engine.total_exit',
-    {
-      market_id: id,
-      user_id: currentUser,
-    },
-    currentUser ? undefined : null
-  )
-
-  useEffect(() => {
-    if (!totalExitLoading && totalExitData === undefined) return
-
-    if (!totalExitLoading && Object.keys(totalExitData?.message)?.length > 0) {
-      if (totalExitData?.message?.yes_price) {
-        setYesPrice(totalExitData?.message?.yes_price)
-      }
-      if (totalExitData?.message?.no_price) {
-        setNoPrice(totalExitData?.message?.no_price)
-      }
-    }
-  }, [totalExitData])
-
-  console.log('DDDDDDDDD', totalExitData)
-
-  const {
-    data: exitData,
-    isLoading: exitDataLoading,
-    mutate: refetchExitData,
-  } = useFrappeGetDocList(
-    'Holding',
-    {
-      fields: [
-        'name',
-        'market_id',
-        'order_id',
-        'price',
-        'quantity',
-        'opinion_type',
-        'status',
-        'exit_price',
-        'market_yes_price',
-        'market_no_price',
-        'creation',
-        'filled_quantity',
-      ],
-      filters: [
-        ['user_id', '=', currentUser],
-        ['market_id', '=', id],
-      ],
-    },
-    currentUser ? undefined : null
-  )
 
   const {
     data: holdingData,
@@ -304,14 +251,6 @@ const MarketHolding = () => {
   console.log('Matched Holdings:', activeMatchedHoldings)
   console.log('Exiting Holdings:', activeExitingHoldings)
   console.log('Exited Holdings:', activeExitedHoldings)
-
-  useEffect(() => {
-    const tab = searchParams.get('tab')
-    if (!tab) {
-      searchParams.set('tab', 'all')
-      setSearchParams(searchParams)
-    }
-  }, [])
 
   //   useEffect(() => {
   //     // Reset relevant state based on which tab we're switching to
@@ -1422,4 +1361,4 @@ const MarketHolding = () => {
   )
 }
 
-export default MarketHolding
+export default ClosedMarketHolding
