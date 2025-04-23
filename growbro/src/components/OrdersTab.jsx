@@ -54,6 +54,7 @@ ChartJS.register(
 )
 
 const OrdersTab = () => {
+  const { id } = useParams()
   const location = useLocation()
   const searchParams = new URLSearchParams(location.search)
   const [activeOrders, setActiveOrders] = useState({})
@@ -86,6 +87,7 @@ const OrdersTab = () => {
       filters: [
         ['status', 'not in', ['SETTLED']],
         ['owner', '=', currentUser],
+        ['market_id', '=', id],
       ],
       orderBy: {
         field: 'creation',

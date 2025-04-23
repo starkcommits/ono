@@ -22,7 +22,7 @@ const CompletedTrades = ({ trade }) => {
   return (
     <div
       key={trade.question}
-      className="p-4 flex flex-col gap-2"
+      className="p-4 flex flex-col gap-2 cursor-pointer"
       onClick={() => {
         navigate(`/portfolio/closed/${trade?.market_id}`)
       }}
@@ -41,24 +41,24 @@ const CompletedTrades = ({ trade }) => {
         <div>
           <div className="text-gray-600 font-medium">Amount Invested</div>
           <div className="font-semibold text-gray-900">
-            ₹{trade?.total_invested}
+            ₹{trade?.total_invested.toFixed(2)}
           </div>
         </div>
         <div className="grid place-content-end">
           <div className="text-gray-600 font-medium">Returns</div>
           {trade?.total_returns > 0 && (
             <div className={`font-bold text-green-700`}>
-              +₹{trade.total_returns}
+              +₹{trade.total_returns.toFixed(2)}
             </div>
           )}{' '}
           {trade?.total_returns === 0 && (
             <div className={`font-bold text-neutral-700`}>
-              ₹{trade?.total_returns}
+              ₹{trade?.total_returns.toFixed(2)}
             </div>
           )}{' '}
           {trade?.total_returns < 0 && (
             <div className={`font-bold text-red-700`}>
-              ₹{trade.total_returns}
+              ₹{trade.total_returns.toFixed(2)}
             </div>
           )}{' '}
           {/* <div
