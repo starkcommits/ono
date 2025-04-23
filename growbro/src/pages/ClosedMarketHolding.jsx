@@ -290,10 +290,12 @@ const ClosedMarketHolding = () => {
                 <div className="text-3xl font-bold text-white flex items-center gap-4">
                   <div>
                     ₹
-                    {closedHoldingData?.reduce(
-                      (acc, value) => acc + value.quantity * value.price,
-                      0
-                    )}
+                    {closedHoldingData
+                      ?.reduce(
+                        (acc, value) => acc + value.quantity * value.price,
+                        0
+                      )
+                      .toFixed(2)}
                   </div>
                 </div>
               </div>
@@ -312,18 +314,16 @@ const ClosedMarketHolding = () => {
                   ) >= 0 ? (
                     <div className="text-green-600">
                       +₹
-                      {closedHoldingData?.reduce(
-                        (acc, value) => acc + value.returns,
-                        0
-                      )}
+                      {closedHoldingData
+                        ?.reduce((acc, value) => acc + value.returns, 0)
+                        .toFixed(2)}
                     </div>
                   ) : (
                     <div className="text-red-600">
                       ₹
-                      {closedHoldingData?.reduce(
-                        (acc, value) => acc + value.returns,
-                        0
-                      )}
+                      {closedHoldingData
+                        ?.reduce((acc, value) => acc + value.returns, 0)
+                        .toFixed(2)}
                     </div>
                   )}
                 </div>
@@ -571,7 +571,7 @@ const ClosedMarketHolding = () => {
                   <div>
                     <div className="text-gray-600 font-medium">Invested</div>
                     <div className="font-semibold text-gray-900">
-                      ₹{position.price * position.quantity}
+                      ₹{(position.price * position.quantity).toFixed(2)}
                     </div>
                   </div>
                   {/* <div>
@@ -587,12 +587,12 @@ const ClosedMarketHolding = () => {
                     {position.returns >= 0 ? (
                       <div className="font-semibold text-green-600 text-end">
                         +&#8377;
-                        {position.returns}
+                        {position.returns.toFixed(2)}
                       </div>
                     ) : (
                       <div className="font-semibold text-red-600 text-end">
                         &#8377;
-                        {position.returns}
+                        {position.returns.toFixed(2)}
                       </div>
                     )}
                   </div>

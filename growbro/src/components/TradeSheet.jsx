@@ -1,7 +1,12 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { Book, ChevronDown, ChevronUp, Minus, Plus } from 'lucide-react'
 import { useParams } from 'react-router-dom'
-import { useFrappeCreateDoc, useFrappeUpdateDoc } from 'frappe-react-sdk'
+import {
+  useFrappeAuth,
+  useFrappeCreateDoc,
+  useFrappeGetDoc,
+  useFrappeUpdateDoc,
+} from 'frappe-react-sdk'
 import { Slider } from '@/components/ui/slider'
 import OrderBook from './OrderBook'
 import toast from 'react-hot-toast'
@@ -22,6 +27,15 @@ const TradeSheet = ({
   const { createDoc, isLoading: createDocLoading } = useFrappeCreateDoc()
   const { updateDoc } = useFrappeUpdateDoc()
   const { id } = useParams()
+  const { currentUser } = useFrappeAuth()
+
+  const { data: userData, isLoading: userDataLoading } = useFrappeGetDoc(
+    'User Wallet',
+    currentUser,
+    currentUser ? undefined : null
+  )
+
+  console.log('User', userData)
 
   const x = useMotionValue(0)
   const background = useTransform(x, [0, 200], ['#e0e0e0', '#4ade80']) // gray to green
@@ -334,8 +348,8 @@ const TradeSheet = ({
           <OrderBook marketId={marketId} />
 
           <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-            <span>Available Balance: ₹{availableBalance}</span>
-            <span>Commission: {(commission * 100).toFixed(1)}%</span>
+            <span>Available Balance: ₹{userData?.balance}</span>
+            {/* <span>Commission: {(commission * 100).toFixed(1)}%</span> */}
           </div>
 
           {tradeAction === 'BUY' && (

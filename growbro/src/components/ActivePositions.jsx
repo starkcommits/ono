@@ -226,7 +226,7 @@ const ActivePositions = ({
               <div>
                 <div className="text-gray-600 font-medium">Invested</div>
                 <div className="font-semibold text-gray-900">
-                  ₹{position.total_invested}
+                  ₹{position.total_invested.toFixed(2)}
                 </div>
               </div>
               <div>

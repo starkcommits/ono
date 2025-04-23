@@ -266,7 +266,7 @@ const EventDetails = () => {
                   <div key={match?.name} className="px-4 py-3">
                     <div className="flex items-center justify-between">
                       {/* User 1 */}
-                      <div className="flex flex-col items-center">
+                      <div className="flex flex-col items-center w-[30%]">
                         <div className="flex gap-2 items-center">
                           <div className="h-8 w-8 rounded-full bg-blue-200 flex justify-center items-center">
                             {/* <img
@@ -280,13 +280,17 @@ const EventDetails = () => {
                           </span> */}
                         </div>
                         <span className="text-sm font-medium">
-                          {match?.first_user_id}
+                          {match?.first_user_id
+                            .split('@')[0]
+                            .charAt(0)
+                            .toUpperCase() +
+                            match?.first_user_id.split('@')[0].slice(1)}
                         </span>
                       </div>
 
                       {/* Connection indicator */}
                       {/* <div className="flex-1 mx-2 border-t border-dashed border-gray-300"></div> */}
-                      <div className="h-8 mb-4 w-full bg-gray-100 rounded-xl overflow-hidden">
+                      <div className="h-8 mb-4 bg-gray-100 rounded-xl overflow-hidden w-[40%]">
                         <div className="flex h-full">
                           <div
                             className="bg-blue-500 h-full flex items-center justify-center text-xs text-white font-bold p-4"
@@ -308,7 +312,7 @@ const EventDetails = () => {
                       </div>
 
                       {/* User 2 */}
-                      <div className="flex flex-col items-center">
+                      <div className="flex flex-col items-center  w-[30%]">
                         <div className="flex items-center gap-2">
                           {/* <span className="text-sm font-medium text-red-600">
                             &#8377;{match?.no_price}
@@ -321,8 +325,12 @@ const EventDetails = () => {
                             {match?.second_user_id.slice(0, 1).toUpperCase()}
                           </div>
                         </div>
-                        <span className="text-sm font-medium mr-2">
-                          {match?.second_user_id}
+                        <span className="text-sm font-medium">
+                          {match?.second_user_id
+                            .split('@')[0]
+                            .charAt(0)
+                            .toUpperCase() +
+                            match?.second_user_id.split('@')[0].slice(1)}
                         </span>
                       </div>
                     </div>

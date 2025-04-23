@@ -31,6 +31,7 @@ const PortfolioActiveValues = () => {
       filters: [
         ['user_id', '=', currentUser],
         ['market_id', '=', id],
+        ['status', 'in', 'ACTIVE'],
       ],
     },
     currentUser && id ? undefined : null
@@ -58,7 +59,7 @@ const PortfolioActiveValues = () => {
       ],
       filters: [
         ['user_id', '=', currentUser],
-        ['status', 'in', ['ACTIVE', 'EXITING']],
+        ['status', 'in', 'ACTIVE'],
       ],
     },
     !id ? undefined : null
@@ -66,14 +67,10 @@ const PortfolioActiveValues = () => {
 
   if (id)
     return (
-      <div className="flex justify-between">
+      <div className="flex justify-between ">
         <div className="flex flex-col gap-2 items-start">
           <div className="flex items-center justify-between">
             <span className="text-white font-semibold">Invested</span>
-            {/* <div className="flex items-center bg-emerald-500 bg-opacity-25 backdrop-blur-sm px-2.5 py-1 rounded-full">
-        <TrendingUp className="h-4 w-4 text-white mr-1" />
-        <span className="text-sm font-semibold text-white">+12.5%</span>
-      </div> */}
           </div>
           <div className="text-3xl font-bold text-white flex items-center gap-4">
             <div>

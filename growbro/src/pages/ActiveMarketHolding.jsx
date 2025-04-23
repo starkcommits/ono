@@ -306,10 +306,7 @@ const ActiveMarketHolding = () => {
       : null
   )
 
-  console.log('Active Holdings:', activeHoldings)
-  console.log('Matched Holdings:', activeMatchedHoldings)
-  console.log('Exiting Holdings:', activeExitingHoldings)
-  console.log('Exited Holdings:', activeExitedHoldings)
+  console.log('Exited ::', exitedHoldingData)
 
   useEffect(() => {
     const tab = searchParams.get('tab')
@@ -865,6 +862,12 @@ const ActiveMarketHolding = () => {
                               </DialogContent>
                             </Dialog>
                           )}
+                        {position.filled_quantity === position.quantity &&
+                          position.status === 'EXITED' && (
+                            <span className="bg-emerald-100 text-emerald-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium flex gap-1">
+                              {position.status}
+                            </span>
+                          )}
                       </div>
                     </div>
                     <div className="flex justify-between gap-4 text-sm mb-4">
@@ -873,7 +876,7 @@ const ActiveMarketHolding = () => {
                           Invested
                         </div>
                         <div className="font-semibold text-gray-900">
-                          ₹{position.price * position.quantity}
+                          ₹{(position.price * position.quantity).toFixed(2)}
                         </div>
                       </div>
                       {/* <div>
@@ -889,8 +892,12 @@ const ActiveMarketHolding = () => {
                         <div className="font-semibold text-gray-900 text-end">
                           &#8377;
                           {position.opinion_type === 'YES'
-                            ? position.market_yes_price * position.quantity
-                            : position.market_no_price * position.quantity}
+                            ? (
+                                position.market_yes_price * position.quantity
+                              ).toFixed(2)
+                            : (
+                                position.market_no_price * position.quantity
+                              ).toFixed(2)}
                         </div>
                       </div>
                       {/* <div>
@@ -1025,7 +1032,7 @@ const ActiveMarketHolding = () => {
                             Invested
                           </div>
                           <div className="font-semibold text-gray-900">
-                            ₹{position.price * position.quantity}
+                            ₹{(position.price * position.quantity).toFixed(2)}
                           </div>
                         </div>
                         {/* <div>
@@ -1043,8 +1050,12 @@ const ActiveMarketHolding = () => {
                           <div className="font-semibold text-gray-900 text-end">
                             &#8377;
                             {position.opinion_type === 'YES'
-                              ? position.market_yes_price * position.quantity
-                              : position.market_no_price * position.quantity}
+                              ? (
+                                  position.market_yes_price * position.quantity
+                                ).toFixed(2)
+                              : (
+                                  position.market_no_price * position.quantity
+                                ).toFixed(2)}
                           </div>
                         </div>
                         {/* <div>
@@ -1188,7 +1199,7 @@ const ActiveMarketHolding = () => {
                               Invested
                             </div>
                             <div className="font-semibold text-gray-900">
-                              ₹{position.price * position.quantity}
+                              ₹{(position.price * position.quantity).toFixed(2)}
                             </div>
                           </div>
                           {/* <div>
@@ -1206,8 +1217,13 @@ const ActiveMarketHolding = () => {
                             <div className="font-semibold text-gray-900 text-end">
                               &#8377;
                               {position.opinion_type === 'YES'
-                                ? position.market_yes_price * position.quantity
-                                : position.market_no_price * position.quantity}
+                                ? (
+                                    position.market_yes_price *
+                                    position.quantity
+                                  ).toFixed(2)
+                                : (
+                                    position.market_no_price * position.quantity
+                                  ).toFixed(2)}
                             </div>
                           </div>
                           {/* <div>
@@ -1276,7 +1292,7 @@ const ActiveMarketHolding = () => {
             </TabsContent>
             <TabsContent value="exited">
               <div className="divide-y divide-gray-100">
-                {exitingHoldingData?.length > 0
+                {exitedHoldingData?.length > 0
                   ? exitedHoldingData?.map((position) => (
                       <div
                         key={position.name}
@@ -1324,7 +1340,7 @@ const ActiveMarketHolding = () => {
                               Invested
                             </div>
                             <div className="font-semibold text-gray-900">
-                              ₹{position.price * position.quantity}
+                              ₹{(position.price * position.quantity).toFixed(2)}
                             </div>
                           </div>
                           {/* <div>
@@ -1342,8 +1358,13 @@ const ActiveMarketHolding = () => {
                             <div className="font-semibold text-gray-900 text-end">
                               &#8377;
                               {position.opinion_type === 'YES'
-                                ? position.market_yes_price * position.quantity
-                                : position.market_no_price * position.quantity}
+                                ? (
+                                    position.market_yes_price *
+                                    position.quantity
+                                  ).toFixed(2)
+                                : (
+                                    position.market_no_price * position.quantity
+                                  ).toFixed(2)}
                             </div>
                           </div>
                           {/* <div>
