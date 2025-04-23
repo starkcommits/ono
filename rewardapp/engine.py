@@ -288,7 +288,7 @@ def market(doc, method):
                 "Holding",
                 filters={
                     "market_id": doc.name,
-                    "status": ["in", ["ACTIVE", "EXITING"]]
+                    "status": ["in", ["ACTIVE", "EXITING","EXITED"]]
                 },
                 pluck="name"
             )
