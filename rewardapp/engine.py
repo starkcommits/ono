@@ -568,20 +568,29 @@ def total_exit(market_id,user_id):
     result = frappe.db.sql(
         """
         SELECT 
-            opinion_type,
-            SUM(quantity - filled_quantity) AS total_quantity
+            h.opinion_type,
+            SUM(h.quantity - h.filled_quantity) AS total_quantity,
+            m.yes_price,
+            m.no_price
         FROM 
-            `tabHolding`
+            `tabHolding` h
+        JOIN 
+            `tabMarket` m ON h.market_id = m.name
         WHERE 
-            market_id = %s
-            AND user_id = %s
-            AND status = 'ACTIVE'
+            h.market_id = %s
+            AND h.user_id = %s
+            AND h.status = 'ACTIVE'
         GROUP BY 
-            opinion_type
+            h.opinion_type, m.yes_price, m.no_price
         """,
         (market_id, user_id),
         as_dict=True
     )
-    # Transform to dict with opinion_type as key
-    output = {row["opinion_type"]: row["total_quantity"] for row in result}
+    output = {"YES": 0, "NO": 0}
+    for row in result:
+        output[row["opinion_type"]] = row["total_quantity"]
+        # Store prices just once (they'll be same across rows)
+        output["yes_price"] = row["yes_price"]
+        output["no_price"] = row["no_price"]
+        
     return output
