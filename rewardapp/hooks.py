@@ -163,7 +163,7 @@ api = {
         "rewardapp.wallet.update_wallet",
         "rewardapp.engine.update_order",
         "rewardapp.engine.trades",
-        "rewardapp.engine.close_market",
+        "rewardapp.engine.total_exit",
         "rewardapp.engine.resolve_market",
         "rewardapp.engine.unmatched_orders",
         "rewardapp.engine.market_settlements",
