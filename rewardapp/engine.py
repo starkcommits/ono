@@ -283,21 +283,12 @@ def market(doc, method):
 
             frappe.db.commit()
 
-            holdings = frappe.get_all(
-                "Holding",
-                filters={
-                    "market_id": doc.name,
-                    "status": ["in", ["ACTIVE", "EXITING","EXITED"]]
-                },
-                pluck="name"
-            )
-
-            for holding_name in holdings:
-                holding = frappe.get_doc("Holding", holding_name)
-                holding.status = "EXITED"
-                holding.remark = "Market Resolved"
-                holding.save()  # Triggers validation + on_update
-                   
+            frappe.db.sql("""
+                UPDATE `tabHolding`
+                SET status = 'EXITED'
+                WHERE market_id = %s
+                AND status IN ('ACTIVE', 'EXITING')
+            """, (doc.name,))    
             frappe.db.commit()
     except Exception as e:
         frappe.log_error(f"Exception market: {str(e)}")
@@ -618,19 +609,17 @@ def total_exit(market_id,user_id):
 def total_returns(user_id):
     result = frappe.db.sql("""
         SELECT
-            h.market_id,
-            m.question,
-            SUM((h.quantity - h.filled_quantity) * h.price) AS total_invested,
-            SUM(h.returns) AS total_returns
+            market_id,
+            question,
+            SUM(quantity * price) AS total_invested,
+            SUM(returns) AS total_returns
         FROM
-            `tabHolding` h
-        JOIN
-            `tabMarket` m ON h.market_id = m.name
+            `tabHolding`
         WHERE
-            h.user_id = %s
-            AND m.status = 'RESOLVED'
+            user_id = %s
+        AND market_status = 'RESOLVED'
         GROUP BY
-            h.market_id, m.question
+            market_id
     """, (user_id,), as_dict=True)
 
     return result

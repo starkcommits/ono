@@ -119,6 +119,7 @@ const ActivePositions = ({
         user_id: currentUser,
       })
       toast.success('Exit Orders Canceled Successfully.')
+      refetchActiveHoldings()
       setIsCancelOpen(false)
     } catch (err) {
       console.log(err)
@@ -159,7 +160,7 @@ const ActivePositions = ({
           order_type: 'SELL',
         })
       }
-
+      refetchActiveHoldings()
       toast.success('All positions exited from this market', {
         top: 0,
       })
@@ -226,7 +227,7 @@ const ActivePositions = ({
               <div>
                 <div className="text-gray-600 font-medium">Invested</div>
                 <div className="font-semibold text-gray-900">
-                  ₹{position.total_invested.toFixed(2)}
+                  ₹{position.total_invested?.toFixed(2)}
                 </div>
               </div>
               <div>

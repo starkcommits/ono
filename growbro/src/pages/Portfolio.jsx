@@ -105,21 +105,21 @@ const Portfolio = () => {
     }
   }, [])
 
-  useEffect(() => {
-    if (!holdingDataLoading && holdingData.message === undefined) {
-      return
-    }
-    if (!holdingDataLoading && Object.values(holdingData.message).length > 0) {
-      const holdingDataMap = Object.values(holdingData.message).reduce(
-        (acc, holding) => {
-          acc[holding.name] = holding // ✅ Store as { "market_name": marketData }
-          return acc
-        },
-        {}
-      )
-      setActiveHoldings(holdingDataMap)
-    }
-  }, [holdingData])
+  // useEffect(() => {
+  //   if (!holdingDataLoading && holdingData === undefined) {
+  //     return
+  //   }
+  //   if (!holdingDataLoading && Object.values(holdingData).length > 0) {
+  //     const holdingDataMap = Object.values(holdingData).reduce(
+  //       (acc, holding) => {
+  //         acc[holding.name] = holding // ✅ Store as { "market_name": marketData }
+  //         return acc
+  //       },
+  //       {}
+  //     )
+  //     setActiveHoldings(holdingDataMap)
+  //   }
+  // }, [holdingData])
 
   // console.log('Holdings: ', activeHoldings)
 
@@ -371,19 +371,23 @@ const Portfolio = () => {
 
           {/* Trades List */}
           <div className="divide-y divide-gray-100">
-            {activeTab === 'active'
-              ? Object.values(activeHoldings).map((position) => (
-                  <ActivePosition
-                    key={position.market_id}
-                    position={position}
-                    setActiveHoldings={setActiveHoldings}
-                    refetchActiveHoldings={refetchActiveHoldings}
-                    handleTradeClick={handleTradeClick}
-                  />
+            {activeTab === 'active' && holdingData
+              ? Object.values(holdingData.message)?.map((position) => (
+                  <div key={position?.market_id}>
+                    <ActivePosition
+                      position={position}
+                      setActiveHoldings={setActiveHoldings}
+                      refetchActiveHoldings={refetchActiveHoldings}
+                      handleTradeClick={handleTradeClick}
+                    />
+                  </div>
                 ))
-              : completedTradesData?.message?.map((trade) => (
+              : null}
+            {activeTab === 'completed'
+              ? completedTradesData?.message?.map((trade) => (
                   <CompletedTrades key={trade.market_id} trade={trade} />
-                ))}
+                ))
+              : null}
           </div>
         </div>
       </div>

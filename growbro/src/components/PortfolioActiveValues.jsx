@@ -5,8 +5,6 @@ import { useParams } from 'react-router-dom'
 const PortfolioActiveValues = () => {
   const { currentUser } = useFrappeAuth()
   const { id } = useParams()
-
-  console.log(id)
   const {
     data: holdingData,
     isLoading: holdingDataLoading,
@@ -62,7 +60,7 @@ const PortfolioActiveValues = () => {
         ['status', 'in', 'ACTIVE'],
       ],
     },
-    !id ? undefined : null
+    currentUser && !id ? undefined : null
   )
 
   if (id)

@@ -129,7 +129,11 @@ const ActiveMarketHolding = () => {
     id
   )
 
-  const { data: totalExitData, isLoading: totalExitLoading } = useFrappeGetCall(
+  const {
+    data: totalExitData,
+    isLoading: totalExitLoading,
+    mutate: refetchTotalExit,
+  } = useFrappeGetCall(
     'rewardapp.engine.total_exit',
     {
       market_id: id,
@@ -394,15 +398,21 @@ const ActiveMarketHolding = () => {
       case 'all':
         console.log('1')
         refetcHoldingData()
+        refetchTotalExit()
       case 'matched':
         console.log('2')
         refetchMatchedHoldingData()
+        refetchTotalExit()
+
       case 'exiting':
         console.log('3')
         refetchExitingHoldingData()
+        refetchTotalExit()
+
       case 'exited':
         console.log('4')
         refetchExitedHoldingData()
+        refetchTotalExit()
     }
   })
 
@@ -516,7 +526,8 @@ const ActiveMarketHolding = () => {
           order_type: 'SELL',
         })
       }
-
+      refetchTotalExit()
+      refetcHoldingData()
       toast.success('All positions exited from this market', {
         top: 0,
       })
