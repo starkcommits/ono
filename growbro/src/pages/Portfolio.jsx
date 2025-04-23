@@ -95,6 +95,7 @@ const Portfolio = () => {
     )
 
   console.log(holdingData)
+  console.log('completedTradesData', completedTradesData)
 
   useEffect(() => {
     const tab = searchParams.get('tab')
@@ -121,8 +122,6 @@ const Portfolio = () => {
   }, [holdingData])
 
   // console.log('Holdings: ', activeHoldings)
-
-  console.log('Completeddddd: ', completedTradesData)
 
   // useEffect(() => {
   //   if (!completedTradesDataLoading && completedTradesData === undefined) return
@@ -277,8 +276,45 @@ const Portfolio = () => {
           </div>
 
           {/* Portfolio Stats Card with better contrast */}
-          <PortfolioActiveValues />
-
+          {activeTab === 'active' ? <PortfolioActiveValues /> : null}
+          {activeTab === 'completed' && !completedTradesDataLoading ? (
+            <div className="flex justify-between">
+              <div className="flex flex-col gap-2 items-start">
+                <div className="flex items-center justify-between">
+                  <span className="text-white font-semibold">Invested</span>
+                  {/* <div className="flex items-center bg-emerald-500 bg-opacity-25 backdrop-blur-sm px-2.5 py-1 rounded-full">
+        <TrendingUp className="h-4 w-4 text-white mr-1" />
+        <span className="text-sm font-semibold text-white">+12.5%</span>
+      </div> */}
+                </div>
+                <div className="text-3xl font-bold text-white flex items-center gap-4">
+                  <div>
+                    ₹
+                    {completedTradesData?.message?.reduce((acc, value) => {
+                      return acc + value.total_invested
+                    }, 0)}
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-col gap-2 items-end">
+                <div className="flex items-center justify-between">
+                  <span className="text-white font-semibold">Returns</span>
+                  {/* <div className="flex items-center bg-emerald-500 bg-opacity-25 backdrop-blur-sm px-2.5 py-1 rounded-full">
+        <TrendingUp className="h-4 w-4 text-white mr-1" />
+        <span className="text-sm font-semibold text-white">+12.5%</span>
+      </div> */}
+                </div>
+                <div className="text-3xl font-bold text-white flex items-center gap-4">
+                  <div>
+                    ₹
+                    {completedTradesData?.message?.reduce((acc, value) => {
+                      return acc + value.total_returns
+                    }, 0)}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : null}
           {/* Chart Card */}
           {/* <div className="bg-white rounded-3xl p-4 shadow-sm">
             <div className="h-40">
@@ -322,7 +358,7 @@ const Portfolio = () => {
           </div>
 
           {/* Filter Bar */}
-          <div className="p-4 flex items-center justify-between border-b border-gray-100">
+          {/* <div className="p-4 flex items-center justify-between border-b border-gray-100">
             <div className="text-sm font-medium text-gray-700">
               {activeTab === 'active'
                 ? `${Object.values(activeHoldings).length} Active Position`
@@ -331,7 +367,7 @@ const Portfolio = () => {
             <button className="p-2 hover:bg-gray-50 rounded-lg transition-colors">
               <Filter className="h-4 w-4 text-gray-600" />
             </button>
-          </div>
+          </div> */}
 
           {/* Trades List */}
           <div className="divide-y divide-gray-100">
@@ -345,8 +381,8 @@ const Portfolio = () => {
                     handleTradeClick={handleTradeClick}
                   />
                 ))
-              : Object.values(completedTrades).map((trade) => (
-                  <CompletedTrades key={trade.name} trade={trade} />
+              : completedTradesData?.message?.map((trade) => (
+                  <CompletedTrades key={trade.market_id} trade={trade} />
                 ))}
           </div>
         </div>

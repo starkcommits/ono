@@ -5,9 +5,11 @@ import {
 } from 'frappe-react-sdk'
 import { AlertCircle, CheckCircle } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
+import TradeSheet from './TradeSheet'
+import { useNavigate } from 'react-router-dom'
 
 const CompletedTrades = ({ trade }) => {
-  console.log('Completed Trades: ', completedTrades)
+  const navigate = useNavigate()
   const formatDate = (dateString) => {
     const date = new Date(dateString)
     return date.toLocaleDateString('en-US', {
@@ -18,36 +20,45 @@ const CompletedTrades = ({ trade }) => {
     })
   }
   return (
-    <div key={trade.question} className="p-4">
+    <div
+      key={trade.question}
+      className="p-4 flex flex-col gap-2"
+      onClick={() => {
+        navigate(`/portfolio/closed/${trade?.market_id}`)
+      }}
+    >
       <div className="flex items-center justify-between mb-2">
         <h3 className="font-medium text-gray-900">{trade.market_id}</h3>
         <div className="bg-green-200 text-green-600 rounded-xl px-3">
           {trade.status}
         </div>
       </div>
-      <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
+      <div>{trade?.question}</div>
+      {/* <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
         <span>{formatDate(trade.closing_time)}</span>
-      </div>
+      </div> */}
       <div className="grid grid-cols-2 gap-4 text-sm">
         <div>
           <div className="text-gray-600 font-medium">Amount Invested</div>
-          <div className="font-semibold text-gray-900">₹{trade?.price}</div>
+          <div className="font-semibold text-gray-900">
+            ₹{trade?.total_invested}
+          </div>
         </div>
         <div className="grid place-content-end">
           <div className="text-gray-600 font-medium">Returns</div>
-          {trade.exit_price - trade.price > 0 && (
+          {trade?.total_returns > 0 && (
             <div className={`font-bold text-green-700`}>
-              +₹{(trade.exit_price - trade.price) * 10}
+              +₹{trade.total_returns}
             </div>
           )}{' '}
-          {trade.exit_price - trade.price === 0 && (
+          {trade?.total_returns === 0 && (
             <div className={`font-bold text-neutral-700`}>
-              ₹{(trade.exit_price - trade.price) * 10}
+              ₹{trade?.total_returns}
             </div>
           )}{' '}
-          {trade.exit_price - trade.price < 0 && (
+          {trade?.total_returns < 0 && (
             <div className={`font-bold text-red-700`}>
-              ₹{(trade.exit_price - trade.price) * 10}
+              ₹{trade.total_returns}
             </div>
           )}{' '}
           {/* <div

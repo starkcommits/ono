@@ -124,9 +124,9 @@ const ClosedMarketHolding = () => {
   const [noPrice, setNoPrice] = useState(5)
 
   const {
-    data: holdingData,
-    isLoading: holdingDataLoading,
-    mutate: refetcHoldingData,
+    data: closedHoldingData,
+    isLoading: closedHoldingDataLoading,
+    mutate: refetchClosedHoldingData,
   } = useFrappeGetDocList(
     'Holding',
     {
@@ -141,205 +141,23 @@ const ClosedMarketHolding = () => {
         'exit_price',
         'market_yes_price',
         'market_no_price',
+        'returns',
         'creation',
         'filled_quantity',
       ],
       filters: [
         ['user_id', '=', currentUser],
         ['market_id', '=', id],
+        ['market_status', '=', 'RESOLVED'],
       ],
     },
-    currentUser && tab === 'all'
-      ? ['HoldingList', 'all', tab, currentUser, id]
-      : null
+    currentUser ? undefined : null
   )
 
-  const {
-    data: matchedHoldingData,
-    isLoading: matchedHoldingDataLoading,
-    mutate: refetchMatchedHoldingData,
-  } = useFrappeGetDocList(
-    'Holding',
-    {
-      fields: [
-        'name',
-        'market_id',
-        'price',
-        'quantity',
-        'opinion_type',
-        'status',
-        'exit_price',
-        'market_yes_price',
-        'market_no_price',
-        'creation',
-        'filled_quantity',
-      ],
-      filters: [
-        ['user_id', '=', currentUser],
-        ['market_id', '=', id],
-        ['status', '=', 'ACTIVE'],
-      ],
-    },
-    currentUser && tab === 'matched'
-      ? ['HoldingList', 'matched', tab, currentUser, id]
-      : null
-  )
-
-  const {
-    data: exitingHoldingData,
-    isLoading: exitingHoldingDataLoading,
-    mutate: refetchExitingHoldingData,
-  } = useFrappeGetDocList(
-    'Holding',
-    {
-      fields: [
-        'name',
-        'market_id',
-        'order_id',
-        'price',
-        'quantity',
-        'opinion_type',
-        'status',
-        'exit_price',
-        'market_yes_price',
-        'market_no_price',
-        'creation',
-        'filled_quantity',
-      ],
-      filters: [
-        ['user_id', '=', currentUser],
-        ['market_id', '=', id],
-        ['status', '=', 'EXITING'],
-      ],
-    },
-    currentUser && tab === 'exiting'
-      ? ['HoldingList', 'exiting', tab, currentUser, id]
-      : null
-  )
-  const {
-    data: exitedHoldingData,
-    isLoading: exitedHoldingDataLoading,
-    mutate: refetchExitedHoldingData,
-  } = useFrappeGetDocList(
-    'Holding',
-    {
-      fields: [
-        'name',
-        'market_id',
-        'price',
-        'quantity',
-        'opinion_type',
-        'status',
-        'exit_price',
-        'market_yes_price',
-        'market_no_price',
-        'creation',
-        'filled_quantity',
-      ],
-      filters: [
-        ['user_id', '=', currentUser],
-        ['market_id', '=', id],
-        ['status', '=', 'EXITED'],
-      ],
-    },
-    currentUser && tab === 'exited'
-      ? ['HoldingList', 'exited', tab, currentUser, id]
-      : null
-  )
-
-  console.log('Active Holdings:', activeHoldings)
-  console.log('Matched Holdings:', activeMatchedHoldings)
-  console.log('Exiting Holdings:', activeExitingHoldings)
-  console.log('Exited Holdings:', activeExitedHoldings)
-
-  //   useEffect(() => {
-  //     // Reset relevant state based on which tab we're switching to
-  //     if (activeTab === 'All') {
-  //       refetcHoldingData()
-  //       // Optionally clear other states
-  //       setActiveMatchedHoldings({})
-  //       setActiveExitingHoldings({})
-  //       setActiveExitedHoldings({})
-  //     } else if (activeTab === 'Matched') {
-  //       refetchMatchedHoldingData()
-  //       // Optionally clear other states
-  //       setActiveHoldings({})
-  //       setActiveExitingHoldings({})
-  //       setActiveExitedHoldings({})
-  //     } else if (activeTab === 'Exiting') {
-  //       refetchExitingHoldingData()
-  //       // Optionally clear other states
-  //       setActiveHoldings({})
-  //       setActiveMatchedHoldings({})
-  //       setActiveExitedHoldings({})
-  //     } else if (activeTab === 'Exited') {
-  //       refetchExitedHoldingData()
-  //       // Optionally clear other states
-  //       setActiveHoldings({})
-  //       setActiveMatchedHoldings({})
-  //       setActiveExitingHoldings({})
-  //     }
-  //   }, [tab]) // This will run whenever activeTab changes
-
-  //   useEffect(() => {
-  //     if (!holdingDataLoading && holdingData?.length > 0) {
-  //       const holdingDataMap = holdingData.reduce((acc, holding) => {
-  //         acc[holding.name] = holding // ✅ Store as { "market_name": marketData }
-  //         return acc
-  //       }, {})
-  //       setActiveHoldings(holdingDataMap)
-  //     }
-  //   }, [holdingData])
-
-  //   useEffect(() => {
-  //     if (!matchedHoldingDataLoading && matchedHoldingData?.length > 0) {
-  //       const holdingDataMap = matchedHoldingData.reduce((acc, holding) => {
-  //         acc[holding.name] = holding // ✅ Store as { "market_name": marketData }
-  //         return acc
-  //       }, {})
-  //       setActiveMatchedHoldings(holdingDataMap)
-  //     }
-  //   }, [matchedHoldingData])
-
-  //   useEffect(() => {
-  //     if (!exitingHoldingDataLoading)
-  //       if (exitingHoldingData?.length === 0) {
-  //         setActiveExitingHoldings({})
-  //       } else {
-  //         const holdingDataMap = exitingHoldingData?.reduce((acc, holding) => {
-  //           acc[holding.name] = holding // ✅ Store as { "market_name": marketData }
-  //           return acc
-  //         }, {})
-  //         setActiveExitingHoldings(holdingDataMap)
-  //       }
-  //   }, [exitingHoldingData])
-
-  //   useEffect(() => {
-  //     if (!exitedHoldingDataLoading && exitedHoldingData?.length > 0) {
-  //       const holdingDataMap = exitedHoldingData.reduce((acc, holding) => {
-  //         acc[holding.name] = holding // ✅ Store as { "market_name": marketData }
-  //         return acc
-  //       }, {})
-  //       setActiveExitedHoldings(holdingDataMap)
-  //     }
-  //   }, [exitedHoldingData])
+  console.log('Closed Holding Data: ', closedHoldingData)
 
   useFrappeDocTypeEventListener('Holding', (event) => {
-    console.log('Hlding event entered')
-    switch (tab) {
-      case 'all':
-        console.log('1')
-        refetcHoldingData()
-      case 'matched':
-        console.log('2')
-        refetchMatchedHoldingData()
-      case 'exiting':
-        console.log('3')
-        refetchExitingHoldingData()
-      case 'exited':
-        console.log('4')
-        refetchExitedHoldingData()
-    }
+    console.log('Holding event entered')
   })
 
   //   useFrappeEventListener('order_event', (updatedOrder) => {
@@ -423,68 +241,6 @@ const ClosedMarketHolding = () => {
     setSelectedAction(null)
   }
 
-  const handleExitPositions = async () => {
-    try {
-      if (totalExitData?.message?.YES > 0) {
-        console.log('Yes')
-        await createDoc('Orders', {
-          market_id: id,
-          quantity: totalExitData?.message?.YES,
-          opinion_type: 'YES',
-          status: 'UNMATCHED',
-          user_id: currentUser,
-          amount: yesPrice,
-          filled_quantity: 0,
-          order_type: 'SELL',
-        })
-      }
-
-      if (totalExitData?.message?.NO > 0) {
-        console.log('Yes')
-        await createDoc('Orders', {
-          market_id: id,
-          quantity: totalExitData?.message?.NO,
-          opinion_type: 'NO',
-          status: 'UNMATCHED',
-          user_id: currentUser,
-          amount: noPrice,
-          filled_quantity: 0,
-          order_type: 'SELL',
-        })
-      }
-
-      toast.success('All positions exited from this market', {
-        top: 0,
-      })
-      setIsDrawerOpen(false)
-    } catch (err) {
-      console.log(err)
-      toast.error('Error occured in exiting the positions frm the market.')
-      setIsDrawerOpen(false)
-    }
-  }
-
-  const handleCancelOrder = async (order_id) => {
-    try {
-      console.log('Order ID:', order_id)
-      await updateDoc('Orders', order_id, {
-        status: 'CANCELED',
-      })
-      //  else {
-      //   await updateDoc('Orders', order.name, {
-      //     status: 'CANCELED',
-      //   })
-      // }
-      // Remove this stray 'call' line
-      // call  <-- This is causing the error
-      toast.success('Order Canceled Successfully.')
-      setIsCancelOpen(false)
-    } catch (err) {
-      console.log(err)
-      toast.error('Error occured in canceling the order.')
-    }
-  }
-
   const formatDate = (dateString) => {
     const date = new Date(dateString)
     return date.toLocaleDateString('en-US', {
@@ -495,22 +251,6 @@ const ClosedMarketHolding = () => {
     })
   }
 
-  const invested = Object.values(activeOrders).reduce((acc, order) => {
-    return acc + parseFloat(order.amount * order.quantity)
-  }, 0)
-
-  const currentValue = Object.values(activeOrders).reduce((acc, order) => {
-    return (
-      acc +
-      parseFloat(
-        (order.opinion_type === 'YES' ? order.yes_price : order.no_price) *
-          order.quantity
-      )
-    )
-  }, 0)
-
-  const profitLoss = currentValue - invested
-
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
       {/* Header Section with improved contrast */}
@@ -518,7 +258,7 @@ const ClosedMarketHolding = () => {
         <div className="px-6">
           <div className="flex items-center gap-4 mb-6">
             <button
-              onClick={() => navigate(`/portfolio`)}
+              onClick={() => navigate(`/portfolio?tab=completed`)}
               className="p-2 -ml-2 text-white/90 hover:bg-white/10 rounded-full transition-colors"
             >
               <ArrowLeft className="h-6 w-6" />
@@ -528,8 +268,58 @@ const ClosedMarketHolding = () => {
 
           {/* Portfolio Stats Card with better contrast */}
           <div className="bg-white/30 backdrop-blur-lg rounded-3xl p-6 mb-6">
-            <PortfolioActiveValues />
-            <div className="flex gap-2 items-center justify-between mt-4">
+            <div className="flex justify-between">
+              <div className="flex flex-col gap-2 items-start">
+                <div className="flex items-center justify-between">
+                  <span className="text-white font-semibold">Invested</span>
+                  {/* <div className="flex items-center bg-emerald-500 bg-opacity-25 backdrop-blur-sm px-2.5 py-1 rounded-full">
+        <TrendingUp className="h-4 w-4 text-white mr-1" />
+        <span className="text-sm font-semibold text-white">+12.5%</span>
+      </div> */}
+                </div>
+                <div className="text-3xl font-bold text-white flex items-center gap-4">
+                  <div>
+                    ₹
+                    {closedHoldingData?.reduce(
+                      (acc, value) => acc + value.quantity * value.price,
+                      0
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-col gap-2 items-end">
+                <div className="flex items-center justify-between">
+                  <span className="text-white font-semibold">Returns</span>
+                  {/* <div className="flex items-center bg-emerald-500 bg-opacity-25 backdrop-blur-sm px-2.5 py-1 rounded-full">
+        <TrendingUp className="h-4 w-4 text-white mr-1" />
+        <span className="text-sm font-semibold text-white">+12.5%</span>
+      </div> */}
+                </div>
+                <div className="text-3xl font-bold text-white flex items-center gap-4">
+                  {closedHoldingData?.reduce(
+                    (acc, value) => acc + value.returns,
+                    0
+                  ) >= 0 ? (
+                    <div className="text-green-600">
+                      +₹
+                      {closedHoldingData?.reduce(
+                        (acc, value) => acc + value.returns,
+                        0
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-red-600">
+                      ₹
+                      {closedHoldingData?.reduce(
+                        (acc, value) => acc + value.returns,
+                        0
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            {/* <div className="flex gap-2 items-center justify-between mt-4">
               <Button
                 className="w-[50%] bg-white"
                 variant="primary"
@@ -632,7 +422,7 @@ const ClosedMarketHolding = () => {
                   </DrawerContent>
                 </Drawer>
               ) : null}
-            </div>
+            </div> */}
           </div>
 
           {/* Chart Card */}
@@ -677,136 +467,104 @@ const ClosedMarketHolding = () => {
             </button>
           </div> */}
 
-          <Tabs
-            className=""
-            value={activeTab}
-            onValueChange={(val) => {
-              setActiveTab(val)
-              searchParams.set('tab', val)
-              setSearchParams(searchParams)
-            }}
-          >
-            <TabsList className="w-full">
-              <TabsTrigger value="all" className="w-[50%]">
-                All
-              </TabsTrigger>
-              <TabsTrigger value="matched" className="w-[50%]">
-                Matched
-              </TabsTrigger>
-              <TabsTrigger value="exiting" className="w-[50%]">
-                Exiting
-              </TabsTrigger>
-              <TabsTrigger value="exited" className="w-[50%]">
-                Exited
-              </TabsTrigger>
-            </TabsList>
-            <TabsContent value="all">
-              <div className="divide-y divide-gray-100">
-                {holdingData?.map((position) => (
-                  <div
-                    key={position.name}
-                    className="p-4 w-full cursor-pointer"
-                  >
-                    <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
-                      <span className="flex items-center justify-between w-full">
-                        {position.opinion_type === 'YES' && (
-                          <span className="rounded-full text-blue-600 font-semibold text-md ">
-                            {position.opinion_type}
-                          </span>
-                        )}
-                        {position.opinion_type === 'NO' && (
-                          <span className="rounded-full text-red-600 font-semibold text-md">
-                            {position.opinion_type}
-                          </span>
-                        )}
+          <div className="divide-y divide-gray-100">
+            {closedHoldingData?.map((position) => (
+              <div key={position.name} className="p-4 w-full cursor-pointer">
+                <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
+                  <span className="flex items-center justify-between w-full">
+                    {position.opinion_type === 'YES' && (
+                      <span className="rounded-full text-blue-600 font-semibold text-md ">
+                        {position.opinion_type}
                       </span>
-                      <div className="flex gap-1">
-                        {position.status === 'ACTIVE' && (
-                          <span
-                            className="bg-yellow-100 text-yellow-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium flex gap-1 "
-                            onClick={() =>
-                              handleTradeClick(
-                                position.opinion_type === 'YES'
-                                  ? position.market_yes_price
-                                  : position.market_no_price,
-                                position.opinion_type,
-                                'SELL',
-                                position.market_id,
-                                position.quantity,
-                                position.name
-                              )
-                            }
-                          >
-                            {position.status}
-                            <Separator
-                              orientation="vertical"
-                              className="w-0.5"
-                            />
-                            <LogOut className="w-4 h-4" />
-                          </span>
-                        )}
+                    )}
+                    {position.opinion_type === 'NO' && (
+                      <span className="rounded-full text-red-600 font-semibold text-md">
+                        {position.opinion_type}
+                      </span>
+                    )}
+                  </span>
+                  <div className="flex gap-1">
+                    {position.status === 'ACTIVE' && (
+                      <span
+                        className="bg-yellow-100 text-yellow-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium flex gap-1 "
+                        onClick={() =>
+                          handleTradeClick(
+                            position.opinion_type === 'YES'
+                              ? position.market_yes_price
+                              : position.market_no_price,
+                            position.opinion_type,
+                            'SELL',
+                            position.market_id,
+                            position.quantity,
+                            position.name
+                          )
+                        }
+                      >
+                        {position.status}
+                        <Separator orientation="vertical" className="w-0.5" />
+                        <LogOut className="w-4 h-4" />
+                      </span>
+                    )}
 
-                        {position.filled_quantity >= 0 &&
-                          position.filled_quantity < position.quantity &&
-                          position.status === 'EXITING' && (
-                            <Dialog
-                              open={isCancelOpen}
-                              onOpenChange={setIsCancelOpen}
-                            >
-                              <DialogTrigger className="w-full">
-                                <span className="bg-emerald-100 text-emerald-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium flex gap-1">
-                                  {position.status}
-                                  <Separator
-                                    orientation="vertical"
-                                    className="w-0.5 h-full"
-                                  />
+                    {position.filled_quantity >= 0 &&
+                      position.filled_quantity < position.quantity &&
+                      position.status === 'EXITING' && (
+                        <Dialog
+                          open={isCancelOpen}
+                          onOpenChange={setIsCancelOpen}
+                        >
+                          <DialogTrigger className="w-full">
+                            <span className="bg-emerald-100 text-emerald-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium flex gap-1">
+                              {position.status}
+                              <Separator
+                                orientation="vertical"
+                                className="w-0.5 h-full"
+                              />
 
-                                  <CircleX className="w-4 h-4" />
-                                </span>
-                              </DialogTrigger>
-                              <DialogContent className="">
-                                <DialogHeader>
-                                  <DialogTitle>
-                                    Are you absolutely sure?
-                                  </DialogTitle>
-                                  <DialogDescription>
-                                    This action cannot be undone. This will
-                                    permanently delete your account and remove
-                                    your data from our servers.
-                                  </DialogDescription>
-                                </DialogHeader>
-                                <DialogFooter>
-                                  <Button
-                                    className="bg-white hover:bg-white/90"
-                                    variant="outline"
-                                    onClick={() => setIsCancelOpen(false)}
-                                  >
-                                    Cancel
-                                  </Button>
-                                  <Button
-                                    className="bg-neutral-900 text-white hover:text-neutral-800 hover:bg-neutral-800/40"
-                                    onClick={() =>
-                                      handleCancelOrder(position.order_id)
-                                    }
-                                  >
-                                    Submit
-                                  </Button>
-                                </DialogFooter>
-                              </DialogContent>
-                            </Dialog>
-                          )}
-                      </div>
+                              <CircleX className="w-4 h-4" />
+                            </span>
+                          </DialogTrigger>
+                          <DialogContent className="">
+                            <DialogHeader>
+                              <DialogTitle>
+                                Are you absolutely sure?
+                              </DialogTitle>
+                              <DialogDescription>
+                                This action cannot be undone. This will
+                                permanently delete your account and remove your
+                                data from our servers.
+                              </DialogDescription>
+                            </DialogHeader>
+                            <DialogFooter>
+                              <Button
+                                className="bg-white hover:bg-white/90"
+                                variant="outline"
+                                onClick={() => setIsCancelOpen(false)}
+                              >
+                                Cancel
+                              </Button>
+                              <Button
+                                className="bg-neutral-900 text-white hover:text-neutral-800 hover:bg-neutral-800/40"
+                                onClick={() =>
+                                  handleCancelOrder(position.order_id)
+                                }
+                              >
+                                Submit
+                              </Button>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
+                      )}
+                  </div>
+                </div>
+                <div className="flex justify-between gap-4 text-sm mb-4">
+                  <div>
+                    <div className="text-gray-600 font-medium">Invested</div>
+                    <div className="font-semibold text-gray-900">
+                      ₹{position.price * position.quantity}
                     </div>
-                    <div className="flex justify-between gap-4 text-sm mb-4">
-                      <div>
-                        <div className="text-gray-600 font-medium">
-                          Invested
-                        </div>
-                        <div className="font-semibold text-gray-900">
-                          ₹{position.price * position.quantity}
-                        </div>
-                      </div>
-                      {/* <div>
+                  </div>
+                  {/* <div>
                         <div className="text-gray-600 font-medium">
                           Quantity
                         </div>
@@ -814,16 +572,21 @@ const ClosedMarketHolding = () => {
                           {`${position.filled_quantity}/${position.quantity}`}
                         </div>
                       </div> */}
-                      <div>
-                        <div className="text-gray-600 font-medium">Current</div>
-                        <div className="font-semibold text-gray-900 text-end">
-                          &#8377;
-                          {position.opinion_type === 'YES'
-                            ? position.market_yes_price * position.quantity
-                            : position.market_no_price * position.quantity}
-                        </div>
+                  <div>
+                    <div className="text-gray-600 font-medium">Returns</div>
+                    {position.returns >= 0 ? (
+                      <div className="font-semibold text-green-600 text-end">
+                        +&#8377;
+                        {position.returns}
                       </div>
-                      {/* <div>
+                    ) : (
+                      <div className="font-semibold text-red-600 text-end">
+                        &#8377;
+                        {position.returns}
+                      </div>
+                    )}
+                  </div>
+                  {/* <div>
                               <div className="text-gray-600 font-medium">Current</div>
                               <div className="font-semibold text-gray-900">
                                 ₹
@@ -832,9 +595,9 @@ const ClosedMarketHolding = () => {
                                   : parseFloat(position.market_no_price).toFixed(1)}
                               </div>
                             </div> */}
-                    </div>
-                    {/* Important functions */}
-                    {/* {position.status === 'ACTIVE' && (
+                </div>
+                {/* Important functions */}
+                {/* {position.status === 'ACTIVE' && (
                       <div className="flex gap-2 w-full items-center justify-between">
                         <div className="w-full flex gap-2 items-center ">
                           <Button
@@ -882,465 +645,10 @@ const ClosedMarketHolding = () => {
                         </Button>
                       </div>
                     )} */}
-                  </div>
-                ))}
               </div>
-            </TabsContent>
-            <TabsContent value="matched">
-              <div className="divide-y divide-gray-100">
-                {matchedHoldingData?.length > 0 &&
-                  matchedHoldingData?.map((position) => (
-                    <div
-                      key={position.name}
-                      className="p-4 w-full cursor-pointer"
-                    >
-                      <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
-                        <span className="flex items-center justify-between w-full">
-                          {position.opinion_type === 'YES' && (
-                            <span className="rounded-full text-blue-600 font-semibold text-md ">
-                              {position.opinion_type}
-                            </span>
-                          )}
-                          {position.opinion_type === 'NO' && (
-                            <span className="rounded-full text-red-600 font-semibold text-md">
-                              {position.opinion_type}
-                            </span>
-                          )}
-                        </span>
-                        <div className="flex gap-1">
-                          {position.status === 'ACTIVE' && (
-                            <span
-                              className="bg-yellow-100 text-yellow-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium flex gap-1 "
-                              onClick={() =>
-                                handleTradeClick(
-                                  position.opinion_type === 'YES'
-                                    ? position.market_yes_price
-                                    : position.market_no_price,
-                                  position.opinion_type,
-                                  'SELL',
-                                  position.market_id,
-                                  position.quantity,
-                                  position.name
-                                )
-                              }
-                            >
-                              {position.status}
-                              <Separator
-                                orientation="vertical"
-                                className="w-0.5"
-                              />
-                              <LogOut className="w-4 h-4" />
-                            </span>
-                          )}
+            ))}
+          </div>
 
-                          {position.filled_quantity >= 0 &&
-                            position.filled_quantity < position.quantity &&
-                            position.status === 'EXITING' && (
-                              <span className="bg-emerald-100 text-emerald-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
-                                {position.status}
-                              </span>
-                            )}
-
-                          {position.filled_quantity === position.quantity &&
-                            position.status === 'EXITED' && (
-                              <span className="bg-emerald-100 text-emerald-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
-                                {position.status}
-                              </span>
-                            )}
-                        </div>
-                      </div>
-                      <div className="flex justify-between gap-4 text-sm mb-4">
-                        <div>
-                          <div className="text-gray-600 font-medium">
-                            Invested
-                          </div>
-                          <div className="font-semibold text-gray-900">
-                            ₹{position.price * position.quantity}
-                          </div>
-                        </div>
-                        {/* <div>
-                     <div className="text-gray-600 font-medium">
-                       Quantity
-                     </div>
-                     <div className="font-semibold text-gray-900">
-                       {`${position.filled_quantity}/${position.quantity}`}
-                     </div>
-                   </div> */}
-                        <div className="">
-                          <div className="text-gray-600 font-medium">
-                            Current
-                          </div>
-                          <div className="font-semibold text-gray-900 text-end">
-                            &#8377;
-                            {position.opinion_type === 'YES'
-                              ? position.market_yes_price * position.quantity
-                              : position.market_no_price * position.quantity}
-                          </div>
-                        </div>
-                        {/* <div>
-                           <div className="text-gray-600 font-medium">Current</div>
-                           <div className="font-semibold text-gray-900">
-                             ₹
-                             {position.opinion_type === 'YES'
-                               ? parseFloat(position.market_yes_price).toFixed(1)
-                               : parseFloat(position.market_no_price).toFixed(1)}
-                           </div>
-                         </div> */}
-                      </div>
-                      {/* Important functions */}
-                      {/* {position.status === 'ACTIVE' && (
-                   <div className="flex gap-2 w-full items-center justify-between">
-                     <div className="w-full flex gap-2 items-center ">
-                       <Button
-                         onClick={() =>
-                           handleTradeClick(
-                             position.opinion_type === 'YES'
-                               ? position.market_yes_price
-                               : position.market_no_price,
-                             position.opinion_type,
-                             'SELL',
-                             position.market_id,
-                             position.quantity,
-                             position.name
-                           )
-                         }
-                         className="w-[50%] bg-rose-50 text-rose-600 rounded-xl text-sm font-medium hover:bg-rose-100 transition-colors"
-                       >
-                         <XCircle className="h-4 w-4" />
-                         Exit Position
-                       </Button>
-
-                       <Button
-                         onClick={() => {
-                           navigate(`/event/${id}`)
-                         }}
-                         className="w-[50%] bg-blue-50 text-blue-600 rounded-xl text-sm font-medium hover:bg-blue-100 transition-colors"
-                       >
-                         <Plus className="h-4 w-4" />
-                         Invest More
-                       </Button>
-                     </div>
-                   </div>
-                 )}
-                 {position.status === 'EXITING' && (
-                   <div className="flex gap-2 w-full items-center justify-between">
-                     <div className="w-[50%] flex justify-center font-medium tracking-wide">{`Qty ${position.filled_quantity}/${position.quantity} Matched`}</div>
-                     <Button
-                       onClick={() => {
-                         navigate(`/event/${activeHoldings.market_id}`)
-                       }}
-                       className="w-[50%] bg-blue-50 text-blue-600 rounded-xl text-sm font-medium hover:bg-blue-100 transition-colors"
-                     >
-                       <Plus className="h-4 w-4" />
-                       Invest More
-                     </Button>
-                   </div>
-                 )} */}
-                    </div>
-                  ))}
-              </div>
-            </TabsContent>
-            <TabsContent value="exiting">
-              <div className="divide-y divide-gray-100">
-                {exitingHoldingData?.length > 0
-                  ? exitingHoldingData?.map((position) => (
-                      <div
-                        key={position.name}
-                        className="p-4 w-full cursor-pointer"
-                      >
-                        <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
-                          <span className="flex items-center justify-between w-full">
-                            {position.opinion_type === 'YES' && (
-                              <span className="rounded-full text-blue-600 font-semibold text-md ">
-                                {position.opinion_type}
-                              </span>
-                            )}
-                            {position.opinion_type === 'NO' && (
-                              <span className="rounded-full text-red-600 font-semibold text-md">
-                                {position.opinion_type}
-                              </span>
-                            )}
-                          </span>
-                          <div>
-                            {position.filled_quantity >= 0 &&
-                              position.filled_quantity < position.quantity &&
-                              position.status === 'EXITING' && (
-                                <Dialog
-                                  open={isCancelOpen}
-                                  onOpenChange={setIsCancelOpen}
-                                >
-                                  <DialogTrigger className="w-full">
-                                    <span className="bg-emerald-100 text-emerald-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium flex gap-1">
-                                      {position.status}
-                                      <Separator
-                                        orientation="vertical"
-                                        className="w-0.5 h-full"
-                                      />
-                                      <CircleX className="w-4 h-4" />
-                                    </span>
-                                  </DialogTrigger>
-                                  <DialogContent className="">
-                                    <DialogHeader>
-                                      <DialogTitle>
-                                        Are you absolutely sure?
-                                      </DialogTitle>
-                                      <DialogDescription>
-                                        This action cannot be undone. This will
-                                        permanently delete your account and
-                                        remove your data from our servers.
-                                      </DialogDescription>
-                                    </DialogHeader>
-                                    <DialogFooter>
-                                      <Button
-                                        className="bg-white hover:bg-white/90"
-                                        variant="outline"
-                                        onClick={() => setIsCancelOpen(false)}
-                                      >
-                                        Cancel
-                                      </Button>
-                                      <Button
-                                        className="bg-neutral-900 text-white hover:text-neutral-800 hover:bg-neutral-800/40"
-                                        onClick={() =>
-                                          handleCancelOrder(position.order_id)
-                                        }
-                                      >
-                                        Submit
-                                      </Button>
-                                    </DialogFooter>
-                                  </DialogContent>
-                                </Dialog>
-                              )}
-                          </div>
-                        </div>
-                        <div className="flex justify-between gap-4 text-sm mb-4">
-                          <div>
-                            <div className="text-gray-600 font-medium">
-                              Invested
-                            </div>
-                            <div className="font-semibold text-gray-900">
-                              ₹{position.price * position.quantity}
-                            </div>
-                          </div>
-                          {/* <div>
-                      <div className="text-gray-600 font-medium">
-                        Quantity
-                      </div>
-                      <div className="font-semibold text-gray-900">
-                        {`${position.filled_quantity}/${position.quantity}`}
-                      </div>
-                    </div> */}
-                          <div>
-                            <div className="text-gray-600 font-medium">
-                              Current
-                            </div>
-                            <div className="font-semibold text-gray-900 text-end">
-                              &#8377;
-                              {position.opinion_type === 'YES'
-                                ? position.market_yes_price * position.quantity
-                                : position.market_no_price * position.quantity}
-                            </div>
-                          </div>
-                          {/* <div>
-                            <div className="text-gray-600 font-medium">Current</div>
-                            <div className="font-semibold text-gray-900">
-                              ₹
-                              {position.opinion_type === 'YES'
-                                ? parseFloat(position.market_yes_price).toFixed(1)
-                                : parseFloat(position.market_no_price).toFixed(1)}
-                            </div>
-                          </div> */}
-                        </div>
-                        {/* Important functions */}
-                        {/* {position.status === 'ACTIVE' && (
-                    <div className="flex gap-2 w-full items-center justify-between">
-                      <div className="w-full flex gap-2 items-center ">
-                        <Button
-                          onClick={() =>
-                            handleTradeClick(
-                              position.opinion_type === 'YES'
-                                ? position.market_yes_price
-                                : position.market_no_price,
-                              position.opinion_type,
-                              'SELL',
-                              position.market_id,
-                              position.quantity,
-                              position.name
-                            )
-                          }
-                          className="w-[50%] bg-rose-50 text-rose-600 rounded-xl text-sm font-medium hover:bg-rose-100 transition-colors"
-                        >
-                          <XCircle className="h-4 w-4" />
-                          Exit Position
-                        </Button>
-
-                        <Button
-                          onClick={() => {
-                            navigate(`/event/${id}`)
-                          }}
-                          className="w-[50%] bg-blue-50 text-blue-600 rounded-xl text-sm font-medium hover:bg-blue-100 transition-colors"
-                        >
-                          <Plus className="h-4 w-4" />
-                          Invest More
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                  {position.status === 'EXITING' && (
-                    <div className="flex gap-2 w-full items-center justify-between">
-                      <div className="w-[50%] flex justify-center font-medium tracking-wide">{`Qty ${position.filled_quantity}/${position.quantity} Matched`}</div>
-                      <Button
-                        onClick={() => {
-                          navigate(`/event/${activeHoldings.market_id}`)
-                        }}
-                        className="w-[50%] bg-blue-50 text-blue-600 rounded-xl text-sm font-medium hover:bg-blue-100 transition-colors"
-                      >
-                        <Plus className="h-4 w-4" />
-                        Invest More
-                      </Button>
-                    </div>
-                  )} */}
-                      </div>
-                    ))
-                  : null}
-              </div>
-            </TabsContent>
-            <TabsContent value="exited">
-              <div className="divide-y divide-gray-100">
-                {exitingHoldingData?.length > 0
-                  ? exitedHoldingData?.map((position) => (
-                      <div
-                        key={position.name}
-                        className="p-4 w-full cursor-pointer"
-                      >
-                        <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
-                          <span className="flex items-center justify-between w-full">
-                            {position.opinion_type === 'YES' && (
-                              <span className="rounded-full text-blue-600 font-semibold text-md ">
-                                {position.opinion_type}
-                              </span>
-                            )}
-                            {position.opinion_type === 'NO' && (
-                              <span className="rounded-full text-red-600 font-semibold text-md">
-                                {position.opinion_type}
-                              </span>
-                            )}
-                          </span>
-                          <div>
-                            {position.status === 'ACTIVE' && (
-                              <span className="bg-yellow-100 text-yellow-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
-                                {position.status}
-                              </span>
-                            )}
-
-                            {position.filled_quantity >= 0 &&
-                              position.filled_quantity < position.quantity &&
-                              position.status === 'EXITING' && (
-                                <span className="bg-emerald-100 text-emerald-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
-                                  {position.status}
-                                </span>
-                              )}
-
-                            {position.filled_quantity === position.quantity &&
-                              position.status === 'EXITED' && (
-                                <span className="bg-emerald-100 text-emerald-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
-                                  {position.status}
-                                </span>
-                              )}
-                          </div>
-                        </div>
-                        <div className="flex justify-between gap-4 text-sm mb-4">
-                          <div>
-                            <div className="text-gray-600 font-medium">
-                              Invested
-                            </div>
-                            <div className="font-semibold text-gray-900">
-                              ₹{position.price * position.quantity}
-                            </div>
-                          </div>
-                          {/* <div>
-                      <div className="text-gray-600 font-medium">
-                        Quantity
-                      </div>
-                      <div className="font-semibold text-gray-900">
-                        {`${position.filled_quantity}/${position.quantity}`}
-                      </div>
-                    </div> */}
-                          <div>
-                            <div className="text-gray-600 font-medium">
-                              Current
-                            </div>
-                            <div className="font-semibold text-gray-900 text-end">
-                              &#8377;
-                              {position.opinion_type === 'YES'
-                                ? position.market_yes_price * position.quantity
-                                : position.market_no_price * position.quantity}
-                            </div>
-                          </div>
-                          {/* <div>
-                            <div className="text-gray-600 font-medium">Current</div>
-                            <div className="font-semibold text-gray-900">
-                              ₹
-                              {position.opinion_type === 'YES'
-                                ? parseFloat(position.market_yes_price).toFixed(1)
-                                : parseFloat(position.market_no_price).toFixed(1)}
-                            </div>
-                          </div> */}
-                        </div>
-                        {/* Important functions */}
-                        {/* {position.status === 'ACTIVE' && (
-                    <div className="flex gap-2 w-full items-center justify-between">
-                      <div className="w-full flex gap-2 items-center ">
-                        <Button
-                          onClick={() =>
-                            handleTradeClick(
-                              position.opinion_type === 'YES'
-                                ? position.market_yes_price
-                                : position.market_no_price,
-                              position.opinion_type,
-                              'SELL',
-                              position.market_id,
-                              position.quantity,
-                              position.name
-                            )
-                          }
-                          className="w-[50%] bg-rose-50 text-rose-600 rounded-xl text-sm font-medium hover:bg-rose-100 transition-colors"
-                        >
-                          <XCircle className="h-4 w-4" />
-                          Exit Position
-                        </Button>
-
-                        <Button
-                          onClick={() => {
-                            navigate(`/event/${id}`)
-                          }}
-                          className="w-[50%] bg-blue-50 text-blue-600 rounded-xl text-sm font-medium hover:bg-blue-100 transition-colors"
-                        >
-                          <Plus className="h-4 w-4" />
-                          Invest More
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                  {position.status === 'EXITING' && (
-                    <div className="flex gap-2 w-full items-center justify-between">
-                      <div className="w-[50%] flex justify-center font-medium tracking-wide">{`Qty ${position.filled_quantity}/${position.quantity} Matched`}</div>
-                      <Button
-                        onClick={() => {
-                          navigate(`/event/${activeHoldings.market_id}`)
-                        }}
-                        className="w-[50%] bg-blue-50 text-blue-600 rounded-xl text-sm font-medium hover:bg-blue-100 transition-colors"
-                      >
-                        <Plus className="h-4 w-4" />
-                        Invest More
-                      </Button>
-                    </div>
-                  )} */}
-                      </div>
-                    ))
-                  : null}
-              </div>
-            </TabsContent>
-          </Tabs>
           {/* Trades List */}
         </div>
       </div>

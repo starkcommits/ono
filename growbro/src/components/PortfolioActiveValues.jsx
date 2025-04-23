@@ -19,6 +19,7 @@ const PortfolioActiveValues = () => {
         'market_id',
         'order_id',
         'price',
+        'returns',
         'quantity',
         'opinion_type',
         'status',
