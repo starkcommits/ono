@@ -90,7 +90,7 @@ def signup():
         
         wallet = frappe.new_doc("User Wallet")
         wallet.user = user.name
-        wallet.balance = 0
+        wallet.balance = 5000
         wallet.is_active = 1
 
         wallet.save(ignore_permissions=True)
