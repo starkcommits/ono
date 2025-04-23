@@ -109,10 +109,10 @@ const TradeSheet = ({
       // await updateDoc('Orders', previousOrderId, {
       //   sell_order_id: newSellOrder.name,
       // })
-      setTimeout(() => {
-        console.log('Executing refetch')
-        refetchActiveOrders()
-      }, 500)
+      // setTimeout(() => {
+      //   console.log('Executing refetch')
+      //   refetchActiveOrders()
+      // }, 500)
 
       const res = await updateDoc('Holding', previousOrderId, {
         exit_price: price,

@@ -6,6 +6,7 @@ import {
   useFrappeGetDoc,
   useFrappeGetDocList,
   useFrappePostCall,
+  useFrappePutCall,
   useFrappeUpdateDoc,
 } from 'frappe-react-sdk'
 import {
@@ -22,8 +23,10 @@ import { Slider } from '@/components/ui/slider'
 import {
   ArrowRight,
   Clock,
+  LogOut,
   LucideMousePointerSquareDashed,
   Plus,
+  TabletSmartphone,
   TrendingDown,
   TrendingUp,
   XCircle,
@@ -52,6 +55,7 @@ const ActivePositions = ({
 }) => {
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
+  const [isCancelOpen, setIsCancelOpen] = useState(false)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
   console.log(position)
@@ -60,7 +64,7 @@ const ActivePositions = ({
   const [noPrice, setNoPrice] = useState(position.no_price)
   const { currentUser } = useFrappeAuth()
   const { createDoc } = useFrappeCreateDoc()
-  const { updateDoc } = useFrappeUpdateDoc()
+  const { call } = useFrappePostCall('rewardapp.engine.cancel_order')
 
   //   useFrappeEventListener('market_event', (updatedMarket) => {
   //     console.log('Hello')
@@ -107,38 +111,30 @@ const ActivePositions = ({
     })
   }
 
-  const handleCancelOrder = async () => {
+  const handleCancelOrder = async (market_id) => {
+    console.log(market_id)
     try {
-      console.log(position)
-      if (position.order_type === 'SELL') {
-        console.log('Entered')
-        await updateDoc('Orders', position.buy_order_id, {
-          sell_order_id: null,
-        })
-        await updateDoc('Orders', position.name, {
-          status: 'SETTLED',
-          remark: 'Sell order canceled in midway',
-        })
-      } else {
-        await updateDoc('Orders', position.name, {
-          status: 'CANCELED',
-        })
-      }
-      // Remove this stray 'call' line
-      // call  <-- This is causing the error
-      refetchActiveOrders()
-      setIsOpen(false)
+      call({
+        market_id: market_id,
+        user_id: currentUser,
+      })
+      toast.success('Exit Orders Canceled Successfully.')
+      setIsCancelOpen(false)
     } catch (err) {
       console.log(err)
+      toast.error('Error occured in canceling the order.')
     }
   }
 
   const handleExitPositions = async () => {
     try {
-      if (position.yes_quantity > 0) {
+      if (position?.ACTIVE?.YES?.total_quantity > 0) {
+        console.log('Yes')
         await createDoc('Orders', {
           market_id: position.market_id,
-          quantity: position.yes_quantity,
+          quantity:
+            position?.ACTIVE?.YES?.total_quantity -
+            position?.ACTIVE?.YES?.total_filled_quantity,
           opinion_type: 'YES',
           status: 'UNMATCHED',
           user_id: currentUser,
@@ -147,10 +143,14 @@ const ActivePositions = ({
           order_type: 'SELL',
         })
       }
-      if (position.no_quantity > 0)
+      if (position?.ACTIVE?.NO?.total_quantity > 0) {
+        console.log('No')
+
         await createDoc('Orders', {
           market_id: position.market_id,
-          quantity: position.no_quantity,
+          quantity:
+            position?.ACTIVE?.NO?.total_quantity -
+            position?.ACTIVE?.NO?.total_filled_quantity,
           opinion_type: 'NO',
           status: 'UNMATCHED',
           user_id: currentUser,
@@ -158,6 +158,8 @@ const ActivePositions = ({
           filled_quantity: 0,
           order_type: 'SELL',
         })
+      }
+
       toast.success('All positions exited from this market', {
         top: 0,
       })
@@ -177,16 +179,16 @@ const ActivePositions = ({
   return (
     <>
       <div key={position.market_id} className="p-4 w-full cursor-pointer">
-        <Badge
-          className="text-xs font-semibold mb-2 hover:underline"
+        <div
           onClick={() => {
-            navigate(`/portfolio/${position.market_id}`)
+            navigate(`/portfolio/active/${position.market_id}`)
           }}
         >
-          #{position.market_id}
-        </Badge>
+          <Badge className="text-xs font-semibold mb-2 hover:underline">
+            #{position.market_id}
+          </Badge>
 
-        {/* <div className="flex items-center justify-between mb-2">
+          {/* <div className="flex items-center justify-between mb-2">
           <div className="flex gap-2 items-center w-full">
             <div
               className="font-medium text-gray-900"
@@ -214,122 +216,200 @@ const ActivePositions = ({
             </div>
           </div>
         </div> */}
-        <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
-          <span className="flex items-center font-medium text-lg">
-            {position.question}
-          </span>
-        </div>
-        <div className="flex justify-between gap-4 text-sm mb-4">
-          <div>
-            <div className="text-gray-600 font-medium">Invested</div>
-            <div className="font-semibold text-gray-900">
-              ₹{position.invested_amount}
-            </div>
+          <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
+            <span className="flex items-center font-medium text-lg">
+              {position.question}
+            </span>
           </div>
-          <div>
-            <div className="text-gray-600 font-medium">Total Quantity</div>
-            <div className="font-semibold text-gray-900">
-              {position.total_quantity}
-            </div>
-          </div>
-          <div>
-            <div className="text-gray-600 font-medium">Avg. Price</div>
-            <div className="font-semibold text-gray-900">
-              &#8377;
-              {(position.invested_amount / position.total_quantity).toFixed(2)}
-            </div>
-          </div>
-          {/* <div>
-            <div className="text-gray-600 font-medium">Current</div>
-            <div className="font-semibold text-gray-900">
-              ₹
-              {position.opinion_type === 'YES'
-                ? parseFloat(position.market_yes_price).toFixed(1)
-                : parseFloat(position.market_no_price).toFixed(1)}
-            </div>
-          </div> */}
-        </div>
-        <div className="w-full flex items-center justify-end cursor-default">
-          <Drawer
-            className="w-full"
-            open={isDrawerOpen}
-            onOpenChange={setIsDrawerOpen}
-          >
-            <DrawerTrigger>
-              <button className="rounded-lg p-1.5 border flex items-center justify-center">
-                <span className="text-xs font-medium">Exit Position</span>
-                <ArrowRight strokeWidth={1.5} className="h-4 w-4" />
-              </button>
-            </DrawerTrigger>
-            <DrawerContent className="mx-auto w-full">
-              <DrawerHeader className="flex items-center justify-center">
-                <DrawerTitle className="w-full flex justify-center">
-                  Exit all positions in this particular market
-                </DrawerTitle>
-              </DrawerHeader>
-              <div className="w-full flex flex-col gap-4">
-                {position.yes_quantity ? (
-                  <div className="mb-6 px-10">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-lg font-medium">Yes Price</span>
-                      <div className="flex items-center">
-                        <span className="text-lg font-medium">₹{yesPrice}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex justify-between mt-2">
-                      <Slider
-                        defaultValue={[1]}
-                        max={9.5}
-                        min={0.5}
-                        step={0.5}
-                        value={[yesPrice]}
-                        className={``}
-                        onValueChange={(values) => {
-                          setYesPrice(values[0])
-                        }}
-                      />
-                    </div>
-                  </div>
-                ) : null}
-                {position.no_quantity ? (
-                  <div className="mb-6 px-10">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-lg font-medium">No Price</span>
-                      <div className="flex items-center">
-                        <span className="text-lg font-medium">₹{noPrice}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex justify-between mt-2">
-                      <Slider
-                        defaultValue={[1]}
-                        max={9.5}
-                        min={0.5}
-                        step={0.5}
-                        value={[noPrice]}
-                        className={``}
-                        onValueChange={(values) => {
-                          setNoPrice(values[0])
-                        }}
-                      />
-                    </div>
-                  </div>
-                ) : null}
+          {'EXITING' in position ? null : (
+            <div className="flex justify-between gap-4 text-sm mb-4">
+              <div>
+                <div className="text-gray-600 font-medium">Invested</div>
+                <div className="font-semibold text-gray-900">
+                  ₹{position.total_invested}
+                </div>
               </div>
-              <DrawerFooter className="w-full px-10 text-xs">
-                <Button onClick={handleExitPositions}>
-                  Exit All Positions
-                </Button>
+              <div>
+                <div className="text-gray-600 font-medium">Total Quantity</div>
+                <div className="font-semibold text-gray-900">
+                  {position?.ACTIVE?.NO && !position?.ACTIVE?.YES
+                    ? position?.ACTIVE?.NO?.total_quantity
+                    : null}
+                  {position?.ACTIVE?.NO && position?.ACTIVE?.YES
+                    ? `${
+                        position?.ACTIVE?.NO?.total_quantity +
+                        position?.ACTIVE?.YES?.total_quantity
+                      }`
+                    : null}
+                  {position?.ACTIVE?.YES && !position?.ACTIVE?.NO
+                    ? position?.ACTIVE?.YES?.total_quantity
+                    : null}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
 
-                <DrawerClose className=" w-full">
-                  <Button variant="outline" className="w-full">
-                    Cancel
-                  </Button>
-                </DrawerClose>
-              </DrawerFooter>
-            </DrawerContent>
-          </Drawer>
+        <div className="w-full flex items-center justify-between cursor-default">
+          <div>
+            {'EXITING' in position ? (
+              <div className="flex gap-1 items-center">
+                <span className="flex gap-1 items-center">
+                  <span>
+                    <LogOut className="w-4 h-4" />
+                  </span>
+                  <span>Exited</span>
+                </span>
+                <span>
+                  {position?.EXITING?.NO && !position?.EXITING?.YES
+                    ? position?.EXITING?.NO?.total_filled_quantity
+                    : null}
+                  {position?.EXITING?.YES && !position?.EXITING?.NO
+                    ? position?.EXITING?.YES?.total_filled_quantity
+                    : null}
+                  {position?.EXITING?.NO && position?.EXITING?.YES
+                    ? position?.EXITING?.NO?.total_filled_quantity +
+                      position?.EXITING?.YES?.total_filled_quantity
+                    : null}
+                  /
+                  {position?.EXITING?.NO && !position?.EXITING?.YES
+                    ? position?.EXITING?.NO?.total_quantity
+                    : null}
+                  {position?.EXITING?.YES && !position?.EXITING?.NO
+                    ? position?.EXITING?.YES?.total_quantity
+                    : null}
+                  {position?.EXITING?.NO && position?.EXITING?.YES
+                    ? position?.EXITING?.NO?.total_quantity +
+                      position?.EXITING?.YES?.total_quantity
+                    : null}
+                </span>
+              </div>
+            ) : null}
+          </div>
+          <div>
+            {'EXITING' in position ? (
+              <Dialog open={isCancelOpen} onOpenChange={setIsCancelOpen}>
+                <DialogTrigger className="w-full">
+                  <button className="flex gap-1 items-center">
+                    <span>Cancel</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="">
+                  <DialogHeader>
+                    <DialogTitle>Are you absolutely sure?</DialogTitle>
+                    <DialogDescription>
+                      This action cannot be undone. This will permanently delete
+                      your account and remove your data from our servers.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <DialogFooter>
+                    <Button
+                      className="bg-white hover:bg-white/90"
+                      variant="outline"
+                      onClick={() => setIsCancelOpen(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      className="bg-neutral-900 text-white hover:text-neutral-800 hover:bg-neutral-800/40"
+                      onClick={() => handleCancelOrder(position.market_id)}
+                    >
+                      Submit
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            ) : (
+              <Drawer
+                className="w-full"
+                open={isDrawerOpen}
+                onOpenChange={setIsDrawerOpen}
+              >
+                <DrawerTrigger asChild>
+                  <button
+                    className="flex gap-1 items-center justify-center"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <span className="text-xs font-medium">EXIT</span>
+                    <ArrowRight strokeWidth={1.5} className="h-4 w-4" />
+                  </button>
+                </DrawerTrigger>
+                <DrawerContent className="mx-auto w-full">
+                  <DrawerHeader className="flex items-center justify-center">
+                    <DrawerTitle className="w-full flex justify-center">
+                      Exit all positions in this particular market
+                    </DrawerTitle>
+                  </DrawerHeader>
+                  <div className="w-full flex flex-col gap-4">
+                    {position?.ACTIVE?.YES?.total_quantity ? (
+                      <div className="mb-6 px-10">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-lg font-medium">Yes Price</span>
+                          <div className="flex items-center">
+                            <span className="text-lg font-medium">
+                              ₹{yesPrice}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex justify-between mt-2">
+                          <Slider
+                            defaultValue={[1]}
+                            max={9.5}
+                            min={0.5}
+                            step={0.5}
+                            value={[yesPrice]}
+                            className={``}
+                            onValueChange={(values) => {
+                              setYesPrice(values[0])
+                            }}
+                          />
+                        </div>
+                      </div>
+                    ) : null}
+                    {position?.ACTIVE?.NO?.total_quantity ? (
+                      <div className="mb-6 px-10">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-lg font-medium">No Price</span>
+                          <div className="flex items-center">
+                            <span className="text-lg font-medium">
+                              ₹{noPrice}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex justify-between mt-2">
+                          <Slider
+                            defaultValue={[1]}
+                            max={9.5}
+                            min={0.5}
+                            step={0.5}
+                            value={[noPrice]}
+                            className={``}
+                            onValueChange={(values) => {
+                              setNoPrice(values[0])
+                            }}
+                          />
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
+                  <DrawerFooter className="w-full px-10 text-xs">
+                    <Button onClick={handleExitPositions}>
+                      Exit All Positions
+                    </Button>
+
+                    <DrawerClose className=" w-full">
+                      <Button variant="outline" className="w-full">
+                        Cancel
+                      </Button>
+                    </DrawerClose>
+                  </DrawerFooter>
+                </DrawerContent>
+              </Drawer>
+            )}
+          </div>
         </div>
       </div>
     </>

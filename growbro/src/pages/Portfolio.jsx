@@ -42,6 +42,7 @@ import {
 } from 'frappe-react-sdk'
 import ActivePosition from '../components/ActivePositions'
 import CompletedTrades from '../components/CompletedTrades'
+import PortfolioActiveValues from '../components/PortfolioActiveValues'
 
 ChartJS.register(
   CategoryScale,
@@ -57,9 +58,9 @@ ChartJS.register(
 const Portfolio = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const searchParams = new URLSearchParams(location.search)
+  const [searchParams, setSearchParams] = useSearchParams()
   const tab = searchParams.get('tab')
-  const [activeTab, setActiveTab] = useState(tab)
+  const [activeTab, setActiveTab] = useState(tab || 'active')
   const [tradePrice, setTradePrice] = useState(null)
   const [selectedChoice, setSelectedChoice] = useState(null)
   const [selectedAction, setSelectedAction] = useState(null)
@@ -79,58 +80,59 @@ const Portfolio = () => {
     data: holdingData,
     isLoading: holdingDataLoading,
     mutate: refetchActiveHoldings,
-  } = useFrappeGetCall('rewardapp.engine.get_marketwise_holding')
+  } = useFrappeGetCall(
+    'rewardapp.engine.get_marketwise_holding',
+    activeTab === 'active' ? undefined : null
+  )
+
+  const { data: completedTradesData, isLoading: completedTradesDataLoading } =
+    useFrappeGetCall(
+      'rewardapp.engine.total_returns',
+      {
+        user_id: currentUser,
+      },
+      currentUser && activeTab === 'completed' ? undefined : null
+    )
+
+  console.log(holdingData)
+  console.log('completedTradesData', completedTradesData)
 
   useEffect(() => {
-    if (!holdingDataLoading && holdingData.message.length > 0) {
-      const holdingDataMap = holdingData.message.reduce((acc, holding) => {
-        acc[holding.name] = holding // ✅ Store as { "market_name": marketData }
-        return acc
-      }, {})
+    const tab = searchParams.get('tab')
+    if (!tab) {
+      searchParams.set('tab', 'active')
+      setSearchParams(searchParams)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!holdingDataLoading && holdingData.message === undefined) {
+      return
+    }
+    if (!holdingDataLoading && Object.values(holdingData.message).length > 0) {
+      const holdingDataMap = Object.values(holdingData.message).reduce(
+        (acc, holding) => {
+          acc[holding.name] = holding // ✅ Store as { "market_name": marketData }
+          return acc
+        },
+        {}
+      )
       setActiveHoldings(holdingDataMap)
     }
   }, [holdingData])
 
-  const {
-    data: completedTradesData,
-    isLoading: completedTradesLoading,
-    mutate: refetchCompletedTrades,
-  } = useFrappeGetDocList(
-    'Holding',
-    {
-      fields: [
-        'name',
-        'market_id',
-        'price',
-        'quantity',
-        'opinion_type',
-        'status',
-        'exit_price',
-        'market_yes_price',
-        'market_no_price',
-        'closing_time',
-        'order_id',
-        'filled_quantity',
-      ],
-      filters: [
-        ['owner', '=', currentUser],
-        ['status', '=', 'EXITED'],
-      ],
-    },
-    currentUser && tab === 'completed' ? undefined : null
-  )
-
   // console.log('Holdings: ', activeHoldings)
 
-  useEffect(() => {
-    if (!completedTradesLoading && completedTradesData?.length > 0) {
-      const completedTradesMap = completedTradesData.reduce((acc, trade) => {
-        acc[trade.name] = trade // ✅ Store as { "market_name": marketData }
-        return acc
-      }, {})
-      setCompletedTrades(completedTradesMap)
-    }
-  }, [completedTradesData])
+  // useEffect(() => {
+  //   if (!completedTradesDataLoading && completedTradesData === undefined) return
+  //   if (!completedTradesDataLoading && completedTradesData?.length > 0) {
+  //     const completedTradesMap = completedTradesData.reduce((acc, trade) => {
+  //       acc[trade.name] = trade // ✅ Store as { "market_name": marketData }
+  //       return acc
+  //     }, {})
+  //     setCompletedTrades(completedTradesMap)
+  //   }
+  // }, [completedTradesData])
 
   console.log('Active Holdings: ', activeHoldings)
 
@@ -274,54 +276,45 @@ const Portfolio = () => {
           </div>
 
           {/* Portfolio Stats Card with better contrast */}
-          <div className="flex justify-between bg-white/30 backdrop-blur-lg rounded-3xl p-6 mb-6">
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center justify-between">
-                <span className="text-white font-semibold">
-                  Portfolio Value
-                </span>
-                {/* <div className="flex items-center bg-emerald-500 bg-opacity-25 backdrop-blur-sm px-2.5 py-1 rounded-full">
-                <TrendingUp className="h-4 w-4 text-white mr-1" />
-                <span className="text-sm font-semibold text-white">+12.5%</span>
-              </div> */}
+          {activeTab === 'active' ? <PortfolioActiveValues /> : null}
+          {activeTab === 'completed' && !completedTradesDataLoading ? (
+            <div className="flex justify-between">
+              <div className="flex flex-col gap-2 items-start">
+                <div className="flex items-center justify-between">
+                  <span className="text-white font-semibold">Invested</span>
+                  {/* <div className="flex items-center bg-emerald-500 bg-opacity-25 backdrop-blur-sm px-2.5 py-1 rounded-full">
+        <TrendingUp className="h-4 w-4 text-white mr-1" />
+        <span className="text-sm font-semibold text-white">+12.5%</span>
+      </div> */}
+                </div>
+                <div className="text-3xl font-bold text-white flex items-center gap-4">
+                  <div>
+                    ₹
+                    {completedTradesData?.message?.reduce((acc, value) => {
+                      return acc + value.total_invested
+                    }, 0)}
+                  </div>
+                </div>
               </div>
-              <div className="text-3xl font-bold text-white flex items-center gap-4">
-                <div>
-                  ₹
-                  {Object.values(activeHoldings).length > 0
-                    ? Object.values(activeHoldings).reduce((acc, holding) => {
-                        acc =
-                          acc +
-                          parseFloat(holding.yes_price) * holding.yes_quantity +
-                          parseFloat(holding.no_price) * holding.no_quantity
-                        return acc
-                      }, 0)
-                    : 0}
+              <div className="flex flex-col gap-2 items-end">
+                <div className="flex items-center justify-between">
+                  <span className="text-white font-semibold">Returns</span>
+                  {/* <div className="flex items-center bg-emerald-500 bg-opacity-25 backdrop-blur-sm px-2.5 py-1 rounded-full">
+        <TrendingUp className="h-4 w-4 text-white mr-1" />
+        <span className="text-sm font-semibold text-white">+12.5%</span>
+      </div> */}
+                </div>
+                <div className="text-3xl font-bold text-white flex items-center gap-4">
+                  <div>
+                    ₹
+                    {completedTradesData?.message?.reduce((acc, value) => {
+                      return acc + value.total_returns
+                    }, 0)}
+                  </div>
                 </div>
               </div>
             </div>
-            <div className="flex flex-col gap-4 items-end">
-              <div className="flex items-center justify-between">
-                <span className="text-white font-semibold">Invested</span>
-                {/* <div className="flex items-center bg-emerald-500 bg-opacity-25 backdrop-blur-sm px-2.5 py-1 rounded-full">
-                <TrendingUp className="h-4 w-4 text-white mr-1" />
-                <span className="text-sm font-semibold text-white">+12.5%</span>
-              </div> */}
-              </div>
-              <div className="text-3xl font-bold text-white flex items-center gap-4">
-                <div>
-                  ₹
-                  {Object.values(activeHoldings).length > 0
-                    ? Object.values(activeHoldings).reduce((acc, holding) => {
-                        acc = acc + parseFloat(holding.invested_amount)
-                        return acc
-                      }, 0)
-                    : 0}
-                </div>
-              </div>
-            </div>
-          </div>
-
+          ) : null}
           {/* Chart Card */}
           {/* <div className="bg-white rounded-3xl p-4 shadow-sm">
             <div className="h-40">
@@ -365,7 +358,7 @@ const Portfolio = () => {
           </div>
 
           {/* Filter Bar */}
-          <div className="p-4 flex items-center justify-between border-b border-gray-100">
+          {/* <div className="p-4 flex items-center justify-between border-b border-gray-100">
             <div className="text-sm font-medium text-gray-700">
               {activeTab === 'active'
                 ? `${Object.values(activeHoldings).length} Active Position`
@@ -374,7 +367,7 @@ const Portfolio = () => {
             <button className="p-2 hover:bg-gray-50 rounded-lg transition-colors">
               <Filter className="h-4 w-4 text-gray-600" />
             </button>
-          </div>
+          </div> */}
 
           {/* Trades List */}
           <div className="divide-y divide-gray-100">
@@ -388,8 +381,8 @@ const Portfolio = () => {
                     handleTradeClick={handleTradeClick}
                   />
                 ))
-              : Object.values(completedTrades).map((trade) => (
-                  <CompletedTrades key={trade.name} trade={trade} />
+              : completedTradesData?.message?.map((trade) => (
+                  <CompletedTrades key={trade.market_id} trade={trade} />
                 ))}
           </div>
         </div>

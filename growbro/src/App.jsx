@@ -21,7 +21,9 @@ import { Route, Routes } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import Overview from './pages/Overview'
 import Portfolio from './pages/Portfolio'
-import MarketHolding from './pages/MarketHolding'
+
+import ActiveMarketHolding from './pages/ActiveMarketHolding'
+import ClosedMarketHolding from './pages/ClosedMarketHolding'
 
 const navItems = [
   { icon: Home, label: 'Home', path: '/' },
@@ -51,7 +53,15 @@ function App() {
                 <Route path="/kyc" element={<KYC />} />
                 <Route path="/wallet" element={<WalletPage />} />
                 <Route path="/portfolio" element={<Portfolio />} />
-                <Route path="/portfolio/:id" element={<MarketHolding />} />
+                <Route
+                  path="/portfolio/active/:id"
+                  element={<ActiveMarketHolding />}
+                />
+                <Route
+                  path="/portfolio/closed/:id"
+                  element={<ClosedMarketHolding />}
+                />
+
                 <Route path="/news" element={<News />} />
                 <Route path="/search" element={<SearchPage />} />
                 <Route path="/event/:id" element={<EventDetails />} />
