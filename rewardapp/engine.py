@@ -583,4 +583,5 @@ def total_exit(market_id,user_id):
         as_dict=True
     )
     # Transform to dict with opinion_type as key
-    return output = {row["opinion_type"]: row["total_quantity"] for row in result}
+    output = {row["opinion_type"]: row["total_quantity"] for row in result}
+    return output
