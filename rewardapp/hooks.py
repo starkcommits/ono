@@ -159,6 +159,7 @@ doc_events = {
 api = {
     "methods" : [
         "rewardapp.api.signup",
+        "rewardapp.api.check_password_strength",
         "rewardapp.wallet.get_balance",
         "rewardapp.wallet.update_wallet",
         "rewardapp.engine.update_order",

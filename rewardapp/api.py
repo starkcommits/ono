@@ -2,6 +2,7 @@ import frappe
 import json
 from frappe import _
 from frappe.utils.password import check_password
+from frappe.utils.password_strength import test_password_strength
 from frappe.utils import validate_email_address, getdate, today, get_formatted_email
 import re
 
@@ -104,6 +105,16 @@ def signup():
         frappe.db.rollback()
         frappe.log_error(frappe.get_traceback(), _("Trader Signup Error"))
         return error_response(f"Registration failed: {str(e)}")
+
+@frappe.whitelist(allow_guest=True)
+def check_password_strength():
+    # Get request data
+    data = frappe.request.get_json()
+    if not data:
+        return {
+            "message":"No request data found"
+        }
+    return test_password_strength(data.get('new_password'))
 
 def success_response(message):
     """Return a success response in JSON format"""
