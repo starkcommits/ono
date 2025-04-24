@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { ArrowLeft, Mail, Lock, Eye, EyeOff, User, Phone } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -8,11 +8,15 @@ import {
   useFrappeGetCall,
   useFrappePostCall,
 } from 'frappe-react-sdk'
+import { debounce, first } from 'lodash'
 
 const SignUp = () => {
   const navigate = useNavigate()
-  const { call } = useFrappePostCall('rewardapp.api.signup')
-
+  const { call: signUpCall } = useFrappePostCall('rewardapp.api.signup')
+  const { call: validatePasswordCall } = useFrappePostCall(
+    'rewardapp.api.check_password_strength'
+  )
+  const [passwordScore, setPasswordScore] = useState(-1)
   // const { createDoc } = useFrappeCreateDoc()
 
   const [formData, setFormData] = useState({
@@ -24,11 +28,57 @@ const SignUp = () => {
     confirm_password: '',
   })
   const [showPassword, setShowPassword] = useState(false)
+  const [formError, setFormError] = useState({
+    first_name: '',
+    last_name: '',
+    email: '',
+    phone: '',
+    password: '',
+    confirm_password: '',
+  })
   const [isLoading, setIsLoading] = useState(false)
+
+  const debouncedValidatePassword = useCallback(
+    debounce(async (password) => {
+      if (!password) {
+        setPasswordScore(-1)
+        return
+      }
+      try {
+        const result = await validatePasswordCall({ new_password: password })
+        console.log(result)
+        setPasswordScore(result.message.score) // Assuming the API returns a score or strength indicator
+        // Assuming the API returns a score or strength indicator
+        // You can set the password score here
+      } catch (error) {
+        console.error('Password validation error:', error)
+      }
+    }, 1000),
+    [validatePasswordCall]
+  )
+
+  // Clear debounced function on unmount
+  useEffect(() => {
+    return () => {
+      debouncedValidatePassword.cancel()
+    }
+  }, [debouncedValidatePassword])
 
   const handleChange = (e) => {
     const { name, value } = e.target
+
+    // Update form state immediately for responsive UI
     setFormData((prev) => ({ ...prev, [name]: value }))
+
+    setFormError((prev) => ({
+      ...prev,
+      [name]: '', // clear error for this specific field
+    }))
+
+    // Only debounce the password validation
+    if (name === 'password') {
+      debouncedValidatePassword(value)
+    }
   }
 
   const handleSignUp = async (e) => {
@@ -45,7 +95,7 @@ const SignUp = () => {
       // TODO: Implement actual registration
       const { confirm_password, ...dataToSend } = formData
 
-      const response = await call(dataToSend)
+      const response = await signUpCall(dataToSend)
 
       // const response = await createDoc('User', dataToSend)
 
@@ -53,12 +103,35 @@ const SignUp = () => {
 
       toast.success('Account created successfully!')
 
+      setFormError({})
+
       setTimeout(() => {
         setIsLoading(false)
         navigate('/signin')
       }, 1500)
     } catch (err) {
-      toast.error(`Error occured in the registration process.`)
+      setFormError((prev) => {
+        const newErrors = { ...prev }
+        if (err.message.message?.split(': ')[1] === 'first_name') {
+          newErrors.first_name = err.message.message?.split(': ')[0]
+        }
+        if (err.message.message?.split(': ')[1] === 'last_name') {
+          newErrors.last_name = err.message.message?.split(': ')[0]
+        }
+        if (err.message.message?.split(': ')[1] === 'email') {
+          newErrors.email = err.message.message?.split(': ')[0]
+        }
+        if (err.message.message?.split(': ')[1] === 'phone') {
+          newErrors.phone = err.message.message?.split(': ')[0]
+        }
+        if (err.message.message?.split(': ')[1] === 'password') {
+          newErrors.password = err.message.message?.split(': ')[0]
+        }
+        return newErrors
+      })
+      toast.error(err.message.message, {
+        duration: 4000,
+      })
       setIsLoading(false)
     }
   }
@@ -99,9 +172,13 @@ const SignUp = () => {
                   onChange={handleChange}
                   className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                   placeholder="Enter your first name"
-                  required
                 />
               </div>
+              {formError.first_name && (
+                <span className="text-red-500 text-sm">
+                  {formError.first_name}
+                </span>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -116,9 +193,13 @@ const SignUp = () => {
                   onChange={handleChange}
                   className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                   placeholder="Enter your last name"
-                  required
                 />
               </div>
+              {formError.last_name && (
+                <span className="text-red-500 text-sm">
+                  {formError.last_name}
+                </span>
+              )}
             </div>
 
             <div>
@@ -134,9 +215,11 @@ const SignUp = () => {
                   onChange={handleChange}
                   className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                   placeholder="Enter your email"
-                  required
                 />
               </div>
+              {formError.email && (
+                <span className="text-red-500 text-sm">{formError.email}</span>
+              )}
             </div>
 
             <div>
@@ -152,9 +235,11 @@ const SignUp = () => {
                   onChange={handleChange}
                   className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                   placeholder="Enter your phone number"
-                  required
                 />
               </div>
+              {formError.phone && (
+                <span className="text-red-500 text-sm">{formError.phone}</span>
+              )}
             </div>
 
             <div>
@@ -184,7 +269,40 @@ const SignUp = () => {
                   )}
                 </button>
               </div>
+              {formError.password && (
+                <span className="text-red-500 text-sm">
+                  {formError.password}
+                </span>
+              )}
             </div>
+
+            {passwordScore >= 0 && (
+              <div className="mt-3">
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`text-sm font-semibold ${
+                      passwordScore < 2 && 'text-red-600'
+                    } ${passwordScore === 2 && 'text-yellow-600 '}  ${
+                      passwordScore === 3 && 'text-green-600 '
+                    }   ${passwordScore === 4 && 'text-blue-600 '}`}
+                  >
+                    {passwordScore < 2 ? 'Weak' : null}
+                    {passwordScore === 2 ? 'Average' : null}
+                    {passwordScore === 3 ? 'Strong' : null}
+                    {passwordScore === 4 ? 'Excellent' : null}
+                  </span>
+                  <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-300 ${
+                        passwordScore < 2 && 'bg-red-400 w-1/4'
+                      } ${passwordScore === 2 && 'bg-yellow-400 w-2/4'}  ${
+                        passwordScore === 3 && 'bg-green-400 w-3/4'
+                      }   ${passwordScore === 4 && 'bg-blue-400 w-full'}`}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -199,9 +317,13 @@ const SignUp = () => {
                   onChange={handleChange}
                   className="w-full pl-12 pr-12 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                   placeholder="Confirm your password"
-                  required
                 />
               </div>
+              {formError.confirm_password && (
+                <span className="text-red-500 text-sm">
+                  {formError.confirm_password}
+                </span>
+              )}
             </div>
 
             <button
