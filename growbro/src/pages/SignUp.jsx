@@ -243,9 +243,42 @@ const SignUp = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Password
-              </label>
+              <div className="flex gap-2 justify-between">
+                <label className="block text-sm font-medium text-gray-700 mb-2 w-[60%]">
+                  Password
+                </label>
+                <div className="w-[40%]">
+                  {passwordScore >= 0 && (
+                    <div className="">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`text-sm font-semibold ${
+                            passwordScore < 2 && 'text-red-600'
+                          } ${passwordScore === 2 && 'text-yellow-600 '}  ${
+                            passwordScore === 3 && 'text-green-600 '
+                          }   ${passwordScore === 4 && 'text-blue-600 '}`}
+                        >
+                          {passwordScore < 2 ? 'Weak' : null}
+                          {passwordScore === 2 ? 'Average' : null}
+                          {passwordScore === 3 ? 'Strong' : null}
+                          {passwordScore === 4 ? 'Excellent' : null}
+                        </span>
+                        <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full rounded-full transition-all duration-300 ${
+                              passwordScore < 2 && 'bg-red-400 w-1/4'
+                            } ${
+                              passwordScore === 2 && 'bg-yellow-400 w-2/4'
+                            }  ${
+                              passwordScore === 3 && 'bg-green-400 w-3/4'
+                            }   ${passwordScore === 4 && 'bg-blue-400 w-full'}`}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <input
@@ -275,34 +308,6 @@ const SignUp = () => {
                 </span>
               )}
             </div>
-
-            {passwordScore >= 0 && (
-              <div className="mt-3">
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`text-sm font-semibold ${
-                      passwordScore < 2 && 'text-red-600'
-                    } ${passwordScore === 2 && 'text-yellow-600 '}  ${
-                      passwordScore === 3 && 'text-green-600 '
-                    }   ${passwordScore === 4 && 'text-blue-600 '}`}
-                  >
-                    {passwordScore < 2 ? 'Weak' : null}
-                    {passwordScore === 2 ? 'Average' : null}
-                    {passwordScore === 3 ? 'Strong' : null}
-                    {passwordScore === 4 ? 'Excellent' : null}
-                  </span>
-                  <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all duration-300 ${
-                        passwordScore < 2 && 'bg-red-400 w-1/4'
-                      } ${passwordScore === 2 && 'bg-yellow-400 w-2/4'}  ${
-                        passwordScore === 3 && 'bg-green-400 w-3/4'
-                      }   ${passwordScore === 4 && 'bg-blue-400 w-full'}`}
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">

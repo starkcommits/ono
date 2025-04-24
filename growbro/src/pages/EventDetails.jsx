@@ -254,7 +254,7 @@ const EventDetails = () => {
           <TabsContent value="activity">
             <div className="bg-white rounded-xl shadow-sm">
               <div className="px-4 py-3 border-b border-gray-100">
-                <h3 className="font-medium text-left">
+                <h3 className="font-medium text-center">
                   {tradesData?.length > 0
                     ? 'Matched Users'
                     : 'No Users matched yet.'}
