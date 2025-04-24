@@ -546,6 +546,45 @@ def holding(doc,method):
         doc.save(ignore_permissions=True)
         frappe.db.commit()
 
+    elif doc.status == "ACTIVE" and doc.order_id:
+        order = frappe.get_doc("Orders", doc.order_id)
+
+        # Calculate the new quantity
+        new_quantity = order.quantity - (doc.quantity - doc.filled_quantity)
+
+        # Update status if order is now fully matched
+        new_status = "MATCHED" if new_quantity == order.filled_quantity else order.status
+
+        # Update the order (does NOT trigger hooks)
+        frappe.db.set_value("Orders", doc.order_id, {
+            "quantity": new_quantity,
+            "status": new_status
+        }, update_modified=False)
+
+        # Optionally clear the holding's order link
+        doc.order_id = ''
+        doc.save(ignore_permissions=True)
+
+        # Prepare correct payload
+        payload = {
+            "order_id": order.name,
+            "new_quantity": new_quantity   # ✅ Use updated quantity here
+        }
+
+        # API call to sync order update
+        try:
+            url = "http://94.136.187.188:8086/orders/update_quantity"
+            response = requests.put(url, json=payload)
+            if response.status_code != 201:
+                frappe.logger().error(f"Error response: {response.text}")
+                frappe.throw(f"API error: {response.status_code} - {response.text}")
+            else:
+                frappe.msgprint("Sell order updated with new quantity")
+                return True
+        except Exception as e:
+            frappe.log_error("Error in market price update", f"{str(e)}")
+            return False
+
 @frappe.whitelist(allow_guest=True)
 def cancel_order(market_id, user_id):
     # frappe.db.sql("""
