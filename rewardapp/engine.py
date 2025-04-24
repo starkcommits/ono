@@ -570,6 +570,7 @@ def holding(doc,method):
 
         # Optionally clear the holding's order link
         doc.order_id = ''
+        doc.exit_price = 0
         doc.save(ignore_permissions=True)
 
         # Prepare correct payload
