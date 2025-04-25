@@ -167,7 +167,7 @@ const Overview = () => {
     ],
     filters:
       categoryFilter === 'all'
-        ? ['status', '=', 'OPEN']
+        ? [['status', '=', 'OPEN']]
         : [
             ['category', '=', categoryFilter],
             ['status', '=', 'OPEN'],
