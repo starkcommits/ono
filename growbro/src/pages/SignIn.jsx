@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { ArrowLeft, Mail, Lock, Eye, EyeOff } from 'lucide-react'
 import { useFrappeAuth } from 'frappe-react-sdk'
+import toast from 'react-hot-toast'
 const SignIn = () => {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
@@ -14,15 +15,12 @@ const SignIn = () => {
     e.preventDefault()
     setLoginError(null)
     try {
-      const response = await login({
+      await login({
         username: email,
         password: password,
       })
-      if (response) {
-        console.log('Login successful', response)
-
-        navigate('/')
-      }
+      navigate('/')
+      toast.success('Login successful')
     } catch (error) {
       console.error('Login error:', error)
       setLoginError(error.message || 'Login failed. Please try again.')
@@ -66,7 +64,6 @@ const SignIn = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                   placeholder="Enter your email"
-                  required
                 />
               </div>
             </div>
@@ -82,7 +79,6 @@ const SignIn = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full pl-12 pr-12 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                   placeholder="Enter your password"
-                  required
                 />
                 <button
                   type="button"

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   X,
@@ -15,8 +15,21 @@ import {
 } from 'lucide-react'
 import { useFrappeAuth, useFrappeGetDoc } from 'frappe-react-sdk'
 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import toast from 'react-hot-toast'
+
 const SlideMenu = ({ isOpen, onClose }) => {
   const { logout, currentUser } = useFrappeAuth()
+
+  const [isDialogOpen, setDialogOpen] = useState(false)
 
   const { data: currentUserData, isLoading: currentUserDataLoading } =
     useFrappeGetDoc('User', currentUser)
@@ -128,17 +141,50 @@ const SlideMenu = ({ isOpen, onClose }) => {
           </div>
 
           {/* Footer */}
-          <div className="mt-auto border-t border-gray-100 p-6">
-            <button
-              className="w-full flex items-center text-rose-600 font-medium"
-              onClick={() => {
-                logout()
-              }}
-            >
-              <LogOut className="h-5 w-5 mr-3" />
-              Sign Out
-            </button>
-          </div>
+          <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger>
+              <div className="mt-auto border-t border-gray-100 p-6">
+                <button className="w-full flex items-center text-rose-600 font-medium">
+                  <LogOut className="h-5 w-5 mr-3" />
+                  Sign Out
+                </button>
+              </div>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Are you sure you want to sign out?</DialogTitle>
+                <DialogDescription>
+                  You'll need to log in again to access your account.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <div className="w-full flex justify-end gap-4">
+                  <button
+                    className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-medium rounded-md transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500"
+                    onClick={async () => {
+                      try {
+                        await logout()
+                        toast.success(
+                          'You have been signed out of your account.'
+                        )
+                        setDialogOpen(false)
+                      } catch (error) {
+                        toast.error('Failed to sign out. Please try again.')
+                      }
+                    }}
+                  >
+                    Logout
+                  </button>
+                  <button
+                    className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-md transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300"
+                    onClick={() => setDialogOpen(false)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
     </>

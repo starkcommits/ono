@@ -69,6 +69,7 @@ import {
   useFrappeGetCall,
   useFrappeGetDoc,
   useFrappeGetDocList,
+  useFrappePostCall,
   useFrappeUpdateDoc,
 } from 'frappe-react-sdk'
 import ActivePosition from '../components/ActivePositions'
@@ -128,6 +129,8 @@ const ActiveMarketHolding = () => {
     'Market',
     id
   )
+
+  const { call } = useFrappePostCall('frappe.client.get')
 
   const {
     data: totalExitData,
@@ -539,12 +542,27 @@ const ActiveMarketHolding = () => {
     }
   }
 
-  const handleCancelOrder = async (order_id) => {
+  const handleCancelOrder = async (
+    order_id,
+    holding_id,
+    holding_filled_quantity,
+    holding_quantity
+  ) => {
     try {
       console.log('Order ID:', order_id)
-      await updateDoc('Orders', order_id, {
-        status: 'CANCELED',
+      const sellOrder = await call({
+        doctype: 'Orders',
+        name: order_id,
       })
+      if (sellOrder.message.holding_id) {
+        await updateDoc('Orders', order_id, {
+          status: 'CANCELED',
+        })
+      } else {
+        await updateDoc('Holding', holding_id, {
+          status: 'ACTIVE',
+        })
+      }
       toast.success('Order Canceled Successfully.')
       setIsCancelOpen(false)
     } catch (err) {
@@ -864,7 +882,12 @@ const ActiveMarketHolding = () => {
                                   <Button
                                     className="bg-neutral-900 text-white hover:text-neutral-800 hover:bg-neutral-800/40"
                                     onClick={() =>
-                                      handleCancelOrder(position.order_id)
+                                      handleCancelOrder(
+                                        position.order_id,
+                                        position.name,
+                                        position.filled_quantity,
+                                        position.quantity
+                                      )
                                     }
                                   >
                                     Submit
