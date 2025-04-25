@@ -287,7 +287,7 @@ def market(doc, method):
                 UPDATE `tabHolding`
                 SET status = 'EXITED', remark = 'Maket Resolved'
                 WHERE market_id = %s
-                AND status IN ('ACTIVE', 'EXITING')
+                AND status IN ('ACTIVE', 'EXITING', 'EXITED')
             """, (doc.name,))    
             frappe.db.commit()
     except Exception as e:
