@@ -26,8 +26,8 @@ export default defineConfig({
         background_color: '#ffffff',
         display: 'standalone',
         orientation: 'portrait',
-        scope: '/',
-        start_url: '/',
+        scope: '/growbro/',
+        start_url: '/growbro/',
         icons: [
           {
             src: '/icon-32.svg',

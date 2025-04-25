@@ -54,8 +54,6 @@ import {
   useFrappeUpdateDoc,
 } from 'frappe-react-sdk'
 import toast from 'react-hot-toast'
-import EnterWalletPIN from '../components/EnterWalletPIN'
-import CreateWalletPIN from '../components/CreateWalletPIN'
 
 const formSchema = z.object({
   pin: z
@@ -230,37 +228,37 @@ const Wallet = () => {
     },
   ]
 
-  async function handleAddMoney(data) {
-    try {
-      await updateDoc('User Wallet', currentUser, {
-        balance: userWalletData.balance + parseFloat(amount),
-      })
-      await createDoc('Transaction Logs', {
-        user: currentUser,
-        transaction_amount: amount,
-        transaction_type: 'Recharge',
-        transaction_status: 'Success',
-        transaction_method: 'UPI',
-      })
-      toast.success(`${amount} added to your wallet.`, {
-        top: 0,
-        right: 0,
-      })
+  // async function handleAddMoney(data) {
+  //   try {
+  //     await updateDoc('User Wallet', currentUser, {
+  //       balance: userWalletData.balance + parseFloat(amount),
+  //     })
+  //     await createDoc('Transaction Logs', {
+  //       user: currentUser,
+  //       transaction_amount: amount,
+  //       transaction_type: 'Recharge',
+  //       transaction_status: 'Success',
+  //       transaction_method: 'UPI',
+  //     })
+  //     toast.success(`${amount} added to your wallet.`, {
+  //       top: 0,
+  //       right: 0,
+  //     })
 
-      setAmount(0)
-      refetchTotal()
-      refetchWalletData()
-      activeTab === 'all'
-        ? refetchTransactionHistory()
-        : activeTab === 'deposits'
-        ? refetchDepositsHistory()
-        : refetchWithdrawalsHistory()
-      setOpen(false)
-    } catch (err) {
-      console.log(err)
-      toast.error('Failed to add money in the wallet.')
-    }
-  }
+  //     setAmount(0)
+  //     refetchTotal()
+  //     refetchWalletData()
+  //     activeTab === 'all'
+  //       ? refetchTransactionHistory()
+  //       : activeTab === 'deposits'
+  //       ? refetchDepositsHistory()
+  //       : refetchWithdrawalsHistory()
+  //     setOpen(false)
+  //   } catch (err) {
+  //     console.log(err)
+  //     toast.error('Failed to add money in the wallet.')
+  //   }
+  // }
 
   const handleQuickAmount = (value) => {
     setAmount(value.toString())
@@ -274,6 +272,14 @@ const Wallet = () => {
       hour: '2-digit',
       minute: '2-digit',
     })
+  }
+
+  if (userWalletLoading) {
+    return (
+      <div className="w-screen h-screen flex justify-center items-center">
+        <div className="spinner w-14 h-14 rounded-full border-4 border-gray-200 border-r-blue-500 animate-spin"></div>
+      </div>
+    )
   }
 
   return (
@@ -412,7 +418,7 @@ const Wallet = () => {
                   <DialogFooter>
                     <Button
                       type="submit"
-                      onClick={handleAddMoney}
+                      // onClick={handleAddMoney}
                       className="bg-secondary hover:bg-secondary/90"
                     >
                       Submit
