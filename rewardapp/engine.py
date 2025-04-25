@@ -573,7 +573,7 @@ def holding(doc,method):
 
         # API call to sync order update
         try:
-            url = "http://94.136.187.188:8086/orders/update_quantity"
+            url = "http://127.0.0.1:8086/orders/update_quantity"
             response = requests.put(url, json=payload)
             if response.status_code != 201:
                 frappe.logger().error(f"Error response: {response.text}")
