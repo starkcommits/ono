@@ -561,8 +561,16 @@ def holding(doc,method):
             "status": new_status
         }, update_modified=False)
 
+        order_book_data = {
+            "market_id": doc.market_id,
+            "quantity": - (doc.quantity - doc.filled_quantity),
+            "opinion_type": doc.opinion_type,
+            "price": doc.exit_price
+        }
+
         # Optionally clear the holding's order link
         doc.order_id = ''
+        doc.exit_price = 0
         doc.save(ignore_permissions=True)
 
         # Prepare correct payload
@@ -579,6 +587,7 @@ def holding(doc,method):
                 frappe.logger().error(f"Error response: {response.text}")
                 frappe.throw(f"API error: {response.status_code} - {response.text}")
             else:
+                frappe.publish_realtime("order_book_event", order_book_data,after_commit=True)
                 frappe.msgprint("Sell order updated with new quantity")
                 return True
         except Exception as e:
