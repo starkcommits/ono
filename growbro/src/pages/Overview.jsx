@@ -167,8 +167,11 @@ const Overview = () => {
     ],
     filters:
       categoryFilter === 'all'
-        ? undefined
-        : [['category', '=', categoryFilter]],
+        ? ['status', '=', 'OPEN']
+        : [
+            ['category', '=', categoryFilter],
+            ['status', '=', 'OPEN'],
+          ],
     orderBy: {
       field: 'total_traders',
       order: 'desc',
@@ -191,6 +194,7 @@ const Overview = () => {
         'closing_time',
         'category',
       ],
+      filters: [['status', '=', 'OPEN']],
       orderBy: {
         field: 'total_traders',
         order: 'desc',
