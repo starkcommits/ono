@@ -54,8 +54,6 @@ import {
   useFrappeUpdateDoc,
 } from 'frappe-react-sdk'
 import toast from 'react-hot-toast'
-import EnterWalletPIN from '../components/EnterWalletPIN'
-import CreateWalletPIN from '../components/CreateWalletPIN'
 
 const formSchema = z.object({
   pin: z
@@ -274,6 +272,14 @@ const Wallet = () => {
       hour: '2-digit',
       minute: '2-digit',
     })
+  }
+
+  if (userWalletLoading) {
+    return (
+      <div className="w-screen h-screen flex justify-center items-center">
+        <div className="spinner w-14 h-14 rounded-full border-4 border-gray-200 border-r-blue-500 animate-spin"></div>
+      </div>
+    )
   }
 
   return (

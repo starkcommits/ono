@@ -35,8 +35,6 @@ const Home = () => {
       filters: [['is_active', '=', 1]],
     })
 
-  console.log(marketCategories)
-
   const { data: marketData, isLoading: marketDataLoading } =
     useFrappeGetDocList('Market', {
       fields: [
@@ -60,8 +58,6 @@ const Home = () => {
     'User Wallet',
     currentUser
   )
-
-  console.log('Market Data: ', marketData)
 
   useEffect(() => {
     if (
@@ -103,6 +99,13 @@ const Home = () => {
     navigate(`/category/${category}`)
   }
 
+  if (marketDataLoading) {
+    return (
+      <div className="w-full h-screen flex justify-center items-center">
+        <div className="spinner w-14 h-14 rounded-full border-4 border-gray-200 border-r-blue-500 animate-spin"></div>
+      </div>
+    )
+  }
   return (
     <div className="pb-24">
       <header className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">

@@ -1,11 +1,5 @@
 import React, { cache, useEffect, useMemo, useState } from 'react'
-import {
-  redirect,
-  useLocation,
-  useNavigate,
-  useParams,
-  useSearchParams,
-} from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   ArrowLeft,
   TrendingUp,
@@ -34,12 +28,7 @@ import {
   Legend,
 } from 'chart.js'
 import TradeSheet from '../components/TradeSheet'
-import {
-  useFrappeAuth,
-  useFrappeEventListener,
-  useFrappeGetCall,
-  useFrappeGetDocList,
-} from 'frappe-react-sdk'
+import { useFrappeAuth, useFrappeGetCall } from 'frappe-react-sdk'
 import ActivePosition from '../components/ActivePositions'
 import CompletedTrades from '../components/CompletedTrades'
 import PortfolioActiveValues from '../components/PortfolioActiveValues'
@@ -57,11 +46,9 @@ ChartJS.register(
 
 const Portfolio = () => {
   const navigate = useNavigate()
-  const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
   const tab = searchParams.get('tab')
   const [activeTab, setActiveTab] = useState(tab || 'active')
-  const [tradePrice, setTradePrice] = useState(null)
   const [selectedChoice, setSelectedChoice] = useState(null)
   const [selectedAction, setSelectedAction] = useState(null)
   const [marketPrice, setMarketPrice] = useState(null)
@@ -69,12 +56,8 @@ const Portfolio = () => {
   const [sellQuantity, setSellQuantity] = useState(null)
   const [previousOrderId, setPreviousOrderId] = useState(null)
   const [showTradeSheet, setShowTradeSheet] = useState(false)
-  const [activeOrders, setActiveOrders] = useState({})
-  const [completedOrders, setCompletedOrders] = useState({})
-  const { currentUser, isLoading: currentUserLoading } = useFrappeAuth()
-  const [totalReturns, setTotalReturns] = useState(0)
+  const { currentUser } = useFrappeAuth()
   const [activeHoldings, setActiveHoldings] = useState({})
-  const [completedTrades, setCompletedTrades] = useState({})
 
   const {
     data: holdingData,
@@ -133,8 +116,6 @@ const Portfolio = () => {
   //     setCompletedTrades(completedTradesMap)
   //   }
   // }, [completedTradesData])
-
-  console.log('Active Holdings: ', activeHoldings)
 
   // const { data: userOrders, isLoading: userOrdersLoading } =
   //   useFrappeGetDocList(
@@ -244,21 +225,16 @@ const Portfolio = () => {
     setSelectedAction(null)
   }
 
-  const invested = Object.values(activeOrders).reduce((acc, order) => {
-    return acc + parseFloat(order.amount * order.quantity)
-  }, 0)
-
-  const currentValue = Object.values(activeOrders).reduce((acc, order) => {
+  if (
+    (holdingDataLoading && tab === 'active') ||
+    (completedTradesDataLoading && tab === 'completed')
+  ) {
     return (
-      acc +
-      parseFloat(
-        (order.opinion_type === 'YES' ? order.yes_price : order.no_price) *
-          order.quantity
-      )
+      <div className="w-full h-screen flex justify-center items-center">
+        <div className="spinner w-14 h-14 rounded-full border-4 border-gray-200 border-r-blue-500 animate-spin"></div>
+      </div>
     )
-  }, 0)
-
-  const profitLoss = currentValue - invested
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 pb-24">

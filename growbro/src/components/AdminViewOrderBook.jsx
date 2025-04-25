@@ -72,7 +72,7 @@ const AdminViewOrderBook = ({ marketId }) => {
 
     console.log('Type of order:', typeof order.quantity, typeof order.price)
 
-    refetchOrderBook()
+    refetchOrderBook()  
 
     // setOrderBook((prevOrderBook) => {
     //   const priceKey = parseFloat(order.price).toFixed(1) // Ensure consistent price format

@@ -148,6 +148,8 @@ const Overview = () => {
     },
   })
 
+  console.log('Marketsssss:', marketsData)
+
   const {
     data: tradesData,
     isLoading: tradesLoading,
@@ -156,19 +158,30 @@ const Overview = () => {
     fields: [
       'name',
       'creation',
-      'no_order_id',
-      'no_price',
-      'no_user_id',
-      'yes_order_id',
-      'yes_price',
-      'yes_user_id',
+      'market_id',
       'quantity',
+      'first_user_id',
+      'second_user_id',
+      'first_user_order_id',
+      'second_user_order_id',
+      'first_user_price',
+      'second_user_price',
     ],
     filters: [['market_id', '=', marketParam]],
     orderBy: {
       field: 'creation',
       order: 'desc',
     },
+  })
+
+  useFrappeDocTypeEventListener('Trades', (event) => {
+    refetchMarketData()
+    refetchTrades()
+  })
+
+  useFrappeDocTypeEventListener('Orders', (event) => {
+    refetchMarketData()
+    refetchTrades()
   })
 
   useFrappeDocTypeEventListener('Market', (event) => {
@@ -596,27 +609,29 @@ const Overview = () => {
                             <TableBody>
                               {!tradesLoading &&
                                 tradesData?.length > 0 &&
-                                tradesData?.slice(0, 10).map((trade, index) => (
-                                  <TableRow key={trade.name}>
-                                    <TableCell>{`#${
-                                      trade.name.split('_')[2]
-                                    }`}</TableCell>
-                                    <TableCell className="text-blue-500">
-                                      {trade?.yes_price}
-                                    </TableCell>
-                                    <TableCell className="text-red-500">
-                                      {trade?.no_price}
-                                    </TableCell>
-                                    <TableCell>{trade?.quantity}</TableCell>
-                                    <TableCell>
-                                      {trade?.creation
-                                        .split(' ')[0]
-                                        .split('-')
-                                        .reverse()
-                                        .join('-')}
-                                    </TableCell>
-                                  </TableRow>
-                                ))}
+                                tradesData
+                                  ?.slice(0, 10)
+                                  ?.map((trade, index) => (
+                                    <TableRow key={trade.name}>
+                                      <TableCell>{`#${
+                                        trade?.name?.split('_')[2]
+                                      }`}</TableCell>
+                                      <TableCell className="text-blue-500">
+                                        {trade?.first_user_price}
+                                      </TableCell>
+                                      <TableCell className="text-red-500">
+                                        {trade?.second_user_price}
+                                      </TableCell>
+                                      <TableCell>{trade?.quantity}</TableCell>
+                                      <TableCell>
+                                        {trade?.creation
+                                          ?.split(' ')[0]
+                                          ?.split('-')
+                                          ?.reverse()
+                                          ?.join('-')}
+                                      </TableCell>
+                                    </TableRow>
+                                  ))}
                             </TableBody>
                           </Table>
                         </ScrollArea>
