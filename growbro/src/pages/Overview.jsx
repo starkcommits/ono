@@ -3,6 +3,7 @@ import {
   useFrappeGetDocList,
   useFrappeGetDoc,
   useFrappeDocTypeEventListener,
+  useFrappeGetDocCount,
 } from 'frappe-react-sdk'
 
 import React, { useEffect, useMemo, useState } from 'react'
@@ -112,6 +113,32 @@ const Overview = () => {
   const [marketOrders, setMarketOrders] = useState([])
   const [chartData, setChartData] = useState([])
 
+  const { data: marketCategories, isLoading: marketCategoriesLoading } =
+    useFrappeGetDocList('Market Category')
+
+  const {
+    data: totalOrders,
+    isLoading: totalOrdersLoading,
+    mutate: refetchTotalOrders,
+  } = useFrappeGetDocCount(
+    'Orders',
+    [[]],
+    false,
+    false,
+    !marketParam ? undefined : null
+  )
+  const {
+    data: totalTrades,
+    isLoading: totalTradesLoading,
+    mutate: refetchTotalTrades,
+  } = useFrappeGetDocCount(
+    'Trades',
+    [],
+    false,
+    false,
+    !marketParam ? undefined : null
+  )
+
   const { data: marketData, isLoading: marketLoading } = useFrappeGetDoc(
     'Market',
     marketParam,
@@ -140,52 +167,116 @@ const Overview = () => {
     ],
     filters:
       categoryFilter === 'all'
-        ? undefined
-        : [['category', '=', categoryFilter]],
+        ? [['status', '=', 'OPEN']]
+        : [
+            ['category', '=', categoryFilter],
+            ['status', '=', 'OPEN'],
+          ],
     orderBy: {
       field: 'total_traders',
       order: 'desc',
     },
   })
 
-  console.log('Marketsssss:', marketsData)
+  const {
+    data: trendingMarketsData,
+    isLoading: trendingMarketsDataLoading,
+    mutate: refetchTrendingMarkets,
+  } = useFrappeGetDocList(
+    'Market',
+    {
+      fields: [
+        'name',
+        'question',
+        'yes_price',
+        'no_price',
+        'total_traders',
+        'closing_time',
+        'category',
+      ],
+      filters: [['status', '=', 'OPEN']],
+      orderBy: {
+        field: 'total_traders',
+        order: 'desc',
+      },
+    },
+    !marketParam ? undefined : null
+  )
+
+  // console.log('Marketsssss:', marketsData)
+
+  const {
+    data: recentTradesData,
+    isLoading: recentTradesLoading,
+    mutate: refetchRecentTrades,
+  } = useFrappeGetDocList(
+    'Trades',
+    {
+      fields: [
+        'name',
+        'creation',
+        'market_id',
+        'quantity',
+        'first_user_id',
+        'second_user_id',
+        'first_user_order_id',
+        'second_user_order_id',
+        'first_user_price',
+        'second_user_price',
+      ],
+      orderBy: {
+        field: 'creation',
+        order: 'desc',
+      },
+    },
+    !marketParam ? undefined : null
+  )
 
   const {
     data: tradesData,
     isLoading: tradesLoading,
     mutate: refetchTrades,
-  } = useFrappeGetDocList('Trades', {
-    fields: [
-      'name',
-      'creation',
-      'market_id',
-      'quantity',
-      'first_user_id',
-      'second_user_id',
-      'first_user_order_id',
-      'second_user_order_id',
-      'first_user_price',
-      'second_user_price',
-    ],
-    filters: [['market_id', '=', marketParam]],
-    orderBy: {
-      field: 'creation',
-      order: 'desc',
+  } = useFrappeGetDocList(
+    'Trades',
+    {
+      fields: [
+        'name',
+        'creation',
+        'market_id',
+        'quantity',
+        'first_user_id',
+        'second_user_id',
+        'first_user_order_id',
+        'second_user_order_id',
+        'first_user_price',
+        'second_user_price',
+      ],
+      filters: [['market_id', '=', marketParam]],
+      orderBy: {
+        field: 'creation',
+        order: 'desc',
+      },
     },
-  })
+    marketParam ? undefined : null
+  )
 
   useFrappeDocTypeEventListener('Trades', (event) => {
-    refetchMarketData()
-    refetchTrades()
+    refetchMarketData() // Current market view (prices changed)
+    refetchTrades() // Market-specific trades
+    refetchTrendingMarkets() // Global trending markets (activity changed)
+    refetchRecentTrades() // Global recent trades
+    refetchTotalTrades() // Total trade count
   })
 
   useFrappeDocTypeEventListener('Orders', (event) => {
     refetchMarketData()
     refetchTrades()
+    refetchTrendingMarkets()
   })
 
   useFrappeDocTypeEventListener('Market', (event) => {
-    refetchMarketData()
+    refetchMarketData() // Current market (order book changed)
+    refetchTotalOrders() // Total order count
   })
 
   const formatDate = (frappeDate) => {
@@ -311,16 +402,13 @@ const Overview = () => {
                     <SelectValue placeholder="Category" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all" className="cursor-pointer">
-                      All Categories
-                    </SelectItem>
-                    <SelectItem value="bitcoin">Bitcoin</SelectItem>
-                    <SelectItem value="ethereum">Ethereum</SelectItem>
-                    <SelectItem value="Sports">Sports</SelectItem>
-                    <SelectItem value="politics">Politics</SelectItem>
-                    <SelectItem value="entertainment">Entertainment</SelectItem>
-                    <SelectItem value="stocks">Stocks</SelectItem>
-                    <SelectItem value="tech">Tech</SelectItem>
+                    <SelectItem value="all">All</SelectItem>
+                    {!marketCategoriesLoading &&
+                      marketCategories?.map((category) => (
+                        <SelectItem value={category.name}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
                 {/* <Select value={sortBy} onValueChange={setSortBy}>
@@ -347,6 +435,7 @@ const Overview = () => {
                     onClick={() => {
                       // handleMarketSelect(market)
                       handleMarketChange(market.name)
+                      handleMarketSelect(market.name)
                     }}
                   >
                     <CardContent className="p-4">
@@ -386,7 +475,13 @@ const Overview = () => {
                 <div className="grid grid-cols-4 gap-2">
                   <Card>
                     <CardHeader className="w-full">
-                      <CardTitle className="text-center text-2xl">0</CardTitle>
+                      <CardTitle className="text-center text-2xl">
+                        {!trendingMarketsDataLoading &&
+                          trendingMarketsData?.length > 0 &&
+                          trendingMarketsData?.reduce((acc, market) => {
+                            return acc + 1
+                          }, 0)}
+                      </CardTitle>
                       <CardDescription className="text-center text-lg font-bold">
                         Total Markets
                       </CardDescription>
@@ -394,7 +489,9 @@ const Overview = () => {
                   </Card>
                   <Card>
                     <CardHeader className="w-full">
-                      <CardTitle className="text-center text-2xl">0</CardTitle>
+                      <CardTitle className="text-center text-2xl">
+                        {totalOrders}
+                      </CardTitle>
                       <CardDescription className="text-center text-lg font-bold">
                         Total Orders
                       </CardDescription>
@@ -402,7 +499,9 @@ const Overview = () => {
                   </Card>
                   <Card>
                     <CardHeader className="w-full">
-                      <CardTitle className="text-center text-2xl">0</CardTitle>
+                      <CardTitle className="text-center text-2xl">
+                        {totalTrades}
+                      </CardTitle>
                       <CardDescription className="text-center text-lg font-bold">
                         Total Trades
                       </CardDescription>
@@ -410,7 +509,12 @@ const Overview = () => {
                   </Card>
                   <Card>
                     <CardHeader className="w-full">
-                      <CardTitle className="text-center text-2xl">0</CardTitle>
+                      <CardTitle className="text-center text-2xl">
+                        {!trendingMarketsDataLoading &&
+                          trendingMarketsData?.reduce((acc, market) => {
+                            return acc + market.total_traders
+                          }, 0)}
+                      </CardTitle>
                       <CardDescription className="text-center text-lg font-bold">
                         Total Traders
                       </CardDescription>
@@ -427,12 +531,15 @@ const Overview = () => {
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      {marketsData.length > 0 &&
-                        marketsData?.map((market) => {
+                      {trendingMarketsData.length > 0 &&
+                        trendingMarketsData?.map((market) => {
                           return (
                             <div
                               key={market.name}
                               className="market-card cursor-pointer"
+                              onClick={() => {
+                                handleMarketChange(market.name)
+                              }}
                             >
                               <>
                                 <div className="p-4">
@@ -476,6 +583,57 @@ const Overview = () => {
                         actions across all markets.
                       </CardDescription>
                     </CardHeader>
+                    <CardContent>
+                      <ScrollArea className="">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Trade ID</TableHead>
+                              <TableHead>Yes Price</TableHead>
+                              <TableHead>No Price</TableHead>
+                              <TableHead>Quantity</TableHead>
+                              <TableHead>Date</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          {!recentTradesLoading &&
+                            recentTradesData?.length === 0 && (
+                              <TableRow>
+                                <TableCell
+                                  colSpan={5}
+                                  className="text-center py-8 font-medium"
+                                >
+                                  No trades done yet.
+                                </TableCell>
+                              </TableRow>
+                            )}
+                          <TableBody>
+                            {!recentTradesLoading &&
+                              recentTradesData?.length > 0 &&
+                              recentTradesData?.slice(0, 10)?.map((trade) => (
+                                <TableRow key={trade.name}>
+                                  <TableCell>{`#${
+                                    trade?.name?.split('_')[2]
+                                  }`}</TableCell>
+                                  <TableCell className="text-blue-500">
+                                    {trade?.first_user_price}
+                                  </TableCell>
+                                  <TableCell className="text-red-500">
+                                    {trade?.second_user_price}
+                                  </TableCell>
+                                  <TableCell>{trade?.quantity}</TableCell>
+                                  <TableCell>
+                                    {trade?.creation
+                                      ?.split(' ')[0]
+                                      ?.split('-')
+                                      ?.reverse()
+                                      ?.join('-')}
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                          </TableBody>
+                        </Table>
+                      </ScrollArea>
+                    </CardContent>
                   </Card>
                 </div>
               </div>
