@@ -129,8 +129,7 @@ jobs:
             --build-arg=PYTHON_VERSION=3.11.6 \
             --build-arg=NODE_VERSION=20.9.0 \
             --build-arg=APPS_JSON_BASE64=${{ env.APPS_JSON_BASE64 }} \
-            --tag=ghcr.io/starkcommits/project_probo_app/probo_app:1.0.0 \
-            --file=images/custom/Containerfile .
+            --tag=ghcr.io/starkcommits/project_probo_app/probo_app:1.0.0 .
 
       - name: Push Docker Image
         run: docker push ghcr.io/starkcommits/project_probo_app/probo_app:1.0.0
