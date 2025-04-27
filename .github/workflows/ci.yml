@@ -104,45 +104,36 @@ jobs:
           bench --site test_site run-tests --app rewardapp
         env:
           TYPE: server
-          
+        
   deploy:
-    name: Deploy to Production
+    name: Deploy to Production (Frappe App)
     needs: tests
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/develop'
+  
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build Docker Image
-        run: |
-          docker build \
-            --build-arg=FRAPPE_PATH=https://github.com/frappe/frappe \
-            --build-arg=FRAPPE_BRANCH=version-15 \
-            --build-arg=PYTHON_VERSION=3.11.6 \
-            --build-arg=NODE_VERSION=20.9.0 \
-            --build-arg=APPS_JSON_BASE64=${{ env.APPS_JSON_BASE64 }} \
-            --tag=ghcr.io/starkcommits/project_probo_app/probo_app:1.0.0 .
-
-      - name: Push Docker Image
-        run: docker push ghcr.io/starkcommits/project_probo_app/probo_app:1.0.0
-
-      - name: SSH into Server and Deploy
+  
+      - name: SSH into Server and Deploy App
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            docker pull ghcr.io/starkcommits/project_probo_app/probo_app:1.0.0
-            cd ~/frappe_reward_app
-            docker compose -f pwd.yml down
-            docker system prune -af
-            docker compose -f pwd.yml up -d
+            set -e
+            cd ~/apps/reward_app/ || git clone git@github.com:starkcommits/reward_app.git ~/apps/reward_app
+            cd ~/apps/reward_app
+            git pull origin develop
+            
+            # Assuming your frappe-bench is at ~/frappe-bench
+            cd ~/frappe-bench
+            
+            # Get updated app code into bench
+            bench get-app ~/apps/reward_app/rewardapp --overwrite
+  
+            # Migrate site and reload
+            bench build
+            bench --site frontend migrate
+            sudo supervisorctl restart all
