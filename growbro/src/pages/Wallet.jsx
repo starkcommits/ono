@@ -400,12 +400,12 @@ const Wallet = () => {
               <DialogTrigger className="w-full">
                 <Button
                   className="bg-secondary w-full hover:bg-secondary/90"
-                  disabled={!amount}
+                  disabled={amount <= 0}
                 >
                   Add Money
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              {/* <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Add Money to Wallet</DialogTitle>
                   <DialogDescription>
@@ -425,7 +425,7 @@ const Wallet = () => {
                     </Button>
                   </DialogFooter>
                 </DialogHeader>
-              </DialogContent>
+              </DialogContent> */}
             </Dialog>
           </div>
 
