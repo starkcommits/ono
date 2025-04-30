@@ -168,7 +168,7 @@ const Dashboard = () => {
           <CardHeader>
             <div className="flex flex-col gap-3 items-center">
               <CardTitle className="font-semibold text-4xl">
-                {!marketCountLoading && marketCount}
+                {!marketCountLoading && marketCount ? marketCount : 0}
               </CardTitle>
               <CardDescription className="font-medium tracking-wide text-md">
                 Active Markets
@@ -180,7 +180,9 @@ const Dashboard = () => {
           <CardHeader>
             <div className="flex flex-col gap-3 items-center">
               <CardTitle className="font-semibold text-4xl">
-                {!marketCategoryCountLoading && marketCategoryCount}
+                {!marketCategoryCountLoading && marketCategoryCount
+                  ? marketCategoryCount
+                  : 0}
               </CardTitle>
               <CardDescription className="font-medium tracking-wide text-md">
                 Total Market Categories
@@ -192,7 +194,7 @@ const Dashboard = () => {
           <CardHeader>
             <div className="flex flex-col gap-3 items-center">
               <CardTitle className="font-semibold text-4xl">
-                {!teamSizeDataLoading && teamSizeData}
+                {!teamSizeDataLoading && teamSizeData ? teamSizeData : 0}
               </CardTitle>
               <CardDescription className="font-medium tracking-wide text-md">
                 Team Size
