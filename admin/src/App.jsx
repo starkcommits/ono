@@ -3,6 +3,9 @@ import Layout from './components/Layout'
 import AdminRoute from './components/AdminRoute'
 import Dashboard from './pages/Dashboard'
 import { Toaster } from 'react-hot-toast'
+import Events from './pages/Events'
+import Orders from './pages/Orders'
+import Trades from './pages/Trades'
 
 function App() {
   return (
@@ -12,6 +15,9 @@ function App() {
         <Route element={<AdminRoute />}>
           <Route element={<Layout />}>
             <Route path="/" element={<Dashboard />} />
+            <Route path="/events" element={<Events />} />
+            <Route path="/orders" element={<Orders />} />
+            <Route path="/trades" element={<Trades />} />
           </Route>
         </Route>
         <Route

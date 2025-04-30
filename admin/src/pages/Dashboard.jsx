@@ -7,6 +7,16 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from '@/components/ui/dialog'
+
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -47,16 +57,16 @@ import {
 } from 'frappe-react-sdk'
 import { Ellipsis, MoreHorizontal, Users } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { useState } from 'react'
 
 const Dashboard = () => {
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [selectedMarketId, setSelectedMarketId] = useState(null)
   const { data: marketCount, isLoading: marketCountLoading } =
-    useFrappeGetDocCount('Market')
-  const { data: orderCount, isLoading: orderCountLoading } =
-    useFrappeGetDocCount('Orders')
-  const { data: tradesCount, isLoading: tradesCountLoading } =
-    useFrappeGetDocCount('Trades')
-  const { data: holdingCount, isLoading: holdingCountLoading } =
-    useFrappeGetDocCount('Holding')
+    useFrappeGetDocCount('Market', [['status', '=', 'OPEN']])
+
+  const { data: marketCategoryCount, isLoading: marketCategoryCountLoading } =
+    useFrappeGetDocCount('Market Category', [['is_active', '=', true]])
 
   const { data: usersData, isLoading: usersDataLoading } = useFrappeGetDocList(
     'User',
@@ -64,6 +74,16 @@ const Dashboard = () => {
       fields: ['*'],
     }
   )
+
+  const { data: pendingKycUsersData, isLoading: pendingKycUsersDataLoading } =
+    useFrappeGetDocList('User', {
+      fields: ['*'],
+    })
+
+  const { data: teamSizeData, isLoading: teamSizeDataLoading } =
+    useFrappeGetDocCount('User', [['role_profile_name', '=', 'Trader']])
+
+  console.log('Pending: ', pendingKycUsersData)
 
   const { updateDoc } = useFrappeUpdateDoc()
 
@@ -78,13 +98,22 @@ const Dashboard = () => {
 
   const handlePauseMarket = () => {}
 
-  const handleCloseMarket = async (market_id) => {
+  const handleDialogClosingMarket = (market_id) => {
+    setIsDialogOpen(true)
+    setSelectedMarketId(market_id)
+  }
+
+  const handleCloseMarket = async () => {
+    if (!setSelectedMarketId) {
+      return
+    }
     try {
-      const response = await updateDoc('Market', market_id, {
+      const response = await updateDoc('Market', selectedMarketId, {
         status: 'CLOSED',
       })
       console.log('Response', response)
       toast.success('Market closed successfully')
+      setIsDialogOpen(false)
       refetchMarketData()
     } catch (err) {
       console.log(err)
@@ -101,54 +130,6 @@ const Dashboard = () => {
           <CardHeader>
             <div className="flex flex-col gap-3 items-center">
               <CardTitle className="font-semibold text-4xl">
-                {!marketCountLoading && marketCount}
-              </CardTitle>
-              <CardDescription className="font-medium tracking-wide text-md">
-                Total Markets
-              </CardDescription>
-            </div>
-          </CardHeader>
-        </Card>
-        <Card className="py-4">
-          <CardHeader>
-            <div className="flex flex-col gap-3 items-center">
-              <CardTitle className="font-semibold text-4xl">
-                {!orderCountLoading && orderCount}
-              </CardTitle>
-              <CardDescription className="font-medium tracking-wide text-md">
-                Total Orders
-              </CardDescription>
-            </div>
-          </CardHeader>
-        </Card>
-        <Card className="py-4">
-          <CardHeader>
-            <div className="flex flex-col gap-3 items-center">
-              <CardTitle className="font-semibold text-4xl">
-                {!tradesCountLoading && tradesCount}
-              </CardTitle>
-              <CardDescription className="font-medium tracking-wide text-md">
-                Total Trades
-              </CardDescription>
-            </div>
-          </CardHeader>
-        </Card>
-        <Card className="py-4">
-          <CardHeader>
-            <div className="flex flex-col gap-3 items-center">
-              <CardTitle className="font-semibold text-4xl">
-                {!holdingCountLoading && holdingCount}
-              </CardTitle>
-              <CardDescription className="font-medium tracking-wide text-md">
-                Total Holding
-              </CardDescription>
-            </div>
-          </CardHeader>
-        </Card>
-        <Card className="py-4">
-          <CardHeader>
-            <div className="flex flex-col gap-3 items-center">
-              <CardTitle className="font-semibold text-4xl">
                 {!usersDataLoading &&
                   usersData?.length > 0 &&
                   usersData?.reduce((acc, user) => {
@@ -159,7 +140,62 @@ const Dashboard = () => {
                   }, 0)}
               </CardTitle>
               <CardDescription className="font-medium tracking-wide text-md">
-                Total Markets
+                Total Users
+              </CardDescription>
+            </div>
+          </CardHeader>
+        </Card>
+        <Card className="py-4">
+          <CardHeader>
+            <div className="flex flex-col gap-3 items-center">
+              <CardTitle className="font-semibold text-4xl">
+                {!pendingKycUsersDataLoading &&
+                  pendingKycUsersData?.length > 0 &&
+                  pendingKycUsersData?.reduce((acc, user) => {
+                    if (user.role_profile_name === 'Trader') {
+                      acc = acc + 1
+                    }
+                    return acc
+                  }, 0)}
+              </CardTitle>
+              <CardDescription className="font-medium tracking-wide text-md">
+                Pending KYC Users
+              </CardDescription>
+            </div>
+          </CardHeader>
+        </Card>
+        <Card className="py-4">
+          <CardHeader>
+            <div className="flex flex-col gap-3 items-center">
+              <CardTitle className="font-semibold text-4xl">
+                {!marketCountLoading && marketCount}
+              </CardTitle>
+              <CardDescription className="font-medium tracking-wide text-md">
+                Active Markets
+              </CardDescription>
+            </div>
+          </CardHeader>
+        </Card>
+        <Card className="py-4">
+          <CardHeader>
+            <div className="flex flex-col gap-3 items-center">
+              <CardTitle className="font-semibold text-4xl">
+                {!marketCategoryCountLoading && marketCategoryCount}
+              </CardTitle>
+              <CardDescription className="font-medium tracking-wide text-md">
+                Total Market Categories
+              </CardDescription>
+            </div>
+          </CardHeader>
+        </Card>
+        <Card className="py-4">
+          <CardHeader>
+            <div className="flex flex-col gap-3 items-center">
+              <CardTitle className="font-semibold text-4xl">
+                {!teamSizeDataLoading && teamSizeData}
+              </CardTitle>
+              <CardDescription className="font-medium tracking-wide text-md">
+                Team Size
               </CardDescription>
             </div>
           </CardHeader>
@@ -199,10 +235,11 @@ const Dashboard = () => {
                               <DropdownMenuItem onClick={handlePauseMarket}>
                                 Pause Market
                               </DropdownMenuItem>
+
                               <DropdownMenuItem
-                                onClick={() => {
-                                  handleCloseMarket(market.name)
-                                }}
+                                onClick={() =>
+                                  handleDialogClosingMarket(market.name)
+                                }
                               >
                                 Close Market
                               </DropdownMenuItem>
@@ -296,6 +333,38 @@ const Dashboard = () => {
           </CardContent>
         </Card> */}
       </div>
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              Are You Sure You Want to Close the Market?
+            </DialogTitle>
+            <DialogDescription>
+              Closing the market will stop all trading and finalize the outcome.
+              This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <div className="flex gap-2 items-center">
+              <Button
+                type="button"
+                onClick={() => {
+                  setIsDialogOpen(false)
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  handleCloseMarket()
+                }}
+              >
+                Confirm
+              </Button>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -2,15 +2,22 @@ import React from 'react'
 import { Outlet } from 'react-router-dom'
 import { useFrappeAuth } from 'frappe-react-sdk'
 import { FloatingDock } from './ui/floating-dock'
-import { ArrowLeftRight, CalendarClock, Receipt } from 'lucide-react'
+import { ArrowLeftRight, CalendarClock, Receipt, House } from 'lucide-react'
 
 const links = [
+  {
+    title: 'Home',
+    icon: (
+      <House className="h-full w-full text-neutral-500 dark:text-neutral-300" />
+    ),
+    href: '/',
+  },
   {
     title: 'Market',
     icon: (
       <CalendarClock className="h-full w-full text-neutral-500 dark:text-neutral-300" />
     ),
-    href: '/',
+    href: '/events',
   },
 
   {
