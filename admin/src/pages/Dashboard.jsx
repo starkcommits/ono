@@ -204,7 +204,10 @@ const Dashboard = () => {
         'closing_time',
         'status',
       ],
-      filters: [['_liked_by', 'like', `%${currentUser}%`]],
+      filters: [
+        ['_liked_by', 'like', `%${currentUser}%`],
+        ['status', 'in', ['OPEN', 'PAUSED', 'CLOSED']],
+      ],
     },
     tab === 'favorites' ? undefined : null
   )
@@ -297,6 +300,12 @@ const Dashboard = () => {
           <div className="w-full">
             <TabsList className="flex gap-4 w-full justify-start">
               <TabsTrigger
+                value="favorites"
+                className="w-[12.5%]  flex justify-start items-center p-2.5"
+              >
+                Favorites
+              </TabsTrigger>
+              <TabsTrigger
                 value="open"
                 className="w-[12.5%] flex justify-start items-center p-2.5"
               >
@@ -308,14 +317,15 @@ const Dashboard = () => {
               >
                 Closed
               </TabsTrigger>
-              <TabsTrigger
-                value="favorites"
-                className="w-[12.5%]  flex justify-start items-center p-2.5"
-              >
-                Favorites
-              </TabsTrigger>
             </TabsList>
           </div>
+          <TabsContent value="favorites">
+            <FavoriteMarkets
+              favoriteMarketsData={favoriteMarketsData}
+              favoriteMarketsDataLoading={favoriteMarketsDataLoading}
+              refetchFavoriteMarketsData={refetchFavoriteMarketsData}
+            />
+          </TabsContent>
           <TabsContent value="open">
             <OpenMarkets
               openMarketsData={openMarketsData}
@@ -328,13 +338,6 @@ const Dashboard = () => {
               closedMarketsData={closedMarketsData}
               closedMarketsDataLoading={closedMarketsDataLoading}
               refetchClosedMarketsData={refetchClosedMarketsData}
-            />
-          </TabsContent>
-          <TabsContent value="favorites">
-            <FavoriteMarkets
-              favoriteMarketsData={favoriteMarketsData}
-              favoriteMarketsDataLoading={favoriteMarketsDataLoading}
-              refetchFavoriteMarketsData={refetchFavoriteMarketsData}
             />
           </TabsContent>
         </Tabs>
