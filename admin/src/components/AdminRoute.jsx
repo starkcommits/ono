@@ -17,8 +17,8 @@ const AdminRoute = () => {
 
   if (!authLoading && !currentUser) {
     // If not logged in, redirect to main app login
-    window.location.href = 'http://localhost:8002/' // adjust if needed
-  } 
+    window.location.href = `/?redirect-to=${import.meta.env.VITE_BASE_PATH}` // adjust if needed
+  }
 
   if (authLoading || userLoading) {
     return (

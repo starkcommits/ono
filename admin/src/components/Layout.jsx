@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom'
 import { useFrappeAuth } from 'frappe-react-sdk'
 import { FloatingDock } from './ui/floating-dock'
 import { ArrowLeftRight, CalendarClock, Receipt, House } from 'lucide-react'
+import Header from './Header'
 
 const links = [
   {
@@ -40,19 +41,22 @@ const Layout = () => {
   const { currentUser } = useFrappeAuth()
   console.log('outlet hello')
   return (
-    <div className="mx-auto px-4">
-      <Outlet />
-      <div className="relative">
-        <div className="flex items-center justify-center h-[8rem] w-full fixed bottom-0 left-0 right-0">
-          <FloatingDock
-            mobileClassName="translate-y-20" // only for demo, remove for production
-            items={links}
-          />
+    <>
+      <Header />
+      <div className="mx-auto px-4 mt-16">
+        <Outlet />
+        <div className="relative">
+          <div className="flex items-center justify-center h-[8rem] w-full fixed bottom-0 left-0 right-0">
+            <FloatingDock
+              mobileClassName="translate-y-20" // only for demo, remove for production
+              items={links}
+            />
+          </div>
         </div>
-      </div>
 
-      {/* <div className="">{currentUser && <div></div>}</div> */}
-    </div>
+        {/* <div className="">{currentUser && <div></div>}</div> */}
+      </div>
+    </>
   )
 }
 
