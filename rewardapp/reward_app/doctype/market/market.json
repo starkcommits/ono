@@ -59,7 +59,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Status",
-   "options": "OPEN\nCLOSED\nRESOLVED"
+   "options": "OPEN\nPAUSED\nCLOSED\nRESOLVED"
   },
   {
    "fieldname": "category",
@@ -78,7 +78,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-04-19 18:17:43.267608",
+ "modified": "2025-05-02 13:55:36.630628",
  "modified_by": "Administrator",
  "module": "Reward App",
  "name": "Market",
@@ -110,7 +110,6 @@
    "write": 1
   }
  ],
- "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []
