@@ -52,8 +52,19 @@ import { toast } from 'react-hot-toast'
 
 import { ChevronDown, CirclePause, CircleCheck, CircleX } from 'lucide-react'
 import ResolveSheet from './ResolveSheet'
+import UseNow from './UseNow'
+import { useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import MultipleSelector from './ui/multiple-selector'
+import getResolveCountdown from './GetResolveCountdown'
 
-const CloseMarkets = ({
+const OPTIONS = [
+  { label: 'Politics', value: 'Politics' },
+  { label: 'Sports', value: 'Sports' },
+  { label: 'Tech', value: 'Tech' },
+]
+
+const ClosedMarkets = ({
   closedMarketsData,
   closedMarketsDataLoading,
   refetchClosedMarketsData,
@@ -63,8 +74,21 @@ const CloseMarkets = ({
   const [columnVisibility, setColumnVisibility] = React.useState({})
   const [rowSelection, setRowSelection] = React.useState({})
   const [isSheetOpen, setSheetOpen] = React.useState(false)
+  const [value, setValue] = useState([])
+  const [searchParams, setSearchParams] = useSearchParams()
 
   const { updateDoc } = useFrappeUpdateDoc()
+
+  React.useEffect(() => {
+    const newParams = new URLSearchParams(searchParams.toString())
+    if (value.length > 0) {
+      const marketCategories = value.map((item) => item.value)
+      newParams.set('categories', marketCategories.join(','))
+    } else {
+      newParams.delete('categories')
+    }
+    setSearchParams(newParams)
+  }, [value])
 
   const formatDate = (dateString) => {
     const date = new Date(dateString)
@@ -92,8 +116,8 @@ const CloseMarkets = ({
 
   const columns = [
     {
-      accessorKey: 'market_id',
-      id: 'market_id',
+      accessorKey: 'name',
+      id: 'name',
       header: ({ table }) => <div>ID</div>,
       cell: ({ row }) => (
         <div className="text-sm font-medium flex items-center gap-2">
@@ -118,8 +142,8 @@ const CloseMarkets = ({
       header: ({ table }) => <div>Question</div>,
       cell: ({ row }) => (
         <div className="text-sm font-medium flex gap-2 items-center">
-          {row.original.question.length > 20
-            ? `${row.original.question.substr(0, 20)}...`
+          {row.original.question.length > 250
+            ? `${row.original.question.substr(0, 250)}...`
             : row.original.question}
         </div>
       ),
@@ -139,19 +163,18 @@ const CloseMarkets = ({
       enableHiding: false,
     },
     {
-      id: 'yes_price',
-      header: ({ table }) => <div>Yes Price</div>,
-      cell: ({ row }) => (
-        <div className="text-sm font-medium">{row.original.yes_price}</div>
+      id: 'yes_no_price',
+      header: ({ table }) => (
+        <div className="">
+          <span className="text-green-700">Yes</span>/
+          <span className="text-red-700">No</span>
+        </div>
       ),
-      enableSorting: false,
-      enableHiding: false,
-    },
-    {
-      id: 'no_price',
-      header: ({ table }) => <div>No Price</div>,
       cell: ({ row }) => (
-        <div className="text-sm font-medium">{row.original.no_price}</div>
+        <div className="text-sm font-medium">
+          <span className="text-green-700">{row.original.yes_price}</span>/
+          <span className="text-red-700">{row.original.no_price}</span>
+        </div>
       ),
       enableSorting: false,
       enableHiding: false,
@@ -182,13 +205,15 @@ const CloseMarkets = ({
     {
       accessorKey: 'closing_time',
       header: ({ column }) => {
-        return <div>Closing Time</div>
+        return <div>Time Since Closed</div>
       },
-      cell: ({ row }) => (
-        <div className="text-sm font-medium">
-          {formatDate(row.original.closing_time)}
-        </div>
-      ),
+      cell: ({ row }) => {
+        // console.log(row.original.closing_time)
+        const now = UseNow(1000)
+        const countdown = getResolveCountdown(row.original.closing_time, now)
+
+        return <div className="text-sm font-medium">{countdown}</div>
+      },
     },
 
     {
@@ -272,7 +297,30 @@ const CloseMarkets = ({
 
   return (
     <div className="w-full">
-      <div className="flex items-center pb-4">
+      <div className="flex items-center py-4 gap-4">
+        <Input
+          placeholder="Filter market ID..."
+          value={table.getColumn('name')?.getFilterValue() ?? ''}
+          onChange={(event) =>
+            table.getColumn('name')?.setFilterValue(event.target.value)
+          }
+          className="max-w-sm"
+        />
+        <div className="flex flex-col gap-1">
+          <MultipleSelector
+            className="max-w-sm"
+            value={value}
+            onChange={setValue}
+            options={OPTIONS}
+            hidePlaceholderWhenSelected
+            placeholder="Select category you like..."
+            emptyIndicator={
+              <p className="text-center text-lg leading-10 text-gray-600 dark:text-gray-400">
+                no results found.
+              </p>
+            }
+          />
+        </div>
         {/* <Input
           placeholder="Filter emails..."
           value={table.getColumn('email')?.getFilterValue() ?? ''}
@@ -386,4 +434,4 @@ const CloseMarkets = ({
   )
 }
 
-export default CloseMarkets
+export default ClosedMarkets

@@ -64,6 +64,7 @@ import OpenMarkets from '../components/OpenMarkets'
 import ClosedMarkets from '../components/ClosedMarkets'
 import FavoriteMarkets from '../components/FavoriteMarkets'
 import { useFrappeAuth } from 'frappe-react-sdk'
+import PausedMarkets from '../components/PausedMarkets'
 
 const data = [
   {
@@ -107,8 +108,16 @@ const Dashboard = () => {
   const [rowSelection, setRowSelection] = React.useState({})
   const [searchParams, setSearchParams] = useSearchParams()
   const tab = searchParams.get('tab') || 'open'
+  const categories = searchParams.get('categories')?.split(',')
 
-  const { currentUser } = useFrappeAuth()
+  const openMarketsFilters = [['status', '=', 'OPEN']]
+  const closedMarketsFilters = [['status', 'in', ['CLOSED']]]
+  const pausedMarketsFilters = [['status', 'in', ['PAUSED']]]
+  if (categories?.length) {
+    openMarketsFilters.push(['category', 'in', categories])
+    pausedMarketsFilters.push(['category', 'in', categories])
+    closedMarketsFilters.push(['category', 'in', categories])
+  }
 
   const handleTabChange = (newTab) => {
     const newParams = new URLSearchParams(searchParams)
@@ -158,9 +167,32 @@ const Dashboard = () => {
         'closing_time',
         'status',
       ],
-      filters: [['status', 'in', ['OPEN', 'PAUSED']]],
+      filters: openMarketsFilters,
     },
     tab === 'open' ? undefined : null
+  )
+
+  const {
+    data: pausedMarketsData,
+    isLoading: pausedMarketsDataLoading,
+    mutate: refetchPausedMarketsData,
+  } = useFrappeGetDocList(
+    'Market',
+    {
+      fields: [
+        'name',
+        'question',
+        'category',
+        'total_traders',
+        'yes_price',
+        'no_price',
+        'total_traders',
+        'closing_time',
+        'status',
+      ],
+      filters: pausedMarketsFilters,
+    },
+    tab === 'paused' ? undefined : null
   )
 
   const {
@@ -181,38 +213,39 @@ const Dashboard = () => {
         'closing_time',
         'status',
       ],
-      filters: [['status', '=', 'CLOSED']],
+      filters: closedMarketsFilters,
     },
     tab === 'closed' ? undefined : null
   )
 
-  const {
-    data: favoriteMarketsData,
-    isLoading: favoriteMarketsDataLoading,
-    mutate: refetchFavoriteMarketsData,
-  } = useFrappeGetDocList(
-    'Market',
-    {
-      fields: [
-        'name',
-        'question',
-        'category',
-        'total_traders',
-        'yes_price',
-        'no_price',
-        'total_traders',
-        'closing_time',
-        'status',
-      ],
-      filters: [
-        ['_liked_by', 'like', `%${currentUser}%`],
-        ['status', 'in', ['OPEN', 'PAUSED', 'CLOSED']],
-      ],
-    },
-    tab === 'favorites' ? undefined : null
-  )
+  // const {
+  //   data: favoriteMarketsData,
+  //   isLoading: favoriteMarketsDataLoading,
+  //   mutate: refetchFavoriteMarketsData,
+  // } = useFrappeGetDocList(
+  //   'Market',
+  //   {
+  //     fields: [
+  //       'name',
+  //       'question',
+  //       'category',
+  //       'total_traders',
+  //       'yes_price',
+  //       'no_price',
+  //       'total_traders',
+  //       'closing_time',
+  //       'status',
+  //     ],
+  //     filters: [
+  //       ['_liked_by', 'like', `%${currentUser}%`],
+  //       ['status', 'in', ['OPEN', 'PAUSED', 'CLOSED']],
+  //     ],
+  //   },
+  //   tab === 'favorites' ? undefined : null
+  // )
 
   console.log('Open Market Data', openMarketsData)
+  console.log('Paused Market Data', pausedMarketsData)
   console.log('Closed Market Data', closedMarketsData)
 
   return (
@@ -295,21 +328,28 @@ const Dashboard = () => {
           </CardHeader>
         </Card>
       </div>
+
       <div className="grid grid-cols-1 gap-2 w-full">
         <Tabs className="w-full" value={tab} onValueChange={handleTabChange}>
           <div className="w-full">
             <TabsList className="flex gap-4 w-full justify-start">
-              <TabsTrigger
+              {/* <TabsTrigger
                 value="favorites"
                 className="w-[12.5%]  flex justify-start items-center p-2.5"
               >
                 Favorites
-              </TabsTrigger>
+              </TabsTrigger> */}
               <TabsTrigger
                 value="open"
                 className="w-[12.5%] flex justify-start items-center p-2.5"
               >
                 Open
+              </TabsTrigger>
+              <TabsTrigger
+                value="paused"
+                className="w-[12.5%] flex justify-start items-center p-2.5"
+              >
+                Paused
               </TabsTrigger>
               <TabsTrigger
                 value="closed"
@@ -319,18 +359,26 @@ const Dashboard = () => {
               </TabsTrigger>
             </TabsList>
           </div>
-          <TabsContent value="favorites">
+
+          {/* <TabsContent value="favorites">
             <FavoriteMarkets
               favoriteMarketsData={favoriteMarketsData}
               favoriteMarketsDataLoading={favoriteMarketsDataLoading}
               refetchFavoriteMarketsData={refetchFavoriteMarketsData}
             />
-          </TabsContent>
+          </TabsContent> */}
           <TabsContent value="open">
             <OpenMarkets
               openMarketsData={openMarketsData}
               openMarketsDataLoading={openMarketsDataLoading}
               refetchOpenMarketsData={refetchOpenMarketsData}
+            />
+          </TabsContent>
+          <TabsContent value="paused">
+            <PausedMarkets
+              pausedMarketsData={pausedMarketsData}
+              pausedMarketsDataLoading={pausedMarketsDataLoading}
+              refetchPausedMarketsData={refetchPausedMarketsData}
             />
           </TabsContent>
           <TabsContent value="closed">
