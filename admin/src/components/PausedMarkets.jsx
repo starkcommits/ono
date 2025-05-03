@@ -69,10 +69,10 @@ const OPTIONS = [
   { label: 'Tech', value: 'Tech' },
 ]
 
-const OpenMarkets = ({
-  openMarketsData,
-  openMarketsDataLoading,
-  refetchOpenMarketsData,
+const PausedMarkets = ({
+  pausedMarketsData,
+  pausedMarketsDataLoading,
+  refetchPausedMarketsData,
 }) => {
   const [sorting, setSorting] = React.useState([])
   const [pauseDialogOpen, setPauseDialogOpen] = React.useState(false)
@@ -99,25 +99,12 @@ const OpenMarkets = ({
 
   const { updateDoc } = useFrappeUpdateDoc()
 
-  const onPauseAction = async (market_id) => {
-    try {
-      await updateDoc('Market', market_id, {
-        status: 'PAUSED',
-      })
-      toast.success('Market paused successfully')
-      refetchOpenMarketsData()
-    } catch (err) {
-      console.log(err)
-      toast.error('Error in pausing market')
-    }
-  }
-
   const onResumeAction = async (market_id) => {
     try {
       await updateDoc('Market', market_id, {
         status: 'OPEN',
       })
-      refetchOpenMarketsData()
+      refetchPausedMarketsData()
       toast.success('Market resumed successfully')
       setResumeDialogOpen(false)
     } catch (err) {
@@ -129,12 +116,11 @@ const OpenMarkets = ({
   const onCloseAction = async (market_id) => {
     try {
       const istNow = getISTDateTime()
-      console.log(istNow)
       await updateDoc('Market', market_id, {
         status: 'CLOSED',
         closing_time: istNow,
       })
-      refetchOpenMarketsData()
+      refetchPausedMarketsData()
       toast.success('Market closed successfully')
       setCloseDialogOpen(false)
     } catch (err) {
@@ -156,6 +142,7 @@ const OpenMarkets = ({
   const columns = [
     {
       accessorKey: 'name',
+      id: 'name',
       header: ({ table }) => <div>ID</div>,
       cell: ({ row }) => (
         <div className="text-sm font-medium flex items-center gap-2">
@@ -176,6 +163,7 @@ const OpenMarkets = ({
     },
     {
       accessorKey: 'question',
+      id: 'question',
       header: ({ table }) => <div>Question</div>,
       cell: ({ row }) => (
         <div className="text-sm font-medium flex gap-2 items-center">
@@ -216,7 +204,6 @@ const OpenMarkets = ({
       enableSorting: false,
       enableHiding: false,
     },
-
     // {
     //   accessorKey: 'status',
     //   header: 'Status',
@@ -261,12 +248,6 @@ const OpenMarkets = ({
         <div className="text-sm text-muted-foreground font-medium ">
           {console.log('market id', row.original.name)}
           <div className="flex items-center gap-2">
-            {row.original.status === 'OPEN' && (
-              <PauseActionDialog
-                market_id={row.original.name}
-                onPauseAction={onPauseAction}
-              />
-            )}
             {row.original.status === 'PAUSED' && (
               <ResumeActionDialog
                 market_id={row.original.name}
@@ -330,7 +311,7 @@ const OpenMarkets = ({
   ]
 
   const table = useReactTable({
-    data: openMarketsData || [],
+    data: pausedMarketsData || [],
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -350,18 +331,18 @@ const OpenMarkets = ({
 
   return (
     <div className="w-full">
-      <div className="flex items-center py-4 gap-4">
-        <Input
-          placeholder="Filter market ID..."
-          value={table.getColumn('name')?.getFilterValue() ?? ''}
+      <div className="flex items-center py-4">
+        {/* <Input
+          placeholder="Filter emails..."
+          value={table.getColumn('email')?.getFilterValue() ?? ''}
           onChange={(event) =>
-            table.getColumn('name')?.setFilterValue(event.target.value)
+            table.getColumn('email')?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
-        />
+        /> */}
         <div className="flex flex-col gap-1">
           <MultipleSelector
-            className="max-w-sm"
+            className="w-[280px]"
             value={value}
             onChange={setValue}
             options={OPTIONS}
@@ -375,31 +356,31 @@ const OpenMarkets = ({
           />
         </div>
         {/* <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="ml-auto">
-                Columns <ChevronDown />
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-                {table
-                .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => {
-                    return (
-                    <DropdownMenuCheckboxItem
-                        key={column.id}
-                        className="capitalize"
-                        checked={column.getIsVisible()}
-                        onCheckedChange={(value) =>
-                        column.toggleVisibility(!!value)
-                        }
-                    >
-                        {column.id}
-                    </DropdownMenuCheckboxItem>
-                    )
-                })}
-            </DropdownMenuContent>
-            </DropdownMenu> */}
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="ml-auto">
+              Columns <ChevronDown />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {table
+              .getAllColumns()
+              .filter((column) => column.getCanHide())
+              .map((column) => {
+                return (
+                  <DropdownMenuCheckboxItem
+                    key={column.id}
+                    className="capitalize"
+                    checked={column.getIsVisible()}
+                    onCheckedChange={(value) =>
+                      column.toggleVisibility(!!value)
+                    }
+                  >
+                    {column.id}
+                  </DropdownMenuCheckboxItem>
+                )
+              })}
+          </DropdownMenuContent>
+        </DropdownMenu> */}
       </div>
       <div className="rounded-md border">
         <Table>
@@ -451,7 +432,7 @@ const OpenMarkets = ({
           </TableBody>
         </Table>
       </div>
-      {/* <div className="flex items-center justify-end space-x-2 py-4">
+      <div className="flex items-center justify-end space-x-2 py-4">
         <div className="flex-1 text-sm text-muted-foreground">
           {table.getFilteredSelectedRowModel().rows.length} of{' '}
           {table.getFilteredRowModel().rows.length} row(s) selected.
@@ -474,9 +455,9 @@ const OpenMarkets = ({
             Next
           </Button>
         </div>
-      </div> */}
+      </div>
     </div>
   )
 }
 
-export default OpenMarkets
+export default PausedMarkets

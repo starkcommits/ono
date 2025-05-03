@@ -9,8 +9,13 @@ export default function Header() {
       </div>
       {/* Right: Profile + Switch Button */}
       <div className="flex items-center space-x-4">
-        <UserCircle className="w-6 h-6 text-gray-600" />
-        <Button variant="outline" className="">
+        <Button
+          variant="outline"
+          className=""
+          onClick={() => {
+            window.location.href = '/'
+          }}
+        >
           Switch to Desk
         </Button>
       </div>
