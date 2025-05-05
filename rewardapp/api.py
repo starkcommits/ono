@@ -69,7 +69,9 @@ def signup():
         
         # Assign Role Profile
         user.role_profile_name = "Trader"
-        
+
+        # Save user with profiles
+        user.insert(ignore_permissions=True)
         # Assign Module Profile
         # module_profile = frappe.get_doc("Module Profile", "Trader")
         # for module in module_profile.modules:
@@ -121,10 +123,6 @@ def signup():
                 'status': 'Rewarded'
             })
             referral_tracking.insert(ignore_permissions=True)
-
-
-        # Save user with profiles
-        user.insert(ignore_permissions=True)
         
         # Add role directly to ensure it's applied
         if not frappe.db.exists("Has Role", {"parent": user.name, "role": "Trader"}):
@@ -203,3 +201,15 @@ def error_response(message):
         "status": "error",
         "message": message
     }
+
+@frappe.whitelist(allow_guest=True)
+def check_referral(referral_code):
+    
+    try:
+        referral_doc = frappe.get_doc("Referral Code", referral_code)
+
+        if int(referral_doc.total_referrals) >= int(referral_doc.total_allowed_referrals):
+            return error_response("This referral code has reached its limit")
+
+    except Exception as e:
+        return error_response(f"Registration failed: {str(e)}")
