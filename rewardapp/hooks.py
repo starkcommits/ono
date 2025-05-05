@@ -161,7 +161,7 @@ api = {
         "rewardapp.api.signup",
         "rewardapp.api.check_password_strength",
         "rewardapp.wallet.get_balance",
-        "rewardapp.wallet.update_wallet",
+        "rewardapp.wallet.recharge_wallet",
         "rewardapp.engine.update_order",
         "rewardapp.engine.trades",
         "rewardapp.engine.total_exit",

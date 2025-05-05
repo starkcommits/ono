@@ -1,57 +1,62 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "field:user",
- "creation": "2025-05-02 14:05:29.823554",
+ "autoname": "format:GST{####}",
+ "creation": "2025-05-03 13:01:46.044596",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "user",
-  "column_break_yppd",
-  "balance",
-  "column_break_vixq",
+  "sgst_rate",
+  "column_break_nwre",
+  "cgst_rate",
+  "column_break_mmyq",
+  "igst_rate",
+  "column_break_rvmv",
   "is_active"
  ],
  "fields": [
   {
-   "fieldname": "user",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "User",
-   "options": "User",
-   "reqd": 1,
-   "unique": 1
+   "fieldname": "sgst_rate",
+   "fieldtype": "Data",
+   "label": "SGST Rate"
   },
   {
-   "fieldname": "column_break_yppd",
+   "fieldname": "cgst_rate",
+   "fieldtype": "Data",
+   "label": "CGST Rate"
+  },
+  {
+   "fieldname": "igst_rate",
+   "fieldtype": "Data",
+   "label": "IGST Rate"
+  },
+  {
+   "fieldname": "column_break_nwre",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "balance",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Balance"
-  },
-  {
-   "fieldname": "column_break_vixq",
+   "fieldname": "column_break_mmyq",
    "fieldtype": "Column Break"
   },
   {
    "default": "0",
    "fieldname": "is_active",
    "fieldtype": "Check",
-   "in_list_view": 1,
    "label": "Is Active"
+  },
+  {
+   "fieldname": "column_break_rvmv",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-05-02 17:48:47.892778",
+ "modified": "2025-05-03 16:22:15.144875",
  "modified_by": "Administrator",
  "module": "Reward App",
- "name": "Promotional Wallet",
- "naming_rule": "By fieldname",
+ "name": "GST Config",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

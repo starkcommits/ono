@@ -1,16 +1,16 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "field:user",
- "creation": "2025-05-02 14:05:29.823554",
+ "autoname": "hash",
+ "creation": "2025-05-02 16:53:24.237568",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "user",
-  "column_break_yppd",
-  "balance",
-  "column_break_vixq",
-  "is_active"
+  "total_referrals",
+  "column_break_vskj",
+  "referral_name",
+  "total_allowed_referrals"
  ],
  "fields": [
   {
@@ -19,39 +19,41 @@
    "in_list_view": 1,
    "label": "User",
    "options": "User",
-   "reqd": 1,
-   "unique": 1
+   "reqd": 1
   },
   {
-   "fieldname": "column_break_yppd",
+   "fieldname": "column_break_vskj",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "balance",
-   "fieldtype": "Float",
+   "fieldname": "referral_name",
+   "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Balance"
-  },
-  {
-   "fieldname": "column_break_vixq",
-   "fieldtype": "Column Break"
+   "label": "Referral Name",
+   "options": "Referral Config"
   },
   {
    "default": "0",
-   "fieldname": "is_active",
-   "fieldtype": "Check",
+   "fieldname": "total_referrals",
+   "fieldtype": "Int",
    "in_list_view": 1,
-   "label": "Is Active"
+   "label": "Total Referrals"
+  },
+  {
+   "fetch_from": "referral_name.total_allowed_referrals",
+   "fieldname": "total_allowed_referrals",
+   "fieldtype": "Read Only",
+   "label": "Total Allowed Referrals"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-05-02 17:48:47.892778",
+ "modified": "2025-05-02 19:08:07.277832",
  "modified_by": "Administrator",
  "module": "Reward App",
- "name": "Promotional Wallet",
- "naming_rule": "By fieldname",
+ "name": "Referral Code",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [
   {
