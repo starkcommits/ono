@@ -133,12 +133,6 @@ def signup():
         # Commit transaction
         frappe.db.commit()
 
-        promotional_wallet = frappe.new_doc("Promotional Wallet")
-        promotional_wallet.user = user.name
-        promotional_wallet.balance = promotional_wallet_amount
-        promotional_wallet.is_active = 1
-        promotional_wallet.save()
-
         # Fetch active referral configs
         referrals = frappe.db.sql(
             """
@@ -149,7 +143,7 @@ def signup():
             """,
             as_dict=True
         )
-
+        user_referral = ""
         if referrals:
             user_referral = frappe.get_doc({
                 'doctype': 'Referral Code',
@@ -165,6 +159,13 @@ def signup():
         wallet.balance = 5000
         wallet.is_active = 1
         wallet.save(ignore_permissions=True)
+
+        promotional_wallet = frappe.new_doc("Promotional Wallet")
+        promotional_wallet.user = user.name
+        promotional_wallet.balance = promotional_wallet_amount
+        promotional_wallet.is_active = 1
+        promotional_wallet.referral_code = user_referral.name
+        promotional_wallet.save(ignore_permissions=True)
 
         # Optional: Only needed if inside a custom function, not a DocType method
         frappe.db.commit()
