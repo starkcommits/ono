@@ -69,7 +69,9 @@ def signup():
         
         # Assign Role Profile
         user.role_profile_name = "Trader"
-        
+
+        # Save user with profiles
+        user.insert(ignore_permissions=True)
         # Assign Module Profile
         # module_profile = frappe.get_doc("Module Profile", "Trader")
         # for module in module_profile.modules:
@@ -121,10 +123,6 @@ def signup():
                 'status': 'Rewarded'
             })
             referral_tracking.insert(ignore_permissions=True)
-
-
-        # Save user with profiles
-        user.insert(ignore_permissions=True)
         
         # Add role directly to ensure it's applied
         if not frappe.db.exists("Has Role", {"parent": user.name, "role": "Trader"}):
@@ -134,12 +132,6 @@ def signup():
         
         # Commit transaction
         frappe.db.commit()
-
-        promotional_wallet = frappe.new_doc("Promotional Wallet")
-        promotional_wallet.user = user.name
-        promotional_wallet.balance = promotional_wallet_amount
-        promotional_wallet.is_active = 1
-        promotional_wallet.save()
 
         # Fetch active referral configs
         referrals = frappe.db.sql(
@@ -151,7 +143,7 @@ def signup():
             """,
             as_dict=True
         )
-
+        user_referral = ""
         if referrals:
             user_referral = frappe.get_doc({
                 'doctype': 'Referral Code',
@@ -167,6 +159,13 @@ def signup():
         wallet.balance = 5000
         wallet.is_active = 1
         wallet.save(ignore_permissions=True)
+
+        promotional_wallet = frappe.new_doc("Promotional Wallet")
+        promotional_wallet.user = user.name
+        promotional_wallet.balance = promotional_wallet_amount
+        promotional_wallet.is_active = 1
+        promotional_wallet.referral_code = user_referral.name
+        promotional_wallet.save(ignore_permissions=True)
 
         # Optional: Only needed if inside a custom function, not a DocType method
         frappe.db.commit()
@@ -203,3 +202,15 @@ def error_response(message):
         "status": "error",
         "message": message
     }
+
+@frappe.whitelist(allow_guest=True)
+def check_referral(referral_code):
+    
+    try:
+        referral_doc = frappe.get_doc("Referral Code", referral_code)
+
+        if int(referral_doc.total_referrals) >= int(referral_doc.total_allowed_referrals):
+            return error_response("This referral code has reached its limit")
+
+    except Exception as e:
+        return error_response(f"Registration failed: {str(e)}")

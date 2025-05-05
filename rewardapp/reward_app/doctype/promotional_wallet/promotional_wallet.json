@@ -9,6 +9,8 @@
   "user",
   "column_break_yppd",
   "balance",
+  "column_break_yrrj",
+  "referral_code",
   "column_break_vixq",
   "is_active"
  ],
@@ -42,12 +44,22 @@
    "fieldtype": "Check",
    "in_list_view": 1,
    "label": "Is Active"
+  },
+  {
+   "fieldname": "column_break_yrrj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "referral_code",
+   "fieldtype": "Link",
+   "label": "Referral Code",
+   "options": "Referral Code"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-05-02 17:48:47.892778",
+ "modified": "2025-05-05 12:39:00.950685",
  "modified_by": "Administrator",
  "module": "Reward App",
  "name": "Promotional Wallet",
