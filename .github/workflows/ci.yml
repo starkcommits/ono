@@ -148,7 +148,7 @@ jobs:
   #             bench --site frontend migrate
   #           "
   
-            echo ">> Restarting supervisor processes..."
-            docker exec -u root -i frappe_reward_app-backend-1 supervisorctl restart all || true
+            # echo ">> Restarting supervisor processes..."
+            # docker exec -u root -i frappe_reward_app-backend-1 supervisorctl restart all || true
 
-            echo "✅ Deployment complete."
+            # echo "✅ Deployment complete."
