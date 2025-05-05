@@ -7,16 +7,17 @@
  "engine": "InnoDB",
  "field_order": [
   "user",
-  "remark",
   "market_id",
   "question",
   "winning_side",
+  "wallet_type",
   "column_break_rbct",
   "order_id",
   "transaction_amount",
   "transaction_type",
   "transaction_status",
-  "transaction_method"
+  "transaction_method",
+  "remark"
  ],
  "fields": [
   {
@@ -87,11 +88,17 @@
    "fieldtype": "Select",
    "label": "Transaction Method",
    "options": "UPI\nCARD"
+  },
+  {
+   "fieldname": "wallet_type",
+   "fieldtype": "Select",
+   "label": "Wallet Type",
+   "options": "Promo\nMain"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-04-04 23:24:57.380071",
+ "modified": "2025-05-05 16:59:04.127827",
  "modified_by": "Administrator",
  "module": "Reward App",
  "name": "Transaction Logs",
@@ -111,6 +118,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

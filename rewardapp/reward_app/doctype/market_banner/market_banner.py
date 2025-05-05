@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class MarketingBanner(Document):
+class MarketBanner(Document):
 	pass
