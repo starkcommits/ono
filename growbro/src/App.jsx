@@ -1,7 +1,7 @@
 import { Home, Search, Newspaper, Briefcase, Wallet } from 'lucide-react'
 import Navbar from './components/Navbar'
 import HomePage from './pages/Home'
-import WalletPage from './pages/Wallet'
+import WalletComponent from './pages/Wallet'
 import EventDetails from './pages/EventDetails'
 
 import News from './pages/News'

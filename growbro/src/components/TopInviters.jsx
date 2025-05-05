@@ -4,8 +4,8 @@ const TopInviters = () => {
   const inviters = [
     {
       id: 1,
-      name: 'Amrit Krishna',
-      username: '@amkrishna8u68',
+      name: 'Harshit Adhikari',
+      username: '@mitsuxhoney',
       earnings: 601234,
       position: 1,
       avatar:
@@ -13,8 +13,8 @@ const TopInviters = () => {
     },
     {
       id: 2,
-      name: 'Yoga',
-      username: '@yo007',
+      name: 'Anurag',
+      username: '@maverick',
       earnings: 159255,
       position: 2,
       avatar:
@@ -22,8 +22,8 @@ const TopInviters = () => {
     },
     {
       id: 3,
-      name: 'Phir Hera Pheri',
-      username: '@PhirHeraPheri',
+      name: 'Rahul',
+      username: '@papne',
       earnings: 151159,
       position: 3,
       avatar:
@@ -37,12 +37,12 @@ const TopInviters = () => {
   }
 
   return (
-    <div className="bg-white rounded-xl p-5 shadow-sm border border-amber-100">
+    <div className="bg-white rounded-xl p-5 shadow-sm border border-amber-100 ">
       <h2 className="text-lg font-semibold text-center text-gray-800 mb-4">
         TOP INVITERS
       </h2>
 
-      <div className="flex justify-between items-end mb-8 px-4">
+      <div className="flex justify-between items-end mb-4 px-4 ">
         {inviters.map((inviter) => {
           const isFirst = inviter.position === 1
           const size = isFirst ? 'large' : 'medium'

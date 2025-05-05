@@ -21,6 +21,98 @@ import {
   useFrappeGetDocList,
   useFrappeGetCall,
 } from 'frappe-react-sdk'
+const categoryIcons = {
+  Sports: (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      class="lucide lucide-volleyball-icon lucide-volleyball"
+    >
+      <path d="M11.1 7.1a16.55 16.55 0 0 1 10.9 4" />
+      <path d="M12 12a12.6 12.6 0 0 1-8.7 5" />
+      <path d="M16.8 13.6a16.55 16.55 0 0 1-9 7.5" />
+      <path d="M20.7 17a12.8 12.8 0 0 0-8.7-5 13.3 13.3 0 0 1 0-10" />
+      <path d="M6.3 3.8a16.55 16.55 0 0 0 1.9 11.5" />
+      <circle cx="12" cy="12" r="10" />
+    </svg>
+  ),
+  Politics: (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      class="lucide lucide-vote-icon lucide-vote"
+    >
+      <path d="m9 12 2 2 4-4" />
+      <path d="M5 7c0-1.1.9-2 2-2h10a2 2 0 0 1 2 2v12H5V7Z" />
+      <path d="M22 19H2" />
+    </svg>
+  ),
+  Tech: (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      class="lucide lucide-cpu-icon lucide-cpu"
+    >
+      <path d="M12 20v2" />
+      <path d="M12 2v2" />
+      <path d="M17 20v2" />
+      <path d="M17 2v2" />
+      <path d="M2 12h2" />
+      <path d="M2 17h2" />
+      <path d="M2 7h2" />
+      <path d="M20 12h2" />
+      <path d="M20 17h2" />
+      <path d="M20 7h2" />
+      <path d="M7 20v2" />
+      <path d="M7 2v2" />
+      <rect x="4" y="4" width="16" height="16" rx="2" />
+      <rect x="8" y="8" width="8" height="8" rx="1" />
+    </svg>
+  ),
+  Teaching: (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      class="lucide lucide-notebook-icon lucide-notebook"
+    >
+      <path d="M2 6h4" />
+      <path d="M2 10h4" />
+      <path d="M2 14h4" />
+      <path d="M2 18h4" />
+      <rect width="16" height="20" x="4" y="2" rx="2" />
+      <path d="M16 2v20" />
+    </svg>
+  ),
+  // Add more mappings here...
+}
 
 const Home = () => {
   const navigate = useNavigate()
@@ -224,8 +316,7 @@ const Home = () => {
                   <div
                     key={market.name}
                     className="market-card cursor-pointer"
-                    onClick={() => handleMarketClick(market)}
-                  >
+                    onClick={() => handleMarketClick(market)} >
                     <>
                       {/* <div className="relative h-32">
                      <img
