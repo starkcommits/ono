@@ -147,15 +147,7 @@ const FavoriteMarkets = ({
       cell: ({ row }) => (
         <div className="text-sm font-medium flex items-center gap-2">
           {row.original?.name?.split('_')[2]}
-          {row.original?.category === 'Sports' ? (
-            <Badge variant="outline">{row.original.category}</Badge>
-          ) : null}
-          {row.original?.category === 'Politics' ? (
-            <Badge variant="outline">{row.original.category}</Badge>
-          ) : null}
-          {row.original?.category === 'Tech' ? (
-            <Badge variant="outline">{row.original.category}</Badge>
-          ) : null}
+          <Badge variant="outline">{row.original.category}</Badge>
         </div>
       ),
       enableSorting: false,
