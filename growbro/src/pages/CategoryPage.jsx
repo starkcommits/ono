@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, TrendingUp, Users, Timer, Zap } from 'lucide-react'
-import { useFrappeEventListener, useFrappeGetDocList } from 'frappe-react-sdk'
+import {
+  useFrappeEventListener,
+  useFrappeGetDoc,
+  useFrappeGetDocList,
+} from 'frappe-react-sdk'
 import TradingViewWidgetBTC from '../components/TradingViewWidgetBTC'
 import TradingViewWidgetETH from '../components/TradingViewWidgetETH'
 
@@ -27,6 +31,11 @@ const CategoryPage = () => {
         ['category', '=', id],
       ],
     })
+
+  const { data: currentCategory, isLoading: currentCategoryLoading } =
+    useFrappeGetDoc('Market Category', id)
+
+  console.log(currentCategory)
 
   useEffect(() => {
     if (
@@ -133,9 +142,15 @@ const CategoryPage = () => {
             )}
             <div className="flex items-center gap-4 mt-4">
               <div
-                className={`w-16 h-16 bg-gradient-to-br ${getCategoryGradient()} rounded-2xl shadow-sm flex items-center justify-center`}
+                className={`w-16 h-16 ${getCategoryGradient()} rounded-2xl shadow-sm flex items-center justify-center`}
               >
-                <span className="text-3xl">{getCategoryEmoji()}</span>
+                <span className="text-3xl">
+                  <img
+                    src={currentCategory?.category_image}
+                    width={25}
+                    alt=""
+                  />
+                </span>
               </div>
               <div>
                 <h2 className="text-xl font-bold text-white mb-1">

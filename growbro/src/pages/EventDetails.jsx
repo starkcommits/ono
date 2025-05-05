@@ -193,12 +193,12 @@ const EventDetails = () => {
             )}
           </div>
         </div>
-        <div className="bg-amber-50 p-4 rounded-xl mb-6">
+        {/* <div className="bg-amber-50 p-4 rounded-xl mb-6">
           <div className="flex items-center">
             <span className="text-2xl mr-2">💡</span>
             <p className="text-sm text-amber-800">{market?.question}</p>
           </div>
-        </div>
+        </div> */}
         <div className="flex gap-3 mb-6">
           <button
             onClick={() => handleTradeClick('YES', 'BUY')}
@@ -311,7 +311,7 @@ const EventDetails = () => {
                       <div className="h-8 mb-4 bg-gray-100 rounded-xl overflow-hidden w-[40%]">
                         <div className="flex h-full">
                           <div
-                            className="bg-blue-500 h-full flex items-center justify-center text-xs text-white font-bold p-4"
+                            className="bg-blue-400 h-full flex items-center justify-center text-xs text-white font-bold p-4"
                             style={{
                               width: `${match?.first_user_price * 10}%`,
                             }}
@@ -319,7 +319,7 @@ const EventDetails = () => {
                             {match?.first_user_price}
                           </div>
                           <div
-                            className="bg-rose-500 h-full flex items-center justify-center text-xs text-white font-bold p-4"
+                            className="bg-rose-400 h-full flex items-center justify-center text-xs text-white font-bold p-4"
                             style={{
                               width: `${match?.second_user_price * 10}%`,
                             }}

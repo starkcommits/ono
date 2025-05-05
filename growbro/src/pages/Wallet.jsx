@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import {
   ArrowLeft,
@@ -262,9 +262,21 @@ const Wallet = () => {
     })
   }
 
+  const formatAmount = useCallback((amount) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 2,
+      notation: 'standard',
+    })
+      .format(amount)
+      .replace('INR', '')
+      .trim()
+  }, [])
+
   if (userWalletLoading) {
     return (
-      <div className="w-screen h-screen flex justify-center items-center">
+      <div className="w-full h-screen flex justify-center items-center">
         <div className="spinner w-14 h-14 rounded-full border-4 border-gray-200 border-r-blue-500 animate-spin"></div>
       </div>
     )
@@ -273,7 +285,7 @@ const Wallet = () => {
   return (
     <div className="bg-gray-50">
       {/* Header Section */}
-      <div className="bg-indigo-600 pt-safe-top pb-8">
+      {/* <div className="bg-indigo-600 pt-safe-top pb-8">
         <div className="px-6">
           <div className="flex items-center gap-4 mb-6">
             <button
@@ -285,7 +297,6 @@ const Wallet = () => {
             <h1 className="text-2xl font-bold text-white">Wallet</h1>
           </div>
 
-          {/* Balance Card */}
           <div className="bg-white/20 backdrop-blur-lg rounded-3xl p-6">
             <div className="flex items-center justify-between mb-2">
               <span className="text-white/90 font-medium">
@@ -322,13 +333,21 @@ const Wallet = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
 
-      {/* <div className="w-full max-w-md mx-auto px-4">
+      <div className="w-full">
         <div className="space-y-4 py-6">
-          <h2 className="text-2xl font-bold text-center mb-6">
-            Wallet Summary
-          </h2>
+          <div className="flex items-center">
+            <div className="flex items-center mb-6">
+              <button
+                onClick={() => navigate('/')}
+                className="p-2 rounded-full transition-colors"
+              >
+                <ArrowLeft className="h-6 w-6" />
+              </button>
+            </div>
+            <h2 className="text-2xl font-bold text-center mb-6">Wallet</h2>
+          </div>
 
           <Card className="overflow-hidden bg-white dark:bg-gray-800 border-0 shadow-lg rounded-2xl">
             <CardContent className="p-0">
@@ -343,7 +362,7 @@ const Wallet = () => {
                         Deposit
                       </p>
                       <h3 className="text-2xl font-bold mt-1">
-                        <span className="font-normal text-xl">₹</span>
+                        <span className="font-normal text-xl"></span>
                         {formatAmount(8.5)}
                       </h3>
                     </div>
@@ -352,6 +371,7 @@ const Wallet = () => {
                     <Button
                       variant="default"
                       size="lg"
+                      disabled
                       onClick={() => console.log('Recharge clicked')}
                       className="rounded-xl transition-all duration-300 font-medium bg-gray-900 hover:bg-gray-800 text-white dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-white"
                     >
@@ -361,7 +381,7 @@ const Wallet = () => {
                 </div>
               </div>
 
-              <div className="border-t border-gray-100 dark:border-gray-700">
+              {/* <div className="border-t border-gray-100 dark:border-gray-700">
                 <button
                   onClick={() => setShowBreakdown(!showBreakdown)}
                   className="flex items-center justify-center w-full py-3 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors"
@@ -392,11 +412,11 @@ const Wallet = () => {
                     </div>
                   </div>
                 )}
-              </div>
+              </div> */}
             </CardContent>
           </Card>
 
-          <Card className="overflow-hidden bg-white dark:bg-gray-800 border-0 shadow-lg rounded-2xl">
+          {/* <Card className="overflow-hidden bg-white dark:bg-gray-800 border-0 shadow-lg rounded-2xl">
             <CardContent className="p-0">
               <div className="p-5">
                 <div className="flex items-start justify-between">
@@ -409,7 +429,7 @@ const Wallet = () => {
                         Winnings
                       </p>
                       <h3 className="text-2xl font-bold mt-1">
-                        <span className="font-normal text-xl">₹</span>
+                        <span className="font-normal text-xl"></span>
                         {formatAmount(21.7)}
                       </h3>
                     </div>
@@ -440,9 +460,9 @@ const Wallet = () => {
                 </button>
               </div>
             </CardContent>
-          </Card>
+          </Card> */}
 
-          <div>
+          {/* <div>
             <Card className="overflow-hidden bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/40 dark:to-pink-950/40 border-0 shadow-lg rounded-2xl hover:shadow-xl transition-shadow">
               <CardContent className="p-0">
                 <button
@@ -459,7 +479,7 @@ const Wallet = () => {
                           Promotional
                         </p>
                         <h3 className="text-2xl font-bold mt-1">
-                          <span className="font-normal text-xl">₹</span>
+                          <span className="font-normal text-xl"></span>
                           {formatAmount(2.19)}
                         </h3>
                       </div>
@@ -471,12 +491,12 @@ const Wallet = () => {
                 </button>
               </CardContent>
             </Card>
-          </div>
+          </div> */}
         </div>
-      </div> */}
+      </div>
 
       {/* Content Section */}
-      <div className="px-6 -mt-4">
+      <div className="">
         <div className="bg-white rounded-3xl shadow-sm">
           {/* Add Money Section */}
           <div className="p-6 border-b border-gray-100">
@@ -529,7 +549,7 @@ const Wallet = () => {
                   Add Money
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              {/* <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Add Money to Wallet</DialogTitle>
                   <DialogDescription>
@@ -549,7 +569,7 @@ const Wallet = () => {
                     </Button>
                   </DialogFooter>
                 </DialogHeader>
-              </DialogContent>
+              </DialogContent> */}
             </Dialog>
           </div>
 

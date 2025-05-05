@@ -53,7 +53,7 @@ function App() {
                 {/* <Route path="/kyc" element={<KYC />} /> */}
                 <Route path="/wallet" element={<WalletPage />} />
                 <Route path="/portfolio" element={<Portfolio />} />
-                <Route path="/referral" element={<Referral />} />
+                {/* <Route path="/referral" element={<Referral />} /> */}
                 <Route
                   path="/portfolio/active/:id"
                   element={<ActiveMarketHolding />}
@@ -62,15 +62,15 @@ function App() {
                   path="/portfolio/closed/:id"
                   element={<ClosedMarketHolding />}
                 />
-                {/* 
+
                 <Route path="/news" element={<News />} />
-                <Route path="/search" element={<SearchPage />} /> */}
+                <Route path="/search" element={<SearchPage />} />
                 <Route path="/event/:id" element={<EventDetails />} />
                 <Route path="/category/:id" element={<CategoryPage />} />
                 {/* <Route path="/profile" element={<Profile />} />
                 <Route path="/settings" element={<Settings />} /> */}
                 {/* <Route path="/rewards" element={<Rewards />} /> */}
-                {/* <Route path="/notifications" element={<Notifications />} /> */}
+                <Route path="/notifications" element={<Notifications />} />
               </Route>
             </Route>
             <Route

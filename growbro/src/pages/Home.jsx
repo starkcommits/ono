@@ -31,9 +31,11 @@ const Home = () => {
 
   const { data: marketCategories, isLoading: marketCategoriesLoading } =
     useFrappeGetDocList('Market Category', {
-      fields: ['name', 'category_name'],
+      fields: ['name', 'category_name', 'category_image'],
       filters: [['is_active', '=', 1]],
     })
+
+  console.log(marketCategories)
 
   const { data: marketData, isLoading: marketDataLoading } =
     useFrappeGetDocList('Market', {
@@ -153,10 +155,12 @@ const Home = () => {
                   className="flex-shrink-0 group"
                 >
                   <div
-                    className={`w-16 h-16 bg-gradient-to-br rounded-2xl border border-neutral-600 shadow-sm flex flex-col items-center justify-center relative overflow-hidden`}
+                    className={`w-14 h-14 bg-gradient-to-br rounded-2xl border border-neutral-600 shadow-sm flex flex-col items-center justify-center relative overflow-hidden`}
                   >
                     <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    {/* <span className="text-2xl mb-1">{category.icon}</span> */}
+                    <span className="text-2xl mb-1">
+                      <img src={`${category.category_image}`} alt="Alt" />
+                    </span>
                     <span className="text-xs font-medium text-black/90">
                       {category.category_name}
                     </span>
