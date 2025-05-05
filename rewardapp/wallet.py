@@ -230,59 +230,6 @@ def get_balance(user_id: str):
     return {"status": "success", "wallet": wallet_data[0]}
 
 
-# @frappe.whitelist(allow_guest=True)
-# def update_wallet():
-#     """Update the wallet balance based on a transaction."""
-#     try:
-#         if 
-#         # Get wallet with lock
-#         wallet_data = frappe.db.sql("""
-#             SELECT name, balance FROM `tabUser Wallet`
-#             WHERE user = %s AND is_active = 1
-#         """, (data.user_id,), as_dict=True)
-        
-#         if not wallet_data:
-#             frappe.db.rollback()
-#             return {"status": "error", "message": "No active wallet found."}
-
-#         wallet_name = wallet_data[0]["name"]
-#         available_balance = wallet_data[0]["balance"]
-
-#         # Calculate new balance
-#         new_balance = available_balance + data.amount
-        
-#         # Update wallet balance
-#         frappe.db.sql("""
-#             UPDATE `tabUser Wallet`
-#             SET balance = %s
-#             WHERE name = %s
-#         """, (new_balance, wallet_name))
-
-#         # Insert Transaction Log
-#         txn_log = frappe.get_doc({
-#             "doctype": "Transaction Logs",
-#             "user": data.user_id,
-#             "market_id": data.market_id,
-#             "transaction_amount": data.amount,
-#             "transaction_type": data.transaction_type,
-#             "remark": data.description,
-#             "status": "Completed"
-#         })
-
-#         txn_log.insert(ignore_permissions=True)
-        
-#         # Commit only once at the end
-#         frappe.db.commit()
-        
-#         # Log successful update
-#         frappe.logger().info(f"Wallet updated successfully: {data.user_id}, Amount: {data.amount}")
-        
-#         return {"status": "success", "message": "Wallet updated successfully", "new_balance": new_balance}
-
-#     except Exception as e:
-#         frappe.log_error(f"Wallet update failed:", f"{str(e)}")
-#         return {"status": "error", "message": str(e)}
-
 @frappe.whitelist(allow_guest=True)
 def get_deposit_and_withdrawal():
     try:
@@ -304,3 +251,58 @@ def get_deposit_and_withdrawal():
             "error":"Error in total deposit and withdrawal calculation",
             "message":f"{str(e)}"
         }
+
+@frappe.whitelist(allow_guest=True)
+def recharge_wallet(user, amount):
+    gst_config = frappe.db.sql(
+        """
+        SELECT
+            sgst_rate,
+            cgst_rate,
+            igst_rate
+        FROM `tabGST Config`
+        WHERE is_active = 1
+        LIMIT 1
+        """, as_dict=True
+    )
+    sgst_amount = 0
+    cgst_amount = 0
+    igst_amount = 0
+    if gst_config:
+        sgst_amount = amount * (gst_config[0]['sgst_rate']/100)
+        cgst_amount = amount * (gst_config[0]['cgst_rate']/100)
+
+    total_gst = sgst_amount + cgst_amount + igst_amount
+    
+    # Get referrer's promotional wallet
+    promotional_wallet_data = frappe.db.sql("""
+        SELECT name, balance FROM `tabPromotional Wallet`
+        WHERE user = %s AND is_active = 1
+    """, (user,), as_dict=True)
+
+    if not promotional_wallet_data:
+        frappe.throw(f"No active promotional wallet found for {ruser}")
+
+    # Add referrer reward to wallet
+    new_balance = promotional_wallet_data[0]["balance"] + total_gst
+
+    frappe.db.set_value("Promotional Wallet", promotional_wallet_data[0]["name"], "balance", new_balance)
+
+    # Get referrer's promotional wallet
+    wallet_data = frappe.db.sql("""
+        SELECT name, balance FROM `tabUser Wallet`
+        WHERE user = %s AND is_active = 1
+    """, (user,), as_dict=True)
+
+    if not wallet_data:
+        frappe.throw(f"No active user wallet found for {ruser}")
+
+    wallet_name = promotional_wallet_data[0]["name"]
+    available_balance = promotional_wallet_data[0]["balance"]
+
+    # Add referrer reward to wallet
+    new_wallet_balance = available_balance - total_gst
+
+    frappe.db.set_value("User Wallet", wallet_name, "balance", new_wallet_balance)
+
+        
