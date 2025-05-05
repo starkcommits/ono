@@ -112,16 +112,14 @@ const Home = () => {
         <div className="pt-safe-top">
           <div className="max-w-lg mx-auto px-6 py-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
                 <button
                   onClick={() => setIsMenuOpen(true)}
                   className="p-2 hover:bg-gray-100 rounded-xl"
                 >
                   <Menu className="h-5 w-5 text-gray-700" />
                 </button>
-                <h1 className="text-xl font-semibold text-indigo-600">
-                  GrowBro
-                </h1>
+                <h1 className="text-xl font-semibold text-indigo-600">ONO</h1>
               </div>
               <div className="flex items-center gap-4">
                 <button

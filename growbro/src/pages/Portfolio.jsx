@@ -237,7 +237,7 @@ const Portfolio = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
+    <div className=" bg-gray-50 ">
       {/* Header Section with improved contrast */}
       <div className="bg-indigo-600 pt-safe-top pb-8">
         <div className="px-6">

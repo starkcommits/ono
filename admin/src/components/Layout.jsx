@@ -46,7 +46,7 @@ const Layout = () => {
       <div className="mx-auto px-4 mt-16">
         <Outlet />
         <div className="relative">
-          <div className="flex items-center justify-center h-[8rem] w-full fixed bottom-0 left-0 right-0">
+          <div className="flex items-center justify-center h-[4rem] w-full fixed bottom-0 left-0 right-0">
             <FloatingDock
               mobileClassName="translate-y-20" // only for demo, remove for production
               items={links}

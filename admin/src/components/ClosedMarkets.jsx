@@ -100,10 +100,10 @@ const ClosedMarkets = ({
     })
   }
 
-  const onResolveAction = async (data, market_id) => {
+  const onResolveAction = async (outcome, market_id) => {
     try {
       await updateDoc('Market', market_id, {
-        end_result: data.outcome,
+        end_result: outcome,
         status: 'RESOLVED',
       })
       refetchClosedMarketsData()

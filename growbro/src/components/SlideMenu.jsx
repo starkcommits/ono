@@ -84,7 +84,7 @@ const SlideMenu = ({ isOpen, onClose }) => {
           {/* Header */}
           <div className="pt-safe-top px-6 pb-4 border-b border-gray-100">
             <div className="flex items-center justify-between mb-6">
-              <h1 className="text-xl font-semibold text-indigo-600">GrowBro</h1>
+              <h1 className="text-xl font-semibold text-indigo-600">ONO</h1>
               <button
                 onClick={onClose}
                 className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
@@ -119,7 +119,7 @@ const SlideMenu = ({ isOpen, onClose }) => {
                   {section.items.map((item, itemIndex) => (
                     <button
                       key={itemIndex}
-                      onClick={() => item.path && navigate(item.path)}
+                      // onClick={() => item.path && navigate(item.path)}
                       className="w-full px-6 py-2.5 flex items-center justify-between hover:bg-gray-50 transition-colors"
                     >
                       <div className="flex items-center">

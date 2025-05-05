@@ -14,14 +14,12 @@ const EarningsTracker = () => {
           <Wallet size={20} className="text-amber-600" />
         </div>
         <div>
-          <h3 className="text-sm font-medium text-gray-500">
-            Current earnings
-          </h3>
+          <h3 className="text-sm font-medium text-gray-500">Invite Rewards</h3>
           <p className="text-2xl font-bold text-gray-800">₹{currentEarnings}</p>
         </div>
       </div>
 
-      <div className="mt-4">
+      {/* <div className="mt-4">
         <div className="w-full bg-gray-200 rounded-full h-2.5 mb-1">
           <div
             className="bg-gradient-to-r from-amber-400 to-yellow-500 h-2.5 rounded-full transition-all duration-700 ease-out"
@@ -32,9 +30,9 @@ const EarningsTracker = () => {
           <span>₹0</span>
           <span>₹1,000</span>
         </div>
-      </div>
+      </div> */}
 
-      <div className="mt-3 bg-white p-3 rounded-lg border border-amber-100">
+      {/* <div className="mt-3 bg-white p-3 rounded-lg border border-amber-100">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <div className="h-3 w-3 rounded-full bg-green-500"></div>
@@ -44,7 +42,7 @@ const EarningsTracker = () => {
           </div>
           <span className="text-sm font-semibold text-gray-800">₹0</span>
         </div>
-      </div>
+      </div> */}
     </div>
   )
 }

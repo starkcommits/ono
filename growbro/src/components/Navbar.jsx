@@ -5,7 +5,7 @@ const Navbar = ({ items }) => {
   const location = useLocation()
   const navigate = useNavigate()
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100">
+    <nav className="fixed bottom-0 left-0 right-0 bg-white border-gray-100 ">
       <div className="max-w-lg mx-auto px-6">
         <div className="flex justify-between py-4">
           {items.map((item) => {
@@ -14,7 +14,7 @@ const Navbar = ({ items }) => {
 
             return (
               <div
-                key={item.path}
+                key={item.label}
                 className={`nav-item ${
                   isActive ? 'active' : ''
                 } cursor-pointer flex flex-col items-center`}

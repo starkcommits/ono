@@ -120,7 +120,7 @@ const OrdersTab = () => {
   })
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className=" bg-gray-50">
       {/* Content Section */}
       <div className="mt-4">
         <div className="bg-white rounded-3xl shadow-sm">
