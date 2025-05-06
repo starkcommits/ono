@@ -215,7 +215,8 @@ def market(doc, method):
                     "question": doc.question,
                     "yes_price": doc.yes_price,
                     "no_price": doc.no_price,
-                    "closing_time": doc.closing_time
+                    "closing_time": doc.closing_time,
+                    "total_traders": doc.total_traders
                 }
                 
                 frappe.publish_realtime("market_event",update_data,after_commit=True)
@@ -348,7 +349,8 @@ def update_market_price():
             "question": market.question,
             "yes_price": data.yes_price,
             "no_price": data.no_price,
-            "closing_time": market.closing_time
+            "closing_time": market.closing_time,
+            "total_traders": market.total_traders
         }
 
         frappe.publish_realtime("market_event",update_data,after_commit=True)
