@@ -337,7 +337,7 @@ const Wallet = () => {
 
       <div className="w-full">
         <div className="space-y-4 py-6">
-          <div className="flex items-center">
+          <div className="flex items-center gap-6">
             <div className="flex items-center mb-6">
               <button
                 onClick={() => navigate('/')}
@@ -359,11 +359,11 @@ const Wallet = () => {
                     </div>
                     <div>
                       <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                        Deposit
+                        Wallet Balance
                       </p>
                       <h3 className="text-2xl font-bold mt-1">
                         <span className="font-normal text-xl"></span>
-                        {formatAmount(8.5)}
+                        {formatAmount(userWalletData?.balance)}
                       </h3>
                     </div>
                   </div>

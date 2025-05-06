@@ -24,6 +24,7 @@ import Portfolio from './pages/Portfolio'
 import ActiveMarketHolding from './pages/ActiveMarketHolding'
 import ClosedMarketHolding from './pages/ClosedMarketHolding'
 import Referral from './pages/Referral'
+import OTPScreen from './pages/OTPScreen'
 
 const navItems = [
   { icon: Home, label: 'Home', path: '/' },
@@ -42,6 +43,7 @@ function App() {
           <Routes>
             <Route element={<PublicRoute />}>
               <Route path="/signin" element={<SignIn />} />
+              <Route path="/otp" element={<OTPScreen />} />
               <Route path="/signup" element={<SignUp />} />
             </Route>
 
@@ -67,6 +69,7 @@ function App() {
                 <Route path="/search" element={<SearchPage />} />
                 <Route path="/event/:id" element={<EventDetails />} />
                 <Route path="/category/:id" element={<CategoryPage />} />
+
                 {/* <Route path="/profile" element={<Profile />} />
                 <Route path="/settings" element={<Settings />} /> */}
                 {/* <Route path="/rewards" element={<Rewards />} /> */}

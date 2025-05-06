@@ -149,17 +149,14 @@ const EventDetails = () => {
       <div className="fixed top-0 left-0 right-0 z-20 bg-white/80 backdrop-blur-lg border-b border-gray-100">
         {/* ... existing header content ... */}
         <div className="px-4 pt-safe-top pb-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center max-w-lg gap-6 mx-auto">
             <button
               onClick={() => navigate(-1)}
               className="p-2 -ml-2 active:bg-gray-100 rounded-full transition-colors"
             >
               <ArrowLeft className="h-6 w-6" />
             </button>
-            <h1 className="text-lg font-semibold">Event Details</h1>
-            <button className="p-2 active:bg-gray-100 rounded-full transition-colors">
-              <Share2 className="h-6 w-6" />
-            </button>
+            <h1 className="text-xl font-semibold">Event Details</h1>
           </div>
         </div>
       </div>
