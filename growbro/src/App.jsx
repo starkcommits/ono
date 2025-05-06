@@ -44,7 +44,7 @@ function App() {
             <Route element={<PublicRoute />}>
               <Route path="/signin" element={<SignIn />} />
               <Route path="/otp" element={<OTPScreen />} />
-              <Route path="/signup" element={<SignUp />} />
+              {/* <Route path="/signup" element={<SignUp />} /> */}
             </Route>
 
             {/* <Route path="/overview" element={<Overview />} /> */}
