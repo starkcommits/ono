@@ -237,7 +237,7 @@ const Portfolio = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
+    <div className=" bg-gray-50 ">
       {/* Header Section with improved contrast */}
       <div className="bg-indigo-600 pt-safe-top pb-8">
         <div className="px-6">
@@ -266,9 +266,11 @@ const Portfolio = () => {
                 <div className="text-3xl font-bold text-white flex items-center gap-4">
                   <div>
                     ₹
-                    {completedTradesData?.message?.reduce((acc, value) => {
-                      return acc + value.total_invested
-                    }, 0)}
+                    {completedTradesData?.message?.length > 0
+                      ? completedTradesData?.message?.reduce((acc, value) => {
+                          return acc + value.total_invested
+                        }, 0)
+                      : 0}
                   </div>
                 </div>
               </div>
@@ -283,9 +285,11 @@ const Portfolio = () => {
                 <div className="text-3xl font-bold text-white flex items-center gap-4">
                   <div>
                     ₹
-                    {completedTradesData?.message?.reduce((acc, value) => {
-                      return acc + value.total_returns
-                    }, 0)}
+                    {completedTradesData?.message?.length > 0
+                      ? completedTradesData?.message?.reduce((acc, value) => {
+                          return acc + value.total_returns
+                        }, 0)
+                      : 0}
                   </div>
                 </div>
               </div>

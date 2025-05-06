@@ -1,6 +1,15 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { ArrowLeft, Mail, Lock, Eye, EyeOff, User, Phone } from 'lucide-react'
+import {
+  ArrowLeft,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  User,
+  Phone,
+  Gift,
+} from 'lucide-react'
 import toast from 'react-hot-toast'
 import {
   useFrappeCreateDoc,
@@ -26,6 +35,7 @@ const SignUp = () => {
     phone: '',
     password: '',
     confirm_password: '',
+    referral_code: '',
   })
   const [showPassword, setShowPassword] = useState(false)
   const [formError, setFormError] = useState({
@@ -35,6 +45,7 @@ const SignUp = () => {
     phone: '',
     password: '',
     confirm_password: '',
+    referral_code: '',
   })
   const [isLoading, setIsLoading] = useState(false)
 
@@ -125,6 +136,9 @@ const SignUp = () => {
           newErrors.phone = err.message.message?.split(': ')[0]
         }
         if (err.message.message?.split(': ')[1] === 'password') {
+          newErrors.password = err.message.message?.split(': ')[0]
+        }
+        if (err.message.message?.split(': ')[1] === 'referral_code') {
           newErrors.password = err.message.message?.split(': ')[0]
         }
         return newErrors
@@ -327,6 +341,28 @@ const SignUp = () => {
               {formError.confirm_password && (
                 <span className="text-red-500 text-sm">
                   {formError.confirm_password}
+                </span>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Referral Code
+              </label>
+              <div className="relative">
+                <Gift className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <input
+                  type="text"
+                  name="referral_code"
+                  value={formData.referral_code}
+                  onChange={handleChange}
+                  className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                  placeholder="Enter the referral code (optional)"
+                />
+              </div>
+              {formError.referral_code && (
+                <span className="text-red-500 text-sm">
+                  {formError.referral_code}
                 </span>
               )}
             </div>

@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import React, { useCallback, useEffect, useState } from 'react'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import {
   ArrowLeft,
   Wallet as WalletIcon,
@@ -15,6 +15,11 @@ import {
   StethoscopeIcon,
   CircleX,
   Check,
+  ChevronUp,
+  ChevronDown,
+  Trophy,
+  Gift,
+  ArrowRight,
 } from 'lucide-react'
 import {
   InputOTP,
@@ -47,43 +52,50 @@ import {
 } from '@/components/ui/dialog'
 import {
   useFrappeAuth,
-  useFrappeCreateDoc,
   useFrappeGetCall,
   useFrappeGetDoc,
   useFrappeGetDocList,
   useFrappeUpdateDoc,
 } from 'frappe-react-sdk'
-import toast from 'react-hot-toast'
+import { AnimatePresence } from 'framer-motion'
+import { motion } from 'motion/react'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 
-const formSchema = z.object({
-  pin: z
-    .string()
-    .length(4, 'PIN must be exactly 4 digits')
-    .regex(/^\d+$/, 'PIN must contain only digits'),
-  confirm_pin: z
-    .string()
-    .length(4, 'PIN must be exactly 4 digits')
-    .regex(/^\d+$/, 'PIN must contain only digits'),
-})
+// const formSchema = z.object({
+//   pin: z
+//     .string()
+//     .length(4, 'PIN must be exactly 4 digits')
+//     .regex(/^\d+$/, 'PIN must contain only digits'),
+//   confirm_pin: z
+//     .string()
+//     .length(4, 'PIN must be exactly 4 digits')
+//     .regex(/^\d+$/, 'PIN must contain only digits'),
+// })
 
 const Wallet = () => {
   const navigate = useNavigate()
-  const location = useLocation()
-  const searchParams = new URLSearchParams(location.search)
-  const tab = searchParams.get('tab')
+  const [searchParams, setSearchParams] = useSearchParams()
   const [amount, setAmount] = useState('')
-  const [activeTab, setActiveTab] = useState(tab)
   const quickAmounts = [100, 500, 1000, 5000]
-  const [userWallet, setUserWallet] = useState({})
-  const [userHistory, setUserHistory] = useState([])
-  const [userWithdrawals, setUserWithdrawals] = useState([])
-  const [userDeposits, setUserDeposits] = useState([])
   const [open, setOpen] = useState(false)
   const { currentUser } = useFrappeAuth()
-  const { createDoc } = useFrappeCreateDoc()
-  const { updateDoc } = useFrappeUpdateDoc()
+  const tab = searchParams.get('tab' || 'all')
+  const [showBreakdown, setShowBreakdown] = useState(false)
 
-  console.log(currentUser)
+  const handleTabChange = (newTab) => {
+    const newParams = new URLSearchParams(searchParams)
+    newParams.set('tab', newTab) // update tab
+    setSearchParams(newParams) // apply while preserving others
+  }
+
+  // console.log(currentUser)
 
   const {
     data: userWalletData,
@@ -99,9 +111,12 @@ const Wallet = () => {
     data: total,
     isLoading: totalLoading,
     mutate: refetchTotal,
-  } = useFrappeGetCall('rewardapp.wallet.get_deposit_and_withdrawal')
+  } = useFrappeGetCall(
+    'rewardapp.wallet.get_deposit_and_withdrawal',
+    currentUser ? undefined : null
+  )
 
-  console.log('total: ', total)
+  // console.log('total: ', total)
 
   const {
     data: transactionHistory,
@@ -185,48 +200,21 @@ const Wallet = () => {
     tab === 'withdrawals' && currentUser ? undefined : null
   )
 
-  useEffect(() => {
-    setUserHistory(transactionHistory)
-  }, [transactionHistory])
+  // useEffect(() => {
+  //   setUserHistory(transactionHistory)
+  // }, [transactionHistory])
 
-  useEffect(() => {
-    setUserWithdrawals(withdrawalsHistory)
-  }, [withdrawalsHistory])
+  // useEffect(() => {
+  //   setUserWithdrawals(withdrawalsHistory)
+  // }, [withdrawalsHistory])
 
-  useEffect(() => {
-    setUserDeposits(depositsHistory)
-  }, [depositsHistory])
+  // useEffect(() => {
+  //   setUserDeposits(depositsHistory)
+  // }, [depositsHistory])
 
-  useEffect(() => {
-    setUserWallet(userWalletData)
-  }, [userWalletData])
-
-  const transactions = [
-    {
-      id: '1',
-      type: 'deposit',
-      amount: 1000,
-      status: 'completed',
-      method: 'UPI',
-      timestamp: '2024-03-05T14:30:00Z',
-    },
-    {
-      id: '2',
-      type: 'withdrawal',
-      amount: 500,
-      status: 'pending',
-      method: 'Bank Transfer',
-      timestamp: '2024-03-05T12:15:00Z',
-    },
-    {
-      id: '3',
-      type: 'deposit',
-      amount: 2000,
-      status: 'completed',
-      method: 'Credit Card',
-      timestamp: '2024-03-04T18:45:00Z',
-    },
-  ]
+  // useEffect(() => {
+  //   setUserWallet(userWalletData)
+  // }, [userWalletData])
 
   // async function handleAddMoney(data) {
   //   try {
@@ -274,9 +262,21 @@ const Wallet = () => {
     })
   }
 
+  const formatAmount = useCallback((amount) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 2,
+      notation: 'standard',
+    })
+      .format(amount)
+      .replace('INR', '')
+      .trim()
+  }, [])
+
   if (userWalletLoading) {
     return (
-      <div className="w-screen h-screen flex justify-center items-center">
+      <div className="w-full h-screen flex justify-center items-center">
         <div className="spinner w-14 h-14 rounded-full border-4 border-gray-200 border-r-blue-500 animate-spin"></div>
       </div>
     )
@@ -285,7 +285,7 @@ const Wallet = () => {
   return (
     <div className="bg-gray-50">
       {/* Header Section */}
-      <div className="bg-indigo-600 pt-safe-top pb-8">
+      {/* <div className="bg-indigo-600 pt-safe-top pb-8">
         <div className="px-6">
           <div className="flex items-center gap-4 mb-6">
             <button
@@ -297,7 +297,6 @@ const Wallet = () => {
             <h1 className="text-2xl font-bold text-white">Wallet</h1>
           </div>
 
-          {/* Balance Card */}
           <div className="bg-white/20 backdrop-blur-lg rounded-3xl p-6">
             <div className="flex items-center justify-between mb-2">
               <span className="text-white/90 font-medium">
@@ -306,7 +305,7 @@ const Wallet = () => {
               <WalletIcon className="h-5 w-5 text-white/90" />
             </div>
             <div className="text-4xl font-bold text-white mb-4">
-              ₹{userWallet?.balance}
+              ₹{userWalletData?.balance}
             </div>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
@@ -334,10 +333,172 @@ const Wallet = () => {
             </div>
           </div>
         </div>
+      </div> */}
+
+      <div className="w-full">
+        <div className="space-y-4 py-4">
+          <div className="flex items-center gap-6">
+            <div className="flex items-center mb-6">
+              <button
+                onClick={() => navigate('/')}
+                className="p-2 rounded-full transition-colors"
+              >
+                <ArrowLeft className="h-6 w-6" />
+              </button>
+            </div>
+            <h2 className="text-2xl font-bold text-center mb-6">Wallet</h2>
+          </div>
+
+          <Card className="overflow-hidden bg-white dark:bg-gray-800 border-0 shadow-lg rounded-2xl">
+            <CardContent className="p-0">
+              <div className="p-5">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className="rounded-xl p-3 flex items-center justify-center bg-blue-100 dark:bg-blue-900/30">
+                      <WalletIcon className="h-6 w-6 text-blue-500" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        Wallet Balance
+                      </p>
+                      <h3 className="text-2xl font-bold mt-1">
+                        <span className="font-normal text-xl"></span>
+                        {userWalletData?.balance
+                          ? formatAmount(userWalletData?.balance)
+                          : formatAmount(0)}
+                      </h3>
+                    </div>
+                  </div>
+                  <div>
+                    <Button
+                      variant="default"
+                      size="lg"
+                      disabled
+                      onClick={() => console.log('Recharge clicked')}
+                      className="rounded-xl transition-all duration-300 font-medium bg-gray-900 hover:bg-gray-800 text-white dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-white"
+                    >
+                      Recharge
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              {/* <div className="border-t border-gray-100 dark:border-gray-700">
+                <button
+                  onClick={() => setShowBreakdown(!showBreakdown)}
+                  className="flex items-center justify-center w-full py-3 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors"
+                >
+                  <span>View breakdown</span>
+                  {showBreakdown ? (
+                    <ChevronUp className="ml-2 h-4 w-4" />
+                  ) : (
+                    <ChevronDown className="ml-2 h-4 w-4" />
+                  )}
+                </button>
+
+                {showBreakdown && (
+                  <div className="overflow-hidden">
+                    <div className="px-4 py-3 space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500 dark:text-gray-400">
+                          Main Balance
+                        </span>
+                        <span className="font-medium">₹5.0</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500 dark:text-gray-400">
+                          Bonus
+                        </span>
+                        <span className="font-medium">₹3.5</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div> */}
+            </CardContent>
+          </Card>
+
+          {/* <Card className="overflow-hidden bg-white dark:bg-gray-800 border-0 shadow-lg rounded-2xl">
+            <CardContent className="p-0">
+              <div className="p-5">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className="rounded-xl p-3 flex items-center justify-center bg-amber-100 dark:bg-amber-900/30">
+                      <Trophy className="h-6 w-6 text-amber-500" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        Winnings
+                      </p>
+                      <h3 className="text-2xl font-bold mt-1">
+                        <span className="font-normal text-xl"></span>
+                        {formatAmount(21.7)}
+                      </h3>
+                    </div>
+                  </div>
+                  <div>
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      disabled={true}
+                      onClick={() => console.log('Withdraw clicked')}
+                      className="rounded-xl transition-all duration-300 font-medium border-gray-200 text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600"
+                    >
+                      Withdraw
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t border-gray-100 dark:border-gray-700">
+                <button
+                  onClick={() => console.log('KYC verification clicked')}
+                  className="w-full flex items-center justify-between py-4 px-5 text-left bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20"
+                >
+                  <span className="text-sm font-medium text-amber-700 dark:text-amber-500">
+                    Complete KYC to withdraw funds
+                  </span>
+                  <ChevronRight className="h-5 w-5 text-amber-500" />
+                </button>
+              </div>
+            </CardContent>
+          </Card> */}
+
+          {/* <div>
+            <Card className="overflow-hidden bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/40 dark:to-pink-950/40 border-0 shadow-lg rounded-2xl hover:shadow-xl transition-shadow">
+              <CardContent className="p-0">
+                <button
+                  onClick={() => console.log('Promotional balance clicked')}
+                  className="w-full p-5 text-left"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <div className="rounded-xl p-3 flex items-center justify-center bg-purple-100 dark:bg-purple-900/30">
+                        <Gift className="h-6 w-6 text-purple-500" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          Promotional
+                        </p>
+                        <h3 className="text-2xl font-bold mt-1">
+                          <span className="font-normal text-xl"></span>
+                          {formatAmount(2.19)}
+                        </h3>
+                      </div>
+                    </div>
+                    <div className="h-10 w-10 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center shadow-sm">
+                      <ArrowRight className="h-5 w-5 text-purple-500" />
+                    </div>
+                  </div>
+                </button>
+              </CardContent>
+            </Card>
+          </div> */}
+        </div>
       </div>
 
       {/* Content Section */}
-      <div className="px-6 -mt-4">
+      <div className="">
         <div className="bg-white rounded-3xl shadow-sm">
           {/* Add Money Section */}
           <div className="p-6 border-b border-gray-100">
@@ -353,8 +514,11 @@ const Wallet = () => {
                 </span>
                 <input
                   type="number"
+                  min="0"
                   value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
+                  onChange={(e) => {
+                    if (e.target.value >= 0) setAmount(e.target.value)
+                  }}
                   className="w-full pl-8 pr-4 py-3 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                   placeholder="0"
                 />
@@ -377,35 +541,17 @@ const Wallet = () => {
                 ))}
               </div>
             </div>
-            {/* 
-            <div className="space-y-3 mb-6">
-              <button className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 rounded-2xl hover:bg-indigo-50 hover:text-indigo-600 transition-colors">
-                <div className="flex items-center">
-                  <CreditCard className="h-5 w-5 mr-3" />
-                  <span className="font-medium">Credit/Debit Card</span>
-                </div>
-                <ChevronRight className="h-5 w-5" />
-              </button>
-
-              <button className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 rounded-2xl hover:bg-indigo-50 hover:text-indigo-600 transition-colors">
-                <div className="flex items-center">
-                  <BankIcon className="h-5 w-5 mr-3" />
-                  <span className="font-medium">UPI/Net Banking</span>
-                </div>
-                <ChevronRight className="h-5 w-5" />
-              </button>
-            </div> */}
 
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger className="w-full">
                 <Button
                   className="bg-secondary w-full hover:bg-secondary/90"
-                  disabled={!amount}
+                  disabled
                 >
                   Add Money
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              {/* <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Add Money to Wallet</DialogTitle>
                   <DialogDescription>
@@ -425,20 +571,19 @@ const Wallet = () => {
                     </Button>
                   </DialogFooter>
                 </DialogHeader>
-              </DialogContent>
+              </DialogContent> */}
             </Dialog>
           </div>
 
           {/* Transactions Section */}
-          <div>
+          <div className="flex flex-col gap-2 p-2">
             <div className="flex p-2">
               <button
                 onClick={() => {
-                  navigate(`/wallet?tab=all`)
-                  setActiveTab('all')
+                  handleTabChange('all')
                 }}
                 className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-medium transition-colors ${
-                  activeTab === 'all'
+                  tab === 'all'
                     ? 'bg-indigo-50 text-indigo-600'
                     : 'text-gray-600 hover:bg-gray-50'
                 }`}
@@ -447,11 +592,10 @@ const Wallet = () => {
               </button>
               <button
                 onClick={() => {
-                  navigate('/wallet?tab=deposits')
-                  setActiveTab('deposits')
+                  handleTabChange('deposits')
                 }}
                 className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-medium transition-colors ${
-                  activeTab === 'deposits'
+                  tab === 'deposits'
                     ? 'bg-indigo-50 text-indigo-600'
                     : 'text-gray-600 hover:bg-gray-50'
                 }`}
@@ -460,11 +604,10 @@ const Wallet = () => {
               </button>
               <button
                 onClick={() => {
-                  navigate('/wallet?tab=withdrawals')
-                  setActiveTab('withdrawals')
+                  handleTabChange('withdrawals')
                 }}
                 className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-medium transition-colors ${
-                  activeTab === 'withdrawals'
+                  tab === 'withdrawals'
                     ? 'bg-indigo-50 text-indigo-600'
                     : 'text-gray-600 hover:bg-gray-50'
                 }`}
@@ -473,18 +616,48 @@ const Wallet = () => {
               </button>
             </div>
 
-            <div className="p-4 flex items-center justify-between border-b border-gray-100">
-              <div className="text-sm font-medium text-gray-700">
-                Recent Transactions
-              </div>
+            {/* <div className="p-4 flex items-center justify-between border-b border-gray-100">
               <button className="p-2 hover:bg-gray-50 rounded-lg transition-colors">
                 <Filter className="h-4 w-4 text-gray-600" />
               </button>
-            </div>
+            </div> */}
 
-            <div className="mb-20">
-              {activeTab === 'all' &&
-                userHistory?.map((transaction) => {
+            <div className="">
+              {tab === 'all' ? (
+                transactionHistory?.length > 0 ? (
+                  <div className="p-2 text-sm font-medium text-gray-700">
+                    Recent Transactions
+                  </div>
+                ) : (
+                  <div className="p-2 flex justify-center text-sm font-medium text-gray-700">
+                    No transactions history.
+                  </div>
+                )
+              ) : null}
+              {tab === 'deposits' ? (
+                depositsHistory?.length > 0 ? (
+                  <div className="p-2 text-sm font-medium text-gray-700">
+                    Recent Transactions
+                  </div>
+                ) : (
+                  <div className="p-2 flex justify-center text-sm font-medium text-gray-700">
+                    No deposits history.
+                  </div>
+                )
+              ) : null}
+              {tab === 'withdrawals' ? (
+                withdrawalsHistory?.length > 0 ? (
+                  <div className="p-2 text-sm font-medium text-gray-700">
+                    Recent Transactions
+                  </div>
+                ) : (
+                  <div className="p-2 flex justify-center text-sm font-medium text-gray-700">
+                    No withdrawals history.
+                  </div>
+                )
+              ) : null}
+              {tab === 'all' &&
+                transactionHistory?.map((transaction) => {
                   console.log('Transaction:', transaction)
 
                   if (
@@ -586,8 +759,8 @@ const Wallet = () => {
                     )
                 })}
 
-              {activeTab === 'deposits' &&
-                userDeposits?.map((transaction) => {
+              {tab === 'deposits' &&
+                depositsHistory?.map((transaction) => {
                   console.log('Transaction:', transaction)
                   return (
                     <div
@@ -632,8 +805,8 @@ const Wallet = () => {
                     </div>
                   )
                 })}
-              {activeTab === 'withdrawals' &&
-                userWithdrawals?.map((transaction) => {
+              {tab === 'withdrawals' &&
+                withdrawalsHistory?.map((transaction) => {
                   console.log('Transaction:', transaction)
                   return (
                     <div
