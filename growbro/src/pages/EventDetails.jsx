@@ -102,7 +102,9 @@ const EventDetails = () => {
   )
 
   useEffect(() => {
-    if (!marketDataLoading && Object.values(marketData)) console.log('hello')
+    if (!marketDataLoading && Object.values(marketData)) {
+      setMarket(marketData)
+    }
   }, [marketData])
 
   console.log(marketData)
