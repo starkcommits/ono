@@ -524,7 +524,7 @@ const WalletComponent = () => {
       </div> */}
 
       <div className="w-full">
-        <div className="space-y-4 py-6">
+        <div className="space-y-4 py-4">
           <div className="flex items-center gap-6">
             <div className="flex items-center mb-6">
               <button
@@ -551,7 +551,9 @@ const WalletComponent = () => {
                       </p>
                       <h3 className="text-2xl font-bold mt-1">
                         <span className="font-normal text-xl"></span>
-                        {formatAmount(userWalletData?.balance)}
+                        {userWalletData?.balance
+                          ? formatAmount(userWalletData?.balance)
+                          : formatAmount(0)}
                       </h3>
                     </div>
                   </div>
@@ -735,7 +737,7 @@ const WalletComponent = () => {
               <DialogTrigger className="w-full">
                 <Button
                   className="bg-secondary w-full hover:bg-secondary/90"
-                  disabled={amount <= 0}
+                  disabled
                 >
                   Add Money
                 </Button>

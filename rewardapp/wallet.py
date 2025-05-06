@@ -3,6 +3,28 @@ import json
 import requests
 from frappe import _
 
+def create_transaction_log(doc):
+    try:
+        total_amount = doc.amount * doc.quantity
+
+        promotional_wallet_data = frappe.db.sql("""
+            SELECT name, balance FROM `tabPromotional Wallet`
+            WHERE user = %s AND is_active = 1
+        """, (user_id,), as_dict=True)
+
+        if promotional_wallet_data and promotional_wallet_data[0]["balance"]>0:
+            wallet_balance = promotional_wallet_data[0]["balance"]
+            if wallet_balance >= total_amount:
+                transaction_log = frappe.new_doc({
+                    'doctype':"Transaction Logs",
+                    'market_id':doc.market_id,
+                    
+                    
+                })
+
+    except Exception as e:
+        return raise_error(f"Error in creating transaction log {str(e)}")
+
 def wallet_operation(doc, method):
     try:
 

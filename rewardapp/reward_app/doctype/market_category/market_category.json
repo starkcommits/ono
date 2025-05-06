@@ -9,6 +9,8 @@
   "category_name",
   "column_break_alfv",
   "category_image",
+  "column_break_htwk",
+  "image_url",
   "column_break_kmlc",
   "is_active"
  ],
@@ -38,12 +40,21 @@
    "fieldname": "category_image",
    "fieldtype": "Attach Image",
    "label": "Category Image"
+  },
+  {
+   "fieldname": "column_break_htwk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "image_url",
+   "fieldtype": "Data",
+   "label": "Image URL"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-04-20 10:46:42.230757",
+ "modified": "2025-05-05 18:18:56.691266",
  "modified_by": "Administrator",
  "module": "Reward App",
  "name": "Market Category",

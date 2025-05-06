@@ -5,5 +5,5 @@
 from frappe.tests.utils import FrappeTestCase
 
 
-class TestMarketingBanner(FrappeTestCase):
+class TestMarketBanner(FrappeTestCase):
 	pass
