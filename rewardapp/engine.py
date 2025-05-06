@@ -218,7 +218,7 @@ def market(doc, method):
                     "closing_time": doc.closing_time
                 }
                 
-                frappe.publish_realtime("market_event",update_data,user=frappe.session.user,after_commit=True)
+                frappe.publish_realtime("market_event",update_data,after_commit=True)
                 frappe.msgprint("Market Created Successfully.")
         elif doc.status == "CLOSED":
             frappe.db.sql("""
@@ -338,14 +338,20 @@ def update_market_price():
             'no_price': data.no_price
         }, update_modified=False)
         frappe.db.commit()
-        """Send real-time update via WebSockets"""
+
+        market = frappe.get_doc("Market", data.market_id)
+
         update_data = {
-            "name": data.market_id,
+            "name": market.name,
+            "status": market.status,
+            "category": market.category,
+            "question": market.question,
             "yes_price": data.yes_price,
-            "no_price": data.no_price
+            "no_price": data.no_price,
+            "closing_time": market.closing_time
         }
-        
-        frappe.publish_realtime("market_event",update_data,user=frappe.session.user,after_commit=True)
+
+        frappe.publish_realtime("market_event",update_data,after_commit=True)
         
         return True
     except Exception as e:
