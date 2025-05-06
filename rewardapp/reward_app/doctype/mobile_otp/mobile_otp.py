@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class PageConfig(Document):
+class MobileOTP(Document):
 	pass
