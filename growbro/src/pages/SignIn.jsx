@@ -27,13 +27,16 @@ const SignIn = () => {
       //   username: email,
       //   password: password,
       // })
+      setLoading(true)
       await generateOTP({
         mobile_number: phone,
       })
       navigate('/otp', { state: { mobile_no: phone } })
+      setLoading(false)
     } catch (error) {
       console.error('Login error:', error)
       setLoginError(error.message || 'Login failed. Please try again.')
+      setLoading(false)
     }
   }
   return (

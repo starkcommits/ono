@@ -192,13 +192,13 @@ const Home = () => {
             alt="IT20L"
             className="w-full h-40 object-cover"
           />
-          <div className="absolute bottom-4 left-4 z-20 text-white">
+          {/* <div className="absolute bottom-4 left-4 z-20 text-white">
             <h3 className="text-xl font-semibold mb-2">IT20 League 2024</h3>
             <div className="inline-flex items-center bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full text-sm">
               <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse mr-2"></div>
               Events live at 7:30 PM today
             </div>
-          </div>
+          </div> */}
         </div>
 
         <div>
