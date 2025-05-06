@@ -266,7 +266,7 @@ def verify_otp(mobile, otp):
         user = user_doc.name  # get the name (string)
 
         wallet = frappe.new_doc("User Wallet")
-        wallet.user = user.name
+        wallet.user = user
         wallet.balance = 2000
         wallet.is_active = 1
         wallet.save(ignore_permissions=True)
