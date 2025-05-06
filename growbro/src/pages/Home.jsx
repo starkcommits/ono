@@ -35,6 +35,14 @@ const Home = () => {
       filters: [['is_active', '=', 1]],
     })
 
+  const { data: marketingBanner, isLoading: marketingBannerLoading } =
+    useFrappeGetDocList('Market Banner', {
+      fields: ['name', 'image_url', 'home_position'],
+      filters: [['home', '=', true]],
+    })
+
+  console.log('MArket Banner ', marketingBanner)
+
   console.log(marketCategories)
 
   const { data: marketData, isLoading: marketDataLoading } =
@@ -109,7 +117,7 @@ const Home = () => {
     )
   }
   return (
-    <div className="pb-24">
+    <div className="">
       <header className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
         <div className="pt-safe-top">
           <div className="max-w-lg mx-auto px-6 py-4">
@@ -159,7 +167,11 @@ const Home = () => {
                   >
                     <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <span className="text-2xl mb-1">
-                      <img src={`${category.category_image}`} alt="Alt" />
+                      <img
+                        src={`${category.category_image}`}
+                        alt="Alt"
+                        className=""
+                      />
                     </span>
                     <span className="text-xs font-medium text-black/90">
                       {category.category_name}
@@ -173,7 +185,10 @@ const Home = () => {
         <div className="relative rounded-2xl overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10"></div>
           <img
-            src="https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=800&h=300&fit=crop"
+            src={
+              marketingBanner?.find((item) => item.home_position === 1)
+                ?.image_url
+            }
             alt="IT20L"
             className="w-full h-40 object-cover"
           />
