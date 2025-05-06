@@ -255,8 +255,8 @@ def verify_otp(mobile, otp):
         user_doc = frappe.get_doc({
             "doctype": "User",
             "user_name": username,
-            "email": f"{username}@example.com",
-            "first_name": "Mobile User",
+            "email": f"{username}@ono.com",
+            "first_name": "ONO User",
             "phone": mobile,
             "enabled": 1,
             "role_profile_name": "Trader",  # set role profile
@@ -264,6 +264,12 @@ def verify_otp(mobile, otp):
         })
         user_doc.insert(ignore_permissions=True)
         user = user_doc.name  # get the name (string)
+
+        wallet = frappe.new_doc("User Wallet")
+        wallet.user = user.name
+        wallet.balance = 2000
+        wallet.is_active = 1
+        wallet.save(ignore_permissions=True)
 
     # Log the user in
     frappe.local.login_manager = LoginManager()
