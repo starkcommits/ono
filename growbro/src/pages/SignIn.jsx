@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { ArrowLeft, Mail, Lock, Eye, EyeOff, Phone } from 'lucide-react'
-import { useFrappeAuth } from 'frappe-react-sdk'
+import { useFrappeAuth, useFrappePostCall } from 'frappe-react-sdk'
 import toast from 'react-hot-toast'
 const SignIn = () => {
   const navigate = useNavigate()
@@ -13,9 +13,13 @@ const SignIn = () => {
 
   const [loading, setLoading] = useState(false)
 
+  const { call: generateOTP } = useFrappePostCall(
+    'rewardapp.api.generate_mobile_otp'
+  )
+
   // const [screen, setScreen] = useState('sign_in')
 
-  const sendOTP = (e) => {
+  const sendOTP = async (e) => {
     e.preventDefault()
     setLoginError(null)
     try {
@@ -23,7 +27,10 @@ const SignIn = () => {
       //   username: email,
       //   password: password,
       // })
-      navigate('/otp')
+      await generateOTP({
+        mobile_number: phone,
+      })
+      navigate('/otp', { state: { mobile_no: phone } })
     } catch (error) {
       console.error('Login error:', error)
       setLoginError(error.message || 'Login failed. Please try again.')

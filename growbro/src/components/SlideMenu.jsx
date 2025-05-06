@@ -92,8 +92,8 @@ const SlideMenu = ({ isOpen, onClose }) => {
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-indigo-400 to-indigo-500 rounded-full flex items-center justify-center">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 bg-gradient-to-br from-indigo-400 to-indigo-500 rounded-full flex items-center justify-center">
                 <span className="text-lg font-medium text-white">
                   {currentUserData?.full_name?.split(' ')[0]?.slice(0, 1)}
                   {currentUserData?.full_name?.split(' ')[1]?.slice(0, 1)}
@@ -102,7 +102,7 @@ const SlideMenu = ({ isOpen, onClose }) => {
               <div>
                 <h2 className="font-medium">{currentUserData?.full_name}</h2>
                 <p className="text-sm text-gray-500">
-                  {currentUserData?.email}
+                  {currentUserData?.username}
                 </p>
               </div>
             </div>

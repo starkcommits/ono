@@ -17,11 +17,18 @@ import {
   InputOTPSeparator,
   InputOTPSlot,
 } from '@/components/ui/input-otp'
+import { useFrappePostCall } from 'frappe-react-sdk'
+import { Navigate, useLocation, useNavigate } from 'react-router-dom'
+import toast from 'react-hot-toast'
 
 const OTPScreen = () => {
-  const [timeLeft, setTimeLeft] = useState(300) // 5 minutes = 300 seconds
+  const [timeLeft, setTimeLeft] = useState(600) // 5 minutes = 300 seconds
+  const location = useLocation()
+  const navigate = useNavigate()
+  const { mobile_no } = location.state || {}
   const [resendEnabled, setResendEnabled] = useState(false)
   const [otp, setOtp] = useState('')
+  const { call: verifyOTP } = useFrappePostCall('rewardapp.api.verify_otp')
 
   const formatTime = (seconds) => {
     const m = Math.floor(seconds / 60)
@@ -44,15 +51,26 @@ const OTPScreen = () => {
 
   const handleResend = () => {
     // Trigger resend logic here
-    setTimeLeft(300)
+    setTimeLeft(600)
     setResendEnabled(false)
   }
 
-  const handleVerifyOTP = async () => {}
+  const handleVerifyOTP = async () => {
+    try {
+      await verifyOTP({
+        mobile: mobile_no,
+        otp: otp,
+      })
+      navigate('/')
+    } catch (error) {
+      console.log(error)
+      toast.error(error?.message?.message || 'error in validating the otp')
+    }
+  }
 
   return (
     <div className="h-screen w-full flex items-center justify-center">
-      <Card className="mx-auto max-w-md ">
+      <Card className="mx-auto max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">
             Enter Verification Code
