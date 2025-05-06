@@ -191,8 +191,9 @@ from frappe.sessions import get_expiry_in_seconds
 def generate_mobile_otp(mobile_number):
     # Validate mobile number format
     if not re.match(r'^\d{10}$', mobile_number):
-        frappe.throw("Please enter a valid 10-digit mobile number")
-    
+        # frappe.throw("Please enter a valid 10-digit mobile number")
+        return error_response("Please enter a valid 10-digit mobile number")
+
     # Generate 6-digit OTP
     otp = ''.join(random.choice('0123456789') for _ in range(6))
     
@@ -229,20 +230,20 @@ def verify_otp(mobile, otp):
         fields=["name", "otp", "expires_at", "verified"])
     
     if not otp_record:
-        frappe.throw("No OTP found for this mobile number")
+        return error_response("No OTP found for this mobile number")
     
     otp_doc = frappe.get_doc("Mobile OTP", otp_record[0].name)
     
     # Check if OTP is expired
     if frappe.utils.now_datetime() > otp_doc.expires_at:
-        frappe.throw("OTP has expired. Please request a new one")
+        return error_response("OTP has expired. Please request a new one")
     
     if otp_doc.verified == 1:
-        frappe.throw("OTP is already verified. Please request a new one")
+        return error_response("OTP is already verified. Please request a new one")
 
     # Verify OTP
     if otp_doc.otp != otp:
-        frappe.throw("Invalid OTP")
+        return error_response("Invalid OTP")
 
     # Mark as verified
     otp_doc.verified = 1
