@@ -70,11 +70,7 @@ const Home = () => {
   )
 
   useEffect(() => {
-    if (
-      !marketDataLoading &&
-      marketData?.length > 0 &&
-      Object.keys(markets).length === 0
-    ) {
+    if (!marketDataLoading && marketData?.length > 0) {
       const marketMap = marketData.reduce((acc, market) => {
         acc[market.name] = market // ✅ Store as { "market_name": marketData }
         return acc
@@ -82,6 +78,8 @@ const Home = () => {
       setMarkets(marketMap)
     }
   }, [marketData]) // Depend only on loading state
+
+  console.log('Markets: ', markets)
 
   useFrappeEventListener('market_event', (updatedMarket) => {
     console.log('Updated Market:', updatedMarket)

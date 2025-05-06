@@ -102,8 +102,10 @@ const EventDetails = () => {
   )
 
   useEffect(() => {
-    setMarket(marketData)
+    if (!marketDataLoading && Object.values(marketData)) console.log('hello')
   }, [marketData])
+
+  console.log(marketData)
 
   // Listen for real-time updates
   // useFrappeEventListener('market_event', (updatedMarket) => {

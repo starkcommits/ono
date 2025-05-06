@@ -130,10 +130,6 @@ const ActiveMarketHolding = () => {
     id
   )
 
-  const { call: refetchActiveHoldings } = useFrappePostCall(
-    'rewardapp.engine.get_marketwise_holding'
-  )
-
   const { call } = useFrappePostCall('frappe.client.get')
 
   const {
@@ -568,8 +564,7 @@ const ActiveMarketHolding = () => {
         })
       }
       toast.success('Order Canceled Successfully.')
-
-      refetchActiveHoldings()
+      window.location.reload()
       setIsCancelOpen(false)
     } catch (err) {
       console.log(err)
