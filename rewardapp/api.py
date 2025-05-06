@@ -191,7 +191,7 @@ def send_sms(mobile_number,otp):
         url = "http://65.2.148.196:8081/message/sendText/test"
 
         payload = {
-            "number": mobile_number,
+            "number": f"91{mobile_number}",
             "text": f"Hi *ONO User*,\n Your login OTP is *{otp}*",
             "delay": 1
         }
@@ -218,7 +218,7 @@ def generate_mobile_otp(mobile_number):
     
     # Set expiry (e.g., 10 minutes from now)
     expiry = frappe.utils.now_datetime() + datetime.timedelta(minutes=10)
-    
+
      # Here you would integrate with an SMS gateway to send the OTP
     if not send_sms(mobile_number, otp):
         return error_response("Error in sending otp")
