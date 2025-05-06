@@ -51,10 +51,13 @@ const SignIn = () => {
       <div className="px-6 -mt-4">
         <div className="bg-white rounded-3xl p-6 shadow-sm">
           <div className="text-center mb-8">
+            {/* <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                  Welcome Back!
+                </h1> */}
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              Welcome Back!
+              Get Started
             </h1>
-            <p className="text-gray-600">Get Started</p>
+            {/* <span>Login or Signup</span> */}
           </div>
           {loginError && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-center">
