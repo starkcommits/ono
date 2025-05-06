@@ -8,6 +8,7 @@ import re
 from frappe.auth import LoginManager
 import random
 import datetime
+import requests
 from frappe.core.doctype.user.user import User
 from frappe.sessions import get_expiry_in_seconds
 
@@ -185,6 +186,24 @@ from frappe.sessions import get_expiry_in_seconds
 #         frappe.db.rollback()
 #         frappe.log_error(frappe.get_traceback(), _("Trader Signup Error"))
 #         return error_response(f"Registration failed: {str(e)}")
+def send_sms(mobile_number,otp):
+    try:
+        url = "http://65.2.148.196:8081/message/sendText/test"
+
+        payload = {
+            "number": mobile_number,
+            "text": f"Hi *ONO User*,\n Your login OTP is *{otp}*",
+            "delay": 1
+        }
+        headers = {
+            "apikey": "modimc",
+            "Content-Type": "application/json"
+        }
+
+        response = requests.request("POST", url, json=payload, headers=headers)
+        return True
+    except Exception as e:
+        return False
 
 
 @frappe.whitelist(allow_guest=True)
@@ -200,6 +219,10 @@ def generate_mobile_otp(mobile_number):
     # Set expiry (e.g., 10 minutes from now)
     expiry = frappe.utils.now_datetime() + datetime.timedelta(minutes=10)
     
+     # Here you would integrate with an SMS gateway to send the OTP
+    if not send_sms(mobile_number, otp):
+        return error_response("Error in sending otp")
+
     # Store OTP
     existing = frappe.db.get_value("Mobile OTP", {"mobile_number": mobile_number})
     if existing:
@@ -216,9 +239,6 @@ def generate_mobile_otp(mobile_number):
             "expires_at": expiry,
             "verified": 0
         }).insert(ignore_permissions=True)
-    
-    # Here you would integrate with an SMS gateway to send the OTP
-    # send_sms(mobile_number, f"Your OTP is {otp}")
     
     return {"success": True, "message": "OTP sent successfully"}
 
