@@ -285,7 +285,7 @@ def market(doc, method):
 
             frappe.db.sql("""
                 UPDATE `tabHolding`
-                SET status = 'EXITED', remark = 'Market Resolved'
+                SET status = 'EXITED', remark = 'Market Resolved', market_status = 'RESOLVED'
                 WHERE market_id = %s
                 AND status IN ('ACTIVE', 'EXITING', 'EXITED')
             """, (doc.name,))    
@@ -667,7 +667,7 @@ def total_returns(user_id):
             `tabMarket` m ON h.market_id = m.name
         WHERE
             h.user_id = %s
-            AND m.market_status = 'RESOLVED'
+            AND m.status = 'RESOLVED'
         GROUP BY
             h.market_id
     """, (user_id,), as_dict=True)
