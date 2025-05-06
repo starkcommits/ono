@@ -423,8 +423,9 @@ const WalletComponent = () => {
   // }
 
   const handleQuickAmount = (value) => {
-    setAmount(value.toString())
-  }, [])
+    setAmount(value.toString());
+  };
+  
 
   const formatDate = useCallback((dateString) => {
     const date = new Date(dateString)
