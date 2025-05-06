@@ -288,4 +288,4 @@ scheduler_events = {
 # }
 
 
-website_route_rules = [{'from_route': '/growbro/<path:app_path>', 'to_route': 'growbro'},]
+website_route_rules = [{'from_route': '/admin/<path:app_path>', 'to_route': 'admin'}, {'from_route': '/growbro/<path:app_path>', 'to_route': 'growbro'},]

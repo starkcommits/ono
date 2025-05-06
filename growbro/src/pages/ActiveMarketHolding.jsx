@@ -94,11 +94,11 @@ ChartJS.register(
 const ActiveMarketHolding = () => {
   const { id } = useParams()
   const navigate = useNavigate()
-  const location = useLocation()
+
   const [searchParams, setSearchParams] = useSearchParams()
   const tab = searchParams.get('tab')
   const [activeTab, setActiveTab] = useState(tab || 'all')
-  const [tradePrice, setTradePrice] = useState(null)
+
   const [selectedChoice, setSelectedChoice] = useState(null)
   const [selectedAction, setSelectedAction] = useState(null)
   const [marketPrice, setMarketPrice] = useState(null)
@@ -128,6 +128,10 @@ const ActiveMarketHolding = () => {
   const { data: marketData, isLoading: marketLoading } = useFrappeGetDoc(
     'Market',
     id
+  )
+
+  const { call: refetchActiveHoldings } = useFrappePostCall(
+    'rewardapp.engine.get_marketwise_holding'
   )
 
   const { call } = useFrappePostCall('frappe.client.get')
@@ -564,6 +568,8 @@ const ActiveMarketHolding = () => {
         })
       }
       toast.success('Order Canceled Successfully.')
+
+      refetchActiveHoldings()
       setIsCancelOpen(false)
     } catch (err) {
       console.log(err)

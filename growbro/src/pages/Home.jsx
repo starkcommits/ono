@@ -31,9 +31,19 @@ const Home = () => {
 
   const { data: marketCategories, isLoading: marketCategoriesLoading } =
     useFrappeGetDocList('Market Category', {
-      fields: ['name', 'category_name'],
+      fields: ['name', 'category_name', 'category_image'],
       filters: [['is_active', '=', 1]],
     })
+
+  const { data: marketingBanner, isLoading: marketingBannerLoading } =
+    useFrappeGetDocList('Market Banner', {
+      fields: ['name', 'image_url', 'home_position'],
+      filters: [['home', '=', true]],
+    })
+
+  console.log('MArket Banner ', marketingBanner)
+
+  console.log(marketCategories)
 
   const { data: marketData, isLoading: marketDataLoading } =
     useFrappeGetDocList('Market', {
@@ -107,21 +117,19 @@ const Home = () => {
     )
   }
   return (
-    <div className="pb-24">
+    <div className="">
       <header className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
         <div className="pt-safe-top">
           <div className="max-w-lg mx-auto px-6 py-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
                 <button
                   onClick={() => setIsMenuOpen(true)}
                   className="p-2 hover:bg-gray-100 rounded-xl"
                 >
                   <Menu className="h-5 w-5 text-gray-700" />
                 </button>
-                <h1 className="text-xl font-semibold text-indigo-600">
-                  GrowBro
-                </h1>
+                <h1 className="text-xl font-semibold text-indigo-600">ONO</h1>
               </div>
               <div className="flex items-center gap-4">
                 <button
@@ -155,10 +163,16 @@ const Home = () => {
                   className="flex-shrink-0 group"
                 >
                   <div
-                    className={`w-16 h-16 bg-gradient-to-br rounded-2xl border border-neutral-600 shadow-sm flex flex-col items-center justify-center relative overflow-hidden`}
+                    className={`w-14 h-14 bg-gradient-to-br rounded-2xl border border-neutral-600 shadow-sm flex flex-col items-center justify-center relative overflow-hidden`}
                   >
                     <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    {/* <span className="text-2xl mb-1">{category.icon}</span> */}
+                    <span className="text-2xl mb-1">
+                      <img
+                        src={`${category.category_image}`}
+                        alt="Alt"
+                        className=""
+                      />
+                    </span>
                     <span className="text-xs font-medium text-black/90">
                       {category.category_name}
                     </span>
@@ -171,17 +185,20 @@ const Home = () => {
         <div className="relative rounded-2xl overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10"></div>
           <img
-            src="https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=800&h=300&fit=crop"
+            src={
+              marketingBanner?.find((item) => item.home_position === 1)
+                ?.image_url
+            }
             alt="IT20L"
             className="w-full h-40 object-cover"
           />
-          <div className="absolute bottom-4 left-4 z-20 text-white">
+          {/* <div className="absolute bottom-4 left-4 z-20 text-white">
             <h3 className="text-xl font-semibold mb-2">IT20 League 2024</h3>
             <div className="inline-flex items-center bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full text-sm">
               <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse mr-2"></div>
               Events live at 7:30 PM today
             </div>
-          </div>
+          </div> */}
         </div>
 
         <div>

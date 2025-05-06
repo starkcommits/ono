@@ -144,22 +144,19 @@ const EventDetails = () => {
   }
 
   return (
-    <div className="min-h-full bg-gray-50">
+    <div className=" bg-gray-50">
       {/* Existing code remains the same */}
       <div className="fixed top-0 left-0 right-0 z-20 bg-white/80 backdrop-blur-lg border-b border-gray-100">
         {/* ... existing header content ... */}
         <div className="px-4 pt-safe-top pb-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center max-w-lg gap-6 mx-auto">
             <button
               onClick={() => navigate(-1)}
               className="p-2 -ml-2 active:bg-gray-100 rounded-full transition-colors"
             >
               <ArrowLeft className="h-6 w-6" />
             </button>
-            <h1 className="text-lg font-semibold">Event Details</h1>
-            <button className="p-2 active:bg-gray-100 rounded-full transition-colors">
-              <Share2 className="h-6 w-6" />
-            </button>
+            <h1 className="text-xl font-semibold">Event Details</h1>
           </div>
         </div>
       </div>
@@ -193,12 +190,12 @@ const EventDetails = () => {
             )}
           </div>
         </div>
-        <div className="bg-amber-50 p-4 rounded-xl mb-6">
+        {/* <div className="bg-amber-50 p-4 rounded-xl mb-6">
           <div className="flex items-center">
             <span className="text-2xl mr-2">💡</span>
             <p className="text-sm text-amber-800">{market?.question}</p>
           </div>
-        </div>
+        </div> */}
         <div className="flex gap-3 mb-6">
           <button
             onClick={() => handleTradeClick('YES', 'BUY')}
@@ -311,7 +308,7 @@ const EventDetails = () => {
                       <div className="h-8 mb-4 bg-gray-100 rounded-xl overflow-hidden w-[40%]">
                         <div className="flex h-full">
                           <div
-                            className="bg-blue-500 h-full flex items-center justify-center text-xs text-white font-bold p-4"
+                            className="bg-blue-400 h-full flex items-center justify-center text-xs text-white font-bold p-4"
                             style={{
                               width: `${match?.first_user_price * 10}%`,
                             }}
@@ -319,7 +316,7 @@ const EventDetails = () => {
                             {match?.first_user_price}
                           </div>
                           <div
-                            className="bg-rose-500 h-full flex items-center justify-center text-xs text-white font-bold p-4"
+                            className="bg-rose-400 h-full flex items-center justify-center text-xs text-white font-bold p-4"
                             style={{
                               width: `${match?.second_user_price * 10}%`,
                             }}
