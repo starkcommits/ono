@@ -47,7 +47,7 @@ def update_order():
 
 @frappe.whitelist(allow_guest=True)
 def trades():
-    """Handles trades updates with proper transaction management."""
+    """Handles trades updates."""
     try:
         data = frappe._dict(frappe.request.get_json())
         frappe.log_error("Trade Data", data)
@@ -55,171 +55,139 @@ def trades():
         if "trades" not in data:
             return {"status": "error", "message": "Missing 'trades' key in request data"}
 
-        # Begin a global transaction for all trades processing
-        frappe.db.begin()
-        
-        try:
-            for trade in data.trades:
-                # Insert trade record
-                trade_doc = frappe.get_doc({
-                    "doctype": "Trades",
-                    "first_user_order_id": trade["first_user_order_id"],
-                    "second_user_order_id": trade["second_user_order_id"],
+        for trade in data.trades:
+            trade_doc = frappe.get_doc({
+                "doctype": "Trades",
+                "first_user_order_id": trade["first_user_order_id"],
+                "second_user_order_id": trade["second_user_order_id"],
+                "market_id": trade["market_id"],
+                "first_user_id": trade["first_user_id"],
+                "second_user_id": trade["second_user_id"],
+                "first_user_price": trade["first_user_price"],
+                "second_user_price": trade["second_user_price"],
+                "quantity": trade["quantity"]
+            })
+            trade_doc.insert(ignore_permissions=True)
+
+            if trade["first_user_option"] != trade["second_user_option"]:
+                holding_doc1 = frappe.get_doc({
+                    "doctype": "Holding",
                     "market_id": trade["market_id"],
-                    "first_user_id": trade["first_user_id"],
-                    "second_user_id": trade["second_user_id"],
-                    "first_user_price": trade["first_user_price"],
-                    "second_user_price": trade["second_user_price"],
-                    "quantity": trade["quantity"]
+                    "quantity": trade["quantity"],
+                    "user_id": trade["first_user_id"],
+                    "opinion_type": trade["first_user_option"],
+                    "price": trade["first_user_price"],
+                    "status": "ACTIVE"
                 })
-                trade_doc.insert(ignore_permissions=True)
+                holding_doc1.insert(ignore_permissions=True)
 
-                # Different opinion types case
-                if trade["first_user_option"] != trade["second_user_option"]:
-                    # Create new holdings for both users
-                    holding_doc1 = frappe.get_doc({
-                        "doctype": "Holding",
-                        "market_id": trade["market_id"],
-                        "quantity": trade["quantity"],
-                        "user_id": trade["first_user_id"],
-                        "opinion_type": trade["first_user_option"],
-                        "price": trade["first_user_price"],
-                        "status": "ACTIVE"
-                    })
-                    holding_doc1.insert(ignore_permissions=True)
+                holding_doc2 = frappe.get_doc({
+                    "doctype": "Holding",
+                    "market_id": trade["market_id"],
+                    "quantity": trade["quantity"],
+                    "user_id": trade["second_user_id"],
+                    "opinion_type": trade["second_user_option"],
+                    "price": trade["second_user_price"],
+                    "status": "ACTIVE"
+                })
+                holding_doc2.insert(ignore_permissions=True)
+                frappe.db.commit()
 
-                    holding_doc2 = frappe.get_doc({
-                        "doctype": "Holding",
-                        "market_id": trade["market_id"],
-                        "quantity": trade["quantity"],
-                        "user_id": trade["second_user_id"],
-                        "opinion_type": trade["second_user_option"],
-                        "price": trade["second_user_price"],
-                        "status": "ACTIVE"
-                    })
-                    holding_doc2.insert(ignore_permissions=True)
-                
-                # Same opinion types case - handle exits
-                else:
-                    # Find holdings that are being exited
-                    result = frappe.db.sql("""
-                        SELECT name
-                        FROM `tabHolding`
-                        WHERE market_id = %s
-                        AND status = 'EXITING'
-                        AND order_id = %s
-                        AND user_id = %s
-                        AND opinion_type = %s
-                        ORDER BY price
-                        FOR UPDATE  /* Lock rows to prevent concurrent modifications */
-                    """, (
-                        trade["market_id"],
-                        trade["first_user_order_id"],
-                        trade["first_user_id"],
-                        trade["first_user_option"]
-                    ), as_dict=True)
+            else:
+                result = frappe.db.sql("""
+                    SELECT name
+                    FROM `tabHolding`
+                    WHERE market_id = %s
+                    AND status = 'EXITING'
+                    AND order_id = %s
+                    AND user_id = %s
+                    AND opinion_type = %s
+                    ORDER BY price
+                """, (
+                    trade["market_id"],
+                    trade["first_user_order_id"],
+                    trade["first_user_id"],
+                    trade["first_user_option"]
+                ), as_dict=True)
 
-                    trade_quantity = trade["quantity"]
+                trade_quantity = trade["quantity"]
 
-                    for row in result:
-                        holding_doc = frappe.get_doc("Holding", row["name"])
-                        remaining_quantity = holding_doc.quantity - holding_doc.filled_quantity
-                        quantity = 0
+                for row in result:
+                    holding_doc = frappe.get_doc("Holding", row["name"])
+                    remaining_quantity = holding_doc.quantity - holding_doc.filled_quantity
+                    quantity = 0
 
-                        if remaining_quantity <= trade_quantity:
-                            trade_quantity -= remaining_quantity
-                            holding_doc.filled_quantity = holding_doc.quantity
-                            holding_doc.status = "EXITED"
-                            quantity = remaining_quantity
-                        else:
-                            quantity = trade_quantity
-                            holding_doc.filled_quantity += trade_quantity
-                            trade_quantity = 0
+                    if remaining_quantity <= trade_quantity:
+                        trade_quantity -= remaining_quantity
+                        holding_doc.filled_quantity = holding_doc.quantity
+                        holding_doc.status = "EXITED"
+                        quantity = remaining_quantity
+                    else:
+                        quantity = trade_quantity
+                        holding_doc.filled_quantity += trade_quantity
+                        trade_quantity = 0
 
-                        # Reward logic
-                        reward = quantity * (holding_doc.exit_price - holding_doc.price)
-                        holding_doc.returns += reward
+                    # Reward logic
+                    reward = quantity * (holding_doc.exit_price - holding_doc.price)
+                    holding_doc.returns += reward
 
-                        holding_doc.save(ignore_permissions=True)
+                    holding_doc.save(ignore_permissions=True)
 
-                        # Lock and fetch wallet in the same transaction
-                        wallet_data = frappe.db.sql("""
-                            SELECT name, balance FROM `tabUser Wallet`
-                            WHERE user = %s AND is_active = 1
-                            FOR UPDATE  /* Lock row to prevent concurrent modifications */
-                        """, (trade["first_user_id"],), as_dict=True)
+                    # Lock and fetch wallet
+                    wallet_data = frappe.db.sql("""
+                        SELECT name, balance FROM `tabUser Wallet`
+                        WHERE user = %s AND is_active = 1
+                        FOR UPDATE
+                    """, (trade["first_user_id"],), as_dict=True)
 
-                        if not wallet_data:
-                            # If no wallet found, roll back the entire transaction
-                            frappe.db.rollback()
-                            return {"status": "error", "message": f"No active wallet found for user {trade['first_user_id']}."}
+                    if not wallet_data:
+                        frappe.db.rollback()
+                        return {"status": "error", "message": "No active wallet found."}
 
-                        wallet_name = wallet_data[0]["name"]
-                        available_balance = wallet_data[0]["balance"]
-                        new_balance = available_balance + reward
+                    wallet_name = wallet_data[0]["name"]
+                    available_balance = wallet_data[0]["balance"]
 
-                        # Update wallet
-                        frappe.db.sql("""
-                            UPDATE `tabUser Wallet`
-                            SET balance = %s
-                            WHERE name = %s
-                        """, (new_balance, wallet_name))
+                    new_balance = available_balance + reward
 
-                        if trade_quantity == 0:
-                            break
+                    # Update wallet
+                    frappe.db.sql("""
+                        UPDATE `tabUser Wallet`
+                        SET balance = %s
+                        WHERE name = %s
+                    """, (new_balance, wallet_name))
 
-                    # Create holding for second user
-                    holding_doc2 = frappe.get_doc({
-                        "doctype": "Holding",
-                        "market_id": trade["market_id"],
-                        "quantity": trade["quantity"],
-                        "user_id": trade["second_user_id"],
-                        "opinion_type": trade["second_user_option"],
-                        "price": trade["second_user_price"],
-                        "status": "ACTIVE"
-                    })
-                    holding_doc2.insert(ignore_permissions=True)
+                    if trade_quantity == 0:
+                        break
 
-            # Commit all changes in a single transaction
-            frappe.db.commit()
-            
-            # Publish realtime updates after successful commit
-            for trade in data.trades:
-                frappe.publish_realtime(
-                    "trade_event", 
-                    {
-                        "market_id": trade["market_id"],
-                        "quantity": trade["quantity"],
-                        "first_user_id": trade["first_user_id"],
-                        "second_user_id": trade["second_user_id"]
-                    },
-                    after_commit=True
-                )
-                
-            return {"status": "success", "message": f"{len(data.trades)} trades inserted successfully"}
-            
-        except Exception as e:
-            # Roll back the entire transaction if any part fails
-            frappe.db.rollback()
-            frappe.log_error(f"Trade processing failed: {str(e)}", "Trade_Error")
-            return {"status": "error", "message": f"Trade processing failed: {str(e)}"}
-            
+                frappe.db.commit()
+
+                holding_doc2 = frappe.get_doc({
+                    "doctype": "Holding",
+                    "market_id": trade["market_id"],
+                    "quantity": trade["quantity"],
+                    "user_id": trade["second_user_id"],
+                    "opinion_type": trade["second_user_option"],
+                    "price": trade["second_user_price"],
+                    "status": "ACTIVE"
+                })
+                holding_doc2.insert(ignore_permissions=True)
+
+                frappe.db.commit()
+
+        return {"status": "success", "message": f"{len(data.trades)} trades inserted successfully"}
     except Exception as e:
-        # Handle JSON parsing or other initialization errors
         frappe.log_error(f"Trade update failed: {str(e)}", "Trade_order")
         return {"status": "error", "message": str(e)}
 
 def market(doc, method):
-    """
-    Handles market operations with proper transaction management.
-    """
     try:
-        # OPEN market status
         if doc.status == "OPEN":
             # Convert closing_time to ISO format if needed
             if isinstance(doc.closing_time, str):
+                # If it's already a string, ensure it's in ISO format
                 closing_time = doc.closing_time
             else:
+                # If it's a datetime object, convert to ISO
                 closing_time = doc.closing_time.isoformat()
         
             payload = {
@@ -232,154 +200,99 @@ def market(doc, method):
             # For debugging
             frappe.logger().info(f"Sending payload to market engine: {payload}")
             
-            # External API call - no transaction needed yet as we aren't modifying DB
-            try:
-                url = "http://94.136.187.188:8086/markets/"
-                response = requests.post(url, json=payload)
-                
-                if response.status_code != 201:
-                    frappe.logger().error(f"Error response: {response.text}")
-                    frappe.throw(f"API error: {response.status_code} - {response.text}")
-                else:
-                    # Send real-time update via WebSockets
-                    update_data = {
-                        "name": doc.name,
-                        "status": doc.status,
-                        "category": doc.category,
-                        "question": doc.question,
-                        "yes_price": doc.yes_price,
-                        "no_price": doc.no_price,
-                        "closing_time": doc.closing_time,
-                        "total_traders": doc.total_traders
-                    }
-                    
-                    frappe.publish_realtime("market_event", update_data, after_commit=True)
-                    frappe.msgprint("Market Created Successfully.")
-            except requests.exceptions.RequestException as e:
-                frappe.logger().error(f"API connection error: {str(e)}")
-                frappe.throw(f"Failed to connect to market engine: {str(e)}")
-                
-        # CLOSED market status
-        elif doc.status == "CLOSED":
-            # Begin transaction for canceling orders
-            frappe.db.begin()
-            try:
-                # Cancel all open orders for this market
-                frappe.db.sql("""
-                    UPDATE `tabOrders`
-                    SET status = 'CANCELED'
-                    WHERE market_id = %s AND status NOT IN ('MATCHED', 'SETTLED', 'CANCELED')
-                    FOR UPDATE
-                """, (doc.name,))
-                
-                # Commit changes before external API call
-                frappe.db.commit()
-                
-                # External API call after database transaction
-                try:
-                    url = f"http://94.136.187.188:8086/markets/{doc.name}/close"
-                    response = requests.post(url)
-                    
-                    if response.status_code != 200:
-                        frappe.logger().error(f"Error response: {response.text}")
-                        frappe.throw(f"API error: {response.status_code} - {response.text}")
-                except requests.exceptions.RequestException as e:
-                    frappe.logger().error(f"Market close API error: {str(e)}")
-                    frappe.throw(f"Failed to close market in engine: {str(e)}")
+            url = "http://127.0.0.1:8086/markets/"
+            response = requests.post(url, json=payload)
             
-            except Exception as e:
-                frappe.db.rollback()
-                frappe.log_error(f"Failed to close market: {str(e)}")
-                frappe.throw(f"Error closing market: {str(e)}")
+            if response.status_code != 201:
+                frappe.logger().error(f"Error response: {response.text}")
+                frappe.throw(f"API error: {response.status_code} - {response.text}")
+            else:
+                """Send real-time update via WebSockets"""
+                update_data = {
+                    "name": doc.name,
+                    "status": doc.status,
+                    "category": doc.category,
+                    "question": doc.question,
+                    "yes_price": doc.yes_price,
+                    "no_price": doc.no_price,
+                    "closing_time": doc.closing_time,
+                    "total_traders": doc.total_traders
+                }
                 
-        # Market resolution (RESOLVED or other status)
+                frappe.publish_realtime("market_event",update_data,after_commit=True)
+                frappe.msgprint("Market Created Successfully.")
+        elif doc.status == "CLOSED":
+            frappe.db.sql("""
+                UPDATE `tabOrders`
+                SET status = 'CANCELED'
+                WHERE market_id = %s AND status NOT IN ('MATCHED', 'SETTLED', 'CANCELED')
+            """, (doc.name,))
+
+            frappe.db.commit()
+            url=f"http://127.0.0.1:8086/markets/{doc.name}/close"
+            response = requests.post(url)
+                
+            if response.status_code != 200:
+                frappe.logger().error(f"Error response: {response.text}")
+                frappe.throw(f"API error: {response.status_code} - {response.text}")
         else:
-            # Begin a transaction for the entire resolution process
-            frappe.db.begin()
-            try:
-                # Get holdings data with row locks
-                result = frappe.db.sql("""
-                    SELECT
-                        user_id,
-                        opinion_type,
-                        SUM(quantity - filled_quantity) AS total_quantity
-                    FROM `tabHolding`
-                    WHERE market_id = %s
-                    AND status IN ('ACTIVE', 'EXITING')
-                    GROUP BY user_id, opinion_type
-                    FOR UPDATE  /* Lock rows to prevent concurrent modifications */
-                """, (doc.name,), as_dict=True)
+            result = frappe.db.sql("""
+                SELECT
+                    user_id,
+                    opinion_type,
+                    SUM(quantity - filled_quantity) AS total_quantity
+                FROM `tabHolding`
+                WHERE market_id = %s
+                AND status IN ('ACTIVE', 'EXITING')
+                GROUP BY user_id, opinion_type
+            """, (doc.name,), as_dict=True)
 
-                # Process payouts for winning positions
-                for row in result:
-                    if row["opinion_type"] == doc.end_result:
-                        user_id = row["user_id"]
-                        qty = row["total_quantity"] or 0
-                        
-                        # Lock and get wallet data
-                        wallet_data = frappe.db.sql("""
-                            SELECT name, balance FROM `tabUser Wallet`
-                            WHERE user = %s AND is_active = 1
-                            FOR UPDATE  /* Lock row to prevent concurrent modifications */
-                        """, (user_id,), as_dict=True)
+            for row in result:
+                
+                if row["opinion_type"] == doc.end_result:
+                    user_id = row["user_id"]
+                    qty = row["total_quantity"] or 0
+                    wallet_data = frappe.db.sql("""
+                        SELECT name, balance FROM `tabUser Wallet`
+                        WHERE user = %s AND is_active = 1
+                        FOR UPDATE
+                    """, (user_id,), as_dict=True)
 
-                        if not wallet_data:
-                            frappe.db.rollback()
-                            frappe.msgprint("No active wallet found")
-                            frappe.throw(f"No active wallet found for {user_id}")
+                    if not wallet_data:
+                        frappe.msgprint("No active wallet found")
+                        frappe.throw(f"No active wallet found for {user_id}")
 
-                        wallet_name = wallet_data[0]["name"]
-                        available_balance = wallet_data[0]["balance"]
+                    wallet_name = wallet_data[0]["name"]
+                    available_balance = wallet_data[0]["balance"]
 
-                        # Calculate new balance
-                        new_balance = available_balance + qty * 10
-                        
-                        # Update wallet balance
-                        frappe.db.sql("""
-                            UPDATE `tabUser Wallet`
-                            SET balance = %s
-                            WHERE name = %s
-                        """, (new_balance, wallet_name))
-                
-                # Update returns for winning positions
-                frappe.db.sql("""
-                    UPDATE `tabHolding`
-                    SET returns = returns + ((quantity - filled_quantity) * 10)
-                    WHERE market_id = %s
-                    AND opinion_type = %s
-                """, (doc.name, doc.end_result))
+                    # Calculate new balance
+                    new_balance = available_balance + qty * 10
+                    
+                    # Update wallet balance
+                    frappe.db.sql("""
+                        UPDATE `tabUser Wallet`
+                        SET balance = %s
+                        WHERE name = %s
+                    """, (new_balance, wallet_name))
+            
+            frappe.db.sql("""
+                UPDATE `tabHolding`
+                SET returns = returns + ((quantity - filled_quantity) * 10)
+                WHERE market_id = %s
+                AND opinion_type = %s
+            """, (doc.name, doc.end_result))
 
-                # Update all holdings status to EXITED
-                frappe.db.sql("""
-                    UPDATE `tabHolding`
-                    SET status = 'EXITED', remark = 'Market Resolved', market_status = 'RESOLVED'
-                    WHERE market_id = %s
-                    AND status IN ('ACTIVE', 'EXITING', 'EXITED')
-                """, (doc.name,))
-                
-                # Commit all changes at once
-                frappe.db.commit()
-                
-                # Send notification about market resolution
-                frappe.publish_realtime(
-                    "market_resolved", 
-                    {
-                        "market_id": doc.name,
-                        "result": doc.end_result
-                    },
-                    after_commit=True
-                )
-                
-                frappe.msgprint(f"Market {doc.name} resolved successfully with {doc.end_result} result.")
-                
-            except Exception as e:
-                frappe.db.rollback()
-                frappe.log_error(f"Failed to resolve market: {str(e)}")
-                frappe.throw(f"Error resolving market: {str(e)}")
-                
+            frappe.db.commit()
+
+            frappe.db.sql("""
+                UPDATE `tabHolding`
+                SET status = 'EXITED', remark = 'Market Resolved', market_status = 'RESOLVED'
+                WHERE market_id = %s
+                AND status IN ('ACTIVE', 'EXITING', 'EXITED')
+            """, (doc.name,))    
+            frappe.db.commit()
     except Exception as e:
-        frappe.log_error(f"Exception in market function: {str(e)}")
-        frappe.throw(f"Market operation failed: {str(e)}")
+        frappe.log_error(f"Exception market: {str(e)}")
 
 
 @frappe.whitelist(allow_guest=True)
@@ -676,7 +589,7 @@ def holding(doc,method):
 
         # API call to sync order update
         try:
-            url = "http://94.136.187.188:8086/orders/update_quantity"
+            url = "http://127.0.0.1:8086/orders/update_quantity"
             response = requests.put(url, json=payload)
             if response.status_code != 201:
                 frappe.logger().error(f"Error response: {response.text}")

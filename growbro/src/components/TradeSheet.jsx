@@ -21,9 +21,8 @@ const TradeSheet = ({
   tradeAction,
   sellQuantity,
   previousOrderId,
-  refetchActiveOrders,
+  refetchActiveHoldings,
 }) => {
-  console.log('Refetch: ', refetchActiveOrders)
   const { createDoc, isLoading: createDocLoading } = useFrappeCreateDoc()
   const { updateDoc } = useFrappeUpdateDoc()
   const { id } = useParams()
@@ -34,8 +33,6 @@ const TradeSheet = ({
     currentUser,
     currentUser ? undefined : null
   )
-
-  console.log('User', userData)
 
   const x = useMotionValue(0)
   const background = useTransform(x, [0, 200], ['#e0e0e0', '#4ade80']) // gray to green
@@ -136,6 +133,8 @@ const TradeSheet = ({
       console.log('Resssssssssssss', res)
 
       toast.success(`Sell Order Placed.`)
+
+      refetchActiveHoldings()
 
       onClose()
     } catch (err) {

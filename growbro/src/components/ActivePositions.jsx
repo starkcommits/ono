@@ -9,6 +9,7 @@ import {
   useFrappePutCall,
   useFrappeUpdateDoc,
 } from 'frappe-react-sdk'
+
 import {
   Drawer,
   DrawerClose,
@@ -46,22 +47,20 @@ import { Badge } from '@/components/ui/badge'
 import { useEffect, useState } from 'react'
 import { useFrappeDeleteDoc } from 'frappe-react-sdk'
 import toast from 'react-hot-toast'
+import ExitHoldingsDialog from './ExitHoldingsDialog'
+import CancelHoldingsDialog from './CancelHoldingsDialog'
 
-const ActivePositions = ({
-  position,
-  setActiveHoldings,
-  handleTradeClick,
-  refetchActiveHoldings,
-}) => {
+const ActivePositions = ({ position, refetchActiveHoldings }) => {
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
   const [isCancelOpen, setIsCancelOpen] = useState(false)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
-  console.log(position)
-
   const [yesPrice, setYesPrice] = useState(position.yes_price)
   const [noPrice, setNoPrice] = useState(position.no_price)
+
+  console.log(position)
+
   const { currentUser } = useFrappeAuth()
   const { createDoc } = useFrappeCreateDoc()
   const { call } = useFrappePostCall('rewardapp.engine.cancel_order')
@@ -111,15 +110,18 @@ const ActivePositions = ({
     })
   }
 
-  const handleCancelOrder = async (market_id) => {
-    console.log(market_id)
+  const handleCancelOrders = async (market_id, setIsCancelOpen) => {
+    console.log('Cancel Orders', market_id)
     try {
-      call({
-        market_id: market_id,
-        user_id: currentUser,
-      })
+      await call(
+        {
+          market_id: market_id,
+          user_id: currentUser,
+        },
+        currentUser ? undefined : null
+      )
       toast.success('Exit Orders Canceled Successfully.')
-      refetchActiveHoldings()
+      console.log('11111111111', refetchActiveHoldings)
       setIsCancelOpen(false)
     } catch (err) {
       console.log(err)
@@ -127,7 +129,7 @@ const ActivePositions = ({
     }
   }
 
-  const handleExitPositions = async () => {
+  const handleExitPositions = async (yesPrice, noPrice, setIsDrawerOpen) => {
     try {
       if (position?.ACTIVE?.YES?.total_quantity > 0) {
         console.log('Yes')
@@ -167,7 +169,7 @@ const ActivePositions = ({
       setIsDrawerOpen(false)
     } catch (err) {
       console.log(err)
-      setIsDrawerOpen(false)
+      toast.error('Error in exiting positions from the market')
     }
   }
 
@@ -289,126 +291,15 @@ const ActivePositions = ({
           </div>
           <div>
             {'EXITING' in position ? (
-              <Dialog open={isCancelOpen} onOpenChange={setIsCancelOpen}>
-                <DialogTrigger className="w-full">
-                  <button className="flex gap-1 items-center">
-                    <span>Cancel</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
-                </DialogTrigger>
-                <DialogContent className="">
-                  <DialogHeader>
-                    <DialogTitle>Are you absolutely sure?</DialogTitle>
-                    <DialogDescription>
-                      This action cannot be undone. This will permanently delete
-                      your account and remove your data from our servers.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <DialogFooter>
-                    <Button
-                      className="bg-white hover:bg-white/90"
-                      variant="outline"
-                      onClick={() => setIsCancelOpen(false)}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      className="bg-neutral-900 text-white hover:text-neutral-800 hover:bg-neutral-800/40"
-                      onClick={() => handleCancelOrder(position.market_id)}
-                    >
-                      Submit
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
+              <CancelHoldingsDialog
+                position={position}
+                handleCancelOrders={handleCancelOrders}
+              />
             ) : (
-              <Drawer
-                className="w-full"
-                open={isDrawerOpen}
-                onOpenChange={setIsDrawerOpen}
-              >
-                <DrawerTrigger asChild>
-                  <button
-                    className="flex gap-1 items-center justify-center"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <span className="text-xs font-medium">EXIT</span>
-                    <ArrowRight strokeWidth={1.5} className="h-4 w-4" />
-                  </button>
-                </DrawerTrigger>
-                <DrawerContent className="mx-auto w-full">
-                  <DrawerHeader className="flex items-center justify-center">
-                    <DrawerTitle className="w-full flex justify-center">
-                      Exit all positions in this particular market
-                    </DrawerTitle>
-                  </DrawerHeader>
-                  <div className="w-full flex flex-col gap-4">
-                    {position?.ACTIVE?.YES?.total_quantity ? (
-                      <div className="mb-6 px-10">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-lg font-medium">Yes Price</span>
-                          <div className="flex items-center">
-                            <span className="text-lg font-medium">
-                              ₹{yesPrice}
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="flex justify-between mt-2">
-                          <Slider
-                            defaultValue={[1]}
-                            max={9.5}
-                            min={0.5}
-                            step={0.5}
-                            value={[yesPrice]}
-                            className={``}
-                            onValueChange={(values) => {
-                              setYesPrice(values[0])
-                            }}
-                          />
-                        </div>
-                      </div>
-                    ) : null}
-                    {position?.ACTIVE?.NO?.total_quantity ? (
-                      <div className="mb-6 px-10">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-lg font-medium">No Price</span>
-                          <div className="flex items-center">
-                            <span className="text-lg font-medium">
-                              ₹{noPrice}
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="flex justify-between mt-2">
-                          <Slider
-                            defaultValue={[1]}
-                            max={9.5}
-                            min={0.5}
-                            step={0.5}
-                            value={[noPrice]}
-                            className={``}
-                            onValueChange={(values) => {
-                              setNoPrice(values[0])
-                            }}
-                          />
-                        </div>
-                      </div>
-                    ) : null}
-                  </div>
-                  <DrawerFooter className="w-full px-10 text-xs">
-                    <Button onClick={handleExitPositions}>
-                      Exit All Positions
-                    </Button>
-
-                    <DrawerClose className=" w-full">
-                      <Button variant="outline" className="w-full">
-                        Cancel
-                      </Button>
-                    </DrawerClose>
-                  </DrawerFooter>
-                </DrawerContent>
-              </Drawer>
+              <ExitHoldingsDialog
+                position={position}
+                handleExitPositions={handleExitPositions}
+              />
             )}
           </div>
         </div>
