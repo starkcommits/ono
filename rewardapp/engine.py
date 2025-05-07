@@ -200,7 +200,7 @@ def market(doc, method):
             # For debugging
             frappe.logger().info(f"Sending payload to market engine: {payload}")
             
-            url = "http://127.0.0.1:8086/markets/"
+            url = "http://94.136.187.188:8086/markets/"
             response = requests.post(url, json=payload)
             
             if response.status_code != 201:
@@ -229,7 +229,7 @@ def market(doc, method):
             """, (doc.name,))
 
             frappe.db.commit()
-            url=f"http://127.0.0.1:8086/markets/{doc.name}/close"
+            url=f"http://94.136.187.188:8086/markets/{doc.name}/close"
             response = requests.post(url)
                 
             if response.status_code != 200:
@@ -589,7 +589,7 @@ def holding(doc,method):
 
         # API call to sync order update
         try:
-            url = "http://127.0.0.1:8086/orders/update_quantity"
+            url = "http://94.136.187.188:8086/orders/update_quantity"
             response = requests.put(url, json=payload)
             if response.status_code != 201:
                 frappe.logger().error(f"Error response: {response.text}")
@@ -617,7 +617,7 @@ def cancel_order(market_id, user_id):
                 "market_id": market_id,
                 "user_id": user_id,
                 "order_type": "SELL",
-                "status": ["!=", "MATCHED"]
+                "status": ["not in", ["MATCHED", "CANCELED"]]
             },
             pluck="name"
         )
@@ -628,10 +628,8 @@ def cancel_order(market_id, user_id):
             order.save()  # Triggers on_update
 
         frappe.db.commit()
-        return {
-            "success":True,
-            "message":"Order canceled successfully"
-        }
+        return success_response("All Order canceled successfully")
+        
     except Exception as e:
         return error_response(f"Error in cancelling order {str(e)}")
 
@@ -687,3 +685,19 @@ def total_returns(user_id):
     """, (user_id,), as_dict=True)
 
     return result
+
+def error_response(message):
+    """Return an error response in JSON format"""
+    frappe.response["http_status_code"] = 400
+    return {
+        "status": "error",
+        "message": message
+    }
+
+def success_response(message):
+    """Return a success response in JSON format"""
+    frappe.response["http_status_code"] = 200
+    return {
+        "status": "success",
+        "message": message
+    }
