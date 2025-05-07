@@ -406,12 +406,10 @@ const ActiveMarketHolding = () => {
         console.log('2')
         refetchMatchedHoldingData()
         refetchTotalExit()
-
       case 'exiting':
         console.log('3')
         refetchExitingHoldingData()
         refetchTotalExit()
-
       case 'exited':
         console.log('4')
         refetchExitedHoldingData()
@@ -564,7 +562,7 @@ const ActiveMarketHolding = () => {
         })
       }
       toast.success('Order Canceled Successfully.')
-      window.location.reload()
+      refetcHoldingData()
       setIsCancelOpen(false)
     } catch (err) {
       console.log(err)

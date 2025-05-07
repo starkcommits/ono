@@ -31,40 +31,40 @@ const ActiveOrders = ({
   const { updateDoc } = useFrappeUpdateDoc()
   const { currentUser } = useFrappeAuth()
 
-  useFrappeEventListener('market_event', (updatedMarket) => {
-    console.log('Hello')
-    if (updatedMarket.name === order.market_id) {
-      console.log('Current: ', order.market_id)
-      console.log('Updated:', updatedMarket.name)
-    }
-    if (updatedMarket.name === order.market_id) {
-      setActiveOrders((prev) => {
-        const updatedActiveOrders = {
-          ...prev,
-          [order.name]: {
-            name: order.name,
-            question: order.question,
-            creation: order.creation,
-            amount: order.amount,
-            status: order.status,
-            quantity: order.quantity,
-            opinion_type: order.opinion_type,
-            market_id: order.market_id,
-            yes_price:
-              order.opinion_type === 'YES'
-                ? updatedMarket.yes_price
-                : order.yes_price,
-            no_price:
-              order.opinion_type === 'NO'
-                ? updatedMarket.no_price
-                : order.no_price,
-            sell_order_id: order.sell_order_id,
-          },
-        }
-        return updatedActiveOrders
-      })
-    }
-  })
+  // useFrappeEventListener('market_event', (updatedMarket) => {
+  //   console.log('Hello')
+  //   if (updatedMarket.name === order.market_id) {
+  //     console.log('Current: ', order.market_id)
+  //     console.log('Updated:', updatedMarket.name)
+  //   }
+  //   if (updatedMarket.name === order.market_id) {
+  //     setActiveOrders((prev) => {
+  //       const updatedActiveOrders = {
+  //         ...prev,
+  //         [order.name]: {
+  //           name: order.name,
+  //           question: order.question,
+  //           creation: order.creation,
+  //           amount: order.amount,
+  //           status: order.status,
+  //           quantity: order.quantity,
+  //           opinion_type: order.opinion_type,
+  //           market_id: order.market_id,
+  //           yes_price:
+  //             order.opinion_type === 'YES'
+  //               ? updatedMarket.yes_price
+  //               : order.yes_price,
+  //           no_price:
+  //             order.opinion_type === 'NO'
+  //               ? updatedMarket.no_price
+  //               : order.no_price,
+  //           sell_order_id: order.sell_order_id,
+  //         },
+  //       }
+  //       return updatedActiveOrders
+  //     })
+  //   }
+  // })
 
   const formatDate = (dateString) => {
     const date = new Date(dateString)

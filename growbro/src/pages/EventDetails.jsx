@@ -24,6 +24,7 @@ import {
 import TradeSheet from '../components/TradeSheet'
 import {
   useFrappeDocTypeEventListener,
+  useFrappeEventListener,
   useFrappeGetDoc,
   useFrappeGetDocList,
 } from 'frappe-react-sdk'
@@ -107,8 +108,15 @@ const EventDetails = () => {
     }
   }, [marketData])
 
-  console.log(marketData)
+  useFrappeEventListener('market_event', (updatedData) => {
+    console.log('Hello: ', updatedData) 
+    if (updatedData.name !== id) return
+    console.log('Updated Data: ', updatedData)
+    setMarket(updatedData)
+  })
 
+
+  console.log("market:", market )
   // Listen for real-time updates
   // useFrappeEventListener('market_event', (updatedMarket) => {
   //   if (updatedMarket.name === market.name) {
