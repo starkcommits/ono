@@ -611,23 +611,29 @@ def cancel_order(market_id, user_id):
     #     AND user_id = %s
     #     AND order_type = 'SELL'
     # """, (market_id, user_id))
+    try:
+        orders = frappe.get_all("Orders", 
+            filters={
+                "market_id": market_id,
+                "user_id": user_id,
+                "order_type": "SELL",
+                "status": ["!=", "MATCHED"]
+            },
+            pluck="name"
+        )
 
-    orders = frappe.get_all("Orders", 
-        filters={
-            "market_id": market_id,
-            "user_id": user_id,
-            "order_type": "SELL",
-            "status": ["!=", "MATCHED"]
-        },
-        pluck="name"
-    )
+        for order_name in orders:
+            order = frappe.get_doc("Orders", order_name)
+            order.status = "CANCELED"
+            order.save()  # Triggers on_update
 
-    for order_name in orders:
-        order = frappe.get_doc("Orders", order_name)
-        order.status = "CANCELED"
-        order.save()  # Triggers on_update
-
-    frappe.db.commit()
+        frappe.db.commit()
+        return {
+            "success":True,
+            "message":"Order canceled successfully"
+        }
+    except Exception as e:
+        return error_response(f"Error in cancelling order {str(e)}")
 
 @frappe.whitelist(allow_guest=True)
 def total_exit(market_id,user_id):
