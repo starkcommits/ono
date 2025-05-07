@@ -63,7 +63,10 @@ const ActivePositions = ({ position, refetchActiveHoldings }) => {
 
   const { currentUser } = useFrappeAuth()
   const { createDoc } = useFrappeCreateDoc()
-  const { call } = useFrappePostCall('rewardapp.engine.cancel_order')
+  const { call } = useFrappePostCall(
+    'rewardapp.engine.cancel_order',
+    currentUser ? undefined : null
+  )
 
   //   useFrappeEventListener('market_event', (updatedMarket) => {
   //     console.log('Hello')
@@ -113,13 +116,10 @@ const ActivePositions = ({ position, refetchActiveHoldings }) => {
   const handleCancelOrders = async (market_id, setIsCancelOpen) => {
     console.log('Cancel Orders', market_id)
     try {
-      await call(
-        {
-          market_id: market_id,
-          user_id: currentUser,
-        },
-        currentUser ? undefined : null
-      )
+      await call({
+        market_id: market_id,
+        user_id: currentUser,
+      })
       toast.success('Exit Orders Canceled Successfully.')
       console.log('11111111111', refetchActiveHoldings)
       setIsCancelOpen(false)

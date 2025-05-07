@@ -633,7 +633,7 @@ def cancel_order(market_id, user_id):
             "message":"Order canceled successfully"
         }
     except Exception as e:
-        return error_response(f"Error in cancelling order {str(e)}")
+        return {"status": "error", "message": str(e)}
 
 @frappe.whitelist(allow_guest=True)
 def total_exit(market_id,user_id):

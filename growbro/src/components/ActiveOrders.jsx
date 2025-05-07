@@ -25,11 +25,9 @@ const ActiveOrders = ({
   handleTradeClick,
   refetchActiveOrders,
 }) => {
-  const [market, setMarket] = useState({})
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
   const { updateDoc } = useFrappeUpdateDoc()
-  const { currentUser } = useFrappeAuth()
 
   // useFrappeEventListener('market_event', (updatedMarket) => {
   //   console.log('Hello')
