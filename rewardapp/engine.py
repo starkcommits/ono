@@ -215,10 +215,11 @@ def market(doc, method):
                     "question": doc.question,
                     "yes_price": doc.yes_price,
                     "no_price": doc.no_price,
-                    "closing_time": doc.closing_time
+                    "closing_time": doc.closing_time,
+                    "total_traders": doc.total_traders
                 }
                 
-                frappe.publish_realtime("market_event",update_data,user=frappe.session.user,after_commit=True)
+                frappe.publish_realtime("market_event",update_data,after_commit=True)
                 frappe.msgprint("Market Created Successfully.")
         elif doc.status == "CLOSED":
             frappe.db.sql("""
@@ -281,15 +282,12 @@ def market(doc, method):
                 AND opinion_type = %s
             """, (doc.name, doc.end_result))
 
-            frappe.db.commit()
-
             frappe.db.sql("""
                 UPDATE `tabHolding`
-                SET status = 'EXITED', remark = 'Maket Resolved'
+                SET status = 'EXITED', remark = 'Market Resolved', market_status = 'RESOLVED'
                 WHERE market_id = %s
                 AND status IN ('ACTIVE', 'EXITING', 'EXITED')
             """, (doc.name,))    
-            frappe.db.commit()
     except Exception as e:
         frappe.log_error(f"Exception market: {str(e)}")
 
@@ -338,14 +336,21 @@ def update_market_price():
             'no_price': data.no_price
         }, update_modified=False)
         frappe.db.commit()
-        """Send real-time update via WebSockets"""
+
+        market = frappe.get_doc("Market", data.market_id)
+
         update_data = {
-            "name": data.market_id,
+            "name": market.name,
+            "status": market.status,
+            "category": market.category,
+            "question": market.question,
             "yes_price": data.yes_price,
-            "no_price": data.no_price
+            "no_price": data.no_price,
+            "closing_time": market.closing_time,
+            "total_traders": market.total_traders
         }
-        
-        frappe.publish_realtime("market_event",update_data,user=frappe.session.user,after_commit=True)
+
+        frappe.publish_realtime("market_event",update_data,after_commit=True)
         
         return True
     except Exception as e:
@@ -603,23 +608,27 @@ def cancel_order(market_id, user_id):
     #     AND user_id = %s
     #     AND order_type = 'SELL'
     # """, (market_id, user_id))
+    try:
+        orders = frappe.get_all("Orders", 
+            filters={
+                "market_id": market_id,
+                "user_id": user_id,
+                "order_type": "SELL",
+                "status": ["not in", ["MATCHED", "CANCELED"]]
+            },
+            pluck="name"
+        )
 
-    orders = frappe.get_all("Orders", 
-        filters={
-            "market_id": market_id,
-            "user_id": user_id,
-            "order_type": "SELL",
-            "status": ["!=", "MATCHED"]
-        },
-        pluck="name"
-    )
+        for order_name in orders:
+            order = frappe.get_doc("Orders", order_name)
+            order.status = "CANCELED"
+            order.save()  # Triggers on_update
 
-    for order_name in orders:
-        order = frappe.get_doc("Orders", order_name)
-        order.status = "CANCELED"
-        order.save()  # Triggers on_update
-
-    frappe.db.commit()
+        frappe.db.commit()
+        return success_response("All Order canceled successfully")
+        
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 
 @frappe.whitelist(allow_guest=True)
 def total_exit(market_id,user_id):
@@ -657,17 +666,35 @@ def total_exit(market_id,user_id):
 def total_returns(user_id):
     result = frappe.db.sql("""
         SELECT
-            market_id,
-            question,
-            SUM(quantity * price) AS total_invested,
-            SUM(returns) AS total_returns
+            h.market_id,
+            m.question,
+            SUM(h.quantity * h.price) AS total_invested,
+            SUM(h.returns) AS total_returns
         FROM
-            `tabHolding`
+            `tabHolding` h
+        JOIN
+            `tabMarket` m ON h.market_id = m.name
         WHERE
-            user_id = %s
-        AND market_status = 'RESOLVED'
+            h.user_id = %s
+            AND m.status = 'RESOLVED'
         GROUP BY
-            market_id
+            h.market_id
     """, (user_id,), as_dict=True)
 
     return result
+
+def error_response(message):
+    """Return an error response in JSON format"""
+    frappe.response["http_status_code"] = 400
+    return {
+        "status": "error",
+        "message": message
+    }
+
+def success_response(message):
+    """Return a success response in JSON format"""
+    frappe.response["http_status_code"] = 200
+    return {
+        "status": "success",
+        "message": message
+    }

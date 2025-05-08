@@ -8,6 +8,8 @@ import re
 from frappe.auth import LoginManager
 import random
 import datetime
+import requests
+import logging
 from frappe.core.doctype.user.user import User
 from frappe.sessions import get_expiry_in_seconds
 
@@ -185,7 +187,61 @@ from frappe.sessions import get_expiry_in_seconds
 #         frappe.db.rollback()
 #         frappe.log_error(frappe.get_traceback(), _("Trader Signup Error"))
 #         return error_response(f"Registration failed: {str(e)}")
+# def send_sms(mobile_number,otp):
+#     try:
+#         url = "http://65.2.148.196:8081/message/sendText/test1"
 
+#         payload = {
+#             "number": f"91{mobile_number}",
+#             "text": f"Hi *ONO User*,\nYour login OTP is *{otp}*",
+#             "delay": 1
+#         }
+#         headers = {
+#             "apikey": "modimc",
+#             "Content-Type": "application/json"
+#         }
+
+#         response = requests.post(url, json=payload, headers=headers)
+#         return True
+#     except Exception as e:
+#         frappe.log_error("Error in sending OTP",f"{str(e)}")
+#         return False
+
+def send_sms(mobile_number, otp):
+    try:
+        url = "http://65.2.148.196:8081/message/sendText/ONO"
+        
+        payload = {
+            "number": f"91{mobile_number}",
+            "text": f"Hi *ONO User,*\nYour login OTP is *{otp}*",
+            "delay": 1
+        }
+        
+        headers = {
+            "apikey": "modimc",
+            "Content-Type": "application/json"
+        }
+        
+        # Add timeout to prevent hanging connections
+        response = requests.post(url, json=payload, headers=headers, timeout=15)
+        
+        if response.status_code == 201:
+            frappe.logger().info(f"SMS sent successfully to {mobile_number}")
+            return True
+        else:
+            frappe.logger().error(f"SMS API returned non-200 response: {response.status_code} - {response.text}")
+            return False
+            
+    except requests.exceptions.ConnectionError as e:
+        frappe.log_error("SMS Connection Error", f"Failed to connect to SMS service: {str(e)}")
+        # You might want to continue with the login process even if SMS fails in production
+        return False
+    except requests.exceptions.Timeout as e:
+        frappe.log_error("SMS Timeout Error", f"SMS service timed out: {str(e)}")
+        return False
+    except Exception as e:
+        frappe.log_error("SMS General Error", f"Unexpected error sending SMS: {str(e)}")
+        return False
 
 @frappe.whitelist(allow_guest=True)
 def generate_mobile_otp(mobile_number):
@@ -199,7 +255,11 @@ def generate_mobile_otp(mobile_number):
     
     # Set expiry (e.g., 10 minutes from now)
     expiry = frappe.utils.now_datetime() + datetime.timedelta(minutes=10)
-    
+
+     # Here you would integrate with an SMS gateway to send the OTP
+    if not send_sms(mobile_number, otp):
+        return error_response("Error in sending otp")
+
     # Store OTP
     existing = frappe.db.get_value("Mobile OTP", {"mobile_number": mobile_number})
     if existing:
@@ -216,9 +276,6 @@ def generate_mobile_otp(mobile_number):
             "expires_at": expiry,
             "verified": 0
         }).insert(ignore_permissions=True)
-    
-    # Here you would integrate with an SMS gateway to send the OTP
-    # send_sms(mobile_number, f"Your OTP is {otp}")
     
     return {"success": True, "message": "OTP sent successfully"}
 

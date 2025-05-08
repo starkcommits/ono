@@ -159,7 +159,6 @@ def wallet_operation(doc, method):
             frappe.publish_realtime("order_book_event", order_book_data,after_commit=True)
 
         elif doc.status == "CANCELED": 
-
             order_book_data = {
                 "market_id": doc.market_id
             }

@@ -356,9 +356,7 @@ const Portfolio = () => {
                   <div key={position?.market_id}>
                     <ActivePosition
                       position={position}
-                      setActiveHoldings={setActiveHoldings}
                       refetchActiveHoldings={refetchActiveHoldings}
-                      handleTradeClick={handleTradeClick}
                     />
                   </div>
                 ))

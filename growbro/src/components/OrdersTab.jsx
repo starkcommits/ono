@@ -36,6 +36,7 @@ import {
 
 import {
   useFrappeAuth,
+  useFrappeDocTypeEventListener,
   useFrappeEventListener,
   useFrappeGetDocList,
 } from 'frappe-react-sdk'
@@ -107,7 +108,7 @@ const OrdersTab = () => {
     }
   }, [activeOrdersData])
 
-  useFrappeEventListener('order_event', (updatedOrder) => {
+  useFrappeDocTypeEventListener('Orders', (updatedOrder) => {
     console.log('Updated Order:', updatedOrder)
     refetchActiveOrders()
     // setActiveOrders((prev) => {

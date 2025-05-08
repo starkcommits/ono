@@ -93,7 +93,7 @@ const SlideMenu = ({ isOpen, onClose }) => {
               </button>
             </div>
             <div className="flex items-center gap-2">
-              <div className="p-1.5 bg-gradient-to-br from-indigo-400 to-indigo-500 rounded-full flex items-center justify-center">
+              <div className="p-0.5 bg-gradient-to-br w-8 from-indigo-400 to-indigo-500 rounded-full flex items-center justify-center">
                 <span className="text-lg font-medium text-white">
                   {currentUserData?.full_name?.split(' ')[0]?.slice(0, 1)}
                   {currentUserData?.full_name?.split(' ')[1]?.slice(0, 1)}
