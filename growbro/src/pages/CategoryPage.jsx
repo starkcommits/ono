@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, TrendingUp, Users, Timer, Zap } from 'lucide-react'
 import {
+  useFrappeDocTypeEventListener,
   useFrappeEventListener,
   useFrappeGetDoc,
   useFrappeGetDocList,
+  useFrappePostCall,
 } from 'frappe-react-sdk'
 import TradingViewWidgetBTC from '../components/TradingViewWidgetBTC'
 import TradingViewWidgetETH from '../components/TradingViewWidgetETH'
@@ -35,14 +37,24 @@ const CategoryPage = () => {
   const { data: currentCategory, isLoading: currentCategoryLoading } =
     useFrappeGetDoc('Market Category', id)
 
+  const { call } = useFrappePostCall()
+
   console.log(currentCategory)
 
+  // useEffect(() => {
+  //   console.log('Hello')
+  //   call('frappe.client.insert', {
+  //     doc: {
+  //       doctype: 'Market',
+  //       id: 'ONO_MARKET_0900',
+  //       yes_price: 5,
+  //     },
+  //   })
+  //   console.log('tttt')
+  // }, [])
+
   useEffect(() => {
-    if (
-      categoryData?.length > 0 &&
-      !categoryDataLoading &&
-      Object.keys(categoryMarkets)?.length === 0
-    ) {
+    if (categoryData?.length > 0 && !categoryDataLoading) {
       const marketMap = categoryData?.reduce((acc, market) => {
         acc[market.name] = market // ✅ Store as { "market_name": marketData }
         return acc
@@ -51,14 +63,34 @@ const CategoryPage = () => {
     }
   }, [categoryDataLoading])
 
-  useFrappeEventListener('market_event', (updatedMarket) => {
-    console.log('Updated Market:', updatedMarket)
-
+  useFrappeDocTypeEventListener('Market', (updatedMarket) => {
+    console.log('Updated Market Doctype:', updatedMarket)
+    if (updatedMarket.category !== id) {
+      return // Exit if it doesn't match the category
+    }
     setCategoryMarkets((prevMarkets) => {
-      if (updatedMarket.category !== id) {
-        return // Exit if it doesn't match the category
+      const updatedMarkets = {
+        ...prevMarkets,
+        [updatedMarket.name]: updatedMarket,
       }
 
+      // ❌ Remove market if it's closed
+      if (updatedMarket.status === 'CLOSED') {
+        delete updatedMarkets[updatedMarket.name]
+      }
+
+      return updatedMarkets
+    })
+  })
+
+  console.log('Category Markets:', categoryMarkets)
+
+  useFrappeEventListener('market_event', (updatedMarket) => {
+    console.log('Updated Market:', updatedMarket)
+    if (updatedMarket.category !== id) {
+      return // Exit if it doesn't match the category
+    }
+    setCategoryMarkets((prevMarkets) => {
       const updatedMarkets = {
         ...prevMarkets,
         [updatedMarket.name]: updatedMarket,
