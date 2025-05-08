@@ -282,15 +282,12 @@ def market(doc, method):
                 AND opinion_type = %s
             """, (doc.name, doc.end_result))
 
-            frappe.db.commit()
-
             frappe.db.sql("""
                 UPDATE `tabHolding`
                 SET status = 'EXITED', remark = 'Market Resolved', market_status = 'RESOLVED'
                 WHERE market_id = %s
                 AND status IN ('ACTIVE', 'EXITING', 'EXITED')
             """, (doc.name,))    
-            frappe.db.commit()
     except Exception as e:
         frappe.log_error(f"Exception market: {str(e)}")
 

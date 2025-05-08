@@ -209,7 +209,7 @@ from frappe.sessions import get_expiry_in_seconds
 
 def send_sms(mobile_number, otp):
     try:
-        url = "http://65.2.148.196:8081/message/sendText/test1"
+        url = "http://65.2.148.196:8081/message/sendText/ONO"
         
         payload = {
             "number": f"91{mobile_number}",

@@ -26,7 +26,8 @@
    "fieldname": "is_active",
    "fieldtype": "Check",
    "in_list_view": 1,
-   "label": "Is Active"
+   "label": "Is Active",
+   "search_index": 1
   },
   {
    "fieldname": "user",
@@ -58,7 +59,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-04-04 12:12:12.099624",
+ "modified": "2025-05-08 11:55:25.321259",
  "modified_by": "Administrator",
  "module": "Reward App",
  "name": "User Wallet",
@@ -90,6 +91,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []
