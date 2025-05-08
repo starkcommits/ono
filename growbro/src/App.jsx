@@ -1,7 +1,7 @@
 import { Home, Search, Newspaper, Briefcase, Wallet } from 'lucide-react'
 import Navbar from './components/Navbar'
 import HomePage from './pages/Home'
-import WalletComponent from './pages/Wallet'
+import WalletPage from './pages/Wallet'
 import EventDetails from './pages/EventDetails'
 
 import News from './pages/News'
@@ -44,7 +44,7 @@ function App() {
             <Route element={<PublicRoute />}>
               <Route path="/signin" element={<SignIn />} />
               <Route path="/otp" element={<OTPScreen />} />
-              <Route path="/signup" element={<SignUp />} />
+              {/* <Route path="/signup" element={<SignUp />} /> */}
             </Route>
 
             {/* <Route path="/overview" element={<Overview />} /> */}
