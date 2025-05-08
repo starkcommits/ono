@@ -109,14 +109,13 @@ const EventDetails = () => {
   }, [marketData])
 
   useFrappeEventListener('market_event', (updatedData) => {
-    console.log('Hello: ', updatedData) 
+    console.log('Hello: ', updatedData)
     if (updatedData.name !== id) return
     console.log('Updated Data: ', updatedData)
     setMarket(updatedData)
   })
 
-
-  console.log("market:", market )
+  console.log('market:', market)
   // Listen for real-time updates
   // useFrappeEventListener('market_event', (updatedMarket) => {
   //   if (updatedMarket.name === market.name) {
@@ -318,24 +317,45 @@ const EventDetails = () => {
                       {/* Connection indicator */}
                       {/* <div className="flex-1 mx-2 border-t border-dashed border-gray-300"></div> */}
                       <div className="h-8 mb-4 bg-gray-100 rounded-xl overflow-hidden w-[40%]">
-                        <div className="flex h-full">
-                          <div
-                            className="bg-blue-400 h-full flex items-center justify-center text-xs text-white font-bold p-4"
-                            style={{
-                              width: `${match?.first_user_price * 10}%`,
-                            }}
-                          >
-                            {match?.first_user_price}
+                        {match?.first_user_price === match.second_user_price ? (
+                          <div className="flex h-full">
+                            <div
+                              className="bg-blue-400 h-full flex items-center justify-center text-xs text-white font-bold p-4"
+                              style={{
+                                width: '50%',
+                              }}
+                            >
+                              {match?.first_user_price}
+                            </div>
+                            <div
+                              className="bg-rose-400 h-full flex items-center justify-center text-xs text-white font-bold p-4"
+                              style={{
+                                width: '50%',
+                              }}
+                            >
+                              {match?.second_user_price}
+                            </div>
                           </div>
-                          <div
-                            className="bg-rose-400 h-full flex items-center justify-center text-xs text-white font-bold p-4"
-                            style={{
-                              width: `${match?.second_user_price * 10}%`,
-                            }}
-                          >
-                            {match?.second_user_price}
+                        ) : (
+                          <div className="flex h-full">
+                            <div
+                              className="bg-blue-400 h-full flex items-center justify-center text-xs text-white font-bold p-4"
+                              style={{
+                                width: `${match?.first_user_price * 10}%`,
+                              }}
+                            >
+                              {match?.first_user_price}
+                            </div>
+                            <div
+                              className="bg-rose-400 h-full flex items-center justify-center text-xs text-white font-bold p-4"
+                              style={{
+                                width: `${match?.second_user_price * 10}%`,
+                              }}
+                            >
+                              {match?.second_user_price}
+                            </div>
                           </div>
-                        </div>
+                        )}
                       </div>
 
                       {/* User 2 */}

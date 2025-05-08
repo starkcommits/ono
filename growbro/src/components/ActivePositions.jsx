@@ -121,6 +121,7 @@ const ActivePositions = ({ position, refetchActiveHoldings }) => {
         user_id: currentUser,
       })
       toast.success('Exit Orders Canceled Successfully.')
+      refetchActiveHoldings()
       console.log('11111111111', refetchActiveHoldings)
       setIsCancelOpen(false)
     } catch (err) {
