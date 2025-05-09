@@ -200,7 +200,7 @@ def market(doc, method):
             # For debugging
             frappe.logger().info(f"Sending payload to market engine: {payload}")
             
-            url = "http://94.136.187.188:8086/markets/"
+            url = "http://127.0.0.1:8086/markets/"
             response = requests.post(url, json=payload)
             
             if response.status_code != 201:
@@ -229,7 +229,7 @@ def market(doc, method):
             """, (doc.name,))
 
             frappe.db.commit()
-            url=f"http://94.136.187.188:8086/markets/{doc.name}/close"
+            url=f"http://127.0.0.1:8086/markets/{doc.name}/close"
             response = requests.post(url)
                 
             if response.status_code != 200:
@@ -586,7 +586,7 @@ def holding(doc,method):
 
         # API call to sync order update
         try:
-            url = "http://94.136.187.188:8086/orders/update_quantity"
+            url = "http://127.0.0.1:8086/orders/update_quantity"
             response = requests.put(url, json=payload)
             if response.status_code != 201:
                 frappe.logger().error(f"Error response: {response.text}")
@@ -628,7 +628,7 @@ def cancel_order(market_id, user_id):
         return success_response("All Order canceled successfully")
         
     except Exception as e:
-        return error_response(f"Error in cancelling order {str(e)}")
+        return {"status": "error", "message": str(e)}
 
 @frappe.whitelist(allow_guest=True)
 def total_exit(market_id,user_id):
