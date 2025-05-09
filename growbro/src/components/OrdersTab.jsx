@@ -123,10 +123,10 @@ const OrdersTab = () => {
   return (
     <div className=" bg-gray-50">
       {/* Content Section */}
-      <div className="mt-4">
-        <div className="bg-white rounded-3xl shadow-sm">
+      <div className="">
+        <div className="bg-white rounded-3xl shadow-sm p-4 space-y-4">
           {/* Filter Bar */}
-          <div className="p-4 flex items-center justify-between border-b border-gray-100">
+          <div className="flex items-center justify-between border-gray-100">
             <div className="text-sm font-medium text-gray-700">
               {
                 Object.values(activeOrders)?.filter((order) => {
@@ -139,7 +139,7 @@ const OrdersTab = () => {
           </div>
 
           {/* Trades List */}
-          <div className="divide-y divide-gray-100">
+          <div className="divide-y divide-gray-100 flex flex-col gap-4">
             {Object.values(activeOrders).map((order) => (
               <ActiveOrders
                 key={order.name}
