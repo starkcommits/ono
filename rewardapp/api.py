@@ -207,6 +207,18 @@ from frappe.sessions import get_expiry_in_seconds
 #         frappe.log_error("Error in sending OTP",f"{str(e)}")
 #         return False
 
+@frappe.whitelist(allow_guest=True)
+def update_profile(user, token):
+    try:
+        user_doc = frappe.get_doc("User",user)
+        user_doc.fcm_token = token
+        user_doc.save(ignore_permissions=True)
+        frappe.db.commit()
+        success_response("Token updated successfully")
+    except Exception as e:
+        frappe.throw(f"Error in profile updation {str(e)}")
+
+
 def send_sms(mobile_number, otp):
     try:
         url = "http://65.2.148.196:8081/message/sendText/ONO"

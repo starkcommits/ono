@@ -161,6 +161,7 @@ api = {
         "rewardapp.api.signup",
         "rewardapp.api.generate_mobile_otp",
         "rewardapp.api.verify_otp",
+        "rewardapp.api.update_profile",
         "rewardapp.api.check_password_strength",
         "rewardapp.api.check_referral",
         "rewardapp.wallet.get_balance",
