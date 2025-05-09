@@ -335,10 +335,10 @@ const Wallet = () => {
         </div>
       </div> */}
 
-      <div className="w-full">
-        <div className="space-y-4 py-4">
-          <div className="flex items-center gap-6">
-            <div className="flex items-center mb-6">
+      <div className="w-full ">
+        <div className="space-y-4">
+          <div className="flex items-center gap-4 py-4">
+            <div className="flex items-center">
               <button
                 onClick={() => navigate('/')}
                 className="p-2 rounded-full transition-colors"
@@ -346,7 +346,7 @@ const Wallet = () => {
                 <ArrowLeft className="h-6 w-6" />
               </button>
             </div>
-            <h2 className="text-2xl font-bold text-center mb-6">Wallet</h2>
+            <h2 className="text-2xl font-bold text-center">Wallet</h2>
           </div>
 
           <Card className="overflow-hidden bg-white dark:bg-gray-800 border-0 shadow-lg rounded-2xl">
@@ -369,7 +369,7 @@ const Wallet = () => {
                       </h3>
                     </div>
                   </div>
-                  <div>
+                  {/* <div>
                     <Button
                       variant="default"
                       size="lg"
@@ -379,7 +379,7 @@ const Wallet = () => {
                     >
                       Recharge
                     </Button>
-                  </div>
+                  </div> */}
                 </div>
               </div>
 
@@ -498,7 +498,7 @@ const Wallet = () => {
       </div>
 
       {/* Content Section */}
-      <div className="">
+      <div className="mt-4">
         <div className="bg-white rounded-3xl shadow-sm">
           {/* Add Money Section */}
           <div className="p-6 border-b border-gray-100">

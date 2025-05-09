@@ -271,132 +271,86 @@ const EventDetails = () => {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="activity">
-            <div className="bg-white rounded-xl shadow-sm">
-              <div className="px-4 py-3 border-b border-gray-100">
-                <h3 className="font-medium text-center">
+            <div className="bg-white rounded-xl shadow-md">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h3 className="text-lg font-semibold text-center text-gray-700">
                   {tradesData?.length > 0
                     ? 'Matched Users'
                     : 'No Users matched yet.'}
                 </h3>
               </div>
-
               <div className="divide-y divide-gray-100">
-                {tradesData?.map((match) => (
-                  <div key={match?.name} className="px-4 py-3">
-                    <div className="flex items-center justify-between">
-                      {/* User 1 */}
-                      <div className="flex flex-col items-center w-[30%]">
-                        <div className="flex gap-2 items-center">
-                          <div className="h-8 w-8 rounded-full bg-blue-200 flex justify-center items-center">
-                            {/* <img
-                            src={match.user1.avatar}
-                            alt={match.user1.name}
-                          />   */}
-                            {match?.first_user_id.slice(0, 1).toUpperCase()}
+                {tradesData?.map((match) => {
+                  const firstUser = match?.first_user_id.split('@')[0]
+                  const secondUser = match?.second_user_id.split('@')[0]
+                  const formatName = (name) =>
+                    name.length > 10
+                      ? name.charAt(0).toUpperCase() + name.slice(1, 10) + '…'
+                      : name.charAt(0).toUpperCase() + name.slice(1)
+                  return (
+                    <div
+                      key={match?.name}
+                      className="px-6 py-4 hover:bg-gray-50 transition"
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        {/* First User */}
+                        <div className="flex flex-col items-center w-1/3">
+                          <div className="flex items-center gap-2">
+                            <div className="h-10 w-10 rounded-full bg-blue-200 shadow-inner flex items-center justify-center font-semibold text-blue-900">
+                              {firstUser.charAt(0).toUpperCase()}
+                            </div>
                           </div>
-                          {/* <span className="text-sm font-medium text-blue-600">
-                            &#8377;{match?.yes_price}
-                          </span> */}
+                          <span
+                            className="text-sm mt-1 font-medium text-gray-700"
+                            title={match.first_user_id}
+                          >
+                            {formatName(firstUser)}
+                          </span>
                         </div>
-                        <span className="text-sm font-medium">
-                          {match?.first_user_id.split('@')[0].length > 10
-                            ? match?.first_user_id
-                                .split('@')[0]
-                                .charAt(0)
-                                .toUpperCase() +
-                              match?.first_user_id.split('@')[0].slice(1, 10) +
-                              '...'
-                            : match?.first_user_id
-                                .split('@')[0]
-                                .charAt(0)
-                                .toUpperCase() +
-                              match?.first_user_id.split('@')[0].slice(1)}
-                        </span>
-                      </div>
-
-                      {/* Connection indicator */}
-                      {/* <div className="flex-1 mx-2 border-t border-dashed border-gray-300"></div> */}
-                      <div className="h-8 mb-4 bg-gray-100 rounded-xl overflow-hidden w-[40%]">
-                        {match?.first_user_price === match.second_user_price ? (
-                          <div className="flex h-full">
+                        {/* Bar */}
+                        <div className="w-1/3 h-8 relative bg-gray-100 rounded-xl overflow-hidden shadow-inner">
+                          <div className="flex h-full transition-all duration-500 ease-in-out">
                             <div
-                              className="bg-blue-400 h-full flex items-center justify-center text-xs text-white font-bold p-4"
+                              className="bg-blue-400 flex items-center justify-center text-xs text-white font-bold"
                               style={{
-                                width: '50%',
+                                width: `${match.first_user_price * 10}%`,
                               }}
                             >
-                              {match?.first_user_price}
+                              {match.first_user_price}
                             </div>
                             <div
-                              className="bg-rose-400 h-full flex items-center justify-center text-xs text-white font-bold p-4"
+                              className="bg-rose-400 flex items-center justify-center text-xs text-white font-bold"
                               style={{
-                                width: '50%',
+                                width: `${match.second_user_price * 10}%`,
                               }}
                             >
-                              {match?.second_user_price}
+                              {match.second_user_price}
                             </div>
-                          </div>
-                        ) : (
-                          <div className="flex h-full">
-                            <div
-                              className="bg-blue-400 h-full flex items-center justify-center text-xs text-white font-bold p-4"
-                              style={{
-                                width: `${match?.first_user_price * 10}%`,
-                              }}
-                            >
-                              {match?.first_user_price}
-                            </div>
-                            <div
-                              className="bg-rose-400 h-full flex items-center justify-center text-xs text-white font-bold p-4"
-                              style={{
-                                width: `${match?.second_user_price * 10}%`,
-                              }}
-                            >
-                              {match?.second_user_price}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* User 2 */}
-                      <div className="flex flex-col items-center  w-[30%]">
-                        <div className="flex items-center gap-2">
-                          {/* <span className="text-sm font-medium text-red-600">
-                            &#8377;{match?.no_price}
-                          </span> */}
-                          <div className="h-8 w-8 rounded-full bg-red-200 flex justify-center items-center">
-                            {/* <img
-                            src={match.user2.avatar}
-                            alt={match.user2.name}
-                          /> */}
-                            {match?.second_user_id.slice(0, 1).toUpperCase()}
                           </div>
                         </div>
-                        <span className="text-sm font-medium">
-                          {match?.second_user_id.split('@')[0].length > 10
-                            ? match?.second_user_id
-                                .split('@')[0]
-                                .charAt(0)
-                                .toUpperCase() +
-                              match?.second_user_id.split('@')[0].slice(1, 10) +
-                              '...'
-                            : match?.second_user_id
-                                .split('@')[0]
-                                .charAt(0)
-                                .toUpperCase() +
-                              match?.second_user_id.split('@')[0].slice(1)}
-                        </span>
+                        {/* Second User */}
+                        <div className="flex flex-col items-center w-1/3">
+                          <div className="flex items-center gap-2">
+                            <div className="h-10 w-10 rounded-full bg-red-200 shadow-inner flex items-center justify-center font-semibold text-red-900">
+                              {secondUser.charAt(0).toUpperCase()}
+                            </div>
+                          </div>
+                          <span
+                            className="text-sm mt-1 font-medium text-gray-700"
+                            title={match.second_user_id}
+                          >
+                            {formatName(secondUser)}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-center justify-center mb-3">
-                      <div className="flex items-center text-sm text-gray-500">
+                      {/* Timestamp */}
+                      <div className="flex justify-center text-sm text-gray-500">
                         <CalendarClock className="h-4 w-4 mr-1" />
                         <span>{formatDate(match?.creation)}</span>
                       </div>
-                      {/* <div className="text-sm font-medium">₹{match.amount}</div> */}
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
           </TabsContent>

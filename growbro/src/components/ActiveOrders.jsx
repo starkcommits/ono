@@ -100,37 +100,33 @@ const ActiveOrders = ({
 
   return (
     <>
-      <div key={order.name} className="p-4 w-full cursor-pointer">
-        <Badge className="text-xs font-semibold mb-2 hover:underline">
+      <div
+        key={order.name}
+        className="p-4 w-full rounded-xl shadow-md bg-white transition hover:shadow-lg cursor-pointer space-y-3"
+      >
+        <Badge className="text-xs font-semibold mb-1 hover:underline">
           #{order.name}
         </Badge>
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex gap-2 items-center justify-between w-full">
-            <div className="font-medium text-gray-900">{order.question}</div>
-
-            {order.status === 'MATCHED' && (
-              <span className="bg-green-100 text-green-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
-                {order.status}
-              </span>
-            )}
-            {order.status === 'PARTIAL' && (
-              <span className="bg-yellow-100 text-yellow-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
-                {order.status}
-              </span>
-            )}
-            {order.status === 'UNMATCHED' && (
-              <span className="bg-white rounded-xl p-1 text-xs text-[0.7rem] font-medium">
-                {order.status}
-              </span>
-            )}
-            {order.status === 'CANCELED' && (
-              <span className="bg-red-200 text-red-600 rounded-xl p-1 text-xs text-[0.7rem] font-medium">
-                {order.status}
-              </span>
-            )}
-          </div>
+        <div className="flex items-center justify-between">
+          <p className="font-medium text-gray-900 max-w-[80%] truncate">
+            {order.question}
+          </p>
+          <span
+            className={`px-2 py-0.5 rounded-xl text-xs font-medium
+        ${
+          order.status === 'MATCHED'
+            ? 'bg-green-100 text-green-700'
+            : order.status === 'PARTIAL'
+            ? 'bg-yellow-100 text-yellow-700'
+            : order.status === 'UNMATCHED'
+            ? 'bg-gray-200 text-gray-700'
+            : 'bg-red-200 text-red-600'
+        }`}
+          >
+            {order.status}
+          </span>
         </div>
-        <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
+        <div className="flex items-center gap-2 text-sm text-gray-600">
           <span
             className={`px-2 py-0.5 rounded-full text-xs font-medium ${
               order.opinion_type === 'YES'
@@ -146,40 +142,33 @@ const ActiveOrders = ({
             End at {formatDate(order.closing_time)}
           </span>
         </div>
-        <div className="grid grid-cols-3 gap-4 text-sm mb-4">
+        <div className="flex justify-between text-sm text-gray-700">
           <div>
-            <div className="text-gray-600 font-medium">Amount</div>
+            <div className="text-xs text-gray-500">Amount</div>
             <div className="font-semibold text-gray-900">
               ₹{order.quantity * order.amount}
             </div>
           </div>
-          <div>
-            <div className="text-gray-600 font-medium">Qty @ Price</div>
-            <div className="font-semibold text-gray-900">
-              {order.quantity} @ ₹{order.amount}
-            </div>
+          <div className="text-center">
+            <div className="text-xs text-gray-500">Quantity</div>
+            <div className="font-semibold text-gray-900">{order.quantity}</div>
           </div>
-          <div>
-            <div className="text-gray-600 font-medium">Current</div>
-            <div className="font-semibold text-gray-900">
-              ₹
-              {order.opinion_type === 'xYES'
-                ? String(order.yes_price)
-                : String(order.no_price)}
-            </div>
+          <div className="text-right">
+            <div className="text-xs text-gray-500">Per Unit Price</div>
+            <div className="font-semibold text-gray-900">₹{order.amount}</div>
           </div>
         </div>
-        {order.status === 'UNMATCHED' || order.status === 'PARTIAL' ? (
-          <div className="flex gap-2 w-full items-center justify-between">
-            <div className="w-[50%]">
+        {(order.status === 'UNMATCHED' || order.status === 'PARTIAL') && (
+          <div className="flex gap-3 pt-3">
+            <div className="w-1/2">
               <Dialog open={isOpen} onOpenChange={setIsOpen}>
                 <DialogTrigger className="w-full">
-                  <Button className="w-full bg-rose-50 text-rose-600 rounded-xl text-sm font-medium hover:bg-rose-100 transition-colors">
-                    <XCircle className="h-4 w-4" />
+                  <Button className="w-full bg-rose-50 text-rose-600 rounded-xl text-sm font-medium hover:bg-rose-100 transition">
+                    <XCircle className="h-4 w-4 mr-1" />
                     Cancel Order
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="">
+                <DialogContent>
                   <DialogHeader>
                     <DialogTitle>Are you absolutely sure?</DialogTitle>
                     <DialogDescription>
@@ -196,8 +185,8 @@ const ActiveOrders = ({
                       Cancel
                     </Button>
                     <Button
-                      className="bg-neutral-900 text-white hover:text-neutral-800 hover:bg-neutral-800/40"
-                      onClick={() => handleCancelOrder(order)}
+                      className="bg-neutral-900 text-white hover:bg-neutral-800/90"
+                      onClick={() => handleCancelOrder()}
                     >
                       Submit
                     </Button>
@@ -205,18 +194,15 @@ const ActiveOrders = ({
                 </DialogContent>
               </Dialog>
             </div>
-
             <Button
-              onClick={() => {
-                handleMarketClick(order)
-              }}
-              className="w-[50%] bg-blue-50 text-blue-600 rounded-xl text-sm font-medium hover:bg-blue-100 transition-colors"
+              onClick={() => handleMarketClick(order)}
+              className="w-1/2 bg-blue-50 text-blue-600 rounded-xl text-sm font-medium hover:bg-blue-100 transition"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-4 w-4 mr-1" />
               Invest More
             </Button>
           </div>
-        ) : null}
+        )}
       </div>
     </>
   )
