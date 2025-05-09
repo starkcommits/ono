@@ -1,5 +1,13 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
-import { Book, ChevronDown, ChevronUp, Minus, Plus } from 'lucide-react'
+import {
+  Book,
+  ChevronDown,
+  ChevronUp,
+  CircleX,
+  Cross,
+  Minus,
+  Plus,
+} from 'lucide-react'
 import { useParams } from 'react-router-dom'
 import {
   useFrappeAuth,
@@ -75,6 +83,8 @@ const TradeSheet = ({
   const maxQuantity = 100
   const commission = 0.2
   const availableBalance = 214.86
+
+  console.log('heheheheheh', userData?.balance < price * quantity)
 
   const handleConfirmBuy = async () => {
     try {
@@ -346,18 +356,44 @@ const TradeSheet = ({
 
           <OrderBook marketId={marketId} />
 
-          <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-            <span>Available Balance: ₹{userData?.balance}</span>
-            {/* <span>Commission: {(commission * 100).toFixed(1)}%</span> */}
+          <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 border border-gray-200 shadow-sm mb-4 ">
+            <div className="text-gray-700 font-medium">
+              Available Balance:{' '}
+              <span className="text-blue-600 font-semibold">
+                ₹{userData?.balance}
+              </span>
+            </div>
+            {userData?.balance < price * quantity && (
+              <div className="flex items-center space-x-2">
+                <svg
+                  className="w-5 h-5 text-red-500"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 8v4m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z"
+                  />
+                </svg>
+                <span className="text-sm text-red-600 font-semibold">
+                  Insufficient balance. Please add funds to continue.
+                </span>
+              </div>
+            )}
           </div>
 
           {tradeAction === 'BUY' && (
             <button
+              disabled={
+                userData?.balance < price * quantity || createDocLoading
+              }
               onClick={handleConfirmBuy}
-              disabled={createDocLoading}
-              className={`w-full ${
+              className={`relative w-full ${
                 choice === 'YES' ? 'bg-blue-500' : 'bg-red-500'
-              } text-white py-4 rounded-xl font-medium transition-colors
+              } text-white py-4 rounded-xl font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60
             ${createDocLoading ? `opacity-50 cursor-not-allowed` : ``}`}
             >
               {createDocLoading
@@ -379,10 +415,6 @@ const TradeSheet = ({
                 : `Confirm ${choice === 'YES' ? 'YES' : 'NO'}`}
             </button>
           )}
-          <p className="text-xs text-gray-500 text-center mt-4">
-            Sale or purchase of Crypto Currency or Digital Assets is neither
-            encouraged nor allowed on this platform
-          </p>
         </div>
       </div>
     </div>

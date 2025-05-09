@@ -20,6 +20,7 @@ import {
   useFrappeGetDoc,
   useFrappeGetDocList,
   useFrappeGetCall,
+  useFrappeDocTypeEventListener,
 } from 'frappe-react-sdk'
 const categoryIcons = {
   Sports: (
@@ -137,24 +138,27 @@ const Home = () => {
 
   console.log(marketCategories)
 
-  const { data: marketData, isLoading: marketDataLoading } =
-    useFrappeGetDocList('Market', {
-      fields: [
-        'name',
-        'question',
-        'yes_price',
-        'no_price',
-        'closing_time',
-        'status',
-        'total_traders',
-      ],
-      filters: [['status', '=', 'OPEN']],
-      orderBy: {
-        field: 'total_traders',
-        order: 'desc',
-      },
-      limit: 5,
-    })
+  const {
+    data: marketData,
+    isLoading: marketDataLoading,
+    mutate: refetchMarketData,
+  } = useFrappeGetDocList('Market', {
+    fields: [
+      'name',
+      'question',
+      'yes_price',
+      'no_price',
+      'closing_time',
+      'status',
+      'total_traders',
+    ],
+    filters: [['status', '=', 'OPEN']],
+    orderBy: {
+      field: 'total_traders',
+      order: 'desc',
+    },
+    limit: 5,
+  })
 
   const { data: userWallet, isLoading: userWalletLoading } = useFrappeGetDoc(
     'User Wallet',
