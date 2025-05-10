@@ -340,6 +340,12 @@ def verify_otp(mobile, otp):
         wallet.is_active = 1
         wallet.save(ignore_permissions=True)
 
+        promo_wallet = frappe.new_doc("Promotional Wallet")
+        promo_wallet.user = user
+        promo_wallet.balance = 0
+        promo_wallet.is_active = 1
+        promo_wallet.save(ignore_permissions=True)
+
     # Log the user in
     frappe.local.login_manager = LoginManager()
     frappe.local.login_manager.login_as(user)
