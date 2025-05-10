@@ -61,7 +61,7 @@ import {
   Filler,
   Legend,
 } from 'chart.js'
-import TradeSheet from '../components/TradeSheet'
+import TradeSheet from '../components/BuyTradeSheet'
 import {
   useFrappeAuth,
   useFrappeCreateDoc,
@@ -81,6 +81,7 @@ import { Slider } from '@/components/ui/slider'
 
 import toast from 'react-hot-toast'
 import CancelHoldingDialog from '../components/CancelHoldingDialog'
+import SellTradeSheet from '../components/SellTradeSheet'
 
 ChartJS.register(
   CategoryScale,
@@ -830,28 +831,10 @@ const ActiveMarketHolding = () => {
                       </span>
                       <div className="flex gap-1">
                         {position.status === 'ACTIVE' && (
-                          <span
-                            className="bg-yellow-100 text-yellow-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium flex gap-1 "
-                            onClick={() =>
-                              handleTradeClick(
-                                position.opinion_type === 'YES'
-                                  ? position.market_yes_price
-                                  : position.market_no_price,
-                                position.opinion_type,
-                                'SELL',
-                                position.market_id,
-                                position.quantity,
-                                position.name
-                              )
-                            }
-                          >
-                            {position.status}
-                            <Separator
-                              orientation="vertical"
-                              className="w-0.5"
-                            />
-                            <LogOut className="w-4 h-4" />
-                          </span>
+                          <SellTradeSheet
+                            position={position}
+                            refetcHoldingData={refetcHoldingData}
+                          />
                         )}
 
                         {position.filled_quantity >= 0 &&
