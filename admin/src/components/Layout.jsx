@@ -2,7 +2,13 @@ import React from 'react'
 import { Outlet } from 'react-router-dom'
 import { useFrappeAuth } from 'frappe-react-sdk'
 import { FloatingDock } from './ui/floating-dock'
-import { ArrowLeftRight, CalendarClock, Receipt, House } from 'lucide-react'
+import {
+  ArrowLeftRight,
+  CalendarClock,
+  Receipt,
+  House,
+  Bell,
+} from 'lucide-react'
 import Header from './Header'
 
 const links = [
@@ -22,6 +28,14 @@ const links = [
   },
 
   {
+    title: 'Notifications',
+    // containerClassName: 'bg-yellow-50',
+    icon: (
+      <Bell className="h-full w-full  dark:text-neutral-300" />
+    ),
+    href: '/notification',
+  },
+  {
     title: 'Orders',
     icon: (
       <Receipt className="h-full w-full text-neutral-500 dark:text-neutral-300" />
@@ -30,8 +44,9 @@ const links = [
   },
   {
     title: 'Trades',
+
     icon: (
-      <ArrowLeftRight className="h-full w-full text-neutral-500 dark:text-neutral-300" />
+      <ArrowLeftRight className="h-full w-full  text-neutral-500 dark:text-neutral-300" />
     ),
     href: '/trades',
   },
@@ -46,7 +61,7 @@ const Layout = () => {
       <div className="mx-auto px-4 mt-16">
         <Outlet />
         <div className="relative">
-          <div className="flex items-center justify-center h-[4rem] w-full fixed bottom-0 left-0 right-0">
+          <div className="flex items-center justify-center h-[4rem] w-full fixed bottom-0 left-0 right-0 ">
             <FloatingDock
               mobileClassName="translate-y-20" // only for demo, remove for production
               items={links}

@@ -75,7 +75,7 @@ const FloatingDockMobile = ({ items, className }) => {
   )
 }
 
-const FloatingDockDesktop = ({ items, className }) => {
+const FloatingDockDesktop = ({ items, className, containerClassName }) => {
   let mouseX = useMotionValue(Infinity)
   return (
     <motion.div
@@ -87,13 +87,18 @@ const FloatingDockDesktop = ({ items, className }) => {
       )}
     >
       {items.map((item) => (
-        <IconContainer mouseX={mouseX} key={item.title} {...item} />
+        <IconContainer
+          mouseX={mouseX}
+          key={item.title}
+          {...item}
+          containerClassName={item.containerClassName}
+        />
       ))}
     </motion.div>
   )
 }
 
-function IconContainer({ mouseX, title, icon, href }) {
+function IconContainer({ mouseX, title, icon, href, containerClassName }) {
   let ref = useRef(null)
 
   let distance = useTransform(mouseX, (val) => {
@@ -132,6 +137,8 @@ function IconContainer({ mouseX, title, icon, href }) {
 
   const [hovered, setHovered] = useState(false)
 
+  console.log(containerClassName, 'clasldasdlasldalslda')
+
   return (
     <Link to={href}>
       <motion.div
@@ -139,7 +146,10 @@ function IconContainer({ mouseX, title, icon, href }) {
         style={{ width, height }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        className="relative flex aspect-square items-center justify-center rounded-full bg-gray-200 dark:bg-neutral-800"
+        className={cn(
+          'relative flex aspect-square items-center justify-center bg-gray-200 rounded-full dark:bg-neutral-800',
+          containerClassName
+        )}
       >
         <AnimatePresence>
           {hovered && (
