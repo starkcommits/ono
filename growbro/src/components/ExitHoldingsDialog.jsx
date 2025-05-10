@@ -10,6 +10,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from '@/components/ui/drawer'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Button } from '@/components/ui/button'
 
 import { Slider } from '@/components/ui/slider'
@@ -20,6 +21,10 @@ const ExitHoldingsDialog = ({ position, handleExitPositions }) => {
 
   const [yesPrice, setYesPrice] = useState(position.yes_price)
   const [noPrice, setNoPrice] = useState(position.no_price)
+
+  const [yesEnabled, setYesEnabled] = useState(false)
+  const [noEnabled, setNoEnabled] = useState(false)
+
   return (
     <Drawer
       className="w-full"
@@ -43,58 +48,102 @@ const ExitHoldingsDialog = ({ position, handleExitPositions }) => {
         </DrawerHeader>
         <div className="w-full flex flex-col gap-4">
           {position?.ACTIVE?.YES?.total_quantity ? (
-            <div className="mb-6 px-10">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-lg font-medium">Yes Price</span>
-                <div className="flex items-center">
-                  <span className="text-lg font-medium">₹{yesPrice}</span>
+            <div className="mb-6 px-10 flex items-center gap-1">
+              <div className="flex items-center justify-center w-[20%]">
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="yes-checkbox"
+                    checked={yesEnabled}
+                    onCheckedChange={setYesEnabled}
+                  />
+                  <label
+                    htmlFor="yes-checkbox"
+                    className="text-md font-medium cursor-pointer"
+                  >
+                    Yes Price
+                  </label>
                 </div>
               </div>
+              {yesEnabled && (
+                <div className="flex flex-col gap-2 w-[80%]">
+                  <div className="flex items-center justify-between">
+                    {/* <span className="text-lg font-medium">Yes Price</span> */}
+                    <div className="flex items-center">
+                      <span className="text-lg font-medium">₹{yesPrice}</span>
+                    </div>
+                  </div>
 
-              <div className="flex justify-between mt-2">
-                <Slider
-                  defaultValue={[1]}
-                  max={9.5}
-                  min={0.5}
-                  step={0.5}
-                  value={[yesPrice]}
-                  className={``}
-                  onValueChange={(values) => {
-                    setYesPrice(values[0])
-                  }}
-                />
-              </div>
+                  <div className="flex justify-between">
+                    <Slider
+                      defaultValue={[1]}
+                      max={9.5}
+                      min={0.5}
+                      step={0.5}
+                      value={[yesPrice]}
+                      className={``}
+                      onValueChange={(values) => {
+                        if (yesEnabled) setYesPrice(values[0])
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           ) : null}
           {position?.ACTIVE?.NO?.total_quantity ? (
-            <div className="mb-6 px-10">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-lg font-medium">No Price</span>
-                <div className="flex items-center">
-                  <span className="text-lg font-medium">₹{noPrice}</span>
+            <div className="mb-6 px-10 flex gap-1 items-center">
+              <div className="flex items-center justify-center w-[20%]">
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="no-checkbox"
+                    checked={noEnabled}
+                    onCheckedChange={setNoEnabled}
+                  />
+                  <label
+                    htmlFor="no-checkbox"
+                    className="text-md font-medium cursor-pointer"
+                  >
+                    No Price
+                  </label>
                 </div>
               </div>
+              {noEnabled && (
+                <div className="flex flex-col gap-2 w-[80%]">
+                  <div className="flex items-center justify-between">
+                    {/* <span className="text-lg font-medium">No Price</span> */}
+                    <div className="flex items-center">
+                      <span className="text-lg font-medium">₹{noPrice}</span>
+                    </div>
+                  </div>
 
-              <div className="flex justify-between mt-2">
-                <Slider
-                  defaultValue={[1]}
-                  max={9.5}
-                  min={0.5}
-                  step={0.5}
-                  value={[noPrice]}
-                  className={``}
-                  onValueChange={(values) => {
-                    setNoPrice(values[0])
-                  }}
-                />
-              </div>
+                  <div className="flex justify-between">
+                    <Slider
+                      defaultValue={[1]}
+                      max={9.5}
+                      min={0.5}
+                      step={0.5}
+                      value={[noPrice]}
+                      className={``}
+                      onValueChange={(values) => {
+                        setNoPrice(values[0])
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           ) : null}
         </div>
         <DrawerFooter className="w-full px-10 text-xs">
           <Button
             onClick={() => {
-              handleExitPositions(yesPrice, noPrice, setIsDrawerOpen)
+              handleExitPositions(
+                yesPrice,
+                noPrice,
+                yesEnabled,
+                noEnabled,
+                setIsDrawerOpen
+              )
             }}
           >
             Exit All Positions

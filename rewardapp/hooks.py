@@ -136,13 +136,13 @@ app_license = "mit"
 # ---------------
 # Hook on document methods and events
 
-doc_events = {
-	"*": {
-		"on_update": "method",
-		"on_cancel": "method",
-		"on_trash": "method"
-	}
-}
+# doc_events = {
+# 	"*": {
+# 		"on_update": "method",
+# 		"on_cancel": "method",
+# 		"on_trash": "method"
+# 	}
+# }
 
 doc_events = {
 	"Orders": {
@@ -161,6 +161,8 @@ api = {
         "rewardapp.api.signup",
         "rewardapp.api.generate_mobile_otp",
         "rewardapp.api.verify_otp",
+        "rewardapp.api.execute",
+        "rewardapp.api.update_profile",
         "rewardapp.api.check_password_strength",
         "rewardapp.api.check_referral",
         "rewardapp.wallet.get_balance",
@@ -182,13 +184,13 @@ api = {
     ]
 }
 
-scheduler_events = {
-    "cron": {
-        "*/1 * * * *": [
-            "rewardapp.tasks.execute"
-        ]
-    }
-}
+# scheduler_events = {
+#     "cron": {
+#         "*/1 * * * *": [
+#             "rewardapp.tasks.execute"
+#         ]
+#     }
+# }
 
 # Scheduled Tasks
 # ---------------

@@ -200,7 +200,7 @@ def market(doc, method):
             # For debugging
             frappe.logger().info(f"Sending payload to market engine: {payload}")
             
-            url = "http://127.0.0.1:8086/markets/"
+            url = "http://94.136.187.188:8086/markets/"
             response = requests.post(url, json=payload)
             
             if response.status_code != 201:
@@ -222,14 +222,20 @@ def market(doc, method):
                 frappe.publish_realtime("market_event",update_data,after_commit=True)
                 frappe.msgprint("Market Created Successfully.")
         elif doc.status == "CLOSED":
-            frappe.db.sql("""
-                UPDATE `tabOrders`
-                SET status = 'CANCELED'
-                WHERE market_id = %s AND status NOT IN ('MATCHED', 'SETTLED', 'CANCELED')
-            """, (doc.name,))
+            frappe.log_error("Market Closed",f"{doc.name}")
+            orders = frappe.get_all("Orders", filters={
+                "market_id": doc.name,
+                "status": ["not in", ["MATCHED", "SETTLED", "CANCELED"]]
+            })
+
+            for order in orders:
+                order_doc = frappe.get_doc("Orders", order.name)
+                order_doc.status = "CANCELED"
+                order_doc.remark = "Market Closed"
+                order_doc.save()  # Triggers hooks
 
             frappe.db.commit()
-            url=f"http://127.0.0.1:8086/markets/{doc.name}/close"
+            url=f"http://94.136.187.188:8086/markets/{doc.name}/close"
             response = requests.post(url)
                 
             if response.status_code != 200:
@@ -586,7 +592,7 @@ def holding(doc,method):
 
         # API call to sync order update
         try:
-            url = "http://127.0.0.1:8086/orders/update_quantity"
+            url = "http://94.136.187.188:8086/orders/update_quantity"
             response = requests.put(url, json=payload)
             if response.status_code != 201:
                 frappe.logger().error(f"Error response: {response.text}")

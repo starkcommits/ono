@@ -130,9 +130,15 @@ const ActivePositions = ({ position, refetchActiveHoldings }) => {
     }
   }
 
-  const handleExitPositions = async (yesPrice, noPrice, setIsDrawerOpen) => {
+  const handleExitPositions = async (
+    yesPrice,
+    noPrice,
+    yesEnabled,
+    noEnabled,
+    setIsDrawerOpen
+  ) => {
     try {
-      if (position?.ACTIVE?.YES?.total_quantity > 0) {
+      if (position?.ACTIVE?.YES?.total_quantity > 0 && yesEnabled) {
         console.log('Yes')
         await createDoc('Orders', {
           market_id: position.market_id,
@@ -147,9 +153,8 @@ const ActivePositions = ({ position, refetchActiveHoldings }) => {
           order_type: 'SELL',
         })
       }
-      if (position?.ACTIVE?.NO?.total_quantity > 0) {
+      if (position?.ACTIVE?.NO?.total_quantity > 0 && noEnabled) {
         console.log('No')
-
         await createDoc('Orders', {
           market_id: position.market_id,
           quantity:

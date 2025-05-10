@@ -207,6 +207,18 @@ from frappe.sessions import get_expiry_in_seconds
 #         frappe.log_error("Error in sending OTP",f"{str(e)}")
 #         return False
 
+@frappe.whitelist(allow_guest=True)
+def update_profile(user, token):
+    try:
+        user_doc = frappe.get_doc("User",user)
+        user_doc.fcm_token = token
+        user_doc.save(ignore_permissions=True)
+        frappe.db.commit()
+        success_response("Token updated successfully")
+    except Exception as e:
+        frappe.throw(f"Error in profile updation {str(e)}")
+
+
 def send_sms(mobile_number, otp):
     try:
         url = "http://65.2.148.196:8081/message/sendText/ONO"
@@ -328,6 +340,12 @@ def verify_otp(mobile, otp):
         wallet.is_active = 1
         wallet.save(ignore_permissions=True)
 
+        promo_wallet = frappe.new_doc("Promotional Wallet")
+        promo_wallet.user = user
+        promo_wallet.balance = 0
+        promo_wallet.is_active = 1
+        promo_wallet.save(ignore_permissions=True)
+
     # Log the user in
     frappe.local.login_manager = LoginManager()
     frappe.local.login_manager.login_as(user)
@@ -359,7 +377,40 @@ def verify_otp(mobile, otp):
 
     return {"message": "Logged in", "sid": frappe.session.sid}
 
+@frappe.whitelist(allow_guest=True)
+def execute():
+    try:
+        now = now_datetime()
 
+        frappe.logger().info(f"[Market Close API] Now: {now}, Adjusted:")
+        
+        markets = frappe.get_all(
+            "Market",
+            filters={"status": "OPEN", "closing_time": ["<=", now]},
+            fields=["name", "closing_time"]
+        )
+
+        if not markets:
+            frappe.logger().info("[Market Close API] No markets to close")
+            return {"status": "no_markets"}
+
+        for market in markets:
+            try:
+                frappe.logger().info(f"[Market Close API] Closing market: {market.name}")
+                doc = frappe.get_doc("Market", market.name)
+                doc.status = "CLOSED"
+                doc.flags.ignore_version = True   # <- CRUCIAL
+                doc.save(ignore_permissions=True)  # <- CRUCIAL
+                frappe.logger().info(f"[Market Close API] Market {market.name} closed.")
+            except Exception as e:
+                frappe.log_error(f"Error closing market {market.name}: {str(e)}")
+
+        frappe.db.commit()
+        return {"status": "success", "closed": [m.name for m in markets]}
+    except Exception as e:
+        frappe.db.rollback()
+        frappe.log_error(f"Market closing script error: {str(e)}")
+        return {"status": "error", "message": str(e)}
 
 
 @frappe.whitelist(allow_guest=True)

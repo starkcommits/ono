@@ -54,13 +54,14 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { useState } from 'react'
+import { Check } from 'lucide-react'
 
 const ResolveSheet = ({ market_id, onResolveAction }) => {
   const [selectedValue, setSelectedValue] = useState(false)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
-  async function onSubmit(data) {
-    console.log('Selected outcome:', data.outcome)
+  async function onSubmit() {
+    console.log('Selected outcome:', selectedValue)
     await onResolveAction(selectedValue, market_id)
   }
 
@@ -147,45 +148,58 @@ const ResolveSheet = ({ market_id, onResolveAction }) => {
     //   </SheetContent>
     // </Sheet>
 
-    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-      <DialogTrigger asChild>
-        <RadioGroup
-          className="flex gap-2"
-          value={selectedValue}
-          onValueChange={setSelectedValue}
-        >
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="YES" id="Yes" />
-            <Label htmlFor="Yes">Yes</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="NO" id="No" />
-            <Label htmlFor="No">No</Label>
-          </div>
-        </RadioGroup>
-      </DialogTrigger>
-      <DialogContent className="">
-        <DialogHeader>
-          <DialogTitle>Resolve Market</DialogTitle>
-          <DialogDescription>
-            Are you sure you want to resolve this market with {selectedValue} as
-            the end result? This action cannot be undone.
-          </DialogDescription>
-        </DialogHeader>
+    <div className="flex items-center gap-2">
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogTrigger>
+          <Button>Resolve Market</Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Resolve Market</DialogTitle>
+            <DialogDescription className="w-full">
+              {`Are you sure you want to resolve the market:
+              ${market_id}`}
+            </DialogDescription>
+          </DialogHeader>
 
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => {
-              setIsDialogOpen(false)
-            }}
-          >
-            Cancel
-          </Button>
-          <Button onClick={onSubmit}>Submit</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          <div className="">
+            <RadioGroup
+              value={selectedValue}
+              onValueChange={(value) => setSelectedValue(value)}
+              className="flex flex-col gap-4"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="YES" id="YES" />
+                <Label htmlFor="YES" className="font-medium cursor-pointer">
+                  YES
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="NO" id="NO" />
+                <Label htmlFor="NO" className="font-medium cursor-pointer">
+                  NO
+                </Label>
+              </div>
+            </RadioGroup>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsDialogOpen(false)
+                setSelectedValue(null)
+              }}
+            >
+              Cancel
+            </Button>
+            <Button onClick={onSubmit} disabled={!selectedValue}>
+              Confirm Resolution
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   )
 }
 
