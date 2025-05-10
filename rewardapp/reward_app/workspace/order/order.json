@@ -1,0 +1,54 @@
+{
+ "charts": [],
+ "content": "[{\"id\":\"SOdNkP6eby\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">ORDERS ANALYTICS</span>\",\"col\":12}},{\"id\":\"wRJODNniX0\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"H430kAd12L\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"<b>MATCHED ORDERS</b>\",\"col\":4}},{\"id\":\"rK9U6ejDQj\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"<b>UNMATCHED ORDERS</b>\",\"col\":4}},{\"id\":\"XdsTTBpnz4\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"<b>CANCELLED ORDERS</b>\",\"col\":4}},{\"id\":\"aw_hrPd3gQ\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"<b>SETTLED ORDERS</b>\",\"col\":4}},{\"id\":\"iEZFeqA-6r\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"<b>BUY ORDERS</b>\",\"col\":4}},{\"id\":\"P2Cy2MHLjw\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"<b>SELL ORDERS</b>\",\"col\":4}},{\"id\":\"zHx4ytZSBt\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"0m09Optniu\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>SHORTCUTS</b></span>\",\"col\":12}}]",
+ "creation": "2025-05-10 12:03:09.265884",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "stock",
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "Order",
+ "links": [],
+ "modified": "2025-05-10 15:12:32.723777",
+ "modified_by": "Administrator",
+ "module": "Reward App",
+ "name": "Order",
+ "number_cards": [
+  {
+   "label": "<b>MATCHED ORDERS</b>",
+   "number_card_name": "Matched Orders"
+  },
+  {
+   "label": "<b>UNMATCHED ORDERS</b>",
+   "number_card_name": "Unmatched Orders"
+  },
+  {
+   "label": "<b>CANCELLED ORDERS</b>",
+   "number_card_name": "Cancelled Orders"
+  },
+  {
+   "label": "<b>SETTLED ORDERS</b>",
+   "number_card_name": "Settled Orders"
+  },
+  {
+   "label": "<b>BUY ORDERS</b>",
+   "number_card_name": "Buy Orders"
+  },
+  {
+   "label": "<b>SELL ORDERS</b>",
+   "number_card_name": "Sell Orders"
+  }
+ ],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 31.0,
+ "shortcuts": [],
+ "title": "Order"
+}
