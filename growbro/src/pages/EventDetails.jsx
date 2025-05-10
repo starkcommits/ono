@@ -21,7 +21,7 @@ import {
   Filler,
   Legend,
 } from 'chart.js'
-import TradeSheet from '../components/TradeSheet'
+import BuyTradeSheet from '../components/BuyTradeSheet'
 import {
   useFrappeDocTypeEventListener,
   useFrappeEventListener,
@@ -372,11 +372,10 @@ const EventDetails = () => {
       </div>
 
       {market?.status === 'OPEN' && showTradeSheet && selectedChoice && (
-        <TradeSheet
-          marketPrice={
-            selectedChoice === 'YES' ? market.yes_price : market.no_price
-          }
+        <BuyTradeSheet
+          market={market}
           choice={selectedChoice}
+          setSelectedChoice={setSelectedChoice}
           onClose={closeTradeSheet}
           tradeAction={selectedAction}
           marketId={id}

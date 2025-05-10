@@ -1209,10 +1209,25 @@
   resolved "https://registry.yarnpkg.com/@radix-ui/primitive/-/primitive-1.1.2.tgz#83f415c4425f21e3d27914c12b3272a32e3dae65"
   integrity sha512-XnbHrrprsNqZKQhStrSwgRUQzoCI1glLzdw79xiZPoofhGICeZRSQ3dIxAKH1gb3OHfNf4d6f+vAv3kil2eggA==
 
-"@radix-ui/react-arrow@1.1.6":
-  version "1.1.6"
-  resolved "https://registry.yarnpkg.com/@radix-ui/react-arrow/-/react-arrow-1.1.6.tgz#4b460fdbc1ac097a4964e04ca404c25c2f6d7d3f"
-  integrity sha512-2JMfHJf/eVnwq+2dewT3C0acmCWD3XiVA1Da+jTDqo342UlU13WvXtqHhG+yJw5JeQmu4ue2eMy6gcEArLBlcw==
+"@radix-ui/react-accordion@^1.2.10":
+  version "1.2.10"
+  resolved "https://registry.yarnpkg.com/@radix-ui/react-accordion/-/react-accordion-1.2.10.tgz#7a83b368c809015514f75e21316633a73ac9a30c"
+  integrity sha512-x+URzV1siKmeXPSUIQ22L81qp2eOhjpy3tgteF+zOr4d1u0qJnFuyBF4MoQRhmKP6ivDxlvDAvqaF77gh7DOIw==
+  dependencies:
+    "@radix-ui/primitive" "1.1.2"
+    "@radix-ui/react-collapsible" "1.1.10"
+    "@radix-ui/react-collection" "1.1.6"
+    "@radix-ui/react-compose-refs" "1.1.2"
+    "@radix-ui/react-context" "1.1.2"
+    "@radix-ui/react-direction" "1.1.1"
+    "@radix-ui/react-id" "1.1.1"
+    "@radix-ui/react-primitive" "2.1.2"
+    "@radix-ui/react-use-controllable-state" "1.2.2"
+
+"@radix-ui/react-arrow@1.1.4":
+  version "1.1.4"
+  resolved "https://registry.npmjs.org/@radix-ui/react-arrow/-/react-arrow-1.1.4.tgz"
+  integrity sha512-qz+fxrqgNxG0dYew5l7qR3c7wdgRu1XVUHGnGYX7rg5HM4p9SWaRmJwfgR3J0SgyUKayLmzQIun+N6rWRgiRKw==
   dependencies:
     "@radix-ui/react-primitive" "2.1.2"
 
@@ -1230,6 +1245,40 @@
     "@radix-ui/react-use-previous" "1.1.1"
     "@radix-ui/react-use-size" "1.1.1"
 
+"@radix-ui/react-collapsible@1.1.10":
+  version "1.1.10"
+  resolved "https://registry.yarnpkg.com/@radix-ui/react-collapsible/-/react-collapsible-1.1.10.tgz#a0e75e5cd9666e8c8100d539a9f57c50d113e38b"
+  integrity sha512-O2mcG3gZNkJ/Ena34HurA3llPOEA/M4dJtIRMa6y/cknRDC8XY5UZBInKTsUwW5cUue9A4k0wi1XU5fKBzKe1w==
+  dependencies:
+    "@radix-ui/primitive" "1.1.2"
+    "@radix-ui/react-compose-refs" "1.1.2"
+    "@radix-ui/react-context" "1.1.2"
+    "@radix-ui/react-id" "1.1.1"
+    "@radix-ui/react-presence" "1.1.4"
+    "@radix-ui/react-primitive" "2.1.2"
+    "@radix-ui/react-use-controllable-state" "1.2.2"
+    "@radix-ui/react-use-layout-effect" "1.1.1"
+
+"@radix-ui/react-collection@1.1.2":
+  version "1.1.2"
+  resolved "https://registry.npmjs.org/@radix-ui/react-collection/-/react-collection-1.1.2.tgz"
+  integrity sha512-9z54IEKRxIa9VityapoEYMuByaG42iSy1ZXlY2KcuLSEtq8x4987/N6m15ppoMffgZX72gER2uHe1D9Y6Unlcw==
+  dependencies:
+    "@radix-ui/react-compose-refs" "1.1.1"
+    "@radix-ui/react-context" "1.1.1"
+    "@radix-ui/react-primitive" "2.0.2"
+    "@radix-ui/react-slot" "1.1.2"
+
+"@radix-ui/react-collection@1.1.4":
+  version "1.1.4"
+  resolved "https://registry.npmjs.org/@radix-ui/react-collection/-/react-collection-1.1.4.tgz"
+  integrity sha512-cv4vSf7HttqXilDnAnvINd53OTl1/bjUYVZrkFnA7nwmY9Ob2POUy0WY0sfqBAe1s5FyKsyceQlqiEGPYNTadg==
+  dependencies:
+    "@radix-ui/react-compose-refs" "1.1.2"
+    "@radix-ui/react-context" "1.1.2"
+    "@radix-ui/react-primitive" "2.1.0"
+    "@radix-ui/react-slot" "1.2.0"
+
 "@radix-ui/react-collection@1.1.6":
   version "1.1.6"
   resolved "https://registry.yarnpkg.com/@radix-ui/react-collection/-/react-collection-1.1.6.tgz#fecf74475e4660ee99c7eb1ebfa5ccfb1a219fe4"
@@ -1239,6 +1288,11 @@
     "@radix-ui/react-context" "1.1.2"
     "@radix-ui/react-primitive" "2.1.2"
     "@radix-ui/react-slot" "1.2.2"
+
+"@radix-ui/react-compose-refs@1.1.1":
+  version "1.1.1"
+  resolved "https://registry.npmjs.org/@radix-ui/react-compose-refs/-/react-compose-refs-1.1.1.tgz"
+  integrity sha512-Y9VzoRDSJtgFMUCoiZBDVo084VQ5hfpXxVE+NgkdNsjiDBByiImMZKKhxMwCbdHvhlENG6a833CbFkOQvTricw==
 
 "@radix-ui/react-compose-refs@1.1.2":
   version "1.1.2"
@@ -1478,7 +1532,7 @@
   dependencies:
     "@radix-ui/react-compose-refs" "1.1.2"
 
-"@radix-ui/react-switch@^1.1.4":
+"@radix-ui/react-switch@^1.2.4":
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/@radix-ui/react-switch/-/react-switch-1.2.4.tgz#3318007c4147df69c04141aa7a77c034baea7169"
   integrity sha512-yZCky6XZFnR7pcGonJkr9VyNRu46KcYAbyg1v/gVVCZUr8UJ4x+RpncC27hHtiZ15jC+3WS8Yg/JSgyIHnYYsQ==
