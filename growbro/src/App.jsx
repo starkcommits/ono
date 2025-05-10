@@ -7,7 +7,7 @@ import EventDetails from './pages/EventDetails'
 import News from './pages/News'
 import CategoryPage from './pages/CategoryPage'
 import SearchPage from './pages/Search'
-import Profile from './pages/Profile'
+// import Profile from './pages/Profile'
 import Settings from './pages/Settings'
 import Rewards from './pages/Rewards'
 import Notifications from './pages/Notifications'
@@ -25,6 +25,7 @@ import ActiveMarketHolding from './pages/ActiveMarketHolding'
 import ClosedMarketHolding from './pages/ClosedMarketHolding'
 import Referral from './pages/Referral'
 import OTPScreen from './pages/OTPScreen'
+import EditProfile from './pages/EditProfile'
 
 const navItems = [
   { icon: Home, label: 'Home', path: '/' },
@@ -64,14 +65,13 @@ function App() {
                   path="/portfolio/closed/:id"
                   element={<ClosedMarketHolding />}
                 />
-
                 <Route path="/news" element={<News />} />
                 <Route path="/search" element={<SearchPage />} />
                 <Route path="/event/:id" element={<EventDetails />} />
                 <Route path="/category/:id" element={<CategoryPage />} />
-
-                {/* <Route path="/profile" element={<Profile />} />
-                <Route path="/settings" element={<Settings />} /> */}
+                <Route path="/profile/:id" element={<EditProfile />} />
+                {/* <Route path="/edit" element={<EditProfile />} /> */}
+                <Route path="/settings" element={<Settings />} />
                 {/* <Route path="/rewards" element={<Rewards />} /> */}
                 <Route path="/notifications" element={<Notifications />} />
               </Route>

@@ -42,7 +42,7 @@ const SlideMenu = ({ isOpen, onClose }) => {
     {
       title: 'Account',
       items: [
-        { icon: User, label: 'Profile', path: '/profile' },
+        { icon: User, label: 'Update Profile', path: '/profile' },
         { icon: Settings, label: 'Settings', path: '/settings' },
         { icon: Bell, label: 'Notifications', path: '/notifications' },
       ],
@@ -119,7 +119,7 @@ const SlideMenu = ({ isOpen, onClose }) => {
                   {section.items.map((item, itemIndex) => (
                     <button
                       key={itemIndex}
-                      // onClick={() => item.path && navigate(item.path)}
+                      onClick={() => item.path && navigate(item.path)}
                       className="w-full px-6 py-2.5 flex items-center justify-between hover:bg-gray-50 transition-colors"
                     >
                       <div className="flex items-center">
