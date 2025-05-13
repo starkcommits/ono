@@ -1,11 +1,11 @@
 {
  "charts": [],
- "content": "[{\"id\":\"vo-T38zEiY\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Finance</span>\",\"col\":12}},{\"id\":\"h3npILdYId\",\"type\":\"custom_block\",\"data\":{\"custom_block_name\":\"total_investment\",\"col\":3}},{\"id\":\"ItY3bD8Nxl\",\"type\":\"custom_block\",\"data\":{\"custom_block_name\":\"Total_returns\",\"col\":3}}]",
+ "content": "[{\"id\":\"vo-T38zEiY\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Finance</span>\",\"col\":12}},{\"id\":\"h3npILdYId\",\"type\":\"custom_block\",\"data\":{\"custom_block_name\":\"Market Investments\",\"col\":4}},{\"id\":\"ItY3bD8Nxl\",\"type\":\"custom_block\",\"data\":{\"custom_block_name\":\"Total_returns\",\"col\":3}}]",
  "creation": "2025-05-10 12:06:49.869920",
  "custom_blocks": [
   {
-   "custom_block_name": "total_investment",
-   "label": "total_investment"
+   "custom_block_name": "Market Investments",
+   "label": "Market Investments"
   },
   {
    "custom_block_name": "Total_returns",
@@ -22,7 +22,7 @@
  "is_hidden": 0,
  "label": "Finance",
  "links": [],
- "modified": "2025-05-13 10:59:07.531363",
+ "modified": "2025-05-13 15:03:23.623161",
  "modified_by": "Administrator",
  "module": "Reward App",
  "name": "Finance",
