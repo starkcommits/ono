@@ -77,6 +77,7 @@ def trades():
                     "user_id": trade["first_user_id"],
                     "opinion_type": trade["first_user_option"],
                     "price": trade["first_user_price"],
+                    "buy_order": trade["first_user_order_id"],
                     "status": "ACTIVE"
                 })
                 holding_doc1.insert(ignore_permissions=True)
@@ -88,6 +89,7 @@ def trades():
                     "user_id": trade["second_user_id"],
                     "opinion_type": trade["second_user_option"],
                     "price": trade["second_user_price"],
+                    "buy_order": trade["second_user_order_id"],
                     "status": "ACTIVE"
                 })
                 holding_doc2.insert(ignore_permissions=True)
@@ -168,6 +170,7 @@ def trades():
                     "user_id": trade["second_user_id"],
                     "opinion_type": trade["second_user_option"],
                     "price": trade["second_user_price"],
+                    "buy_order": trade["second_user_order_id"],
                     "status": "ACTIVE"
                 })
                 holding_doc2.insert(ignore_permissions=True)

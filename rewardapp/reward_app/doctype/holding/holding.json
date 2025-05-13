@@ -14,6 +14,7 @@
   "question",
   "market_yes_price",
   "market_no_price",
+  "buy_order",
   "column_break_znim",
   "price",
   "opinion_type",
@@ -22,7 +23,8 @@
   "returns",
   "market_status",
   "closing_time",
-  "remark"
+  "remark",
+  "amount_invested"
  ],
  "fields": [
   {
@@ -126,12 +128,25 @@
    "fieldname": "remark",
    "fieldtype": "Data",
    "label": "Remark"
+  },
+  {
+   "fieldname": "amount_invested",
+   "fieldtype": "Float",
+   "is_virtual": 1,
+   "label": "Amount invested",
+   "options": "doc.quantity*doc.price",
+   "read_only": 1
+  },
+  {
+   "fieldname": "buy_order",
+   "fieldtype": "Data",
+   "label": "Buy Order"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-05-10 13:22:57.355215",
+ "modified": "2025-05-12 13:02:08.196211",
  "modified_by": "Administrator",
  "module": "Reward App",
  "name": "Holding",
