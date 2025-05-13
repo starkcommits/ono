@@ -334,6 +334,76 @@ def resolve_market():
         frappe.log_error("Error Closing market", f"{str(e)}")
         return {"status": "error", "message": "Error in resolving market"}
 
+def check_price_trigger(market_id,yes_price,no_price):
+    yes_orders = frappe.db.sql("""
+        SELECT name, user_id, quantity, market_id
+        FROM `tabOrders`
+        WHERE market_id = %s
+        AND opinion_type = 'YES'
+        AND status = 'MATCHED'
+        AND order_type = 'BUY'
+        AND quantity > 0
+        AND (
+            (book_profit = 1 AND profit_price <= %s)
+            OR
+            (stop_loss = 1 AND loss_price >= %s)
+        )
+    """, (market_id, yes_price, yes_price), as_dict=True)
+
+    for order in yes_orders:
+        sell_order = frappe.get_doc({
+            'doctype': 'Orders',
+            'quantity': order.quantity,
+            'market_id': order.market_id,
+            'user_id': order.user_id,
+            'opinion_type': 'YES',
+            'order_type': 'SELL',
+            'status': 'UNMATCHED'
+        }).insert(ignore_permissions=True)
+
+        frappe.db.sql("""
+            UPDATE `tabHolding`
+            SET status = 'EXITING', order_id = %s
+            WHERE user_id = %s
+            AND buy_order_id = %s
+        """, (sell_order.name, order.user_id, order.name))
+
+    frappe.db.commit()
+
+    no_orders = frappe.db.sql("""
+        SELECT name, user_id, quantity, market_id
+        FROM `tabOrders`
+        WHERE market_id = %s
+        AND opinion_type = 'NO'
+        AND status = 'MATCHED'
+        AND order_type = 'BUY'
+        AND quantity > 0
+        AND (
+            (book_profit = 1 AND profit_price <= %s)
+            OR
+            (stop_loss = 1 AND loss_price >= %s)
+        )
+    """, (market_id, no_price, no_price), as_dict=True)
+
+    for order in no_orders:
+        sell_order = frappe.get_doc({
+            'doctype': 'Orders',
+            'quantity': order.quantity,
+            'market_id': order.market_id,
+            'user_id': order.user_id,
+            'opinion_type': 'NO',
+            'order_type': 'SELL',
+            'status': 'UNMATCHED'
+        }).insert(ignore_permissions=True)
+
+        frappe.db.sql("""
+            UPDATE `tabHolding`
+            SET status = 'EXITING', order_id = %s
+            WHERE user_id = %s
+            AND buy_order_id = %s
+        """, (sell_order.name, order.user_id, order.name))
+
+    frappe.db.commit()
 
 @frappe.whitelist(allow_guest=True)
 def update_market_price():
@@ -361,6 +431,8 @@ def update_market_price():
 
         frappe.publish_realtime("market_event",update_data,after_commit=True)
         
+        check_price_trigger(data.market_id, data.yes_price, data.no_price)
+
         return True
     except Exception as e:
         frappe.log_error("Error in market price update", f"{str(e)}")
