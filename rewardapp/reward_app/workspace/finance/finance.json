@@ -1,8 +1,17 @@
 {
  "charts": [],
- "content": "[{\"id\":\"vo-T38zEiY\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Finance</span>\",\"col\":12}}]",
+ "content": "[{\"id\":\"vo-T38zEiY\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Finance</span>\",\"col\":12}},{\"id\":\"h3npILdYId\",\"type\":\"custom_block\",\"data\":{\"custom_block_name\":\"total_investment\",\"col\":3}},{\"id\":\"ItY3bD8Nxl\",\"type\":\"custom_block\",\"data\":{\"custom_block_name\":\"Total_returns\",\"col\":3}}]",
  "creation": "2025-05-10 12:06:49.869920",
- "custom_blocks": [],
+ "custom_blocks": [
+  {
+   "custom_block_name": "total_investment",
+   "label": "total_investment"
+  },
+  {
+   "custom_block_name": "Total_returns",
+   "label": "Total_returns"
+  }
+ ],
  "docstatus": 0,
  "doctype": "Workspace",
  "for_user": "",
@@ -13,7 +22,7 @@
  "is_hidden": 0,
  "label": "Finance",
  "links": [],
- "modified": "2025-05-10 12:07:40.457042",
+ "modified": "2025-05-13 10:59:07.531363",
  "modified_by": "Administrator",
  "module": "Reward App",
  "name": "Finance",
