@@ -340,12 +340,34 @@ def verify_otp(mobile, otp):
         wallet.is_active = 1
         wallet.save(ignore_permissions=True)
 
-        promo_wallet = frappe.new_doc("Promotional Wallet")
-        promo_wallet.user = user
-        promo_wallet.balance = 0
-        promo_wallet.is_active = 1
-        promo_wallet.save(ignore_permissions=True)
+        # Fetch active referral configs
+        referrals = frappe.db.sql(
+            """
+            SELECT
+                referral_name
+            FROM `tabReferral Config`
+            WHERE is_active = 1
+            """,
+            as_dict=True
+        )
 
+        if referrals:
+            user_referral = frappe.get_doc({
+                'doctype': 'Referral Code',
+                'user': user.name,
+                'referral_name': referrals[0]['referral_name']
+            })
+            user_referral.insert(ignore_permissions=True)
+
+            promo_wallet = frappe.new_doc("Promotional Wallet")
+            promo_wallet.user = user
+            promo_wallet.balance = 0
+            promo_wallet.referral_code = user_referral.name
+            promo_wallet.is_active = 1
+            promo_wallet.save(ignore_permissions=True)
+        else:
+            frappe.throw("No active Referral Config found.")
+        
     # Log the user in
     frappe.local.login_manager = LoginManager()
     frappe.local.login_manager.login_as(user)
@@ -357,9 +379,7 @@ def verify_otp(mobile, otp):
     frappe.local.cookie_manager.init_cookies()
     
     # Get user information for setting additional cookies
-    user_info = frappe.db.get_value("User", user, 
-                         ["first_name", "last_name", "user_image"], 
-                         as_dict=1)
+    user_info = frappe.db.get_value("User", user, ["first_name", "last_name", "user_image"], as_dict=1)
     
     # Set additional cookies
     full_name = " ".join(filter(None, [user_info.first_name, user_info.last_name]))
