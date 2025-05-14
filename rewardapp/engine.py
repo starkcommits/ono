@@ -335,43 +335,9 @@ def resolve_market():
         return {"status": "error", "message": "Error in resolving market"}
 
 def check_price_trigger(market_id,yes_price,no_price):
-    yes_orders = frappe.db.sql("""
-        SELECT name, user_id, quantity, market_id
-        FROM `tabOrders`
-        WHERE market_id = %s
-        AND opinion_type = 'YES'
-        AND status = 'MATCHED'
-        AND order_type = 'BUY'
-        AND quantity > 0
-        AND (
-            (book_profit = 1 AND profit_price <= %s)
-            OR
-            (stop_loss = 1 AND loss_price >= %s)
-        )
-    """, (market_id, yes_price, yes_price), as_dict=True)
-
-    for order in yes_orders:
-        sell_order = frappe.get_doc({
-            'doctype': 'Orders',
-            'quantity': order.quantity,
-            'market_id': order.market_id,
-            'user_id': order.user_id,
-            'opinion_type': 'YES',
-            'order_type': 'SELL',
-            'status': 'UNMATCHED'
-        }).insert(ignore_permissions=True)
-
-        frappe.db.sql("""
-            UPDATE `tabHolding`
-            SET status = 'EXITING', order_id = %s
-            WHERE user_id = %s
-            AND buy_order_id = %s
-        """, (sell_order.name, order.user_id, order.name))
-
-    frappe.db.commit()
 
     no_orders = frappe.db.sql("""
-        SELECT name, user_id, quantity, market_id
+        SELECT name, user_id, quantity, market_id, profit_price, loss_price
         FROM `tabOrders`
         WHERE market_id = %s
         AND opinion_type = 'NO'
@@ -386,11 +352,16 @@ def check_price_trigger(market_id,yes_price,no_price):
     """, (market_id, no_price, no_price), as_dict=True)
 
     for order in no_orders:
+        order_amount = order.profit_price
+        if order.loss_price >= no_price:
+            order_amount = order.loss_price
+            
         sell_order = frappe.get_doc({
             'doctype': 'Orders',
             'quantity': order.quantity,
             'market_id': order.market_id,
             'user_id': order.user_id,
+            'amount': order_amount,
             'opinion_type': 'NO',
             'order_type': 'SELL',
             'status': 'UNMATCHED'
@@ -401,6 +372,7 @@ def check_price_trigger(market_id,yes_price,no_price):
             SET status = 'EXITING', order_id = %s
             WHERE user_id = %s
             AND buy_order_id = %s
+            AND status = 'ACTIVE'
         """, (sell_order.name, order.user_id, order.name))
 
     frappe.db.commit()

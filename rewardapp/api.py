@@ -466,7 +466,7 @@ def check_referral(referral_code):
         referral_doc = frappe.get_doc("Referral Code", referral_code)
 
         if int(referral_doc.total_referrals) >= int(referral_doc.total_allowed_referrals):
-            return error_response("This referral code has reached its limit")
-
+            frappe.throw("This referral code has reached its limit")
+        return success_response("Referral code verified")
     except Exception as e:
-        return error_response(f"Registration failed: {str(e)}")
+        frappe.throw(f"Registration failed: {str(e)}")
