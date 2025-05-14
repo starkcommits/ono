@@ -35,7 +35,8 @@ const SignIn = () => {
       setLoading(false)
     } catch (error) {
       console.error('Login error:', error)
-      setLoginError(error.message || 'Login failed. Please try again.')
+      setLoginError(error.message.message || 'Login failed. Please try again.')
+      toast.error('Login failed. Please try again.')
       setLoading(false)
     }
   }

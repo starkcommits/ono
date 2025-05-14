@@ -87,12 +87,16 @@ const OTPScreen = () => {
 
   const handleVerifyOTP = async () => {
     try {
-      await verifyOTP({
+      const response = await verifyOTP({
         mobile: mobile_no,
         otp: otp,
       })
-      console.log('OTP verified successfully')
-      navigate('/got-referral-code')
+      console.log('Response: ', response)
+      if (response?.message?.user_exist === true) {
+        navigate('/')
+      } else {
+        navigate('/got-referral-code')
+      }
     } catch (error) {
       console.log(error)
       toast.error(error?.message?.message || 'error in validating the otp')
