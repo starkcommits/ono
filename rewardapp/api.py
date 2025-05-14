@@ -367,7 +367,7 @@ def verify_otp(mobile, otp):
 
         user_referral = frappe.get_doc({
             'doctype': 'Referral Code',
-            'user': user.name,
+            'user': user,
             'referral_name': referral_name
         })
         user_referral.insert(ignore_permissions=True)
@@ -479,6 +479,7 @@ def check_referral(referral_code):
         if int(referral_doc.total_referrals) >= int(referral_doc.total_allowed_referrals):
             frappe.throw("This referral code has reached its limit")
 
+        promotional_wallet_amount  = 0
         # Increment referral count
         referral_doc.total_referrals += 1
         referral_doc.save(ignore_permissions=True)  # Don't forget to save

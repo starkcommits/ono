@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button' // Ensure you have this
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
+import { useFrappePostCall, useFrappeAuth } from 'frappe-react-sdk'
 
 // Schema
 const formSchema = z.object({
@@ -25,6 +26,10 @@ const GotReferralCode = () => {
   const navigate = useNavigate()
   const [isLoading, setIsLoading] = useState(false)
 
+  const { call: checkReferral } = useFrappePostCall(
+    'rewardapp.api.check_referral'
+  )
+
   const form = useForm({
     resolver: zodResolver(formSchema),
     mode: 'onChange',
@@ -32,15 +37,38 @@ const GotReferralCode = () => {
       gotReferralCode: '',
     },
   })
-
+  const{currentUser} = useFrappeAuth()
   const onSubmit = async (data) => {
     try {
       setIsLoading(true)
-      console.log('Referral code submitted:', data.gotReferralCode)
-      // Handle logic or navigation here
-      navigate('/') // Change route as needed
+      const response = await checkReferral({
+        referral_code: data.gotReferralCode,
+        user_id: currentUser,
+      })
+      console.log(response?.message)
+      if (response?.message?.status === 'success') {
+        toast.success(response?.message?.message)
+        navigate('/')
+      }
     } catch (error) {
-      toast.error(error)
+      const serverMessages = error._server_messages
+      let errorMsg = 'Something went wrong'
+
+      if (serverMessages) {
+        try {
+          const parsedMessages = JSON.parse(serverMessages)
+          if (parsedMessages.length > 0) {
+            const primaryMessage = JSON.parse(parsedMessages[0])?.message
+            if (primaryMessage) errorMsg = primaryMessage
+          }
+        } catch (parseErr) {
+          console.error('Error parsing _server_messages:', parseErr)
+        }
+      } else if (error.message) {
+        errorMsg = error.message
+      }
+
+      toast.error(errorMsg)
     } finally {
       setIsLoading(false)
     }
