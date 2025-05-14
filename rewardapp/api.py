@@ -241,7 +241,7 @@ def send_sms(mobile_number, otp):
             frappe.logger().info(f"SMS sent successfully to {mobile_number}")
             return True
         else:
-            frappe.logger().error(f"SMS API returned non-200 response: {response.status_code} - {response.text}")
+            frappe.log_error(f"SMS API returned non-200 response: {response.status_code} - {response.text}")
             return False
             
     except requests.exceptions.ConnectionError as e:
@@ -319,7 +319,9 @@ def verify_otp(mobile, otp):
     otp_doc.save(ignore_permissions=True)
 
     user = frappe.db.get_value("User", {"phone": mobile})
+    user_exist = True
     if not user:
+        user_exist = False
         username = f"user_{frappe.utils.now_datetime().strftime('%Y%m%d%H%M%S')}"
         user_doc = frappe.get_doc({
             "doctype": "User",
@@ -338,7 +340,7 @@ def verify_otp(mobile, otp):
         wallet.user = user
         wallet.balance = 2000
         wallet.is_active = 1
-        wallet.save(ignore_permissions=True)
+        wallet.insert(ignore_permissions=True)
 
         # Fetch active referral configs
         referrals = frappe.db.sql(
@@ -351,23 +353,34 @@ def verify_otp(mobile, otp):
             as_dict=True
         )
 
-        if referrals:
-            user_referral = frappe.get_doc({
-                'doctype': 'Referral Code',
-                'user': user.name,
-                'referral_name': referrals[0]['referral_name']
-            })
-            user_referral.insert(ignore_permissions=True)
-
-            promo_wallet = frappe.new_doc("Promotional Wallet")
-            promo_wallet.user = user
-            promo_wallet.balance = 0
-            promo_wallet.referral_code = user_referral.name
-            promo_wallet.is_active = 1
-            promo_wallet.save(ignore_permissions=True)
+        referral_name = "Default Referral"
+        if not referrals:
+            referral_name = frappe.get_doc({
+                'doctype': 'Referral Config',
+                'referral_name': 'Default Referral',
+                'referrer_reward_point':50,
+                'referee_reward_point':50,
+                'total_allowed_referrals':5,
+                'description':'This is default referral config for each user',
+                'is_active':1
+            }).insert(ignore_permissions=True)
         else:
-            frappe.throw("No active Referral Config found.")
-        
+            referral_name = referrals[0]['referral_name']
+
+        user_referral = frappe.get_doc({
+            'doctype': 'Referral Code',
+            'user': user,
+            'referral_name': referral_name
+        })
+        user_referral.insert(ignore_permissions=True)
+
+        promo_wallet = frappe.new_doc("Promotional Wallet")
+        promo_wallet.user = user
+        promo_wallet.balance = 0
+        promo_wallet.referral_code = user_referral.name
+        promo_wallet.is_active = 1
+        promo_wallet.insert(ignore_permissions=True)
+
     # Log the user in
     frappe.local.login_manager = LoginManager()
     frappe.local.login_manager.login_as(user)
@@ -395,7 +408,11 @@ def verify_otp(mobile, otp):
 
     frappe.db.commit()
 
-    return {"message": "Logged in", "sid": frappe.session.sid}
+    return {
+        "message": "Logged in", 
+        "sid": frappe.session.sid,
+        "user_exist":user_exist
+    }
 
 @frappe.whitelist(allow_guest=True)
 def execute():
@@ -460,13 +477,53 @@ def error_response(message):
     }
 
 @frappe.whitelist(allow_guest=True)
-def check_referral(referral_code):
+def check_referral(user_id,referral_code):
     
     try:
         referral_doc = frappe.get_doc("Referral Code", referral_code)
 
         if int(referral_doc.total_referrals) >= int(referral_doc.total_allowed_referrals):
-            return error_response("This referral code has reached its limit")
+            frappe.throw("This referral code has reached its limit")
 
+        promotional_wallet_amount = 0
+        # Increment referral count
+        referral_doc.total_referrals += 1
+        referral_doc.save(ignore_permissions=True)  # Don't forget to save
+
+        referral_config = frappe.get_doc("Referral Config", referral_doc.referral_name)
+
+        # Add referee reward to their promotional wallet amount
+        promotional_wallet_amount += referral_config.referee_reward_amount
+
+        # Get referrer's promotional wallet
+        promotional_wallet_data = frappe.db.sql("""
+            SELECT name, balance FROM `tabPromotional Wallet`
+            WHERE user = %s AND is_active = 1
+        """, (referral_doc.user,), as_dict=True)
+
+        if not promotional_wallet_data:
+            frappe.throw(f"No active promotional wallet found for {referral_doc.user}")
+
+        wallet_name = promotional_wallet_data[0]["name"]
+        available_balance = promotional_wallet_data[0]["balance"]
+
+        # Add referrer reward to wallet
+        new_balance = available_balance + referral_config.referrer_reward_amount
+
+        frappe.db.set_value("Promotional Wallet", wallet_name, "balance", new_balance)
+        frappe.db.set_value("Promotional Wallet", user_id, "balance", referral_config.referee_reward_amount)
+
+        # Create Referral Tracking entry
+        referral_tracking = frappe.get_doc({
+            'doctype': 'Referral Tracking',
+            'referrer_user': referral_doc.user,
+            'referee_user': user_id,
+            'referral_code': referral_code,
+            'referrer_reward': referral_config.referrer_reward_amount,
+            'referee_reward': referral_config.referee_reward_amount,
+            'status': 'Rewarded'
+        })
+        referral_tracking.insert(ignore_permissions=True)
+        return success_response("Referral point awarded")
     except Exception as e:
-        return error_response(f"Registration failed: {str(e)}")
+        frappe.throw(f"Registration failed: {str(e)}")

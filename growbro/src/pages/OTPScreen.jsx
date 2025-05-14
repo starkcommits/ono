@@ -18,7 +18,7 @@ import {
   InputOTPSlot,
 } from '@/components/ui/input-otp'
 import { useFrappePostCall } from 'frappe-react-sdk'
-import { Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 
 const OTPScreen = () => {
@@ -87,11 +87,16 @@ const OTPScreen = () => {
 
   const handleVerifyOTP = async () => {
     try {
-      await verifyOTP({
+      const response = await verifyOTP({
         mobile: mobile_no,
         otp: otp,
       })
-      navigate('/')
+      console.log('Response: ', response)
+      if (response?.message?.user_exist === true) {
+        navigate('/')
+      } else {
+        navigate('/got-referral-code')
+      }
     } catch (error) {
       console.log(error)
       toast.error(error?.message?.message || 'error in validating the otp')
