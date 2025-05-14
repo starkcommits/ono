@@ -319,7 +319,9 @@ def verify_otp(mobile, otp):
     otp_doc.save(ignore_permissions=True)
 
     user = frappe.db.get_value("User", {"phone": mobile})
+    user_exist = True
     if not user:
+        user_exist = False
         username = f"user_{frappe.utils.now_datetime().strftime('%Y%m%d%H%M%S')}"
         user_doc = frappe.get_doc({
             "doctype": "User",
@@ -356,11 +358,11 @@ def verify_otp(mobile, otp):
             referral_name = frappe.get_doc({
                 'doctype': 'Referral Config',
                 'referral_name': 'Default Referral',
-                'referrer_reward_point':50.0,
-                'referee_reward_point':50.0,
+                'referrer_reward_point':50,
+                'referee_reward_point':50,
                 'total_allowed_referrals':5,
                 'description':'This is default referral config for each user',
-                'is_active':'1'
+                'is_active':1
             }).insert(ignore_permissions=True)
         else:
             referral_name = referrals[0]['referral_name']
@@ -378,7 +380,7 @@ def verify_otp(mobile, otp):
         promo_wallet.referral_code = user_referral.name
         promo_wallet.is_active = 1
         promo_wallet.insert(ignore_permissions=True)
-        
+
     # Log the user in
     frappe.local.login_manager = LoginManager()
     frappe.local.login_manager.login_as(user)
@@ -406,7 +408,11 @@ def verify_otp(mobile, otp):
 
     frappe.db.commit()
 
-    return {"message": "Logged in", "sid": frappe.session.sid}
+    return {
+        "message": "Logged in", 
+        "sid": frappe.session.sid,
+        "user_exist":user_exist
+    }
 
 @frappe.whitelist(allow_guest=True)
 def execute():
@@ -505,6 +511,7 @@ def check_referral(user_id,referral_code):
         new_balance = available_balance + referral_config.referrer_reward_amount
 
         frappe.db.set_value("Promotional Wallet", wallet_name, "balance", new_balance)
+        frappe.db.set_value("Promotional Wallet", user_id, "balance", referral_config.referee_reward_amount)
 
         # Create Referral Tracking entry
         referral_tracking = frappe.get_doc({
