@@ -471,7 +471,7 @@ def error_response(message):
     }
 
 @frappe.whitelist(allow_guest=True)
-def check_referral(referral_code):
+def check_referral(user_id,referral_code):
     
     try:
         referral_doc = frappe.get_doc("Referral Code", referral_code)
@@ -479,7 +479,7 @@ def check_referral(referral_code):
         if int(referral_doc.total_referrals) >= int(referral_doc.total_allowed_referrals):
             frappe.throw("This referral code has reached its limit")
 
-        promotional_wallet_amount  = 0
+        promotional_wallet_amount = 0
         # Increment referral count
         referral_doc.total_referrals += 1
         referral_doc.save(ignore_permissions=True)  # Don't forget to save
@@ -510,7 +510,7 @@ def check_referral(referral_code):
         referral_tracking = frappe.get_doc({
             'doctype': 'Referral Tracking',
             'referrer_user': referral_doc.user,
-            'referee_user': user.name,
+            'referee_user': user_id,
             'referral_code': referral_code,
             'referrer_reward': referral_config.referrer_reward_amount,
             'referee_reward': referral_config.referee_reward_amount,
