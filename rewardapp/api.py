@@ -241,7 +241,7 @@ def send_sms(mobile_number, otp):
             frappe.logger().info(f"SMS sent successfully to {mobile_number}")
             return True
         else:
-            frappe.logger().error(f"SMS API returned non-200 response: {response.status_code} - {response.text}")
+            frappe.log_error(f"SMS API returned non-200 response: {response.status_code} - {response.text}")
             return False
             
     except requests.exceptions.ConnectionError as e:
