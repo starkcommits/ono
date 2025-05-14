@@ -60,7 +60,7 @@ import {
   Filler,
   Legend,
 } from 'chart.js'
-import TradeSheet from '../components/BuyTradeSheet'
+import TradeSheet from '../components/defaultTradeSheet'
 import {
   useFrappeAuth,
   useFrappeCreateDoc,

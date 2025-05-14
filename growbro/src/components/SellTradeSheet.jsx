@@ -99,7 +99,7 @@ const SellTradeSheet = ({ position, refetcHoldingData }) => {
           </div>
           <Accordion type="single" collapsible>
             <AccordionItem value="order_book" className="border-none">
-              <AccordionTrigger className="hover:no-underline   ">
+              <AccordionTrigger className="hover:no-underline">
                 Order Book
               </AccordionTrigger>
               <AccordionContent>

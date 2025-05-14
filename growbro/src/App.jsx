@@ -48,7 +48,7 @@ function App() {
               {/* <Route path="/signup" element={<SignUp />} /> */}
             </Route>
 
-            {/* <Route path="/overview" element={<Overview />} /> */}
+            <Route path="/overview" element={<Overview />} />
 
             <Route element={<ProtectedRoute />}>
               <Route element={<Layout />}>
@@ -70,6 +70,7 @@ function App() {
                 <Route path="/event/:id" element={<EventDetails />} />
                 <Route path="/category/:id" element={<CategoryPage />} />
                 <Route path="/profile/:id" element={<EditProfile />} />
+
                 {/* <Route path="/edit" element={<EditProfile />} /> */}
                 <Route path="/settings" element={<Settings />} />
                 {/* <Route path="/rewards" element={<Rewards />} /> */}

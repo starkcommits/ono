@@ -7,6 +7,12 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  optimizeDeps: {
+    exclude: [
+      '@radix-ui/react-dropdown-menu',
+      // You may need to add other Radix UI components as well
+    ]
+  },
   plugins: [
     react(),
     tailwindcss,
