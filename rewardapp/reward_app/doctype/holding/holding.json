@@ -15,6 +15,7 @@
   "market_yes_price",
   "market_no_price",
   "buy_order",
+  "profit_price",
   "column_break_znim",
   "price",
   "opinion_type",
@@ -24,7 +25,8 @@
   "market_status",
   "closing_time",
   "remark",
-  "amount_invested"
+  "amount_invested",
+  "loss_price"
  ],
  "fields": [
   {
@@ -141,12 +143,22 @@
    "fieldname": "buy_order",
    "fieldtype": "Data",
    "label": "Buy Order"
+  },
+  {
+   "fieldname": "profit_price",
+   "fieldtype": "Float",
+   "label": "Profit Price"
+  },
+  {
+   "fieldname": "loss_price",
+   "fieldtype": "Float",
+   "label": "Loss Price"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-05-12 13:02:08.196211",
+ "modified": "2025-05-13 17:55:44.585034",
  "modified_by": "Administrator",
  "module": "Reward App",
  "name": "Holding",
