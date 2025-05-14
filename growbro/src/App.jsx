@@ -26,6 +26,8 @@ import ClosedMarketHolding from './pages/ClosedMarketHolding'
 import Referral from './pages/Referral'
 import OTPScreen from './pages/OTPScreen'
 import EditProfile from './pages/EditProfile'
+import { PanVerification } from './pages/PanVerification'
+import GotReferralCode from './pages/GotReferralCode'
 
 const navItems = [
   { icon: Home, label: 'Home', path: '/' },
@@ -56,7 +58,7 @@ function App() {
                 {/* <Route path="/kyc" element={<KYC />} /> */}
                 <Route path="/wallet" element={<WalletPage />} />
                 <Route path="/portfolio" element={<Portfolio />} />
-                {/* <Route path="/referral" element={<Referral />} /> */}
+                <Route path="/referral" element={<Referral />} />
                 <Route
                   path="/portfolio/active/:id"
                   element={<ActiveMarketHolding />}
@@ -69,11 +71,16 @@ function App() {
                 <Route path="/search" element={<SearchPage />} />
                 <Route path="/event/:id" element={<EventDetails />} />
                 <Route path="/category/:id" element={<CategoryPage />} />
-                <Route path="/profile/:id" element={<EditProfile />} />
+                <Route path="/profile" element={<EditProfile />} />
                 {/* <Route path="/edit" element={<EditProfile />} /> */}
                 <Route path="/settings" element={<Settings />} />
                 {/* <Route path="/rewards" element={<Rewards />} /> */}
                 <Route path="/notifications" element={<Notifications />} />
+                <Route path="/kyc" element={<PanVerification />} />
+                <Route
+                  path="/got-referral-code"
+                  element={<GotReferralCode />}
+                />
               </Route>
             </Route>
             <Route

@@ -245,10 +245,10 @@ const Home = () => {
         </div>
       </header>
 
-      <div className="pt-[calc(env(safe-area-inset-top)+4rem)] max-w-lg mx-auto px-6">
-        <div className=" mt-6">
+      <div className="pt-[calc(env(safe-area-inset-top)+4rem)] max-w-lg mx-auto px-6 ">
+        <div className=" mt-6 ">
           <h2 className="text-lg font-semibold mb-4">Categories</h2>
-          <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide -mx-6 px-6">
+          <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide -mx-6 px-6 ">
             {!marketCategoriesLoading &&
               marketCategories?.map((category) => (
                 <button
@@ -257,7 +257,7 @@ const Home = () => {
                   className="flex-shrink-0 group"
                 >
                   <div
-                    className={`w-14 h-14 bg-gradient-to-br rounded-2xl border border-neutral-600 shadow-sm flex flex-col items-center justify-center relative overflow-hidden`}
+                    className={`w-14 h-14 bg-gradient-to-br rounded-2xl border border-neutral-600 shadow-sm flex flex-col items-center justify-center relative overflow-hidden `}
                   >
                     <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <span className="text-2xl mb-1">

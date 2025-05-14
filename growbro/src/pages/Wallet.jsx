@@ -67,6 +67,9 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { BalanceCard } from '../components/BalanceCard'
+import { KycAlert } from '../components/KycAlert'
+import { PromotionalSection } from '../components/PromotionalSection'
 
 // const formSchema = z.object({
 //   pin: z
@@ -574,7 +577,30 @@ const Wallet = () => {
               </DialogContent> */}
             </Dialog>
           </div>
-
+          <div className="p-3 border-b border-gray-100">
+          {/* {Balanced Card} */}
+          <BalanceCard
+            type="winnings"
+            title="Winnings"
+            amount={21.7}
+            icon={<Trophy className="h-6 w-6 text-amber-500" />}
+            iconBgClass="bg-amber-100 dark:bg-amber-900/30"
+            actionLabel="Withdraw"
+            actionDisabled={true}
+            onAction={() => console.log('Withdraw clicked')}
+            showDivider
+          >
+            <KycAlert />
+          </BalanceCard>
+          <div className="mt-2 border-b border-gray-100">
+          {/* Promotional Section */}
+          <PromotionalSection
+            amount={2.19}
+            icon={<Gift className="h-6 w-6 text-purple-500" />}
+            iconBgClass="bg-purple-100 dark:bg-purple-900/30"
+          />
+          </div>
+          </div>
           {/* Transactions Section */}
           <div className="flex flex-col gap-2 p-2">
             <div className="flex p-2">

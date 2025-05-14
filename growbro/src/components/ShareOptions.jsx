@@ -1,5 +1,6 @@
 import React from 'react'
 import { Share2, Facebook, Twitter, Mail, Link2 } from 'lucide-react'
+import toast from 'react-hot-toast'
 
 const ShareOptions = () => {
   const shareOptions = [
@@ -41,7 +42,7 @@ const ShareOptions = () => {
       onClick: () => {
         // Handle Copy Link
         navigator.clipboard.writeText('https://example.com/refer?code=HDIPWM')
-        alert('Link copied to clipboard!')
+        toast.success('Link copied to clipboard!')
       },
     },
   ]

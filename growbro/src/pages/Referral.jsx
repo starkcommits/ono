@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom'
 
 const Referral = () => {
   const navigate = useNavigate()
- 
+
   return (
     <>
       <div className="pt-safe-top">
@@ -27,12 +27,12 @@ const Referral = () => {
         </div>
       </div>
       <ReferralHero />
-      <div className="mt-6 space-y-6">
+      <div className="mt-6 mb- 2 space-y-6">
         <EarningsTracker />
-        <ReferralCode />
-        <ShareOptions />
         <TopInviters />
-        {/* <HowItWorks /> */}
+        <ReferralCode />
+        {/* <ShareOptions /> */}
+        {/* <HowItWorks  /> */}
       </div>
     </>
   )
