@@ -197,7 +197,7 @@ const ClosedMarkets = ({
     {
       accessorKey: 'closing_time',
       header: ({ column }) => {
-        return <div>Time Since Closed</div>
+        return <div className="col-span-1">Time Since Closed</div>
       },
       cell: ({ row }) => {
         // console.log(row.original.closing_time)
@@ -211,7 +211,7 @@ const ClosedMarkets = ({
     {
       accessorKey: 'actions',
       header: ({ column }) => {
-        return <div></div>
+        return <div>Action</div>
       },
       cell: ({ row }) => (
         <div className="text-sm text-muted-foreground font-medium flex items-center gap-2">

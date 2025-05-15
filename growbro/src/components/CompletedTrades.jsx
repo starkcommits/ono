@@ -5,7 +5,7 @@ import {
 } from 'frappe-react-sdk'
 import { AlertCircle, CheckCircle } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
-import TradeSheet from './TradeSheet'
+import TradeSheet from './defaultTradeSheet'
 import { useNavigate } from 'react-router-dom'
 
 const CompletedTrades = ({ trade }) => {

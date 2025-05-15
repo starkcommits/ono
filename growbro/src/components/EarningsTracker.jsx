@@ -1,12 +1,20 @@
 import React from 'react'
 import { Wallet } from 'lucide-react'
-
+import { useFrappeAuth, useFrappeGetCall } from 'frappe-react-sdk'
 const EarningsTracker = () => {
   // Current earnings amount (would come from API/state in a real app)
-  const currentEarnings = 0
-  // Progress percentage (for the progress bar)
-  const progress = 0 // 0% because earnings are 0
+  const { currentUser } = useFrappeAuth()
+  const { data: promotionalWalletData } = useFrappeGetCall(
+    'frappe.client.get_list',
+    {
+      doctype: 'Promotional Wallet',
+      filters: [['user', '=', currentUser]],
+      fields: ['*'],
+    }
+  )
 
+  if (promotionalWalletData?.message?.length > 0)
+    console.log('Promotional Wallet Data:', promotionalWalletData?.message[0])
   return (
     <div className="bg-amber-50 rounded-xl p-5 shadow-sm border border-amber-100">
       <div className="flex items-center space-x-3">
@@ -15,7 +23,9 @@ const EarningsTracker = () => {
         </div>
         <div>
           <h3 className="text-sm font-medium text-gray-500">Invite Rewards</h3>
-          <p className="text-2xl font-bold text-gray-800">₹{currentEarnings}</p>
+          <p className="text-2xl font-bold text-gray-800">
+            ₹{promotionalWalletData?.message[0].balance}
+          </p>
         </div>
       </div>
 
@@ -40,7 +50,9 @@ const EarningsTracker = () => {
               Available for withdrawal
             </span>
           </div>
-          <span className="text-sm font-semibold text-gray-800">₹0</span>
+          <span className="text-sm font-semibold text-gray-800">
+            ₹{promotionalWalletData?.message[0].balance}
+          </span>
         </div>
       </div> */}
     </div>

@@ -9,6 +9,9 @@ import {
   Plus,
 } from 'lucide-react'
 import { useParams } from 'react-router-dom'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
 import {
   useFrappeAuth,
   useFrappeCreateDoc,
@@ -21,19 +24,15 @@ import toast from 'react-hot-toast'
 
 import { motion, useMotionValue, useTransform } from 'framer-motion'
 
-const TradeSheet = ({
+const BuyTradeSheet = ({
   marketId,
-  marketPrice,
+  market,
   choice,
+  setSelectedChoice,
   onClose,
-  tradeAction,
-  sellQuantity,
-  previousOrderId,
-  refetchActiveHoldings,
 }) => {
   const { createDoc, isLoading: createDocLoading } = useFrappeCreateDoc()
-  const { updateDoc } = useFrappeUpdateDoc()
-  const { id } = useParams()
+
   const { currentUser } = useFrappeAuth()
 
   const { data: userData, isLoading: userDataLoading } = useFrappeGetDoc(
@@ -68,15 +67,25 @@ const TradeSheet = ({
     isClosing: false,
     isDragging: false,
   })
-  const [price, setPrice] = useState(marketPrice)
-  const [quantity, setQuantity] = useState(
-    tradeAction === 'SELL' ? sellQuantity : 10
+  const [price, setPrice] = useState(
+    choice === 'YES' ? market.yes_price : market.no_price
   )
+  const [quantity, setQuantity] = useState(10)
 
   const [isDragging, setIsDragging] = useState(false)
   const [startY, setStartY] = useState(0)
   const [currentY, setCurrentY] = useState(0)
   const [isClosing, setIsClosing] = useState(false)
+
+  const [stopLossEnabled, setStopLossEnabled] = useState(false)
+  const [bookProfitEnabled, setBookProfitEnabled] = useState(false)
+
+  const [stopLossValue, setStopLossValue] = useState(
+    choice === 'YES' ? market.yes_price : market.no_price
+  )
+  const [bookProfitValue, setBookProfitValue] = useState(
+    choice === 'YES' ? market.yes_price : market.no_price
+  )
 
   const maxPrice = 9.5
   const minPrice = 0.5
@@ -90,7 +99,7 @@ const TradeSheet = ({
     try {
       const orderData = {
         market_id: marketId,
-        order_type: tradeAction,
+        order_type: 'BUY',
         quantity: quantity,
         opinion_type: choice,
         amount: price,
@@ -98,7 +107,7 @@ const TradeSheet = ({
         buy_order_id: '',
       }
 
-      const result = await createDoc('Orders', orderData)
+      await createDoc('Orders', orderData)
 
       toast.success(`Buy Order Placed.`)
       console.log(orderData)
@@ -107,49 +116,6 @@ const TradeSheet = ({
     } catch (err) {
       toast.error(`Error in placing buy order.`)
       console.error('Order creation error:', err)
-    }
-  }
-
-  const handleConfirmSell = async () => {
-    try {
-      // const orderData = {
-      //   market_id: marketId,
-      //   order_type: tradeAction,
-      //   quantity: quantity,
-      //   opinion_type: choice,
-      //   amount: price,
-      //   filled_quantity: 0,
-      //   status: 'UNMATCHED',
-      //   buy_order_id: previousOrderId,
-      // }
-
-      // console.log('90th:', orderData)
-
-      // const newSellOrder = await createDoc('Orders', orderData)
-      // console.log('sell order', newSellOrder)
-      // await updateDoc('Orders', previousOrderId, {
-      //   sell_order_id: newSellOrder.name,
-      // })
-      // setTimeout(() => {
-      //   console.log('Executing refetch')
-      //   refetchActiveOrders()
-      // }, 500)
-
-      const res = await updateDoc('Holding', previousOrderId, {
-        exit_price: price,
-        status: 'EXITING',
-      })
-
-      console.log('Resssssssssssss', res)
-
-      toast.success(`Sell Order Placed.`)
-
-      refetchActiveHoldings()
-
-      onClose()
-    } catch (err) {
-      console.error('Order creation error:', err)
-      toast.error(`Error in placing the order.`)
     }
   }
 
@@ -233,10 +199,6 @@ const TradeSheet = ({
     return Math.min(Math.max(rounded, minPrice), maxPrice)
   }
 
-  const handlePriceChange = (newPrice) => {
-    setPrice(adjustPrice(newPrice))
-  }
-
   const totalCost = price * quantity
   const potentialWinnings =
     choice === 'yes'
@@ -262,14 +224,43 @@ const TradeSheet = ({
           transition: isDragging ? 'none' : 'transform 0.2s ease-out',
           opacity: isClosing ? 0 : 1,
         }}
-        className="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl max-h-[85vh] overflow-hidden"
+        className="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl overflow-hidden"
         onClick={stopPropagation}
       >
         {/* Rest of the existing code remains the same */}
         <div className="p-4">
           <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-4" />
 
-          <div className="mb-6">
+          <Tabs defaultValue={choice} className="w-full">
+            <TabsList className="w-full">
+              <TabsTrigger
+                value="YES"
+                className="w-[50%]"
+                onClick={() => {
+                  setSelectedChoice('YES')
+                }}
+              >
+                YES &#8377;{market.yes_price}
+              </TabsTrigger>
+              <TabsTrigger
+                value="NO"
+                className="w-[50%]"
+                onClick={() => {
+                  setSelectedChoice('NO')
+                }}
+              >
+                NO &#8377;{market.no_price}
+              </TabsTrigger>
+            </TabsList>
+            {/* <TabsContent value="account">
+              Make changes to your account here.
+            </TabsContent>
+            <TabsContent value="password">
+              Change your password here.
+            </TabsContent> */}
+          </Tabs>
+
+          <div className="mb-6 mt-6">
             <div className="flex items-center justify-between mb-2">
               <span className="text-lg font-medium">Price</span>
               <div className="flex items-center">
@@ -315,32 +306,31 @@ const TradeSheet = ({
             </div>
           </div>
 
-          {tradeAction === 'BUY' && (
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-lg font-medium">Quantity</span>
-                <span className="text-lg font-medium">{quantity}</span>
-              </div>
-              {/* <ReactSlider
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-lg font-medium">Quantity</span>
+              <span className="text-lg font-medium">{quantity}</span>
+            </div>
+            {/* <ReactSlider
                     className="horizontal-slider"
                     min={1}
                     max={maxQuantity}
                     value={quantity}
                     onChange={setQuantity}
                   /> */}
-              <Slider
-                defaultValue={[1]}
-                max={50}
-                min={1}
-                step={1}
-                value={[quantity]}
-                className={``}
-                onValueChange={(values) => {
-                  setQuantity(values[0])
-                }}
-              />
-            </div>
-          )}
+            <Slider
+              defaultValue={[1]}
+              max={50}
+              min={1}
+              step={1}
+              value={[quantity]}
+              className={``}
+              onValueChange={(values) => {
+                setQuantity(values[0])
+              }}
+            />
+          </div>
+
           <div className="flex justify-between mb-4 text-lg">
             {/* <div>
               <p className="text-gray-500">You put</p>
@@ -355,6 +345,90 @@ const TradeSheet = ({
           </div>
 
           <OrderBook marketId={marketId} />
+
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center space-x-2">
+              <Label htmlFor="stop-loss" className="text-lg font-medium">
+                Stop Loss
+              </Label>
+              <Switch
+                id="stop-loss"
+                checked={stopLossEnabled}
+                onCheckedChange={setStopLossEnabled}
+              />
+            </div>
+            {stopLossEnabled && (
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-md text-muted-foreground">
+                    Stop Loss Price
+                  </span>
+                  <span className="text-lg font-medium">{stopLossValue}</span>
+                </div>
+                {/* <ReactSlider
+                    className="horizontal-slider"
+                    min={1}
+                    max={maxQuantity}
+                    value={quantity}
+                    onChange={setQuantity}
+                  /> */}
+                <Slider
+                  max={9.5}
+                  min={0.5}
+                  defaultValue={
+                    choice === 'YES' ? market.yes_price : market.no_price
+                  }
+                  step={0.5}
+                  value={[stopLossValue]}
+                  className={``}
+                  onValueChange={(values) => {
+                    setStopLossValue(values[0])
+                  }}
+                />
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-2 my-2">
+            <div className="flex items-center space-x-2">
+              <Label htmlFor="book-profit" className="text-lg font-medium">
+                Book Profit
+              </Label>
+              <Switch
+                id="book-profit"
+                checked={bookProfitEnabled}
+                onCheckedChange={setBookProfitEnabled}
+              />
+            </div>
+            {bookProfitEnabled && (
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-md text-muted-foreground">
+                    Book Profit Price
+                  </span>
+                  <span className="text-lg font-medium">{bookProfitValue}</span>
+                </div>
+                {/* <ReactSlider
+                      className="horizontal-slider"
+                      min={1}
+                      max={maxQuantity}
+                      value={quantity}
+                      onChange={setQuantity}
+                    /> */}
+                <Slider
+                  max={9.5}
+                  min={0.5}
+                  defaultValue={marketPrice}
+                  step={0.5}
+                  value={[bookProfitValue]}
+                  className={``}
+                  onValueChange={(values) => {
+                    setBookProfitValue(values[0])
+                  }}
+                />
+              </div>
+            )}
+          </div>
 
           <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 border border-gray-200 shadow-sm mb-4 ">
             <div className="text-gray-700 font-medium">
@@ -385,43 +459,25 @@ const TradeSheet = ({
             )}
           </div>
 
-          {tradeAction === 'BUY' && (
-            <button
-              disabled={
-                userData?.balance < price * quantity || createDocLoading
-              }
-              onClick={handleConfirmBuy}
-              className={`relative w-full ${
-                choice === 'YES' ? 'bg-blue-500' : 'bg-red-500'
-              } text-white py-4 rounded-xl font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60
+          <button
+            disabled={userData?.balance < price * quantity || createDocLoading}
+            onClick={handleConfirmBuy}
+            className={`relative w-full ${
+              choice === 'YES' ? 'bg-blue-500' : 'bg-red-500'
+            } text-white py-4 rounded-xl font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60
             ${createDocLoading ? `opacity-50 cursor-not-allowed` : ``}`}
-            >
-              {createDocLoading
-                ? 'Processing...'
-                : `Confirm ${choice === 'YES' ? 'YES' : 'NO'}`}
-            </button>
-          )}
-          {tradeAction === 'SELL' && (
-            <button
-              onClick={handleConfirmSell}
-              disabled={createDocLoading}
-              className={`w-full ${
-                choice === 'YES' ? 'bg-green-500' : 'bg-red-500'
-              } text-white py-4 rounded-xl font-medium transition-colors
-            ${createDocLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              {createDocLoading
-                ? 'Processing...'
-                : `Confirm ${choice === 'YES' ? 'YES' : 'NO'}`}
-            </button>
-          )}
+          >
+            {createDocLoading
+              ? 'Processing...'
+              : `Confirm ${choice === 'YES' ? 'YES' : 'NO'}`}
+          </button>
         </div>
       </div>
     </div>
   )
 }
 
-export default TradeSheet
+export default BuyTradeSheet
 
 // import React, { useState, useRef, useEffect } from 'react'
 // import { Book, ChevronDown, ChevronUp, Minus, Plus } from 'lucide-react'

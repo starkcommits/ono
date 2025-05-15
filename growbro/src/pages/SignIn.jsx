@@ -35,7 +35,8 @@ const SignIn = () => {
       setLoading(false)
     } catch (error) {
       console.error('Login error:', error)
-      setLoginError(error.message || 'Login failed. Please try again.')
+      setLoginError(error.message.message || 'Login failed. Please try again.')
+      toast.error('Login failed. Please try again.')
       setLoading(false)
     }
   }
@@ -85,7 +86,7 @@ const SignIn = () => {
             </div>
             {/* <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Password
+                OTP
               </label>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -94,7 +95,7 @@ const SignIn = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full pl-12 pr-12 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                  placeholder="Enter your password"
+                  placeholder="Enter the OTP"
                 />
                 <button
                   type="button"

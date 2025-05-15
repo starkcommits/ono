@@ -8,6 +8,7 @@ import {
   useSearchParams,
 } from 'react-router-dom'
 import { Separator } from '@/components/ui/separator'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Dialog,
   DialogContent,
@@ -60,7 +61,7 @@ import {
   Filler,
   Legend,
 } from 'chart.js'
-import TradeSheet from '../components/TradeSheet'
+import TradeSheet from '../components/defaultTradeSheet'
 import {
   useFrappeAuth,
   useFrappeCreateDoc,
@@ -80,6 +81,7 @@ import { Slider } from '@/components/ui/slider'
 
 import toast from 'react-hot-toast'
 import CancelHoldingDialog from '../components/CancelHoldingDialog'
+import SellTradeSheet from '../components/SellTradeSheet'
 
 ChartJS.register(
   CategoryScale,
@@ -118,18 +120,20 @@ const ActiveMarketHolding = () => {
   const [isCancelOpen, setIsCancelOpen] = useState(false)
   const { updateDoc } = useFrappeUpdateDoc()
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const [yesEnabled, setYesEnabled] = useState(false)
+  const [noEnabled, setNoEnabled] = useState(false)
 
   const [completedTrades, setCompletedTrades] = useState({})
 
   const { createDoc } = useFrappeCreateDoc()
 
-  const [yesPrice, setYesPrice] = useState(5)
-  const [noPrice, setNoPrice] = useState(5)
-
   const { data: marketData, isLoading: marketLoading } = useFrappeGetDoc(
     'Market',
     id
   )
+
+  const [yesPrice, setYesPrice] = useState(marketData?.yesPrice)
+  const [noPrice, setNoPrice] = useState(marketData?.noPrice)
 
   const { call } = useFrappePostCall('frappe.client.get')
 
@@ -160,35 +164,6 @@ const ActiveMarketHolding = () => {
   }, [totalExitData])
 
   console.log('DDDDDDDDD', totalExitData)
-
-  const {
-    data: exitData,
-    isLoading: exitDataLoading,
-    mutate: refetchExitData,
-  } = useFrappeGetDocList(
-    'Holding',
-    {
-      fields: [
-        'name',
-        'market_id',
-        'order_id',
-        'price',
-        'quantity',
-        'opinion_type',
-        'status',
-        'exit_price',
-        'market_yes_price',
-        'market_no_price',
-        'creation',
-        'filled_quantity',
-      ],
-      filters: [
-        ['user_id', '=', currentUser],
-        ['market_id', '=', id],
-      ],
-    },
-    currentUser ? undefined : null
-  )
 
   const {
     data: holdingData,
@@ -501,8 +476,7 @@ const ActiveMarketHolding = () => {
 
   const handleExitPositions = async () => {
     try {
-      if (totalExitData?.message?.YES > 0) {
-        console.log('Yes')
+      if (totalExitData?.message?.YES > 0 && yesEnabled) {
         await createDoc('Orders', {
           market_id: id,
           quantity: totalExitData?.message?.YES,
@@ -515,8 +489,7 @@ const ActiveMarketHolding = () => {
         })
       }
 
-      if (totalExitData?.message?.NO > 0) {
-        console.log('Yes')
+      if (totalExitData?.message?.NO > 0 && noEnabled) {
         await createDoc('Orders', {
           market_id: id,
           quantity: totalExitData?.message?.NO,
@@ -663,55 +636,95 @@ const ActiveMarketHolding = () => {
                   </DrawerHeader>
                   <div className="w-full flex flex-col gap-4">
                     {totalExitData?.message?.YES > 0 ? (
-                      <div className="mb-6 px-10">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-lg font-medium">Yes Price</span>
-                          <div className="flex items-center">
-                            <span className="text-lg font-medium">
-                              ₹{yesPrice}
-                            </span>
+                      <div className="mb-6 px-10 flex items-center gap-1">
+                        <div className="flex items-center justify-center w-[20%]">
+                          <div className="flex items-center gap-2">
+                            <Checkbox
+                              id="yes-checkbox"
+                              checked={yesEnabled}
+                              onCheckedChange={setYesEnabled}
+                            />
+                            <label
+                              htmlFor="yes-checkbox"
+                              className="text-md font-medium cursor-pointer"
+                            >
+                              Yes Price
+                            </label>
                           </div>
                         </div>
 
-                        <div className="flex justify-between mt-2">
-                          <Slider
-                            defaultValue={[1]}
-                            max={9.5}
-                            min={0.5}
-                            step={0.5}
-                            value={[yesPrice]}
-                            className={``}
-                            onValueChange={(values) => {
-                              setYesPrice(values[0])
-                            }}
-                          />
-                        </div>
+                        {yesEnabled && (
+                          <div className="w-[80%] flex flex-col gap-2">
+                            <div className="flex items-center justify-between">
+                              {/* <span className="text-lg font-medium">Yes Price</span> */}
+                              <div className="flex items-center">
+                                <span className="text-lg font-medium">
+                                  ₹{yesPrice}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="flex justify-between ">
+                              <Slider
+                                defaultValue={[1]}
+                                max={9.5}
+                                min={0.5}
+                                step={0.5}
+                                value={[yesPrice]}
+                                className={``}
+                                onValueChange={(values) => {
+                                  if (yesEnabled) setYesPrice(values[0])
+                                }}
+                              />
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ) : null}
                     {totalExitData?.message?.NO > 0 ? (
-                      <div className="mb-6 px-10">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-lg font-medium">No Price</span>
-                          <div className="flex items-center">
-                            <span className="text-lg font-medium">
-                              ₹{noPrice}
-                            </span>
+                      <div className="mb-6 px-10 flex items-center gap-1">
+                        <div className="flex items-center justify-center w-[20%]">
+                          <div className="flex items-center gap-2">
+                            <Checkbox
+                              id="no-checkbox"
+                              checked={noEnabled}
+                              onCheckedChange={setNoEnabled}
+                            />
+                            <label
+                              htmlFor="no-checkbox"
+                              className="text-md font-medium cursor-pointer"
+                            >
+                              No Price
+                            </label>
                           </div>
                         </div>
 
-                        <div className="flex justify-between mt-2">
-                          <Slider
-                            defaultValue={[1]}
-                            max={9.5}
-                            min={0.5}
-                            step={0.5}
-                            value={[noPrice]}
-                            className={``}
-                            onValueChange={(values) => {
-                              setNoPrice(values[0])
-                            }}
-                          />
-                        </div>
+                        {noEnabled && (
+                          <div className="w-[80%] flex flex-col gap-2">
+                            <div className="flex items-center justify-between">
+                              {/* <span className="text-lg font-medium">Yes Price</span> */}
+                              <div className="flex items-center">
+                                <span className="text-lg font-medium">
+                                  ₹{noPrice}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="flex justify-between">
+                              <Slider
+                                defaultValue={[1]}
+                                max={9.5}
+                                min={0.5}
+                                step={0.5}
+                                value={[noPrice]}
+                                className={``}
+                                onValueChange={(values) => {
+                                  if (noEnabled) setNoPrice(values[0])
+                                }}
+                              />
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ) : null}
                   </div>
@@ -818,28 +831,10 @@ const ActiveMarketHolding = () => {
                       </span>
                       <div className="flex gap-1">
                         {position.status === 'ACTIVE' && (
-                          <span
-                            className="bg-yellow-100 text-yellow-700 rounded-xl p-1 text-xs text-[0.7rem] font-medium flex gap-1 "
-                            onClick={() =>
-                              handleTradeClick(
-                                position.opinion_type === 'YES'
-                                  ? position.market_yes_price
-                                  : position.market_no_price,
-                                position.opinion_type,
-                                'SELL',
-                                position.market_id,
-                                position.quantity,
-                                position.name
-                              )
-                            }
-                          >
-                            {position.status}
-                            <Separator
-                              orientation="vertical"
-                              className="w-0.5"
-                            />
-                            <LogOut className="w-4 h-4" />
-                          </span>
+                          <SellTradeSheet
+                            position={position}
+                            refetcHoldingData={refetcHoldingData}
+                          />
                         )}
 
                         {position.filled_quantity >= 0 &&

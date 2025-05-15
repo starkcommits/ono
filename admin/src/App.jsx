@@ -6,6 +6,7 @@ import { Toaster } from 'react-hot-toast'
 import Events from './pages/Events'
 import Orders from './pages/Orders'
 import Trades from './pages/Trades'
+import Notification from './pages/Notification'
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
             <Route path="/events" element={<Events />} />
             <Route path="/orders" element={<Orders />} />
             <Route path="/trades" element={<Trades />} />
+            <Route path="/notification" element={<Notification />} />
           </Route>
         </Route>
         <Route

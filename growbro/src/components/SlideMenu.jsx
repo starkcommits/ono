@@ -42,7 +42,7 @@ const SlideMenu = ({ isOpen, onClose }) => {
     {
       title: 'Account',
       items: [
-        { icon: User, label: 'Profile', path: '/profile' },
+        { icon: User, label: 'Update Profile', path: '/profile' },
         { icon: Settings, label: 'Settings', path: '/settings' },
         { icon: Bell, label: 'Notifications', path: '/notifications' },
       ],
@@ -92,13 +92,23 @@ const SlideMenu = ({ isOpen, onClose }) => {
                 <X className="h-5 w-5" />
               </button>
             </div>
+
             <div className="flex items-center gap-2">
-              <div className="p-0.5 bg-gradient-to-br w-8 from-indigo-400 to-indigo-500 rounded-full flex items-center justify-center">
-                <span className="text-lg font-medium text-white">
-                  {currentUserData?.full_name?.split(' ')[0]?.slice(0, 1)}
-                  {currentUserData?.full_name?.split(' ')[1]?.slice(0, 1)}
-                </span>
+              <div className="p-0.5 bg-gradient-to-br w-8 h-8 from-indigo-400 to-indigo-500 rounded-full flex items-center justify-center overflow-hidden">
+                {currentUserData?.user_image ? (
+                  <img
+                    src={currentUserData.user_image}
+                    alt="User"
+                    className="w-full h-full object-cover rounded-full"
+                  />
+                ) : (
+                  <span className="text-xs font-medium text-white">
+                    {currentUserData?.full_name?.split(' ')[0]?.[0]}
+                    {currentUserData?.full_name?.split(' ')[1]?.[0]}
+                  </span>
+                )}
               </div>
+
               <div>
                 <h2 className="font-medium">{currentUserData?.full_name}</h2>
                 <p className="text-sm text-gray-500">
@@ -119,7 +129,7 @@ const SlideMenu = ({ isOpen, onClose }) => {
                   {section.items.map((item, itemIndex) => (
                     <button
                       key={itemIndex}
-                      // onClick={() => item.path && navigate(item.path)}
+                      onClick={() => item.path && navigate(item.path)}
                       className="w-full px-6 py-2.5 flex items-center justify-between hover:bg-gray-50 transition-colors"
                     >
                       <div className="flex items-center">

@@ -22,6 +22,98 @@ import {
   useFrappeGetCall,
   useFrappeDocTypeEventListener,
 } from 'frappe-react-sdk'
+const categoryIcons = {
+  Sports: (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      class="lucide lucide-volleyball-icon lucide-volleyball"
+    >
+      <path d="M11.1 7.1a16.55 16.55 0 0 1 10.9 4" />
+      <path d="M12 12a12.6 12.6 0 0 1-8.7 5" />
+      <path d="M16.8 13.6a16.55 16.55 0 0 1-9 7.5" />
+      <path d="M20.7 17a12.8 12.8 0 0 0-8.7-5 13.3 13.3 0 0 1 0-10" />
+      <path d="M6.3 3.8a16.55 16.55 0 0 0 1.9 11.5" />
+      <circle cx="12" cy="12" r="10" />
+    </svg>
+  ),
+  Politics: (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      class="lucide lucide-vote-icon lucide-vote"
+    >
+      <path d="m9 12 2 2 4-4" />
+      <path d="M5 7c0-1.1.9-2 2-2h10a2 2 0 0 1 2 2v12H5V7Z" />
+      <path d="M22 19H2" />
+    </svg>
+  ),
+  Tech: (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      class="lucide lucide-cpu-icon lucide-cpu"
+    >
+      <path d="M12 20v2" />
+      <path d="M12 2v2" />
+      <path d="M17 20v2" />
+      <path d="M17 2v2" />
+      <path d="M2 12h2" />
+      <path d="M2 17h2" />
+      <path d="M2 7h2" />
+      <path d="M20 12h2" />
+      <path d="M20 17h2" />
+      <path d="M20 7h2" />
+      <path d="M7 20v2" />
+      <path d="M7 2v2" />
+      <rect x="4" y="4" width="16" height="16" rx="2" />
+      <rect x="8" y="8" width="8" height="8" rx="1" />
+    </svg>
+  ),
+  Teaching: (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      class="lucide lucide-notebook-icon lucide-notebook"
+    >
+      <path d="M2 6h4" />
+      <path d="M2 10h4" />
+      <path d="M2 14h4" />
+      <path d="M2 18h4" />
+      <rect width="16" height="20" x="4" y="2" rx="2" />
+      <path d="M16 2v20" />
+    </svg>
+  ),
+  // Add more mappings here...
+}
 
 const Home = () => {
   const navigate = useNavigate()
@@ -118,45 +210,63 @@ const Home = () => {
       </div>
     )
   }
+
+  function isWebView() {
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera
+
+    const isAndroidWebView = /\bwv\b/.test(userAgent) || /; wv/.test(userAgent)
+    const isIOSWebView = /(iPhone|iPod|iPad).*AppleWebKit(?!.*Safari)/i.test(
+      userAgent
+    )
+
+    return isAndroidWebView || isIOSWebView
+  }
+
+  const isInWebView = isWebView()
+
+  console.log('asdasdas', isInWebView)
+
   return (
     <div className="">
-      <header className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
-        <div className="pt-safe-top">
-          <div className="max-w-lg mx-auto px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setIsMenuOpen(true)}
-                  className="p-2 hover:bg-gray-100 rounded-xl"
-                >
-                  <Menu className="h-5 w-5 text-gray-700" />
-                </button>
-                <h1 className="text-xl font-semibold text-indigo-600">ONO</h1>
-              </div>
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={() => navigate('/wallet')}
-                  className="wallet-balance"
-                >
-                  <WalletBalance balance={userWallet?.balance} />
-                </button>
-                <button
-                  onClick={() => navigate('/notifications')}
-                  className="p-2 hover:bg-gray-100 rounded-xl relative"
-                >
-                  <Bell className="h-5 w-5 text-gray-700" />
-                  <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-red-500 rounded-full"></span>
-                </button>
+      {isInWebView ? null : (
+        <header className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
+          <div className="pt-safe-top">
+            <div className="max-w-lg mx-auto px-6 py-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setIsMenuOpen(true)}
+                    className="p-2 hover:bg-gray-100 rounded-xl"
+                  >
+                    <Menu className="h-5 w-5 text-gray-700" />
+                  </button>
+                  <h1 className="text-xl font-semibold text-indigo-600">ONO</h1>
+                </div>
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={() => navigate('/wallet')}
+                    className="wallet-balance"
+                  >
+                    <WalletBalance balance={userWallet?.balance} />
+                  </button>
+                  <button
+                    onClick={() => navigate('/notifications')}
+                    className="p-2 hover:bg-gray-100 rounded-xl relative"
+                  >
+                    <Bell className="h-5 w-5 text-gray-700" />
+                    <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-red-500 rounded-full"></span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
+      )}
 
-      <div className="pt-[calc(env(safe-area-inset-top)+4rem)] max-w-lg mx-auto px-6">
-        <div className=" mt-6">
+      <div className="pt-[calc(env(safe-area-inset-top)+4rem)] max-w-lg mx-auto px-6 ">
+        <div className=" mt-6 ">
           <h2 className="text-lg font-semibold mb-4">Categories</h2>
-          <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide -mx-6 px-6">
+          <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide -mx-6 px-6 ">
             {!marketCategoriesLoading &&
               marketCategories?.map((category) => (
                 <button
@@ -165,7 +275,7 @@ const Home = () => {
                   className="flex-shrink-0 group"
                 >
                   <div
-                    className={`w-14 h-14 bg-gradient-to-br rounded-2xl border border-neutral-600 shadow-sm flex flex-col items-center justify-center relative overflow-hidden`}
+                    className={`w-14 h-14 bg-gradient-to-br rounded-2xl border border-neutral-600 shadow-sm flex flex-col items-center justify-center relative overflow-hidden `}
                   >
                     <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <span className="text-2xl mb-1">
