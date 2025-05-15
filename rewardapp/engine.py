@@ -68,6 +68,9 @@ def trades():
                 "quantity": trade["quantity"]
             })
             trade_doc.insert(ignore_permissions=True)
+            
+            first_order = frappe.get_doc("Orders",trade["first_user_order_id"])
+            second_order = frappe.get_doc("Orders",trade["second_user_order_id"])
 
             if trade["first_user_option"] != trade["second_user_option"]:
                 holding_doc1 = frappe.get_doc({
@@ -78,6 +81,8 @@ def trades():
                     "opinion_type": trade["first_user_option"],
                     "price": trade["first_user_price"],
                     "buy_order": trade["first_user_order_id"],
+                    "profit_price": first_order.profit_price,
+                    "loss_price": first_order.loss_price,
                     "status": "ACTIVE"
                 })
                 holding_doc1.insert(ignore_permissions=True)
@@ -90,6 +95,8 @@ def trades():
                     "opinion_type": trade["second_user_option"],
                     "price": trade["second_user_price"],
                     "buy_order": trade["second_user_order_id"],
+                    "profit_price": second_order.profit_price,
+                    "loss_price": second_order.loss_price,
                     "status": "ACTIVE"
                 })
                 holding_doc2.insert(ignore_permissions=True)
@@ -171,6 +178,8 @@ def trades():
                     "opinion_type": trade["second_user_option"],
                     "price": trade["second_user_price"],
                     "buy_order": trade["second_user_order_id"],
+                    "profit_price": second_order.profit_price,
+                    "loss_price": second_order.loss_price,
                     "status": "ACTIVE"
                 })
                 holding_doc2.insert(ignore_permissions=True)
@@ -335,45 +344,85 @@ def resolve_market():
         return {"status": "error", "message": "Error in resolving market"}
 
 def check_price_trigger(market_id,yes_price,no_price):
+    yes_holdings = frappe.db.sql("""
+        SELECT 
+            user_id,
+            buy_order,
+            SUM(quantity) AS total_quantity,
+            loss_price,
+            profit_price
+        FROM `tabHolding`
+        WHERE
+            status = 'ACTIVE'
+            AND opinion_type = 'YES'
+            AND market_id = %s
+            AND (loss_price >= %s OR profit_price <= %s)
+        GROUP BY user_id, buy_order, loss_price, profit_price
+    """, (market_id, yes_price, yes_price), as_dict=True)
 
-    no_orders = frappe.db.sql("""
-        SELECT name, user_id, quantity, market_id, profit_price, loss_price
-        FROM `tabOrders`
-        WHERE market_id = %s
-        AND opinion_type = 'NO'
-        AND status = 'MATCHED'
-        AND order_type = 'BUY'
-        AND quantity > 0
-        AND (
-            (book_profit = 1 AND profit_price <= %s)
-            OR
-            (stop_loss = 1 AND loss_price >= %s)
-        )
-    """, (market_id, no_price, no_price), as_dict=True)
+    frappe.log_error("Yes Holdings",yes_holdings)
 
-    for order in no_orders:
-        order_amount = order.profit_price
-        if order.loss_price >= no_price:
-            order_amount = order.loss_price
-            
-        sell_order = frappe.get_doc({
-            'doctype': 'Orders',
-            'quantity': order.quantity,
-            'market_id': order.market_id,
-            'user_id': order.user_id,
-            'amount': order_amount,
-            'opinion_type': 'NO',
-            'order_type': 'SELL',
-            'status': 'UNMATCHED'
-        }).insert(ignore_permissions=True)
+    for holding in yes_holdings:
+        sell_price = holding["loss_price"] if holding["loss_price"] >= yes_price else holding["profit_price"]
+
+        sell_order = frappe.new_doc("Orders")
+        sell_order.user_id = holding["user_id"]
+        sell_order.quantity = holding["total_quantity"]
+        sell_order.order_type = "SELL"
+        sell_order.amount = sell_price
+        sell_order.market_id = market_id
+        sell_order.opinion_type = "YES"
+        sell_order.insert(ignore_permissions=True)
 
         frappe.db.sql("""
             UPDATE `tabHolding`
             SET status = 'EXITING', order_id = %s
-            WHERE user_id = %s
-            AND buy_order_id = %s
-            AND status = 'ACTIVE'
-        """, (sell_order.name, order.user_id, order.name))
+            WHERE
+                user_id = %s
+                AND market_id = %s
+                AND buy_order = %s
+        """, (sell_order.name, holding["user_id"], market_id, holding["buy_order"]))
+
+    frappe.db.commit()
+
+    no_holdings = frappe.db.sql("""
+        SELECT 
+            user_id,
+            buy_order,
+            SUM(quantity) AS total_quantity,
+            loss_price,
+            profit_price
+        FROM `tabHolding`
+        WHERE
+            status = 'ACTIVE'
+            AND opinion_type = 'NO'
+            AND market_id = %s
+            AND (loss_price >= %s OR profit_price <= %s)
+        GROUP BY user_id, buy_order, loss_price, profit_price
+    """, (market_id, no_price, no_price), as_dict=True)
+
+    frappe.log_error("No Holdings",no_holdings)
+    
+    for holding in no_holdings:
+        sell_price = holding["loss_price"] if holding["loss_price"] >= no_price else holding["profit_price"]
+
+        sell_order = frappe.new_doc("Orders")
+        sell_order.user_id = holding["user_id"]
+        sell_order.quantity = holding["total_quantity"]
+        sell_order.order_type = "SELL"
+        sell_order.amount = sell_price
+        sell_order.market_id = market_id
+        sell_order.opinion_type = "NO"
+        sell_order.insert(ignore_permissions=True)
+
+        frappe.db.sql("""
+            UPDATE `tabHolding`
+            SET status = 'EXITING', order_id = %s
+            WHERE
+                user_id = %s
+                AND market_id = %s
+                AND buy_order = %s
+        """, (sell_order.name, holding["user_id"], market_id, holding["buy_order"]))
 
     frappe.db.commit()
 
