@@ -398,8 +398,8 @@ def verify_otp(mobile, otp):
     full_name = " ".join(filter(None, [user_info.first_name, user_info.last_name]))
     frappe.local.cookie_manager.set_cookie("user_id", user)
     frappe.local.cookie_manager.set_cookie("full_name", full_name)
-    frappe.local.cookie_manager.set_cookie("user_exist", user_exist)
-    # frappe.local.cookie_manager.set_cookie("user_image", user_info.user_image or "")
+    # frappe.local.cookie_manager.set_cookie("user_exist", user_exist)
+    frappe.local.cookie_manager.set_cookie("user_image", user_info.user_image or "")
     
     # Set system_user cookie
     if frappe.db.get_value("User", user, "user_type") == "Website User":

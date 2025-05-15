@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Calendar, Clock, ChevronLeft, ChevronRight } from 'lucide-react'
 
-const DAYS_OF_WEEK = ['SUN', 'MON', 'TUE', 'WED', 'THURS', 'FRI', 'SAT']
+const DAYS_OF_WEEK = ['SUN', 'MON', 'TUE', 'WED', 'THUR', 'FRI', 'SAT']
 const MONTHS = [
   'January',
   'February',
