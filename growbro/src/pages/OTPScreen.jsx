@@ -95,6 +95,7 @@ const OTPScreen = () => {
       if (response?.message?.user_exist === true) {
         navigate('/')
       } else {
+        console.log('Hellowwwwwwwwwwwwwwwwwww')
         navigate('/got-referral-code')
       }
     } catch (error) {

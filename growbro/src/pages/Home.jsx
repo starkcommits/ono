@@ -210,40 +210,58 @@ const Home = () => {
       </div>
     )
   }
+
+  function isWebView() {
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera
+
+    const isAndroidWebView = /\bwv\b/.test(userAgent) || /; wv/.test(userAgent)
+    const isIOSWebView = /(iPhone|iPod|iPad).*AppleWebKit(?!.*Safari)/i.test(
+      userAgent
+    )
+
+    return isAndroidWebView || isIOSWebView
+  }
+
+  const isInWebView = isWebView()
+
+  console.log('asdasdas', isInWebView)
+
   return (
     <div className="">
-      <header className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
-        <div className="pt-safe-top">
-          <div className="max-w-lg mx-auto px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setIsMenuOpen(true)}
-                  className="p-2 hover:bg-gray-100 rounded-xl"
-                >
-                  <Menu className="h-5 w-5 text-gray-700" />
-                </button>
-                <h1 className="text-xl font-semibold text-indigo-600">ONO</h1>
-              </div>
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={() => navigate('/wallet')}
-                  className="wallet-balance"
-                >
-                  <WalletBalance balance={userWallet?.balance} />
-                </button>
-                <button
-                  onClick={() => navigate('/notifications')}
-                  className="p-2 hover:bg-gray-100 rounded-xl relative"
-                >
-                  <Bell className="h-5 w-5 text-gray-700" />
-                  <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-red-500 rounded-full"></span>
-                </button>
+      {isInWebView ? null : (
+        <header className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
+          <div className="pt-safe-top">
+            <div className="max-w-lg mx-auto px-6 py-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setIsMenuOpen(true)}
+                    className="p-2 hover:bg-gray-100 rounded-xl"
+                  >
+                    <Menu className="h-5 w-5 text-gray-700" />
+                  </button>
+                  <h1 className="text-xl font-semibold text-indigo-600">ONO</h1>
+                </div>
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={() => navigate('/wallet')}
+                    className="wallet-balance"
+                  >
+                    <WalletBalance balance={userWallet?.balance} />
+                  </button>
+                  <button
+                    onClick={() => navigate('/notifications')}
+                    className="p-2 hover:bg-gray-100 rounded-xl relative"
+                  >
+                    <Bell className="h-5 w-5 text-gray-700" />
+                    <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-red-500 rounded-full"></span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
+      )}
 
       <div className="pt-[calc(env(safe-area-inset-top)+4rem)] max-w-lg mx-auto px-6 ">
         <div className=" mt-6 ">
@@ -333,7 +351,8 @@ const Home = () => {
                   <div
                     key={market.name}
                     className="market-card cursor-pointer"
-                    onClick={() => handleMarketClick(market)} >
+                    onClick={() => handleMarketClick(market)}
+                  >
                     <>
                       {/* <div className="relative h-32">
                      <img
