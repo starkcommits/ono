@@ -42,6 +42,7 @@ const BuyTradeSheet = ({
   isSheetOpen,
   setIsSheetOpen,
 }) => {
+  const [selectedDateTime, setSelectedDateTime] = useState(null)
   const { createDoc, isLoading: createDocLoading } = useFrappeCreateDoc()
 
   const { currentUser } = useFrappeAuth()
@@ -75,8 +76,16 @@ const BuyTradeSheet = ({
     setBookProfitValue(price + 0.5)
   }, [price, choice])
 
-  console.log('heheheheheh', userData?.balance < price * quantity)
+  const formatToFrappeLDatetime = (dateObj) => {
+    const yyyy = dateObj.getFullYear()
+    const mm = String(dateObj.getMonth() + 1).padStart(2, '0')
+    const dd = String(dateObj.getDate()).padStart(2, '0')
+    const hh = String(dateObj.getHours()).padStart(2, '0')
+    const mi = String(dateObj.getMinutes()).padStart(2, '0')
+    const ss = String(dateObj.getSeconds()).padStart(2, '0')
 
+    return `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}`
+  }
   const handleConfirmBuy = async () => {
     try {
       const orderData = {
@@ -100,6 +109,11 @@ const BuyTradeSheet = ({
         orderData.profit_price = bookProfitValue
       }
 
+      if (autoCancelEnabled) {
+        orderData.auto_cancel = autoCancelEnabled
+        orderData.cancel_time = formatToFrappeLDatetime(selectedDateTime)
+      }
+
       await createDoc('Orders', orderData)
 
       toast.success(`Buy Order Placed.`)
@@ -114,6 +128,8 @@ const BuyTradeSheet = ({
   }
 
   console.log(price, stopLossValue, bookProfitValue)
+
+  console.log('Selected Date Time: ', selectedDateTime)
 
   return (
     <Drawer open={isSheetOpen} onOpenChange={setIsSheetOpen}>
@@ -376,29 +392,6 @@ const BuyTradeSheet = ({
                       </div>
                     </div>
                   )}
-                  {/* {bookProfitEnabled && (
-                    <div className="mb-6">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-md text-muted-foreground">
-                          Book Profit Price
-                        </span>
-                        <span className="text-lg font-medium">
-                          {bookProfitValue}
-                        </span>
-                      </div>
-
-                      <Slider
-                        max={9.5}
-                        min={0.5}
-                        step={0.5}
-                        value={[bookProfitValue]}
-                        className={``}
-                        onValueChange={(values) => {
-                          if (values[0] > price) setBookProfitValue(values[0])
-                        }}
-                      />
-                    </div>
-                  )} */}
                 </div>
 
                 <div className="flex flex-col gap-2 my-2">
@@ -416,8 +409,13 @@ const BuyTradeSheet = ({
                         Auto Cancel
                       </Label>
                     </div>
-                    <div className="w-[20%]">
-                      <DateTimePicker disabled={autoCancelEnabled} />
+                    <div className="">
+                      <DateTimePicker
+                        value={selectedDateTime}
+                        onChange={setSelectedDateTime}
+                        placeholder="Select date and time..."
+                        disabled={autoCancelEnabled}
+                      />
                     </div>
                   </div>
                 </div>
