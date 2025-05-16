@@ -180,17 +180,19 @@ api = {
         "rewardapp.engine.total_returns",
         "rewardapp.engine.cancel_order",
         "rewardapp.engine.total_traders",
-        "rewardapp.engine.get_marketwise_holding"
+        "rewardapp.engine.get_marketwise_holding",
+        "rewardapp.task.execute",
+        "rewardapp.api.logout"
     ]
 }
 
-# scheduler_events = {
-#     "cron": {
-#         "*/1 * * * *": [
-#             "rewardapp.tasks.execute"
-#         ]
-#     }
-# }
+scheduler_events = {
+    "cron": {
+        "*/1 * * * *": [
+            "rewardapp.task.execute"
+        ]
+    }
+}
 
 # Scheduled Tasks
 # ---------------
