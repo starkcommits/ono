@@ -17,7 +17,11 @@ import {
   InputOTPSeparator,
   InputOTPSlot,
 } from '@/components/ui/input-otp'
-import { useFrappePostCall } from 'frappe-react-sdk'
+import {
+  useFrappeAuth,
+  useFrappeGetDoc,
+  useFrappePostCall,
+} from 'frappe-react-sdk'
 import { useLocation, useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 
@@ -27,21 +31,42 @@ const OTPScreen = () => {
   const { mobile_no } = location.state || {}
 
   const [otp, setOtp] = useState('')
-  const { call: verifyOTP } = useFrappePostCall('rewardapp.api.verify_otp')
 
-  const [timeLeft, setTimeLeft] = useState(() => {
-    const savedExpiryTime = localStorage.getItem('otpExpiryTime')
-    if (savedExpiryTime) {
-      const remainingTime = Math.max(
-        0,
-        Math.floor((parseInt(savedExpiryTime) - Date.now()) / 1000)
-      )
-      return remainingTime > 0 ? remainingTime : 0
-    }
-    return 600 // 10 minutes = 600 seconds default
-  })
+  const {
+    data: userMobileOTP,
+    isLoading: userMobileOTPLoading,
+    mutate: refetchMobileOTPData,
+  } = useFrappeGetDoc('Mobile OTP', mobile_no, mobile_no ? undefined : null)
+
+  console.log('USer: ', userMobileOTP)
+
+  const { call: verifyOTP } = useFrappePostCall('rewardapp.api.verify_otp')
+  const { call: generateOTP } = useFrappePostCall(
+    'rewardapp.api.generate_mobile_otp'
+  )
+
+  const [timeLeft, setTimeLeft] = useState(0)
 
   const [resendEnabled, setResendEnabled] = useState(timeLeft === 0)
+
+  useEffect(() => {
+    if (!userMobileOTP?.expires_at) return
+
+    const expiryTimestamp = new Date(userMobileOTP.expires_at).getTime()
+    const updateTimeLeft = () => {
+      const now = Date.now()
+      const remaining = Math.floor((expiryTimestamp - now) / 1000)
+      setTimeLeft(remaining > 0 ? remaining : 0)
+      setResendEnabled(remaining <= 0)
+    }
+
+    updateTimeLeft()
+    const interval = setInterval(() => {
+      updateTimeLeft()
+    }, 1000)
+
+    return () => clearInterval(interval)
+  }, [userMobileOTP?.expires_at])
 
   const formatTime = (seconds) => {
     const m = Math.floor(seconds / 60)
@@ -49,40 +74,20 @@ const OTPScreen = () => {
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
   }
 
-  useEffect(() => {
-    // Set expiry time in localStorage when timer starts/resets
-    if (timeLeft === 600) {
-      const expiryTime = Date.now() + timeLeft * 1000
-      localStorage.setItem('otpExpiryTime', expiryTime.toString())
-    }
-
-    if (timeLeft === 0) {
-      setResendEnabled(true)
-      localStorage.removeItem('otpExpiryTime')
-      return
-    }
-
-    const interval = setInterval(() => {
-      setTimeLeft((prev) => {
-        const newValue = prev - 1
-        // If timer reaches zero, clean up localStorage
-        if (newValue === 0) {
-          localStorage.removeItem('otpExpiryTime')
-        }
-        return newValue
-      })
-    }, 1000)
-
-    return () => clearInterval(interval)
-  }, [timeLeft])
-
   const handleResend = () => {
-    // Trigger resend logic here
-    setTimeLeft(600)
-    setResendEnabled(false)
-    // Set new expiry time in localStorage
-    const expiryTime = Date.now() + 600 * 1000
-    localStorage.setItem('otpExpiryTime', expiryTime.toString())
+    // TODO: Trigger resend OTP API here
+    generateOTP({
+      mobile_number: mobile_no,
+    })
+      .then(() => {
+        setResendEnabled(false)
+        refetchMobileOTPData()
+      })
+      .catch((err) => {
+        console.log('error:', err)
+        toast.error('Error occured while generating otp')
+      })
+    // You need to re-fetch the Mobile OTP document or invalidate cache
   }
 
   const handleVerifyOTP = async () => {

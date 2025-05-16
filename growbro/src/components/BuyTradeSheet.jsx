@@ -31,7 +31,7 @@ import {
   DrawerTitle,
 } from '@/components/ui/drawer'
 import { Button } from '@/components/ui/button'
-import { AlertTriangle, Minus, Plus } from 'lucide-react'
+import { AlertTriangle, Clock, Minus, Plus } from 'lucide-react'
 import { DateTimePicker } from './ui/date-picker'
 
 const BuyTradeSheet = ({
@@ -125,6 +125,13 @@ const BuyTradeSheet = ({
       toast.error(`Error in placing buy order.`)
       console.error('Order creation error:', err)
     }
+  }
+
+  const handleBadgeClick = (minutes) => {
+    // Calculate future time based on current time + minutes
+    const futureTime = new Date()
+    futureTime.setMinutes(futureTime.getMinutes() + minutes)
+    setSelectedDateTime(futureTime)
   }
 
   console.log(price, stopLossValue, bookProfitValue)
@@ -395,29 +402,79 @@ const BuyTradeSheet = ({
                 </div>
 
                 <div className="flex flex-col gap-2 my-2">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 w-[30%]">
-                      <Checkbox
-                        id="auto-cancel"
-                        checked={autoCancelEnabled}
-                        onCheckedChange={setAutoCancelEnabled}
-                      />
-                      <Label
-                        htmlFor="auto-cancel"
-                        className="text-lg font-medium"
-                      >
-                        Auto Cancel
-                      </Label>
-                    </div>
-                    <div className="">
-                      <DateTimePicker
-                        value={selectedDateTime}
-                        onChange={setSelectedDateTime}
-                        placeholder="Select date and time..."
-                        disabled={autoCancelEnabled}
-                      />
-                    </div>
+                  <div className="flex items-center justify-between">
+                    <Label
+                      htmlFor="auto-cancel"
+                      className="text-lg font-medium"
+                    >
+                      Auto Cancel
+                    </Label>
+                    <Switch
+                      id="auto-cancel"
+                      checked={autoCancelEnabled}
+                      onCheckedChange={setAutoCancelEnabled}
+                    />
                   </div>
+
+                  {autoCancelEnabled && (
+                    <div className="space-y-4 flex items-center justify-between">
+                      {/*  make three badges here for 1 minute 3 minutes and 5 minutes */}
+                      <div className="flex gap-6 px-2">
+                        <button
+                          onClick={() => handleBadgeClick(1)}
+                          className="px-3 py-1 text-sm rounded-full bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-colors"
+                        >
+                          1 minute
+                        </button>
+                        <button
+                          onClick={() => handleBadgeClick(3)}
+                          className="px-3 py-1 text-sm rounded-full bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-colors"
+                        >
+                          3 minutes
+                        </button>
+                        <button
+                          onClick={() => handleBadgeClick(5)}
+                          className="px-3 py-1 text-sm rounded-full bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-colors"
+                        >
+                          5 minutes
+                        </button>
+                      </div>
+
+                      <div className="mt-2">
+                        <DateTimePicker
+                          value={selectedDateTime}
+                          onChange={setSelectedDateTime}
+                          placeholder="Select date and time..."
+                          disabled={setAutoCancelEnabled}
+                        />
+                      </div>
+                    </div>
+                  )}
+                  {selectedDateTime && (
+                    <div className="bg-gray-50 rounded-lg border border-gray-200 p-3 flex items-start gap-3">
+                      <div className="rounded-full bg-blue-100 p-2 mt-0.5">
+                        <Clock className="h-4 w-4 text-blue-700" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">
+                          Auto-cancel at:
+                        </p>
+                        <p className="text-gray-700">
+                          {selectedDateTime.toLocaleDateString(undefined, {
+                            weekday: 'short',
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                          })}{' '}
+                          at{' '}
+                          {selectedDateTime.toLocaleTimeString(undefined, {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </AccordionContent>
             </AccordionItem>
