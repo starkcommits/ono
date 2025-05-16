@@ -214,14 +214,14 @@ def update_profile(user, token):
         user_doc.fcm_token = token
         user_doc.save(ignore_permissions=True)
         frappe.db.commit()
-        success_response("Token updated successfully")
+        return success_response("Token updated successfully")
     except Exception as e:
         frappe.throw(f"Error in profile updation {str(e)}")
 
 
 def send_sms(mobile_number, otp):
     try:
-        url = "http://65.2.148.196:8081/message/sendText/ONO"
+        url = "http://94.136.187.188:8084/message/sendText/ONO"
         
         payload = {
             "number": f"91{mobile_number}",
@@ -294,126 +294,131 @@ def generate_mobile_otp(mobile_number):
 
 @frappe.whitelist(allow_guest=True)
 def verify_otp(mobile, otp):
-    otp_record = frappe.get_list("Mobile OTP", 
-        filters={"mobile_number": mobile},
-        fields=["name", "otp", "expires_at", "verified"])
-    
-    if not otp_record:
-        return error_response("No OTP found for this mobile number")
-    
-    otp_doc = frappe.get_doc("Mobile OTP", otp_record[0].name)
-    
-    # Check if OTP is expired
-    if frappe.utils.now_datetime() > otp_doc.expires_at:
-        return error_response("OTP has expired. Please request a new one")
-    
-    if otp_doc.verified == 1:
-        return error_response("OTP is already verified. Please request a new one")
+    try:
+        otp_record = frappe.get_list("Mobile OTP", 
+            filters={"mobile_number": mobile},
+            fields=["name", "otp", "expires_at", "verified"])
+        
+        if not otp_record:
+            return error_response("No OTP found for this mobile number")
+        
+        otp_doc = frappe.get_doc("Mobile OTP", otp_record[0].name)
+        
+        # Check if OTP is expired
+        if frappe.utils.now_datetime() > otp_doc.expires_at:
+            return error_response("OTP has expired. Please request a new one")
+        
+        if otp_doc.verified == 1:
+            return error_response("OTP is already verified. Please request a new one")
 
-    # Verify OTP
-    if otp_doc.otp != otp:
-        return error_response("Invalid OTP")
+        # Verify OTP
+        if otp_doc.otp != otp:
+            return error_response("Invalid OTP")
 
-    # Mark as verified
-    otp_doc.verified = 1
-    otp_doc.save(ignore_permissions=True)
+        # Mark as verified
+        otp_doc.verified = 1
+        otp_doc.save(ignore_permissions=True)
 
-    user = frappe.db.get_value("User", {"phone": mobile})
-    user_exist = True
-    if not user:
-        user_exist = False
-        username = f"user_{frappe.utils.now_datetime().strftime('%Y%m%d%H%M%S')}"
-        user_doc = frappe.get_doc({
-            "doctype": "User",
-            "user_name": username,
-            "email": f"{mobile}@ono.com",
-            "first_name": "ONO User",
-            "phone": mobile,
-            "enabled": 1,
-            "role_profile_name": "Trader",  # set role profile
-            "roles": [{"role": "Trader"}],  # assign specific role as well
-        })
-        user_doc.insert(ignore_permissions=True)
-        user = user_doc.name  # get the name (string)
+        user = frappe.db.get_value("User", {"phone": mobile})
+        user_exist = True
+        if not user:
+            user_exist = False
+            # username = f"user_{frappe.utils.now_datetime().strftime('%Y%m%d%H%M%S')}"
+            user_doc = frappe.get_doc({
+                "doctype": "User",
+                "username": mobile,
+                "email": f"{mobile}@ono.com",
+                "first_name": "ONO User",
+                "phone": mobile,
+                "enabled": 1,
+                "role_profile_name": "Trader",  # set role profile
+                "roles": [{"role": "Trader"}],  # assign specific role as well
+            })
+            user_doc.insert(ignore_permissions=True)
+            user = user_doc.name  # get the name (string)
 
-        wallet = frappe.new_doc("User Wallet")
-        wallet.user = user
-        wallet.balance = 2000
-        wallet.is_active = 1
-        wallet.insert(ignore_permissions=True)
+            wallet = frappe.new_doc("User Wallet")
+            wallet.user = user
+            wallet.balance = 2000
+            wallet.is_active = 1
+            wallet.insert(ignore_permissions=True)
 
-        # Fetch active referral configs
-        referrals = frappe.db.sql(
-            """
-            SELECT
-                referral_name
-            FROM `tabReferral Config`
-            WHERE is_active = 1
-            """,
-            as_dict=True
-        )
+            # Fetch active referral configs
+            referrals = frappe.db.sql(
+                """
+                SELECT
+                    referral_name
+                FROM `tabReferral Config`
+                WHERE is_active = 1
+                """,
+                as_dict=True
+            )
 
-        referral_name = "Default Referral"
-        if not referrals:
-            referral_name = frappe.get_doc({
-                'doctype': 'Referral Config',
-                'referral_name': 'Default Referral',
-                'referrer_reward_point':50,
-                'referee_reward_point':50,
-                'total_allowed_referrals':5,
-                'description':'This is default referral config for each user',
-                'is_active':1
-            }).insert(ignore_permissions=True)
+            referral_name = "Default Referral"
+            if not referrals:
+                referral_name = frappe.get_doc({
+                    'doctype': 'Referral Config',
+                    'referral_name': 'Default Referral',
+                    'referrer_reward_point':50,
+                    'referee_reward_point':50,
+                    'total_allowed_referrals':5,
+                    'description':'This is default referral config for each user',
+                    'is_active':1
+                }).insert(ignore_permissions=True)
+            else:
+                referral_name = referrals[0]['referral_name']
+
+            user_referral = frappe.get_doc({
+                'doctype': 'Referral Code',
+                'user': user,
+                'referral_name': referral_name
+            })
+            user_referral.insert(ignore_permissions=True)
+
+            promo_wallet = frappe.new_doc("Promotional Wallet")
+            promo_wallet.user = user
+            promo_wallet.balance = 0
+            promo_wallet.referral_code = user_referral.name
+            promo_wallet.is_active = 1
+            promo_wallet.insert(ignore_permissions=True)
+
+        # Log the user in
+        frappe.local.login_manager = LoginManager()
+        frappe.local.login_manager.login_as(user)
+
+        # # Mark OTP as used
+        # frappe.db.set_value("Mobile OTP", otp_doc.name, "is_used", 1)
+
+        # Initialize cookies
+        frappe.local.cookie_manager.init_cookies()
+        
+        # Get user information for setting additional cookies
+        user_info = frappe.db.get_value("User", user, ["first_name", "last_name", "user_image"], as_dict=1)
+        
+        # Set additional cookies
+        full_name = " ".join(filter(None, [user_info.first_name, user_info.last_name]))
+        frappe.local.cookie_manager.set_cookie("user_id", user)
+        frappe.local.cookie_manager.set_cookie("full_name", full_name)
+        #frappe.local.cookie_manager.set_cookie("user_exist", user_exist)
+        frappe.local.cookie_manager.set_cookie("user_image", user_info.user_image or "")
+        
+        # Set system_user cookie
+        if frappe.db.get_value("User", user, "user_type") == "Website User":
+            frappe.local.cookie_manager.set_cookie("system_user", "no")
         else:
-            referral_name = referrals[0]['referral_name']
+            frappe.local.cookie_manager.set_cookie("system_user", "yes")
 
-        user_referral = frappe.get_doc({
-            'doctype': 'Referral Code',
-            'user': user,
-            'referral_name': referral_name
-        })
-        user_referral.insert(ignore_permissions=True)
+        frappe.db.commit()
 
-        promo_wallet = frappe.new_doc("Promotional Wallet")
-        promo_wallet.user = user
-        promo_wallet.balance = 0
-        promo_wallet.referral_code = user_referral.name
-        promo_wallet.is_active = 1
-        promo_wallet.insert(ignore_permissions=True)
-
-    # Log the user in
-    frappe.local.login_manager = LoginManager()
-    frappe.local.login_manager.login_as(user)
-
-    # # Mark OTP as used
-    # frappe.db.set_value("Mobile OTP", otp_doc.name, "is_used", 1)
-
-    # Initialize cookies
-    frappe.local.cookie_manager.init_cookies()
-    
-    # Get user information for setting additional cookies
-    user_info = frappe.db.get_value("User", user, ["first_name", "last_name", "user_image"], as_dict=1)
-    
-    # Set additional cookies
-    full_name = " ".join(filter(None, [user_info.first_name, user_info.last_name]))
-    frappe.local.cookie_manager.set_cookie("user_id", user)
-    frappe.local.cookie_manager.set_cookie("full_name", full_name)
-    frappe.local.cookie_manager.set_cookie("user_exist", user_exist)
-    # frappe.local.cookie_manager.set_cookie("user_image", user_info.user_image or "")
-    
-    # Set system_user cookie
-    if frappe.db.get_value("User", user, "user_type") == "Website User":
-        frappe.local.cookie_manager.set_cookie("system_user", "no")
-    else:
-        frappe.local.cookie_manager.set_cookie("system_user", "yes")
-
-    frappe.db.commit()
-
-    return {
-        "message": "Logged in", 
-        "sid": frappe.session.sid,
-        "user_exist":user_exist
-    }
+        return {
+            "message": "Logged in",
+            "user_id": user,
+            "sid": frappe.session.sid,
+            "user_exist":user_exist
+        }
+    except Exception as e:
+        frappe.log_error("Error in otp validation",f"{str(e)}")
+        frappe.throw(f"Error in otp validation {str(e)}")
 
 @frappe.whitelist(allow_guest=True)
 def execute():
