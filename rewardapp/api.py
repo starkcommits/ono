@@ -420,6 +420,22 @@ def verify_otp(mobile, otp):
         frappe.log_error("Error in otp validation",f"{str(e)}")
         frappe.throw(f"Error in otp validation {str(e)}")
 
+
+@frappe.whitelist(allow_guest=True)
+def logout(user = None):
+    try:
+        if not user:
+            user = frappe.session.user
+            
+        login_manager = LoginManager()
+        login_manager.logout(user)
+        frappe.db.commit()
+        return {"message": "Successfully logged out"}
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "Error in logout")
+        frappe.throw(f"Error in logout: {str(e)}")
+
+
 @frappe.whitelist(allow_guest=True)
 def execute():
     try:
