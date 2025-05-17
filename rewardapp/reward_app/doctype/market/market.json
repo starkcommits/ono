@@ -10,11 +10,13 @@
   "category",
   "end_result",
   "status",
+  "total_investment",
   "column_break_sgfb",
   "closing_time",
   "yes_price",
   "no_price",
-  "total_traders"
+  "total_traders",
+  "max_allowed_quantity"
  ],
  "fields": [
   {
@@ -74,11 +76,23 @@
    "fieldname": "total_traders",
    "fieldtype": "Int",
    "label": "Total Traders"
+  },
+  {
+   "default": "0",
+   "fieldname": "total_investment",
+   "fieldtype": "Float",
+   "label": "Total Investment"
+  },
+  {
+   "default": "5",
+   "fieldname": "max_allowed_quantity",
+   "fieldtype": "Int",
+   "label": "Max Allowed Quantity"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-05-02 13:55:36.630628",
+ "modified": "2025-05-17 18:16:56.517393",
  "modified_by": "Administrator",
  "module": "Reward App",
  "name": "Market",
@@ -110,6 +124,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

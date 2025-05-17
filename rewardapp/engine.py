@@ -72,6 +72,11 @@ def trades():
             first_order = frappe.get_doc("Orders",trade["first_user_order_id"])
             second_order = frappe.get_doc("Orders",trade["second_user_order_id"])
 
+            market_id = trade["market_id"]
+            quantity = trade["quantity"]
+            f_price = trade["first_user_price"]
+            s_price = trade["second_user_price"]
+
             if trade["first_user_option"] != trade["second_user_option"]:
                 holding_doc1 = frappe.get_doc({
                     "doctype": "Holding",
@@ -100,6 +105,15 @@ def trades():
                     "status": "ACTIVE"
                 })
                 holding_doc2.insert(ignore_permissions=True)
+
+                # Update total investment
+                total_trade_investment = (f_price + s_price) * quantity
+                frappe.db.sql("""
+                    UPDATE `tabMarket`
+                    SET total_investment = COALESCE(total_investment, 0) + %s
+                    WHERE name = %s
+                """, (total_trade_investment, market_id))
+
                 frappe.db.commit()
 
             else:
@@ -119,7 +133,7 @@ def trades():
                     trade["first_user_option"]
                 ), as_dict=True)
 
-                trade_quantity = trade["quantity"]
+                trade_quantity = quantity
 
                 for row in result:
                     holding_doc = frappe.get_doc("Holding", row["name"])
@@ -164,6 +178,13 @@ def trades():
                         SET balance = %s
                         WHERE name = %s
                     """, (new_balance, wallet_name))
+                    
+                    exited_investment = quantity_to_fill * holding_doc.price
+                    frappe.db.sql("""
+                        UPDATE `tabMarket`
+                        SET total_investment = total_investment - %s
+                        WHERE name = %s
+                    """, (exited_investment, market_id))
 
                     if trade_quantity == 0:
                         break
@@ -184,7 +205,30 @@ def trades():
                 })
                 holding_doc2.insert(ignore_permissions=True)
 
+                # Only second user's investment is added
+                frappe.db.sql("""
+                    UPDATE `tabMarket`
+                    SET total_investment = COALESCE(total_investment, 0) + %s
+                    WHERE name = %s
+                """, (s_price * quantity, market_id))
+
                 frappe.db.commit()
+                
+            # 🔁 After each trade, update max_allowed_quantity dynamically
+            current_total = frappe.db.get_value("Market", market_id, "total_investment") or 0
+
+            if current_total < 500:
+                max_qty = 5
+            elif current_total < 2000:
+                max_qty = 10
+            elif current_total < 5000:
+                max_qty = 20
+            elif current_total < 10000:
+                max_qty = 30
+            else:
+                max_qty = 50
+
+            frappe.db.set_value("Market", market_id, "max_allowed_quantity", max_qty)
 
         return {"status": "success", "message": f"{len(data.trades)} trades inserted successfully"}
     except Exception as e:
@@ -212,7 +256,7 @@ def market(doc, method):
             # For debugging
             frappe.logger().info(f"Sending payload to market engine: {payload}")
             
-            url = "http://127.0.0.1:8086/markets/"
+            url = "http://94.136.187.188:8086/markets/"
             response = requests.post(url, json=payload)
             
             if response.status_code != 201:
@@ -247,7 +291,7 @@ def market(doc, method):
                 order_doc.save()  # Triggers hooks
 
             frappe.db.commit()
-            url=f"http://127.0.0.1:8086/markets/{doc.name}/close"
+            url=f"http://94.136.187.188:8086/markets/{doc.name}/close"
             response = requests.post(url)
                 
             if response.status_code != 200:
@@ -688,7 +732,7 @@ def holding(doc,method):
 
         # API call to sync order update
         try:
-            url = "http://127.0.0.1:8086/orders/update_quantity"
+            url = "http://94.136.187.188:8086/orders/update_quantity"
             response = requests.put(url, json=payload)
             if response.status_code != 201:
                 frappe.logger().error(f"Error response: {response.text}")
