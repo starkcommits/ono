@@ -108,8 +108,9 @@ const OrdersTab = () => {
     }
   }, [activeOrdersData])
 
-  useFrappeDocTypeEventListener('Orders', (updatedOrder) => {
-    console.log('Updated Order:', updatedOrder)
+  useFrappeDocTypeEventListener('Orders', (order) => {
+    if (!activeOrders[order.name]) return
+    console.log('Order:', order)
     refetchActiveOrders()
     // setActiveOrders((prev) => {
     //   const updatedActiveOrders = {

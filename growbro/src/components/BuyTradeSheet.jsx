@@ -147,7 +147,7 @@ const BuyTradeSheet = ({
             <TabsList className="w-full">
               <TabsTrigger
                 value="YES"
-                className="w-[50%]"
+                className="w-[50%] data-[state=active]:bg-blue-500 data-[state=active]:text-white"
                 onClick={() => {
                   setSelectedChoice('YES')
                 }}
@@ -156,7 +156,7 @@ const BuyTradeSheet = ({
               </TabsTrigger>
               <TabsTrigger
                 value="NO"
-                className="w-[50%]"
+                className="w-[50%] data-[state=active]:bg-red-500 data-[state=active]:text-white"
                 onClick={() => {
                   setSelectedChoice('NO')
                 }}
