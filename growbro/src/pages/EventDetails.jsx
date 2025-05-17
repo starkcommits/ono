@@ -169,11 +169,10 @@ const EventDetails = () => {
           <h2 className="text-xl text-center font-medium mb-4 px-6">
             {market?.question}
           </h2>
-          <div className="flex items-center gap-4 text-sm text-gray-600">
+          {/* <div className="flex items-center gap-4 text-sm text-gray-600">
             <span className="flex items-center">
               <Users className="h-4 w-4 mr-1.5" />
               {market?.total_traders} traders
-              {/* {market.traders.toLocaleString()} */}
             </span>
             {market?.status === 'OPEN' && (
               <span className="flex items-center">
@@ -187,7 +186,7 @@ const EventDetails = () => {
                 Market Closed At {formatDate(market?.closing_time)}
               </span>
             )}
-          </div>
+          </div> */}
         </div>
         {/* <div className="bg-amber-50 p-4 rounded-xl mb-6">
           <div className="flex items-center">
@@ -215,6 +214,50 @@ const EventDetails = () => {
           >
             No ₹{market?.no_price}
           </button>
+        </div>
+
+        <div className="mx-auto bg-white rounded-xl shadow-sm p-4 mb-6">
+          <h1 className="text-xl font-bold text-left text-gray-900 mb-8">
+            About the event
+          </h1>
+
+          {/* Event Stats Grid */}
+          <div className="grid grid-cols-2 gap-8 mb-8">
+            <div>
+              <p className="text-gray-500 mb-1">Traders</p>
+              <p className="text-xl font-bold text-gray-900">
+                {market?.total_traders}
+              </p>
+            </div>
+            <div>
+              <p className="text-gray-500 mb-1">Total Volume</p>
+              <p className="text-xl font-bold text-gray-900">
+                ₹{market?.total_investment}
+              </p>
+            </div>
+            <div>
+              <p className="text-gray-500 mb-1">Started at</p>
+              <p className="text-md font-semibold text-gray-900">
+                {formatDate(market?.creation)}
+              </p>
+            </div>
+            {market?.status === 'OPEN' && (
+              <div>
+                <p className="text-gray-500 mb-1">Ending at</p>
+                <p className="text-md font-semibold text-gray-900">
+                  {formatDate(market?.closing_time)}
+                </p>
+              </div>
+            )}
+            {market?.status === 'CLOSED' && (
+              <div>
+                <p className="text-gray-500 mb-1">Closed at</p>
+                <p className="text-md font-semibold text-gray-900">
+                  {formatDate(market?.closing_time)}
+                </p>
+              </div>
+            )}
+          </div>
         </div>
 
         <Tabs
