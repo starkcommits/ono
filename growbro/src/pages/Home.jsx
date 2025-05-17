@@ -264,7 +264,7 @@ const Home = () => {
       )}
 
       <div className="pt-[calc(env(safe-area-inset-top)+4rem)] max-w-lg mx-auto px-6 ">
-        <div className=" mt-6 ">
+        <div className=" mt-6">
           <h2 className="text-lg font-semibold mb-4">Categories</h2>
           <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide -mx-6 px-6 ">
             {!marketCategoriesLoading &&

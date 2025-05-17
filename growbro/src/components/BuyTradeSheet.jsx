@@ -33,6 +33,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { AlertTriangle, Clock, Minus, Plus } from 'lucide-react'
 import { DateTimePicker } from './ui/date-picker'
+import { max } from 'lodash'
 
 const BuyTradeSheet = ({
   marketId,
@@ -57,7 +58,7 @@ const BuyTradeSheet = ({
   const [price, setPrice] = useState(
     choice === 'YES' ? market.yes_price : market.no_price
   )
-  const [quantity, setQuantity] = useState(10)
+  const [quantity, setQuantity] = useState(2)
   const [stopLossEnabled, setStopLossEnabled] = useState(false)
   const [bookProfitEnabled, setBookProfitEnabled] = useState(false)
   const [autoCancelEnabled, setAutoCancelEnabled] = useState(false)
@@ -147,7 +148,7 @@ const BuyTradeSheet = ({
             <TabsList className="w-full">
               <TabsTrigger
                 value="YES"
-                className="w-[50%]"
+                className="w-[50%] data-[state=active]:bg-blue-500 data-[state=active]:text-white"
                 onClick={() => {
                   setSelectedChoice('YES')
                 }}
@@ -156,7 +157,7 @@ const BuyTradeSheet = ({
               </TabsTrigger>
               <TabsTrigger
                 value="NO"
-                className="w-[50%]"
+                className="w-[50%] data-[state=active]:bg-red-500 data-[state=active]:text-white"
                 onClick={() => {
                   setSelectedChoice('NO')
                 }}
@@ -207,14 +208,15 @@ const BuyTradeSheet = ({
                       onChange={setQuantity}
                     /> */}
             <Slider
-              defaultValue={[1]}
-              max={50}
+              max={market.max_allowed_quantity}
               min={1}
               step={1}
               value={[quantity]}
               className={``}
               onValueChange={(values) => {
-                setQuantity(values[0])
+                if (quantity <= market.max_allowed_quantity)
+                  setQuantity(values[0])
+                else setQuantity(market.max_allowed_quantity)
               }}
             />
           </div>

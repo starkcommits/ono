@@ -104,9 +104,15 @@ const ActiveOrders = ({
         key={order.name}
         className="p-4 w-full rounded-xl shadow-md bg-white transition hover:shadow-lg cursor-pointer space-y-3"
       >
-        <Badge className="text-xs font-semibold mb-1 hover:underline">
-          #{order.name}
-        </Badge>
+        {order.order_type === 'BUY' ? (
+          <Badge className="text-xs font-semibold hover:underline bg-green-200 text-green-600">
+            {order.order_type}
+          </Badge>
+        ) : (
+          <Badge className="text-xs font-semibold hover:underline bg-red-200 text-red-600">
+            {order.order_type}
+          </Badge>
+        )}
         <div className="flex items-center justify-between">
           <p className="font-medium text-gray-900 max-w-[80%] truncate">
             {order.question}
