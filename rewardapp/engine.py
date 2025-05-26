@@ -256,7 +256,7 @@ def market(doc, method):
             # For debugging
             frappe.logger().info(f"Sending payload to market engine: {payload}")
             
-            url = "http://127.0.0.1:8086/markets/"
+            url = "http://94.136.187.188:8086/markets/"
             response = requests.post(url, json=payload)
             
             if response.status_code != 201:
@@ -291,7 +291,7 @@ def market(doc, method):
                 order_doc.save()  # Triggers hooks
 
             frappe.db.commit()
-            url=f"http://127.0.0.1:8086/markets/{doc.name}/close"
+            url=f"http://94.136.187.188:8086/markets/{doc.name}/close"
             response = requests.post(url)
                 
             if response.status_code != 200:
@@ -732,10 +732,10 @@ def holding(doc,method):
 
         # API call to sync order update
         try:
-            url = "http://127.0.0.1:8086/orders/update_quantity"
+            url = "http://94.136.187.188:8086/orders/update_quantity"
             response = requests.put(url, json=payload)
             if response.status_code != 201:
-                frappe.logger().error(f"Error response: {response.text}")
+                frappe.log_error(f"Error response: {response.text}")
                 frappe.throw(f"API error: {response.status_code} - {response.text}")
             else:
                 frappe.publish_realtime("order_book_event", order_book_data,after_commit=True)
@@ -844,3 +844,56 @@ def success_response(message):
         "status": "success",
         "message": message
     }
+
+
+@frappe.whitelist(allow_guest=True)
+def update_order_price(user_id, order_id, price):
+    try:
+        doc = frappe.get_doc('Orders',order_id)
+        if doc.status == 'CANCELED':
+            frappe.throw(f"Order is canceled. Price can't be updated.")
+            return
+        elif doc.status == 'MATCHED':
+            frappe.throw(f"Order is already matched. Price can't be updated.")
+            return
+        elif doc.order_type == 'BUY':
+            settle_amount = (doc.amount - price) * (doc.quantity - doc.filled_quantity)
+
+            wallet_data = frappe.db.sql("""
+                SELECT name, balance FROM `tabUser Wallet`
+                WHERE user = %s AND is_active = 1
+            """, (user_id,), as_dict=True)
+
+            if not wallet_data:
+                frappe.msgprint("No active wallet found")
+                frappe.throw(f"No active wallet found for {user_id}")
+
+            wallet_name = wallet_data[0]["name"]
+            available_balance = wallet_data[0]["balance"]
+
+            new_balance = available_balance + settle_amount
+
+            frappe.db.sql("""
+                UPDATE `tabUser Wallet`
+                SET balance = %s
+                WHERE name = %s
+            """, (new_balance, wallet_name))
+        
+        frappe.db.set_value('Orders',order_id,'amount', price)
+        payload={
+            "order_id":order_id,
+            "new_price": price
+        }
+        try:
+            url = "http://94.136.187.188:8086/orders/update_price"
+            response = requests.put(url, json=payload)
+            
+            if response.status_code != 201:
+                frappe.throw("Error in price updation API")
+
+        except Exception as e:
+            frappe.throw("Error",f"{str(e)}")
+
+    except Exception as e:
+        frappe.log_error("Error in order price updation", f"{str(e)}")
+        frappe.throw(f"Error in order price updation {str(e)}")

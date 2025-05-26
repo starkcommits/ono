@@ -18,8 +18,6 @@ def create_transaction_log(doc):
                 transaction_log = frappe.new_doc({
                     'doctype':"Transaction Logs",
                     'market_id':doc.market_id,
-                    
-                    
                 })
 
     except Exception as e:
@@ -104,12 +102,8 @@ def wallet_operation(doc, method):
 
             frappe.log_error("Order Payload", payload)
             try:
-                url = "http://127.0.0.1:8086/orders/"
-
-                response = requests.post(url, json=payload)
-                if response.status_code != 201:
+                url = "http://94.136.187.188:8086/orders/"
                     # Update status without triggering the hook again
-                    frappe.db.set_value('Orders', doc.name, {
                         'status': "CANCELED",
                         'remark': "System canceled the order."
                     }, update_modified=False)
@@ -215,7 +209,7 @@ def wallet_operation(doc, method):
 
             if doc.market_status != "CLOSE":
                 try:
-                    url = f"http://127.0.0.1:8086/orders/{doc.name}"
+                    url = f"http://94.136.187.188:8086/orders/{doc.name}"
                     
                     response = requests.delete(url)
                     if response.status_code != 200:

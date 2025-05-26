@@ -176,6 +176,7 @@ api = {
         "rewardapp.engine.update_market_price",
         "rewardapp.engine.get_marketwise_transaction_summary",
         "rewardapp.engine.get_available_quantity",
+        "rewardapp.engine.update_order_price",
         "rewardapp.wallet.get_deposit_and_withdrawal",
         "rewardapp.engine.total_returns",
         "rewardapp.engine.cancel_order",
