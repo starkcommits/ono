@@ -197,7 +197,7 @@ const ClosedMarkets = ({
     {
       accessorKey: 'closing_time',
       header: ({ column }) => {
-        return <div className="col-span-1">Time Since Closed</div>
+        return <div className="">Time Since Closed</div>
       },
       cell: ({ row }) => {
         // console.log(row.original.closing_time)
@@ -211,10 +211,10 @@ const ClosedMarkets = ({
     {
       accessorKey: 'actions',
       header: ({ column }) => {
-        return <div>Action</div>
+        return <div className="text-center">Action</div>
       },
       cell: ({ row }) => (
-        <div className="text-sm text-muted-foreground font-medium flex items-center gap-2">
+        <div className="text-sm text-muted-foreground justify-center font-medium flex items-center gap-2">
           <ResolveSheet
             market_id={row.original.name}
             onResolveAction={onResolveAction}

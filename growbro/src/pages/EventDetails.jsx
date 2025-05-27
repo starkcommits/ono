@@ -101,11 +101,11 @@ const EventDetails = () => {
     id
   )
 
-  useEffect(() => {
-    if (!marketDataLoading && Object.values(marketData)) {
-      setMarket(marketData)
-    }
-  }, [marketData])
+    useEffect(() => {
+      if (!marketDataLoading && Object.values(marketData)) {
+        setMarket(marketData)
+      }
+    }, [marketData])
 
   useFrappeEventListener('market_event', (updatedData) => {
     console.log('Hello: ', updatedData)
