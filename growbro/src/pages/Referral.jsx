@@ -13,26 +13,28 @@ const Referral = () => {
 
   return (
     <>
-      <div className="pt-safe-top">
-        <div className="pt-2">
-          <div className="flex items-center gap-4 mb-6">
-            <button
-              onClick={() => navigate('/wallet')}
-              className="p-1.5 text-neutral-600 border rounded-full transition-colors"
-            >
-              <ArrowLeft className="h-6 w-6" />
-            </button>
-            <h1 className="text-2xl font-bold text-neutral-600">Referral</h1>
+      <div className="px-6">
+        <div className="">
+          <div className="pt-2">
+            <div className="flex items-center gap-4 mb-6">
+              <button
+                onClick={() => navigate('/wallet')}
+                className="p-1.5 text-neutral-600 border rounded-full transition-colors"
+              >
+                <ArrowLeft className="h-6 w-6" />
+              </button>
+              <h1 className="text-2xl font-bold text-neutral-600">Referral</h1>
+            </div>
           </div>
         </div>
-      </div>
-      <ReferralHero />
-      <div className="mt-6 mb- 2 space-y-6">
-        <EarningsTracker />
-        <TopInviters />
-        <ReferralCode />
-        {/* <ShareOptions /> */}
-        {/* <HowItWorks  /> */}
+        <ReferralHero />
+        <div className="mt-6 mb-2 space-y-6">
+          <EarningsTracker />
+          <TopInviters />
+          <ReferralCode />
+          {/* <ShareOptions /> */}
+          {/* <HowItWorks  /> */}
+        </div>
       </div>
     </>
   )

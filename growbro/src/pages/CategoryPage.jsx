@@ -145,7 +145,7 @@ const CategoryPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="pb-6 min-h-screen bg-gray-50">
       <div className="bg-indigo-600 pt-safe-top pb-8">
         <div className="px-6">
           <div className="flex items-center gap-4 mb-6">
@@ -162,7 +162,7 @@ const CategoryPage = () => {
           </div>
 
           <div className="bg-white/20 backdrop-blur-lg rounded-3xl p-6 mb-6">
-            {id === 'bitcoin' && (
+            {id === 'Bitcoin' && (
               <div className="h-[350px]">
                 <TradingViewWidgetBTC />
               </div>
@@ -174,7 +174,7 @@ const CategoryPage = () => {
             )}
             <div className="flex items-center gap-4 mt-4">
               <div
-                className={`w-16 h-16 ${getCategoryGradient()} rounded-2xl shadow-sm flex items-center justify-center`}
+                className={`w-16 h-16 bg-gradient-to-br rounded-2xl shadow-sm flex items-center justify-center`}
               >
                 <span className="text-3xl">
                   <img
@@ -238,7 +238,7 @@ const CategoryPage = () => {
                     <div className="w-1 h-1 bg-red-500 rounded-full animate-pulse mr-1"></div>
                     LIVE
                   </span>
-                  <div className="flex items-center text-xs text-gray-600">
+                  {/* <div className="flex items-center text-xs text-gray-600">
                     <Timer className="h-3.5 w-3.5 mr-1" />
                     <span>
                       {market?.closing_time
@@ -253,9 +253,9 @@ const CategoryPage = () => {
                         .join(':')
                         .slice(0, 5)}
                     </span>
-                  </div>
+                  </div> */}
                 </div>
-                <p className="text-xs text-gray-600 mb-4">{market?.question}</p>
+                {/* <p className="text-xs text-gray-600 mb-4">{market?.question}</p> */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="py-2 px-4 bg-green-50 text-green-600 rounded-xl text-sm font-medium">
                     Yes ₹{market?.yes_price}

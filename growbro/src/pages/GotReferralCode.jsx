@@ -37,7 +37,7 @@ const GotReferralCode = () => {
       gotReferralCode: '',
     },
   })
-  const{currentUser} = useFrappeAuth()
+  const { currentUser } = useFrappeAuth()
   const onSubmit = async (data) => {
     try {
       setIsLoading(true)

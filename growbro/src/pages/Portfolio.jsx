@@ -239,12 +239,12 @@ const Portfolio = () => {
   return (
     <div className=" bg-gray-50 ">
       {/* Header Section with improved contrast */}
-      <div className="bg-indigo-600 pt-safe-top pb-8">
+      <div className="bg-indigo-600 pb-8 pt-4">
         <div className="px-6">
           <div className="flex items-center gap-4 mb-6">
             <button
               onClick={() => navigate('/')}
-              className="p-2 -ml-2 text-white/90 hover:bg-white/10 rounded-full transition-colors"
+              className="p-0 text-white/90 hover:bg-white/10 rounded-full transition-colors"
             >
               <ArrowLeft className="h-6 w-6" />
             </button>
