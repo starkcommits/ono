@@ -27,23 +27,51 @@ def update_profile(user, token):
 
 def send_sms(mobile_number, otp):
     try:
-        url = "http://94.136.187.188:8084/message/sendText/ONO"
+        url = "https://graph.facebook.com/v18.0/692630890593436/messages"
         
         payload = {
-            "number": f"91{mobile_number}",
-            "text": f"Hi *ONO User,*\nYour login OTP is *{otp}*",
-            "delay": 1
+            "messaging_product": "whatsapp",
+            "to": f"91{mobile_number}",
+            "type": "template",
+            "template": {
+                "name": "otp_default",
+                "language": {
+                    "code": "en_US"
+                },
+                "components": [
+                    {
+                        "type": "body",
+                        "parameters": [
+                            {
+                            "type": "text",
+                            "text": f"{otp}"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "button",
+                        "sub_type": "url",
+                        "index": "0",
+                        "parameters": [
+                            {
+                            "type": "text",
+                            "text": f"{otp}"
+                            }
+                        ]
+                    }
+                ]
+            }
         }
         
         headers = {
-            "apikey": "modimc",
+            "Authorization": "Bearer EAAOx688nrSwBO127r48JRoRHfmc8yLEGjnH3Wpmk2S6iWNDzm7QTxEfMJFctGRNGyTaEg9GcrqgHXg58NbyVybkYFNQZBmiBsiSdwDM4aXAZCjDxmBXLz3yVT7h0Hw1zVhWvc7sIrnC68aQW7nGMmSqCfVZAxKlirPJTiPkE6kzpsiszOuhnemf37Q5nv4H",
             "Content-Type": "application/json"
         }
         
         # Add timeout to prevent hanging connections
         response = requests.post(url, json=payload, headers=headers, timeout=15)
         
-        if response.status_code == 201:
+        if response.status_code == 200:
             frappe.logger().info(f"SMS sent successfully to {mobile_number}")
             return True
         else:
