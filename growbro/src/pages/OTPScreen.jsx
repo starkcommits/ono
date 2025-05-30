@@ -23,7 +23,6 @@ import {
   useFrappePostCall,
 } from 'frappe-react-sdk'
 import { useLocation, useNavigate } from 'react-router-dom'
-import toast from 'react-hot-toast'
 
 const OTPScreen = () => {
   const location = useLocation()

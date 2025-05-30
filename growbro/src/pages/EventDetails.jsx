@@ -137,7 +137,7 @@ const EventDetails = () => {
   if (marketDataLoading) {
     return (
       <div className="w-full h-screen flex justify-center items-center">
-        <div className="spinner w-14 h-14 rounded-full border-4 border-gray-200 border-r-blue-500 animate-spin"></div>
+        <div className="spinner w-14 h-14 rounded-full border-4 border-gray-200 border-r-blue-500 animate-spin select-none"></div>
       </div>
     )
   }
@@ -145,7 +145,7 @@ const EventDetails = () => {
   return (
     <div className=" bg-gray-50">
       {/* Existing code remains the same */}
-      <div className="fixed top-0 left-0 right-0 z-20 bg-white/80 backdrop-blur-lg border-b border-gray-100">
+      <div className="fixed top-0 left-0 right-0 z-20 mx-auto max-w-lg bg-white/80 backdrop-blur-lg border-b border-gray-100">
         {/* ... existing header content ... */}
         <div className="px-4 pt-safe-top pb-4">
           <div className="flex items-center max-w-lg gap-6 mx-auto">

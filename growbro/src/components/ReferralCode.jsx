@@ -1,9 +1,6 @@
 import React, { useState } from 'react'
 import { Copy, Check, Share2, X } from 'lucide-react'
-import {
-  useFrappeAuth,
-  useFrappeGetCall,
-} from 'frappe-react-sdk'
+import { useFrappeAuth, useFrappeGetCall } from 'frappe-react-sdk'
 
 const ReferralCode = () => {
   const [copied, setCopied] = useState(false)
@@ -19,7 +16,8 @@ const ReferralCode = () => {
     }
   )
 
-  const referralCode = promotionalWalletData?.message?.[0]?.referral_code || 'REFERCODE'
+  const referralCode =
+    promotionalWalletData?.message?.[0]?.referral_code || 'REFERCODE'
   const referralLink = `https://yourdomain.com/register?ref=${referralCode}`
   const referralMessage = `Join me on this amazing platform and get a discount on your first purchase. Use my referral code: ${referralCode} or click the link below!`
 
@@ -38,17 +36,23 @@ const ReferralCode = () => {
   }
 
   const handleShareWhatsApp = () => {
-    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(referralMessage + ' ' + referralLink)}`
+    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(
+      referralMessage + ' ' + referralLink
+    )}`
     window.open(url, '_blank')
   }
 
   const handleShareTwitter = () => {
-    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(referralMessage)}&url=${encodeURIComponent(referralLink)}`
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+      referralMessage
+    )}&url=${encodeURIComponent(referralLink)}`
     window.open(url, '_blank')
   }
 
   const handleShareFacebook = () => {
-    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(referralLink)}&quote=${encodeURIComponent(referralMessage)}`
+    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+      referralLink
+    )}&quote=${encodeURIComponent(referralMessage)}`
     window.open(url, '_blank')
   }
 
@@ -100,7 +104,7 @@ const ReferralCode = () => {
         </div>
 
         <div className="mt-6">
-          <button 
+          <button
             onClick={toggleShareOptions}
             className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 text-white py-4 rounded-xl text-lg font-semibold shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 flex items-center justify-center"
           >
@@ -108,12 +112,14 @@ const ReferralCode = () => {
             Refer & Earn ₹50 Instantly
           </button>
         </div>
-        
+
         {showShareOptions && (
           <div className="mt-4 bg-gray-50 p-4 rounded-xl border border-gray-100 animate-fadeIn">
             <div className="flex justify-between items-center mb-3">
-              <h3 className="text-gray-700 font-medium">Share your referral code</h3>
-              <button 
+              <h3 className="text-gray-700 font-medium">
+                Share your referral code
+              </h3>
+              <button
                 onClick={() => setShowShareOptions(false)}
                 className="text-gray-400 hover:text-gray-600"
               >
@@ -121,19 +127,19 @@ const ReferralCode = () => {
               </button>
             </div>
             <div className="flex justify-between gap-3">
-              <ShareButton 
+              <ShareButton
                 onClick={handleShareWhatsApp}
                 label="WhatsApp"
                 bgColor="bg-green-500"
                 hoverColor="bg-green-600"
               />
-              <ShareButton 
+              <ShareButton
                 onClick={handleShareTwitter}
                 label="Twitter"
                 bgColor="bg-blue-400"
                 hoverColor="bg-blue-500"
               />
-              <ShareButton 
+              <ShareButton
                 onClick={handleShareFacebook}
                 label="Facebook"
                 bgColor="bg-blue-600"

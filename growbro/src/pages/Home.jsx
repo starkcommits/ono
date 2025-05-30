@@ -22,6 +22,9 @@ import {
   useFrappeGetCall,
   useFrappeDocTypeEventListener,
 } from 'frappe-react-sdk'
+
+import scrollbarHide from 'tailwind-scrollbar-hide'
+
 const categoryIcons = {
   Sports: (
     <svg
@@ -227,16 +230,16 @@ const Home = () => {
   console.log('asdasdas', isInWebView)
 
   return (
-    <div className="">
+    <div className="pb-8">
       {isInWebView ? null : (
-        <header className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
-          <div className="pt-safe-top">
+        <header className="fixed top-0 left-0 right-0 bg-white shadow-sm mx-auto max-w-lg z-50">
+          <div className="">
             <div className="max-w-lg mx-auto px-6 py-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setIsMenuOpen(true)}
-                    className="p-2 hover:bg-gray-100 rounded-xl"
+                    className=" hover:bg-gray-100 rounded-xl"
                   >
                     <Menu className="h-5 w-5 text-gray-700" />
                   </button>
@@ -263,30 +266,26 @@ const Home = () => {
         </header>
       )}
 
-      <div className="pt-[calc(env(safe-area-inset-top)+4rem)] max-w-lg mx-auto px-6 ">
-        <div className=" mt-6">
+      <div className="pt-[calc(env(safe-area-inset-top)+4rem)] max-w-lg mx-auto px-6">
+        <div className="mt-6">
           <h2 className="text-lg font-semibold mb-4">Categories</h2>
-          <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide -mx-6 px-6 ">
+          <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide w-full">
             {!marketCategoriesLoading &&
               marketCategories?.map((category) => (
                 <button
-                  key={category.name}
-                  onClick={() => handleCategoryClick(category.category_name)}
+                  key={category?.name}
+                  onClick={() => handleCategoryClick(category?.name)}
                   className="flex-shrink-0 group"
                 >
                   <div
-                    className={`w-14 h-14 bg-gradient-to-br rounded-2xl border border-neutral-600 shadow-sm flex flex-col items-center justify-center relative overflow-hidden `}
+                    className={`w-16 h-16 bg-gradient-to-br ${category.color} rounded-2xl shadow-sm flex flex-col items-center justify-center relative overflow-hidden`}
                   >
                     <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <span className="text-2xl mb-1">
-                      <img
-                        src={`${category.category_image}`}
-                        alt="Alt"
-                        className=""
-                      />
+                      <img src={category?.category_image} alt="" />
                     </span>
-                    <span className="text-xs font-medium text-black/90">
-                      {category.category_name}
+                    <span className="text-[10px] font-medium text-black/90">
+                      {category?.category_name}
                     </span>
                   </div>
                 </button>
@@ -350,51 +349,55 @@ const Home = () => {
                 .map((market) => (
                   <div
                     key={market.name}
-                    className="market-card cursor-pointer"
+                    className="market-card"
                     onClick={() => handleMarketClick(market)}
                   >
                     <>
                       {/* <div className="relative h-32">
-                     <img
-                       src={market.image}
-                       alt={market.title}
-                       className="w-full h-full object-cover"
-                     />
-                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                     <div className="absolute bottom-3 left-3 right-3">
-                       <div className="flex items-center justify-between text-white">
-                         <span className="text-xs font-medium bg-white/20 backdrop-blur-md px-2.5 py-1 rounded-full">
-                           {market.category}
-                         </span>
-                         <span className="flex items-center text-xs font-medium bg-green-500/20 backdrop-blur-md px-2.5 py-1 rounded-full">
-                           <TrendingUp className="h-3 w-3 mr-1" /> {market.trend}
-                         </span>
-                       </div>
-                     </div>
-                   </div> */}
+                        <img
+                          src={market.image}
+                          alt={market.title}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                        <div className="absolute bottom-3 left-3 right-3">
+                          <div className="flex items-center justify-between text-white">
+                            <span className="text-xs font-medium bg-white/20 backdrop-blur-md px-2.5 py-1 rounded-full">
+                              {market.category}
+                            </span>
+                            <span className="flex items-center text-xs font-medium bg-green-500/20 backdrop-blur-md px-2.5 py-1 rounded-full">
+                              <TrendingUp className="h-3 w-3 mr-1" />{' '}
+                              {market.trend}
+                            </span>
+                          </div>
+                        </div>
+                      </div> */}
 
                       <div className="p-4">
                         <h3 className="text-base font-medium mb-2">
-                          {market?.question}
+                          {market.question}
                         </h3>
                         <div className="flex items-center gap-3 mb-3">
                           <div className="flex items-center text-xs text-gray-600">
                             <Users className="h-3.5 w-3.5 mr-1" />
-                            {/* <span>{market.traders.toLocaleString()} traders</span> */}
-                            <span>{market?.total_traders} traders</span>
+                            <span>
+                              {market.total_traders.toLocaleString()} traders
+                            </span>
                           </div>
                           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-600">
                             <div className="w-1 h-1 bg-red-500 rounded-full animate-pulse mr-1"></div>
                             LIVE
                           </span>
                         </div>
-                        {/* <p className="text-xs text-gray-600 mb-4">{market.info}</p> */}
+                        {/* <p className="text-xs text-gray-600 mb-4">
+                          {market.info}
+                        </p> */}
                         <div className="grid grid-cols-2 gap-3">
                           <div className="py-2 px-4 bg-green-50 text-green-600 rounded-xl text-sm font-medium">
-                            Yes ₹{market?.yes_price}
+                            Yes ₹{market.yes_price}
                           </div>
                           <div className="py-2 px-4 bg-rose-50 text-rose-600 rounded-xl text-sm font-medium">
-                            No ₹{market?.no_price}
+                            No ₹{market.no_price}
                           </div>
                         </div>
                       </div>

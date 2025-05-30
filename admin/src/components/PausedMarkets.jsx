@@ -242,7 +242,7 @@ const PausedMarkets = ({
     {
       accessorKey: 'actions',
       header: ({ column }) => {
-        return <div></div>
+        return <div>Action</div>
       },
       cell: ({ row }) => (
         <div className="text-sm text-muted-foreground font-medium ">

@@ -22,7 +22,7 @@ export function PromotionalSection({ amount, icon, iconBgClass }) {
       transition={{ type: 'spring', stiffness: 500, damping: 15 }}
       onClick={() => navigate('/referral')}
     >
-      <Card className="overflow-hidden bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/40 dark:to-pink-950/40 border-0 shadow-lg rounded-2xl hover:shadow-xl transition-shadow">
+      <Card className="overflow-hidden bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl transition-shadow">
         <CardContent className="p-0">
           <button
             onClick={() => console.log('Promotional balance clicked')}
@@ -43,7 +43,7 @@ export function PromotionalSection({ amount, icon, iconBgClass }) {
                     Promotional
                   </p>
                   <h3 className="text-2xl font-bold mt-1">
-                    <span className="font-normal text-xl">₹</span>
+                    <span className="font-normal text-xl"></span>
                     {displayAmount}
                   </h3>
                 </div>

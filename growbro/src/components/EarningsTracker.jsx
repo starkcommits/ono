@@ -23,9 +23,7 @@ const EarningsTracker = () => {
         </div>
         <div>
           <h3 className="text-sm font-medium text-gray-500">Invite Rewards</h3>
-          <p className="text-2xl font-bold text-gray-800">
-            ₹{promotionalWalletData?.message[0].balance}
-          </p>
+          <p className="text-2xl font-bold text-gray-800">&#8377;0</p>
         </div>
       </div>
 
