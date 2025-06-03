@@ -39,61 +39,54 @@ const navItems = [
 
 function App() {
   return (
-    <div className="">
-      <div className="w-full bg-gray-50">
-        <div className="">
-          <Toaster />
-          <Routes>
-            <Route element={<PublicRoute />}>
-              <Route path="/signin" element={<SignIn />} />
-              <Route path="/otp" element={<OTPScreen />} />
-              {/* <Route path="/signup" element={<SignUp />} /> */}
-            </Route>
+    <div className="w-full bg-gray-50 max-w-lg mx-auto">
+      <Toaster />
+      <Routes>
+        <Route element={<PublicRoute />}>
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/otp" element={<OTPScreen />} />
+          {/* <Route path="/signup" element={<SignUp />} /> */}
+        </Route>
 
-            <Route path="/overview" element={<Overview />} />
+        <Route path="/overview" element={<Overview />} />
 
-            <Route element={<ProtectedRoute />}>
-              <Route element={<Layout />}>
-                <Route path="/" element={<HomePage />} />
-                {/* <Route path="/kyc" element={<KYC />} /> */}
-                <Route path="/wallet" element={<WalletPage />} />
-                <Route path="/portfolio" element={<Portfolio />} />
-                <Route path="/referral" element={<Referral />} />
-                <Route
-                  path="/portfolio/active/:id"
-                  element={<ActiveMarketHolding />}
-                />
-                <Route
-                  path="/portfolio/closed/:id"
-                  element={<ClosedMarketHolding />}
-                />
-                <Route path="/news" element={<News />} />
-                <Route path="/search" element={<SearchPage />} />
-                <Route path="/event/:id" element={<EventDetails />} />
-                <Route path="/category/:id" element={<CategoryPage />} />
-                <Route path="/profile" element={<EditProfile />} />
-                {/* <Route path="/edit" element={<EditProfile />} /> */}
-                <Route path="/settings" element={<Settings />} />
-                {/* <Route path="/rewards" element={<Rewards />} /> */}
-                <Route path="/notifications" element={<Notifications />} />
-                <Route path="/kyc" element={<PanVerification />} />
-                <Route
-                  path="/got-referral-code"
-                  element={<GotReferralCode />}
-                />
-              </Route>
-            </Route>
+        <Route element={<ProtectedRoute />}>
+          <Route element={<Layout />}>
+            <Route path="/" element={<HomePage />} />
+            {/* <Route path="/kyc" element={<KYC />} /> */}
+            <Route path="/wallet" element={<WalletPage />} />
+            <Route path="/portfolio" element={<Portfolio />} />
+            <Route path="/referral" element={<Referral />} />
             <Route
-              path="*"
-              element={
-                <div className="w-full h-screen flex justify-center items-center overflow-hidden">
-                  <div>404 NOT FOUND</div>
-                </div>
-              }
+              path="/portfolio/active/:id"
+              element={<ActiveMarketHolding />}
             />
-          </Routes>
-        </div>
-      </div>
+            <Route
+              path="/portfolio/closed/:id"
+              element={<ClosedMarketHolding />}
+            />
+            <Route path="/news" element={<News />} />
+            <Route path="/search" element={<SearchPage />} />
+            <Route path="/event/:id" element={<EventDetails />} />
+            <Route path="/category/:id" element={<CategoryPage />} />
+            <Route path="/profile" element={<EditProfile />} />
+            {/* <Route path="/edit" element={<EditProfile />} /> */}
+            <Route path="/settings" element={<Settings />} />
+            {/* <Route path="/rewards" element={<Rewards />} /> */}
+            <Route path="/notifications" element={<Notifications />} />
+            <Route path="/kyc" element={<PanVerification />} />
+            <Route path="/got-referral-code" element={<GotReferralCode />} />
+          </Route>
+        </Route>
+        <Route
+          path="*"
+          element={
+            <div className="w-full h-screen flex justify-center items-center overflow-hidden">
+              <div>404 NOT FOUND</div>
+            </div>
+          }
+        />
+      </Routes>
     </div>
   )
 }

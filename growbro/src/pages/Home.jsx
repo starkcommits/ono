@@ -230,44 +230,40 @@ const Home = () => {
   console.log('asdasdas', isInWebView)
 
   return (
-    <div className="pb-8">
+    <div className="">
       {isInWebView ? null : (
-        <header className="fixed top-0 left-0 right-0 bg-white shadow-sm mx-auto max-w-lg z-50">
-          <div className="">
-            <div className="max-w-lg mx-auto px-6 py-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setIsMenuOpen(true)}
-                    className=" hover:bg-gray-100 rounded-xl"
-                  >
-                    <Menu className="h-5 w-5 text-gray-700" />
-                  </button>
-                  <h1 className="text-xl font-semibold text-indigo-600">ONO</h1>
-                </div>
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={() => navigate('/wallet')}
-                    className="wallet-balance"
-                  >
-                    <WalletBalance balance={userWallet?.balance} />
-                  </button>
-                  <button
-                    onClick={() => navigate('/notifications')}
-                    className="p-2 hover:bg-gray-100 rounded-xl relative"
-                  >
-                    <Bell className="h-5 w-5 text-gray-700" />
-                    <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-red-500 rounded-full"></span>
-                  </button>
-                </div>
-              </div>
+        <header className="sticky top-0 left-0 right-0 bg-white shadow-sm mx-auto max-w-lg z-50 mb-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setIsMenuOpen(true)}
+                className=" hover:bg-gray-100 rounded-xl"
+              >
+                <Menu className="h-5 w-5 text-gray-700" />
+              </button>
+              <h1 className="text-xl font-semibold text-indigo-600">ONO</h1>
+            </div>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => navigate('/wallet')}
+                className="wallet-balance"
+              >
+                <WalletBalance balance={userWallet?.balance} />
+              </button>
+              <button
+                onClick={() => navigate('/notifications')}
+                className="p-2 hover:bg-gray-100 rounded-xl relative"
+              >
+                <Bell className="h-5 w-5 text-gray-700" />
+                <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-red-500 rounded-full"></span>
+              </button>
             </div>
           </div>
         </header>
       )}
 
-      <div className="pt-[calc(env(safe-area-inset-top)+4rem)] max-w-lg mx-auto px-6">
-        <div className="mt-6">
+      <div className="max-w-lg mx-auto px-6 py-4">
+        <div className="">
           <h2 className="text-lg font-semibold mb-4">Categories</h2>
           <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide w-full">
             {!marketCategoriesLoading &&
