@@ -239,7 +239,7 @@ const Portfolio = () => {
   return (
     <div className=" bg-gray-50 ">
       {/* Header Section with improved contrast */}
-      <div className="bg-indigo-6 00 pb-8 pt-4">
+      <div className="bg-indigo-600 pb-8 pt-4">
         <div className="px-6">
           <div className="flex items-center gap-4 mb-6">
             <button
