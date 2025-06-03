@@ -145,7 +145,7 @@ const EventDetails = () => {
   return (
     <div className=" bg-gray-50">
       {/* Existing code remains the same */}
-      <div className="fixed top-0 left-0 right-0 z-20 mx-auto max-w-lg bg-white/80 backdrop-blur-lg border-b border-gray-100">
+      <div className="sticky top-0 left-0 right-0 z-20 mx-auto max-w-lg mb-auto bg-white/80 backdrop-blur-lg border-b border-gray-100">
         {/* ... existing header content ... */}
         <div className="px-4 pt-safe-top pb-4">
           <div className="flex items-center max-w-lg gap-6 mx-auto">
@@ -160,9 +160,9 @@ const EventDetails = () => {
         </div>
       </div>
 
-      <div className="pt-[calc(env(safe-area-inset-top)+4rem)] pb-[calc(env(safe-area-inset-bottom)+5rem)] px-4">
+      <div className="px-4 py-4">
         {/* ... existing content ... */}
-        <div className="flex flex-col items-center mb-6 mt-4">
+        <div className="flex flex-col items-center mb-6">
           <div className="w-20 h-20 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center mb-4">
             <span className="text-3xl text-white">₿</span>
           </div>
@@ -216,8 +216,8 @@ const EventDetails = () => {
           </button>
         </div>
 
-        <div className="mx-auto bg-white rounded-xl shadow-sm p-4 mb-6">
-          <h1 className="text-xl font-bold text-left text-gray-900 mb-8">
+        <div className="mx-auto bg-white rounded-xl shadow-sm p-4">
+          <h1 className="text-xl font-bold text-left text-gray-900 mb-6">
             About the event
           </h1>
 
@@ -404,9 +404,9 @@ const EventDetails = () => {
             market={market}
             choice={selectedChoice}
             setSelectedChoice={setSelectedChoice}
+            marketId={id}
             isSheetOpen={isSheetOpen}
             setIsSheetOpen={setIsSheetOpen}
-            marketId={id}
           />
         )}
       </div>

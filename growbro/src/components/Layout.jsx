@@ -15,9 +15,13 @@ const navItems = [
 const Layout = () => {
   const { currentUser } = useFrappeAuth()
   return (
-    <div className="max-w-lg mx-auto">
-      <Outlet />
-      <div className="mt-16">{currentUser && <Navbar items={navItems} />}</div>
+    <div className="min-h-screen flex flex-col">
+      <div>
+        <Outlet />
+      </div>
+      <div className="mt-auto sticky bottom-0 left-0 right-0 bg-white border-t border-[#C6C6C6]">
+        {currentUser && <Navbar items={navItems} />}
+      </div>
     </div>
   )
 }
