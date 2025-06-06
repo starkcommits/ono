@@ -27,50 +27,52 @@ def update_profile(user, token):
 
 def send_sms(mobile_number, otp):
     try:
-        url = "https://graph.facebook.com/v18.0/692630890593436/messages"
+        # url = "https://graph.facebook.com/v18.0/692630890593436/messages"
         
-        payload = {
-            "messaging_product": "whatsapp",
-            "to": f"91{mobile_number}",
-            "type": "template",
-            "template": {
-                "name": "otp_default",
-                "language": {
-                    "code": "en_US"
-                },
-                "components": [
-                    {
-                        "type": "body",
-                        "parameters": [
-                            {
-                            "type": "text",
-                            "text": f"{otp}"
-                            }
-                        ]
-                    },
-                    {
-                        "type": "button",
-                        "sub_type": "url",
-                        "index": "0",
-                        "parameters": [
-                            {
-                            "type": "text",
-                            "text": f"{otp}"
-                            }
-                        ]
-                    }
-                ]
-            }
-        }
+        # payload = {
+        #     "messaging_product": "whatsapp",
+        #     "to": f"91{mobile_number}",
+        #     "type": "template",
+        #     "template": {
+        #         "name": "otp_default",
+        #         "language": {
+        #             "code": "en_US"
+        #         },
+        #         "components": [
+        #             {
+        #                 "type": "body",
+        #                 "parameters": [
+        #                     {
+        #                     "type": "text",
+        #                     "text": f"{otp}"
+        #                     }
+        #                 ]
+        #             },
+        #             {
+        #                 "type": "button",
+        #                 "sub_type": "url",
+        #                 "index": "0",
+        #                 "parameters": [
+        #                     {
+        #                     "type": "text",
+        #                     "text": f"{otp}"
+        #                     }
+        #                 ]
+        #             }
+        #         ]
+        #     }
+        # }
         
-        headers = {
-            "Authorization": "Bearer EAAOx688nrSwBO127r48JRoRHfmc8yLEGjnH3Wpmk2S6iWNDzm7QTxEfMJFctGRNGyTaEg9GcrqgHXg58NbyVybkYFNQZBmiBsiSdwDM4aXAZCjDxmBXLz3yVT7h0Hw1zVhWvc7sIrnC68aQW7nGMmSqCfVZAxKlirPJTiPkE6kzpsiszOuhnemf37Q5nv4H",
-            "Content-Type": "application/json"
-        }
+        # headers = {
+        #     "Authorization": "Bearer EAAOx688nrSwBO127r48JRoRHfmc8yLEGjnH3Wpmk2S6iWNDzm7QTxEfMJFctGRNGyTaEg9GcrqgHXg58NbyVybkYFNQZBmiBsiSdwDM4aXAZCjDxmBXLz3yVT7h0Hw1zVhWvc7sIrnC68aQW7nGMmSqCfVZAxKlirPJTiPkE6kzpsiszOuhnemf37Q5nv4H",
+        #     "Content-Type": "application/json"
+        # }
         
-        # Add timeout to prevent hanging connections
-        response = requests.post(url, json=payload, headers=headers, timeout=15)
+        # # Add timeout to prevent hanging connections
+        # response = requests.post(url, json=payload, headers=headers, timeout=15)
+        url = f"https://api.authkey.io/request?authkey=3c848188d9d7d131&mobile={mobile_number}&country_code=+91&sid=24388&name=Twinkle&otp={otp}&company=ONO"
         
+        response = requests.post(url)
         if response.status_code == 200:
             frappe.logger().info(f"SMS sent successfully to {mobile_number}")
             return True
@@ -98,7 +100,7 @@ def generate_mobile_otp(mobile_number):
 
     # Generate 6-digit OTP
     otp = ''.join(random.choice('0123456789') for _ in range(6))
-    
+    # otp = 679845
     # Set expiry (e.g., 10 minutes from now)
     expiry = frappe.utils.now_datetime() + datetime.timedelta(minutes=10)
 
