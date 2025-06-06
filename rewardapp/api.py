@@ -390,7 +390,7 @@ def check_referral(user_id,referral_code):
         frappe.throw(f"Registration failed: {str(e)}")
 
 @frappe.whitelist(allow_guest=True)
-def get_market():
+def get_markets():
     try:
         """
         Ultra-optimized version using nested set model queries.
