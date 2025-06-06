@@ -388,3 +388,79 @@ def check_referral(user_id,referral_code):
         }
     except Exception as e:
         frappe.throw(f"Registration failed: {str(e)}")
+
+@frappe.whitelist(allow_guest=True)
+def get_market():
+    try:
+        """
+        Ultra-optimized version using nested set model queries.
+        Returns flat array with children data pre-populated.
+        """
+        query = """
+        SELECT 
+            parent.name,
+            parent.question,
+            parent.category,
+            parent.status,
+            parent.closing_time,
+            parent.end_result,
+            parent.total_investment,
+            parent.total_traders,
+            parent.yes_price,
+            parent.no_price,
+            parent.max_allowed_quantity,
+            parent.closing_value,
+            parent.yes_color,
+            parent.yes_side_label,
+            parent.no_color,
+            parent.no_side_label,
+            parent.parent_market,
+            parent.is_group,
+            parent.creation,
+            parent.modified,
+            GROUP_CONCAT(
+                CASE WHEN child.parent_market = parent.name 
+                THEN CONCAT(
+                    '{"name":"', child.name, '",',
+                    '"question":"', REPLACE(child.question, '"', '\\"'), '",',
+                    '"status":"', child.status, '",',
+                    '"yes_price":', IFNULL(child.yes_price, 0), ',',
+                    '"no_price":', IFNULL(child.no_price, 0), '}'
+                ) END
+                SEPARATOR ','
+            ) as children_json
+        FROM 
+            `tabMarket` parent
+        LEFT JOIN 
+            `tabMarket` child ON child.parent_market = parent.name AND child.docstatus = 0
+        WHERE 
+            parent.docstatus = 0
+        GROUP BY 
+            parent.name, parent.question, parent.category, parent.status,
+            parent.closing_time, parent.lft, parent.rgt
+        ORDER BY 
+            parent.lft ASC
+        """
+        
+        markets = frappe.db.sql(query, as_dict=True)
+        
+        # Parse children JSON
+        for market in markets:
+            if market.get("children_json"):
+                try:
+                    children_data = f"[{market['children_json']}]"
+                    market["children"] = frappe.parse_json(children_data)
+                except:
+                    market["children"] = []
+            else:
+                market["children"] = []
+            
+            market["children_count"] = len(market["children"])
+            market["has_children"] = market["children_count"] > 0
+            # Remove the JSON string as it's no longer needed
+            market.pop("children_json", None)
+        
+        return markets
+    except Exception as e:
+        frappe.log_error(str(e), "Error in get_market")
+        frappe.throw(f"Error in getting market: {str(e)}")
