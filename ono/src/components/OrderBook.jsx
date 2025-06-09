@@ -1,10 +1,8 @@
 import { useFrappeEventListener, useFrappeGetCall } from 'frappe-react-sdk'
-import { Book } from 'lucide-react'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 const OrderBook = ({ marketId }) => {
   const [orderBook, setOrderBook] = useState({})
-  console.log(marketId)
 
   const {
     data: orderBookData,
@@ -163,7 +161,7 @@ const OrderBook = ({ marketId }) => {
 
   return (
     <div className="mb-4">
-      <div className="bg-white rounded-xl border-gray-100 overflow-hidden">
+      <div className="bg-white border-gray-100 overflow-hidden">
         {/* <div className="flex items-center px-4 py-1 bg-gray-50">
           <Book className="h-5 w-5 mr-2" />
           <span className="font-medium">Order Book</span>

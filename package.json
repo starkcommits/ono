@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "postinstall": "cd growbro && yarn install",
-    "dev": "cd growbro && yarn dev",
-    "build": "cd growbro && yarn build"
+    "postinstall": "cd ono && yarn install",
+    "dev": "cd ono && yarn dev",
+    "build": "cd ono && yarn build"
   },
   "keywords": [],
   "author": "",

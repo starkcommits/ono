@@ -16,7 +16,12 @@
   "yes_price",
   "no_price",
   "total_traders",
-  "max_allowed_quantity"
+  "max_allowed_quantity",
+  "lft",
+  "rgt",
+  "is_group",
+  "old_parent",
+  "parent_market"
  ],
  "fields": [
   {
@@ -88,15 +93,51 @@
    "fieldname": "max_allowed_quantity",
    "fieldtype": "Int",
    "label": "Max Allowed Quantity"
+  },
+  {
+   "fieldname": "lft",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Left",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "rgt",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Right",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "is_group",
+   "fieldtype": "Check",
+   "label": "Is Group"
+  },
+  {
+   "fieldname": "old_parent",
+   "fieldtype": "Link",
+   "label": "Old Parent",
+   "options": "Market"
+  },
+  {
+   "fieldname": "parent_market",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Parent Market",
+   "options": "Market"
   }
  ],
  "index_web_pages_for_search": 1,
+ "is_tree": 1,
  "links": [],
- "modified": "2025-05-17 18:16:56.517393",
+ "modified": "2025-06-05 13:05:29.030708",
  "modified_by": "Administrator",
  "module": "Reward App",
  "name": "Market",
  "naming_rule": "Expression",
+ "nsm_parent_field": "parent_market",
  "owner": "Administrator",
  "permissions": [
   {

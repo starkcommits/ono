@@ -14,6 +14,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
+
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
@@ -21,10 +22,23 @@ import { SwipeButton } from './SwipeButton'
 import { Slider } from '@/components/ui/slider'
 import scrollbarHide from 'tailwind-scrollbar-hide'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useEffect, useState } from 'react'
-import { useFrappeCreateDoc, useFrappeGetDoc } from 'frappe-react-sdk'
+import { useEffect, useRef, useState } from 'react'
+import {
+  useFrappeAuth,
+  useFrappeCreateDoc,
+  useFrappeEventListener,
+  useFrappeGetDoc,
+} from 'frappe-react-sdk'
 import { useParams } from 'react-router-dom'
-import { AlertTriangle, Clock, Minus, Plus } from 'lucide-react'
+import {
+  AlertTriangle,
+  Clock,
+  Edit3,
+  Ellipsis,
+  Minus,
+  Pencil,
+  Plus,
+} from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 import OrderBook from './OrderBook'
 
@@ -32,6 +46,7 @@ import CricketIcon from '@/assets/Cricket.svg'
 import OrderBookIcon from '@/assets/OrderBook.svg'
 import { DateTimePicker } from './ui/date-picker'
 import { useToast } from '@/hooks/use-toast'
+import HigherQuantityDrawer from './HigherQuantityDrawer'
 
 const BuyDrawer = ({
   isDrawerOpen,
@@ -41,6 +56,7 @@ const BuyDrawer = ({
   marketId,
 }) => {
   const { createDoc, isLoading } = useFrappeCreateDoc()
+  const { currentUser } = useFrappeAuth()
   const { id } = useParams()
   const { toast } = useToast()
   const [market, setMarket] = useState({})
@@ -48,6 +64,10 @@ const BuyDrawer = ({
     'Market',
     marketId || id
   )
+
+  const { data: userWalletData, isLoading: userWalletDataLoading } =
+    useFrappeGetDoc('User Wallet', currentUser, currentUser ? undefined : null)
+
   const [price, setPrice] = useState(
     choice === 'YES' ? market.yes_price : market.no_price
   )
@@ -70,6 +90,56 @@ const BuyDrawer = ({
   const [isOrderProcessing, setIsOrderProcessing] = useState(false)
   const [hasOrderError, setHasOrderError] = useState(false)
 
+  /*handling quantity adjustment logic */
+  const [isEditing, setIsEditing] = useState(false)
+  const [tempValue, setTempValue] = useState('')
+  const inputRef = useRef(null)
+
+  const [maxQuantity, setMaxQuantity] = useState(market.max_allowed_quantity)
+
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus()
+      inputRef.current.select()
+    }
+  }, [isEditing])
+
+  const startEditing = () => {
+    setTempValue(quantity.toString())
+    setIsEditing(true)
+  }
+
+  const saveValue = () => {
+    const numValue = parseInt(tempValue)
+    if (
+      !isNaN(numValue) &&
+      numValue > 0 &&
+      numValue <= market.max_allowed_quantity
+    ) {
+      setQuantity(numValue)
+    }
+    setIsEditing(false)
+  }
+
+  const cancelEditing = () => {
+    setIsEditing(false)
+    setTempValue('')
+  }
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      saveValue()
+    } else if (e.key === 'Escape') {
+      cancelEditing()
+    }
+  }
+
+  const handleInputChange = (e) => {
+    // Only allow numbers
+    const value = e.target.value.replace(/[^0-9]/g, '')
+    setTempValue(value)
+  }
+
   const handleBadgeClick = (minutes) => {
     // Calculate future time based on current time + minutes
     const futureTime = new Date()
@@ -82,6 +152,13 @@ const BuyDrawer = ({
       setMarket(marketData)
     }
   }, [marketData])
+
+  useFrappeEventListener('market_event', (updatedData) => {
+    console.log('Hello: ', updatedData)
+    if (updatedData.name !== market.name) return
+    console.log('Updated Data: ', updatedData)
+    setMarket(updatedData)
+  })
 
   useEffect(() => {
     setPrice(choice === 'YES' ? market.yes_price : market.no_price)
@@ -174,7 +251,7 @@ const BuyDrawer = ({
       <DrawerContent className="max-w-md mx-auto w-full max-h-full bg-[#F5F5F5]">
         <DrawerHeader className="p-0 pb-2">
           <div className="flex justify-between items-center gap-4 px-4">
-            <DrawerTitle className="font-normal font-inter text-[13px] leading-[100%] w-[90%]">
+            <DrawerTitle className="font-normal font-inter text-left text-[13px] leading-[100%] w-[90%]">
               {market.question}
             </DrawerTitle>
             <DrawerDescription className="w-[10%]">
@@ -253,20 +330,38 @@ const BuyDrawer = ({
                 <div className="flex flex-col gap-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="">Quantity</span>
-                    <span className="">{quantity}</span>
+                    {isEditing ? (
+                      <div>
+                        <input
+                          ref={inputRef}
+                          type="text"
+                          value={tempValue}
+                          onChange={handleInputChange}
+                          onBlur={saveValue}
+                          onKeyDown={handleKeyDown}
+                          className="max-w-min border-none font-semibold bg-white focus:outline-none text-right max-h-min h-[0.8rem]"
+                          inputMode="numeric"
+                        />
+                      </div>
+                    ) : (
+                      <span onClick={startEditing} className="">
+                        {quantity}
+                      </span>
+                    )}
                   </div>
                   <div className="flex items-center gap-2">
-                    <button
-                      className="border rounded-5px bg-white border-[#D9D9D980] p-1 cursor-pointer disabled:cursor-not-allowed"
-                      onClick={() => {
-                        setQuantity(quantity - 1)
-                      }}
-                      disabled={quantity <= 1}
-                    >
-                      <Minus className="w-5 h-5" strokeWidth={2} />
-                    </button>
+                    <HigherQuantityDrawer
+                      quantity={quantity}
+                      setQuantity={setQuantity}
+                      market={market}
+                      userWalletData={userWalletData}
+                      price={price}
+                      maxQuantity={maxQuantity}
+                      setMaxQuantity={setMaxQuantity}
+                    />
+
                     <Slider
-                      max={market.max_allowed_quantity}
+                      max={maxQuantity}
                       min={1}
                       step={1}
                       value={[quantity]}
@@ -279,12 +374,9 @@ const BuyDrawer = ({
                     />
                     <button
                       className="border rounded-5px bg-white border-[#D9D9D980] p-1 cursor-pointer disabled:cursor-not-allowed"
-                      onClick={() => {
-                        setQuantity(quantity + 1)
-                      }}
-                      disabled={quantity >= market.max_allowed_quantity}
+                      onClick={startEditing}
                     >
-                      <Plus className="w-5 h-5" strokeWidth={2} />
+                      <Pencil className="w-5 h-5" strokeWidth={2} />
                     </button>
                   </div>
                 </div>
