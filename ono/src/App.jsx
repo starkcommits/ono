@@ -9,6 +9,10 @@ import Search from './pages/Search'
 import PortfolioRedirect from './components/PortfolioRedirect'
 import Login from './pages/Login'
 import { Toaster } from '@/components/ui/toaster'
+import OTPScreen from './pages/OTPScreen'
+import EventDetails from './pages/EventDetails'
+import CategoryDetails from './pages/CategoryDetails'
+import FixtureDetails from './pages/FixtureDetails'
 
 function App() {
   return (
@@ -16,6 +20,7 @@ function App() {
       <Toaster />
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/otp" element={<OTPScreen />} />
 
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
@@ -24,6 +29,9 @@ function App() {
           <Route path="/portfolio" element={<PortfolioRedirect />} />
           <Route path="/portfolio/:status" element={<Portfolio />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/event/:id" element={<EventDetails />} />
+          <Route path="/category/:id" element={<CategoryDetails />} />
+          <Route path="/fixture/:id" element={<FixtureDetails />} />
         </Route>
       </Routes>
     </div>
