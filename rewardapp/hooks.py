@@ -165,6 +165,7 @@ api = {
         "rewardapp.api.update_profile",
         "rewardapp.api.check_password_strength",
         "rewardapp.api.check_referral",
+        "rewardapp.api.get_markets",
         "rewardapp.wallet.get_balance",
         "rewardapp.wallet.recharge_wallet",
         "rewardapp.engine.update_order",
@@ -176,6 +177,7 @@ api = {
         "rewardapp.engine.update_market_price",
         "rewardapp.engine.get_marketwise_transaction_summary",
         "rewardapp.engine.get_available_quantity",
+        "rewardapp.engine.update_order_price",
         "rewardapp.wallet.get_deposit_and_withdrawal",
         "rewardapp.engine.total_returns",
         "rewardapp.engine.cancel_order",
@@ -292,4 +294,4 @@ api = {
 # }
 
 
-website_route_rules = [{'from_route': '/ono/<path:app_path>', 'to_route': 'ono'}]
+website_route_rules = [{'from_route': '/admin/<path:app_path>', 'to_route': 'admin'}, {'from_route': '/ono/<path:app_path>', 'to_route': 'ono'},]
