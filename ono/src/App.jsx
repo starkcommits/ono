@@ -8,16 +8,18 @@ import Profile from './pages/Profile'
 import Search from './pages/Search'
 import PortfolioRedirect from './components/PortfolioRedirect'
 import Login from './pages/Login'
-import { Toaster } from '@/components/ui/toaster'
+import { Toaster } from 'sonner'
 import OTPScreen from './pages/OTPScreen'
 import EventDetails from './pages/EventDetails'
 import CategoryDetails from './pages/CategoryDetails'
 import FixtureDetails from './pages/FixtureDetails'
+import ScrollToTop from './components/ScrollToTop'
 
 function App() {
   return (
     <div className="max-w-md mx-auto relative">
-      <Toaster />
+      <Toaster richColors position="top-right" />
+      <ScrollToTop />
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/otp" element={<OTPScreen />} />

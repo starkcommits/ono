@@ -45,7 +45,7 @@ import OrderBook from './OrderBook'
 import CricketIcon from '@/assets/Cricket.svg'
 import OrderBookIcon from '@/assets/OrderBook.svg'
 import { DateTimePicker } from './ui/date-picker'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import HigherQuantityDrawer from './HigherQuantityDrawer'
 
 const BuyDrawer = ({
@@ -58,7 +58,6 @@ const BuyDrawer = ({
   const { createDoc, isLoading } = useFrappeCreateDoc()
   const { currentUser } = useFrappeAuth()
   const { id } = useParams()
-  const { toast } = useToast()
   const [market, setMarket] = useState({})
   const { data: marketData, isLoading: marketDataLoading } = useFrappeGetDoc(
     'Market',
@@ -184,12 +183,11 @@ const BuyDrawer = ({
     try {
       const orderData = {
         market_id: marketId,
+        user_id: currentUser,
         order_type: 'BUY',
         quantity: quantity,
         opinion_type: choice,
         amount: price,
-        sell_order_id: '',
-        buy_order_id: '',
       }
 
       if (stopLossEnabled) {
@@ -208,14 +206,13 @@ const BuyDrawer = ({
         orderData.cancel_time = formatToFrappeLDatetime(selectedDateTime)
       }
 
+      console.log('asdasdasdasd', orderData)
+
       await createDoc('Orders', orderData)
 
       setIsSwipeSwiped(true)
 
-      toast({
-        title: 'Success',
-        description: 'Your Order is successfully placed.',
-      })
+      toast.success('Your Order is successfully placed.')
 
       console.log(orderData)
 
@@ -224,11 +221,7 @@ const BuyDrawer = ({
       }, 1000)
     } catch (err) {
       setHasOrderError(true)
-      toast({
-        variant: 'destructive',
-        title: 'Uh oh! Something went wrong.',
-        description: 'Error in placing the order.',
-      })
+      toast.error('Error occured in placing the order.')
       console.error('Order creation error:', err)
     } finally {
       setIsOrderProcessing(false)

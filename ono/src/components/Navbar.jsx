@@ -4,7 +4,6 @@ import NewsIcon from '@/assets/NewsNavbar.svg'
 import BriefcaseIcon from '@/assets/BriefcaseNavbar.svg'
 import UserIcon from '@/assets/UserNavbar.svg'
 import { useNavigate } from 'react-router-dom'
-import { Search, House, Newspaper } from 'lucide-react'
 
 const Navbar = () => {
   const navigate = useNavigate()

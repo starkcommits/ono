@@ -15,7 +15,7 @@ import Rules from '@/assets/Rules.svg'
 import Research from '@/assets/Research.svg'
 import ArrowRight from '@/assets/ArrowRight.svg'
 import EventFooterImage from '@/assets/EventFooterImage.svg'
-import Download from '@/assets/Download.svg'
+import ShareAndroid from '@/assets/ShareAndroid.svg'
 import Back from '@/assets/Back.svg'
 import BuyDrawer from '../components/BuyDrawer'
 import OrderBook from '../components/OrderBook'
@@ -90,7 +90,7 @@ const EventDetails = () => {
           <img
             src={Back}
             alt=""
-            className="cursor-pointer"
+            className="cursor-pointer h-4 w-4"
             onClick={() => {
               navigate(-1)
             }}
@@ -101,7 +101,7 @@ const EventDetails = () => {
         </div>
 
         <div>
-          <img src={Download} alt="" />
+          <img src={ShareAndroid} alt="" />
         </div>
       </div>
       {market.status === 'OPEN' && isDrawerOpen && (
