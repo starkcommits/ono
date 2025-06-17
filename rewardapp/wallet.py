@@ -95,7 +95,7 @@ def wallet_operation(doc, method):
                 })
                 holding_doc.insert(ignore_permissions=True)
                 
-                doc.holding_id = holding_doc.name
+                frappe.db.set_value('Orders', doc.name, 'holding_id', holding_doc.name, update_modified=False)
             else:
                 if not doc.holding_id:
                     frappe.db.sql("""
@@ -121,7 +121,7 @@ def wallet_operation(doc, method):
             frappe.db.commit()
 
             try:
-                url = "http://94.136.187.188:8086/orders/"
+                url = "http://13.202.185.148:8086/orders/"
                 response = requests.post(url, json=payload)
 
                 if response.status_code != 201:
@@ -233,6 +233,8 @@ def wallet_operation(doc, method):
                         'transaction_status': 'Success',
                         'transaction_method': 'WALLET'
                     }).insert(ignore_permissions=True)
+
+                frappe.db.set_value("Holdings",doc.holding_id, 'status','CANCELED')
             else:
                 if not doc.holding_id:
                     frappe.db.sql("""
@@ -253,7 +255,7 @@ def wallet_operation(doc, method):
 
             if doc.market_status != "CLOSE":
                 try:
-                    url = f"http://94.136.187.188:8086/orders/{doc.name}"
+                    url = f"http://13.202.185.148:8086/orders/{doc.name}"
                     response = requests.delete(url)
 
                     if response.status_code != 200:
