@@ -5,7 +5,7 @@ from frappe import _
 
 def create_transaction_log(doc):
     try:
-        user_id = doc.user_id
+        user_id = doc.user_id or frappe.session.user
         total_amount = doc.amount * doc.quantity
 
         promo_balance = frappe.db.get_value("Promotional Wallet",user_id, 'balance')
@@ -59,12 +59,15 @@ def create_transaction_log(doc):
 
     except Exception as e:
         frappe.log_error("Error in creating transaction log", str(e))
-        raise
+        raise Exception(str(e))
 
 
 def wallet_operation(doc, method):
     try:
         user_id = doc.user_id or frappe.session.user
+
+        if not doc.user_id:
+                frappe.db.set_value('Orders', doc.name, 'user_id', user_id, update_modified=False)
 
         if doc.status == "UNMATCHED":
 
@@ -77,6 +80,22 @@ def wallet_operation(doc, method):
                 create_transaction_log(doc)
                 order_book_data["price"] = 10 - doc.amount
                 order_book_data["opinion_type"] = "NO" if doc.opinion_type == "YES" else "YES"
+
+                holding_doc = frappe.get_doc({
+                    "doctype": "Holding",
+                    "market_id": doc.market_id,
+                    "quantity": doc.quantity,
+                    "user_id": user_id,
+                    "opinion_type": doc.opinion_type,
+                    "price": doc.amount,
+                    "buy_order": doc.name,
+                    "profit_price": doc.profit_price,
+                    "loss_price": doc.loss_price,
+                    "status": "UNMATCHED"
+                })
+                holding_doc.insert(ignore_permissions=True)
+                
+                doc.holding_id = holding_doc.name
             else:
                 if not doc.holding_id:
                     frappe.db.sql("""
@@ -98,9 +117,6 @@ def wallet_operation(doc, method):
                 "quantity": doc.quantity,
                 "order_type": doc.order_type
             }
-
-            if not doc.user_id:
-                frappe.db.set_value('Orders', doc.name, 'user_id', user_id, update_modified=False)
 
             frappe.db.commit()
 

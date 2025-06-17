@@ -63,7 +63,7 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "ACTIVE\nEXITING\nEXITED",
+   "options": "UNMATCHED\nACTIVE\nEXITING\nEXITED",
    "search_index": 1
   },
   {
@@ -158,7 +158,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-05-13 17:55:44.585034",
+ "modified": "2025-06-17 12:27:59.296283",
  "modified_by": "Administrator",
  "module": "Reward App",
  "name": "Holding",
