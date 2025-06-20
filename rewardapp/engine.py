@@ -77,6 +77,14 @@ def trades():
             f_price = trade["first_user_price"]
             s_price = trade["second_user_price"]
 
+            holding1 = frappe.db.get_value("Holding",first_order.holding_id,'filled_quantity')
+                
+            if holding1["filled_quantity"] + trade["quantity"] == first_order.quantity:
+                frappe.db.delete("Holding",first_order.holding_id)
+                first_order.holding_id=''
+            else:
+                frappe.db.set_value("Holding",first_order.holding_id,'filled_quantity', holding1["filled_quantity"] + trade["quantity"])
+
             if trade["first_user_option"] != trade["second_user_option"]:
                 holding_doc1 = frappe.get_doc({
                     "doctype": "Holding",
@@ -91,6 +99,14 @@ def trades():
                     "status": "ACTIVE"
                 })
                 holding_doc1.insert(ignore_permissions=True)
+
+                filled_holding2 = frappe.db.get_value("Holding",second_order.holding_id,'filled_quantity')
+                
+                if filled_holding2 + trade["quantity"] == second_order.quantity:
+                    frappe.db.delete("Holding",second_order.holding_id)
+                    second_order.holding_id=''
+                else:
+                    frappe.db.set_value("Holding",second_order.holding_id,'filled_quantity', filled_holding2 + trade["quantity"])
 
                 holding_doc2 = frappe.get_doc({
                     "doctype": "Holding",
@@ -597,7 +613,7 @@ def get_marketwise_holding():
         JOIN
             `tabMarket` m ON h.market_id = m.name
         WHERE
-            h.status IN ('ACTIVE', 'EXITING')
+            m.status = 'OPEN'
             AND h.user_id = %(user_id)s
         GROUP BY
             h.market_id,
