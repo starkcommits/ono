@@ -80,7 +80,7 @@ def trades():
             filled_holding1 = frappe.db.get_value("Holding", first_order.holding_id, "filled_quantity") or 0
             total_filled1 = filled_holding1 + trade["quantity"]
 
-            if total_filled1 == first_order.quantity:
+            if total_filled1 >= first_order.quantity:
                 frappe.db.delete("Holding", first_order.holding_id)
                 first_order.holding_id = ''
             else:
@@ -104,7 +104,7 @@ def trades():
                 filled_holding2 = frappe.db.get_value("Holding",second_order.holding_id,'filled_quantity') or 0
                 total_filled2 = filled_holding2 + trade["quantity"]
 
-                if total_filled2 == second_order.quantity:
+                if total_filled2 >= second_order.quantity:
                     frappe.db.delete("Holding",second_order.holding_id)
                     second_order.holding_id=''
                 else:
