@@ -77,11 +77,12 @@ def trades():
             f_price = trade["first_user_price"]
             s_price = trade["second_user_price"]
 
-            holding1 = frappe.db.get_value("Holding",first_order.holding_id,'filled_quantity')
-                
-            if holding1["filled_quantity"] + trade["quantity"] == first_order.quantity:
-                frappe.db.delete("Holding",first_order.holding_id)
-                first_order.holding_id=''
+            filled_holding1 = frappe.db.get_value("Holding", first_order.holding_id, "filled_quantity") or 0
+            total_filled1 = filled_holding1 + trade["quantity"]
+
+            if total_filled1 >= first_order.quantity:
+                frappe.db.delete("Holding", first_order.holding_id)
+                first_order.holding_id = ''
             else:
                 frappe.db.set_value("Holding",first_order.holding_id,'filled_quantity', holding1["filled_quantity"] + trade["quantity"])
 
@@ -100,9 +101,10 @@ def trades():
                 })
                 holding_doc1.insert(ignore_permissions=True)
 
-                filled_holding2 = frappe.db.get_value("Holding",second_order.holding_id,'filled_quantity')
-                
-                if filled_holding2 + trade["quantity"] == second_order.quantity:
+                filled_holding2 = frappe.db.get_value("Holding",second_order.holding_id,'filled_quantity') or 0
+                total_filled2 = filled_holding2 + trade["quantity"]
+
+                if total_filled2 >= second_order.quantity:
                     frappe.db.delete("Holding",second_order.holding_id)
                     second_order.holding_id=''
                 else:
