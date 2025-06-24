@@ -107,7 +107,7 @@ const EventDetails = () => {
       {market.status === 'OPEN' && isDrawerOpen && (
         <BuyDrawer
           market={market}
-          choice={selectedChoice}
+          selectedChoice={selectedChoice}
           setSelectedChoice={setSelectedChoice}
           marketId={id}
           isDrawerOpen={isDrawerOpen}
@@ -139,7 +139,7 @@ const EventDetails = () => {
             </div>
           </div>
         </div>
-        <div className="bg-white pt-2">
+        <div className="bg-white pt-2 overflow-x-hidden">
           <Tabs
             value={activeTab}
             onValueChange={setActiveTab}
@@ -161,72 +161,78 @@ const EventDetails = () => {
             </TabsList>
             <TabsContent value="activity">
               <div className="border-none">
-                {tradesData?.map((_, index) => (
-                  <div
-                    key={_.name}
-                    className="flex justify-between items-center gap-4 border-b py-4 px-4"
-                  >
-                    {/* Left Prober */}
-                    <div className="flex flex-col w-[25%] gap-2">
-                      <div className="flex w-full items-center justify-center">
-                        <img src={DefaultUser} alt="" />
-                      </div>
-
-                      <div className="text-[#5F5F5F] text-sm font-semibold text-center">
-                        {_.first_user_id || 'Prober'}
-                      </div>
-                    </div>
-
-                    {/* Center Content */}
-                    <div className="w-[50%] flex flex-col gap-1 items-center justify-center text-center">
-                      {_.first_user_price === _.second_user_price ? (
-                        <div className="w-full flex items-center">
-                          <div
-                            style={{ width: `50%` }}
-                            className={`font-inter py-[5px] px-[10px] bg-gradient-to-r from-[rgba(255,255,255,0.5)] to-[rgba(73,44,130,0.5)] text-[#492C82] flex justify-start text-xs font-semibold`}
-                          >
-                            &#8377;{_.first_user_price}
-                          </div>
-                          <div
-                            style={{ width: `50%` }}
-                            className={`font-inter py-[5px] px-[10px] bg-gradient-to-r from-[rgba(226,111,100,0.5)] to-[rgba(255,255,255,0.5)] text-[#B74136] flex justify-end text-xs font-semibold`}
-                          >
-                            &#8377;{_.second_user_price}
-                          </div>
+                {tradesData?.map((_) => {
+                  const formatName = (name) =>
+                    name?.length > 10
+                      ? name?.slice(0, 10) + '…'
+                      : name?.slice(0)
+                  return (
+                    <div
+                      key={_.name}
+                      className="flex justify-between items-center gap-4 border-b py-4 px-4"
+                    >
+                      {/* Left Prober */}
+                      <div className="flex flex-col w-[25%] gap-2">
+                        <div className="flex w-full items-center justify-center">
+                          <img src={DefaultUser} alt="" />
                         </div>
-                      ) : (
-                        <div className="w-full flex items-center">
-                          <div
-                            style={{ width: `${_.first_user_price * 10}%` }}
-                            className={`font-inter py-[5px] px-[10px] bg-gradient-to-r from-[rgba(255,255,255,0.5)] to-[rgba(73,44,130,0.5)] text-[#492C82] flex justify-start text-xs font-semibold`}
-                          >
-                            &#8377;{_.first_user_price}
-                          </div>
-                          <div
-                            style={{ width: `${_.second_user_price * 10}%` }}
-                            className={`font-inter py-[5px] px-[10px] bg-gradient-to-r from-[rgba(226,111,100,0.5)] to-[rgba(255,255,255,0.5)] text-[#B74136] flex justify-end text-xs font-semibold`}
-                          >
-                            &#8377;{_.second_user_price}
-                          </div>
+
+                        <div className="text-[#5F5F5F] text-sm font-semibold text-center">
+                          {formatName(_.first_user_id) || 'Prober'}
                         </div>
-                      )}
-                      <div className="text-[#5F5F5F] text-[11px] font-[500]">
-                        a few seconds ago
-                      </div>
-                    </div>
-
-                    {/* Right Prober */}
-                    <div className="flex flex-col w-[25%] gap-2">
-                      <div className="flex w-full items-center justify-center">
-                        <img src={DefaultUser} alt="" />
                       </div>
 
-                      <div className="text-[#5F5F5F] text-sm font-semibold text-center">
-                        {_.second_user_id || 'Prober'}
+                      {/* Center Content */}
+                      <div className="w-[50%] flex flex-col gap-1 items-center justify-center text-center">
+                        {_.first_user_price === _.second_user_price ? (
+                          <div className="w-full flex items-center">
+                            <div
+                              style={{ width: `50%` }}
+                              className={`font-inter py-[5px] px-[10px] bg-gradient-to-r from-[rgba(255,255,255,0.5)] to-[rgba(73,44,130,0.5)] text-[#492C82] flex justify-start text-xs font-semibold`}
+                            >
+                              &#8377;{_.first_user_price}
+                            </div>
+                            <div
+                              style={{ width: `50%` }}
+                              className={`font-inter py-[5px] px-[10px] bg-gradient-to-r from-[rgba(226,111,100,0.5)] to-[rgba(255,255,255,0.5)] text-[#B74136] flex justify-end text-xs font-semibold`}
+                            >
+                              &#8377;{_.second_user_price}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="w-full flex items-center">
+                            <div
+                              style={{ width: `${_.first_user_price * 10}%` }}
+                              className={`font-inter py-[5px] px-[10px] bg-gradient-to-r from-[rgba(255,255,255,0.5)] to-[rgba(73,44,130,0.5)] text-[#492C82] flex justify-start text-xs font-semibold`}
+                            >
+                              &#8377;{_.first_user_price}
+                            </div>
+                            <div
+                              style={{ width: `${_.second_user_price * 10}%` }}
+                              className={`font-inter py-[5px] px-[10px] bg-gradient-to-r from-[rgba(226,111,100,0.5)] to-[rgba(255,255,255,0.5)] text-[#B74136] flex justify-end text-xs font-semibold`}
+                            >
+                              &#8377;{_.second_user_price}
+                            </div>
+                          </div>
+                        )}
+                        <div className="text-[#5F5F5F] text-[11px] font-[500]">
+                          a few seconds ago
+                        </div>
+                      </div>
+
+                      {/* Right Prober */}
+                      <div className="flex flex-col w-[25%] gap-2">
+                        <div className="flex w-full items-center justify-center">
+                          <img src={DefaultUser} alt="" />
+                        </div>
+
+                        <div className="text-[#5F5F5F] text-sm font-semibold text-center">
+                          {formatName(_.second_user_id) || 'Prober'}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
                 <div className="flex justify-center items-center py-6 bg-[#F5F5F5]">
                   <MarketActivityDrawer />
                 </div>

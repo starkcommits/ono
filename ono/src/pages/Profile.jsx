@@ -7,12 +7,22 @@ import Twitter from '@/assets/Twitter.svg'
 
 import Right from '@/assets/Right.svg'
 import { useNavigate } from 'react-router-dom'
-import { useFrappeAuth } from 'frappe-react-sdk'
+import {
+  useFrappeAuth,
+  useFrappeGetDoc,
+  useFrappeGetDocList,
+} from 'frappe-react-sdk'
 
 const Profile = () => {
   const navigate = useNavigate()
 
   const { currentUser } = useFrappeAuth()
+
+  const { data: userWalletData, isLoading: userWalletDataLoading } =
+    useFrappeGetDoc('User Wallet', currentUser)
+
+  console.log(userWalletData)
+
   console.log(currentUser)
   return (
     <div className="bg-[#F5F5F5] min-h-screen flex flex-col select-none">
@@ -35,7 +45,7 @@ const Profile = () => {
           </div>
           <div>
             <h3 className="font-bold text-sm leading-[22px] text-[#2C2D32]">
-              Harshit Adhikari
+              {userWalletData?.user}
             </h3>
           </div>
           <div className="flex justify-center gap-4 ">
@@ -57,19 +67,24 @@ const Profile = () => {
           <div className="flex flex-col gap-4 rounded-[10px] p-[14px] shadow-[0px_2px_2px_0px_#0000001A] bg-[linear-gradient(0deg,_#FFFFFF_41.2%,_#FFF1F0_115.28%)]">
             <div className="bg-[#D3E0DD] w-[23px] h-[23px]"></div>
             <div className="flex flex-col">
-              <span className="font-inter font-medium text-sm leading-[22px]">
-                &#8377;237.69
+              <span className="font-inter font-medium text-xs leading-[22px]">
+                &#8377;{userWalletData?.balance?.toFixed(2)}
               </span>
               <span className="font-normal text-xs leading-[22px] text-[#5F5F5F]">
                 Balance
               </span>
             </div>
           </div>
-          <div className="flex flex-col gap-4 rounded-[10px] p-[13px] shadow-[0px_2px_2px_0px_#0000001A] bg-[linear-gradient(0deg,_#FFFFFF_41.2%,_#DFF3FF_115.28%)]">
+          <div
+            className="flex flex-col gap-4 rounded-[10px] p-[13px] shadow-[0px_2px_2px_0px_#0000001A] bg-[linear-gradient(0deg,_#FFFFFF_41.2%,_#DFF3FF_115.28%)]"
+            onClick={() => {
+              navigate('/leaderboard')
+            }}
+          >
             <div className="bg-[#D3E0DD] w-[23px] h-[23px] "></div>
             <div className="flex flex-col">
-              <span className="font-inter font-medium text-sm leading-[22px]">
-                &#8377;237.69
+              <span className="font-inter font-medium text-xs leading-[22px]">
+                30.8M/38.2M
               </span>
               <span className="font-normal text-xs leading-[22px] text-[#5F5F5F]">
                 Leaderboard
@@ -79,8 +94,8 @@ const Profile = () => {
           <div className="flex flex-col gap-4 rounded-[10px] p-[13px] shadow-[0px_2px_2px_0px_#0000001A] bg-[linear-gradient(0deg,_#FFFFFF_41.2%,_#FFFCEC_115.28%)]">
             <div className="bg-[#D3E0DD] w-[23px] h-[23px]"></div>
             <div className="flex flex-col">
-              <span className="font-inter font-medium text-sm leading-[22px]">
-                &#8377;237.69
+              <span className="font-inter font-medium text-xs leading-[22px]">
+                Seeker
               </span>
               <span className="font-normal text-xs leading-[22px] text-[#5F5F5F]">
                 My Level

@@ -39,28 +39,29 @@ const Home = () => {
   const navigate = useNavigate()
   const [markets, setMarkets] = useState({})
   const [marketId, setMarketId] = useState('')
-  const {
-    data: marketData,
-    isLoading: marketDataLoading,
-    mutate: refetchMarketData,
-  } = useFrappeGetDocList('Market', {
-    fields: [
-      'name',
-      'question',
-      'category',
-      'yes_price',
-      'no_price',
-      'closing_time',
-      'status',
-      'total_traders',
-    ],
-    filters: [['status', '=', 'OPEN']],
-    orderBy: {
-      field: 'total_traders',
-      order: 'desc',
-    },
-    limit: 5,
-  })
+  const { data: marketData, isLoading: marketDataLoading } =
+    useFrappeGetDocList(
+      'Market',
+      {
+        fields: [
+          'name',
+          'question',
+          'category',
+          'yes_price',
+          'no_price',
+          'closing_time',
+          'status',
+          'total_traders',
+        ],
+        filters: [['status', '=', 'OPEN']],
+        orderBy: {
+          field: 'total_traders',
+          order: 'desc',
+        },
+        limit: 5,
+      },
+      ['market_data']
+    )
 
   const { data: marketFixturesData, isLoading: marketFixturesDataLoading } =
     useFrappeGetDocList('Market Fixtures', {
@@ -225,13 +226,13 @@ const Home = () => {
               <div className="overflow-hidden">
                 <Marquee pauseOnHover className="[--duration:25s] p-0 py-0.5">
                   {marketFixturesData
-                    .slice(0, Math.ceil(total / showRows))
-                    .map((_, index) => (
+                    ?.slice(0, Math.ceil(total / showRows))
+                    ?.map((_, index) => (
                       <Card
                         key={_.name}
                         className="rounded-[8px] shadow-[0_0_1px_0_rgba(0,0,0,0.2)]"
                       >
-                        <CardHeader className="px-4 py-2">
+                        <CardHeader className="p-2">
                           <div className="flex gap-2.5">
                             <div className="">
                               <img
@@ -264,11 +265,11 @@ const Home = () => {
                   className="[--duration:30s] p-0 py-0.5"
                 >
                   {marketFixturesData
-                    .slice(
+                    ?.slice(
                       Math.ceil(total / showRows),
                       Math.ceil(total / showRows) * 2
                     )
-                    .map((_, index) => (
+                    ?.map((_, index) => (
                       <Card
                         key={_.name}
                         className="rounded-[8px] shadow-[0_0_1px_0_rgba(0,0,0,0.2)]"
@@ -302,8 +303,8 @@ const Home = () => {
               <div className="overflow-hidden">
                 <Marquee pauseOnHover className="[--duration:40s] p-0 py-0.5">
                   {marketFixturesData
-                    .slice(Math.ceil(total / showRows) * 2)
-                    .map((_, index) => (
+                    ?.slice(Math.ceil(total / showRows) * 2)
+                    ?.map((_, index) => (
                       <Card
                         key={_.index}
                         className="rounded-[8px] shadow-[0_0_1px_0_rgba(0,0,0,0.2)]"
@@ -419,8 +420,8 @@ const Home = () => {
           <BuyDrawer
             isDrawerOpen={isDrawerOpen}
             setIsDrawerOpen={setIsDrawerOpen}
-            choice={selectedChoice}
-            setChoice={setSelectedChoice}
+            selectedChoice={selectedChoice}
+            setSelectedChoice={setSelectedChoice}
             marketId={marketId}
           />
         )}
