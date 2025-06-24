@@ -33,7 +33,6 @@ import {
 import { Users } from 'lucide-react'
 import scrollbarHide from 'tailwind-scrollbar-hide'
 import { Navigate, useNavigate } from 'react-router-dom'
-import Widget from '../components/Widget'
 
 const Home = () => {
   const navigate = useNavigate()
@@ -188,7 +187,7 @@ const Home = () => {
               </div>
             ))}
           </div>
-          <div className="w-full relative z-[1]">
+          <div className="w-full relative z-[1] min-h-[70px]">
             <Carousel className="w-full" plugins={[bannerPlugin.current]}>
               <CarouselContent>
                 {marketingBannerData?.slice(0, 4)?.map((_, index) => (
@@ -223,7 +222,7 @@ const Home = () => {
           </div>
           <div className="flex flex-col gap-4">
             {total > 0 && (
-              <div className="overflow-hidden">
+              <div className=" overflow-hidden">
                 <Marquee pauseOnHover className="[--duration:25s] p-0 py-0.5">
                   {marketFixturesData
                     ?.slice(0, Math.ceil(total / showRows))

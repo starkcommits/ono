@@ -42,7 +42,9 @@ const Navbar = () => {
       <div
         className="flex flex-col justify-center items-center gap-2 cursor-pointer"
         onClick={() => {
-          handleNavigatePage('/portfolio')
+          const portfolioTab = localStorage.getItem('currentPortfolioTab')
+
+          handleNavigatePage(`/portfolio/${portfolioTab || 'open'}`)
         }}
       >
         <img src={BriefcaseIcon} alt="" />

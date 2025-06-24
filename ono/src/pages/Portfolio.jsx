@@ -10,8 +10,12 @@ import { useEffect } from 'react'
 import InfoIcon from '@/assets/Info.svg'
 import CricketIcon from '@/assets/CricketImage.svg'
 import UnmatchedIcon from '@/assets/UnmatchedIcon.svg'
-import { ChevronRight } from 'lucide-react'
-import { useFrappeGetCall } from 'frappe-react-sdk'
+import { ChevronRight, CircleGauge } from 'lucide-react'
+import {
+  useFrappeGetCall,
+  useFrappeGetDocList,
+  useSWRConfig,
+} from 'frappe-react-sdk'
 import ExitSellOrders from '../components/ExitSellOrders'
 
 const Portfolio = () => {
@@ -20,27 +24,22 @@ const Portfolio = () => {
 
   const validTabs = ['open', 'closed']
   // If the status is invalid (e.g. `/events/foo`) → redirect to open
-  useEffect(() => {
-    if (!validTabs.includes(status)) {
-      navigate('/portfolio/open', { replace: true })
-    }
-  }, [status])
 
   const {
     data: marketwiseActiveHoldings,
     isLoading: marketwiseActiveHoldingsLoading,
   } = useFrappeGetCall(
     'rewardapp.engine.get_marketwise_holding',
-    status === 'active' ? undefined : null
+    status === 'active' ? ['active_marketwise_holdings'] : null
   )
 
-  console.log(marketwiseActiveHoldings)
+  console.log('Portfolio: ', marketwiseActiveHoldings)
 
   const handleTabChange = (value) => {
     // Save to localStorage
     localStorage.setItem('currentPortfolioTab', value)
     // Navigate to new tab
-    navigate(`/portfolio/${value}`, { replace: true })
+    navigate(`/portfolio/${value}`)
   }
 
   function getMarketPortfolioStatus(positionObj) {
@@ -239,7 +238,7 @@ const Portfolio = () => {
                           </div>
                         </div>
                       )}
-                      {/* {!statuses.includes('UNMATCHED') &&
+                      {!statuses.includes('UNMATCHED') &&
                         statuses.includes('EXITING') && (
                           <div className="flex items-center justify-between border-t-[0.7px] pt-3">
                             <span
@@ -255,11 +254,11 @@ const Portfolio = () => {
                             </span>
                             <div>
                               <button className="font-semibold text-xs flex ">
-                                Exit <ChevronRight className="h-4 w-4" />
+                                Cancel <ChevronRight className="h-4 w-4" />
                               </button>
                             </div>
                           </div>
-                        )} */}
+                        )}
                       {!statuses.includes('UNMATCHED') &&
                         !statuses.includes('EXITING') &&
                         statuses.includes('ACTIVE') && (
@@ -275,7 +274,7 @@ const Portfolio = () => {
                               <span className="flex border bg-[#2C2D32] -mx-1"></span>{' '}
                               <span>Gains - &#8377;0.1</span>
                             </span>
-                            <ExitSellOrders />
+                            <ExitSellOrders market={marketHolding} />
                           </div>
                         )}
                     </div>
