@@ -648,7 +648,8 @@ def get_marketwise_holding():
         # Set opinion-type breakdown
         output[market].setdefault(status, {})[opinion] = {
             "total_quantity": row["total_quantity"],
-            "total_filled_quantity": row["total_filled_quantity"]
+            "total_filled_quantity": row["total_filled_quantity"],
+            "total_invested": row["total_invested"]
         }
 
     return output
