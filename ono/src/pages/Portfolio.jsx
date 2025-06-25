@@ -17,6 +17,8 @@ import {
   useSWRConfig,
 } from 'frappe-react-sdk'
 import ExitSellOrders from '../components/ExitSellOrders'
+import CancelSellOrders from '../components/CancelSellOrders'
+import CancelBuyOrders from '../components/CancelBuyOrders'
 
 const Portfolio = () => {
   const { status = 'open' } = useParams()
@@ -231,11 +233,7 @@ const Portfolio = () => {
                               <span className="font-inter">5.0</span>
                             </span>
                           </div>
-                          <div>
-                            <button className="font-semibold text-xs flex">
-                              Cancel <ChevronRight className="h-4 w-4" />
-                            </button>
-                          </div>
+                          <CancelBuyOrders market={marketHolding} />
                         </div>
                       )}
                       {!statuses.includes('UNMATCHED') &&
@@ -252,11 +250,7 @@ const Portfolio = () => {
                               <span className="flex border bg-[#2C2D32] -mx-1"></span>{' '}
                               <span>Gains - &#8377;0.1</span>
                             </span>
-                            <div>
-                              <button className="font-semibold text-xs flex ">
-                                Cancel <ChevronRight className="h-4 w-4" />
-                              </button>
-                            </div>
+                            <CancelSellOrders market={marketHolding} />
                           </div>
                         )}
                       {!statuses.includes('UNMATCHED') &&

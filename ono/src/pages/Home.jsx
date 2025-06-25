@@ -59,7 +59,7 @@ const Home = () => {
         },
         limit: 5,
       },
-      ['market_data']
+      'market_data'
     )
 
   const { data: marketFixturesData, isLoading: marketFixturesDataLoading } =

@@ -16,12 +16,15 @@ import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/button'
 import { useSWRConfig } from 'frappe-react-sdk'
 
-const ExitSellOrdersPriceDrawer = ({ opinion_type, price, setPrice }) => {
+const ExitSellOrdersPriceDrawer = ({
+  opinion_type,
+  price,
+  setPrice,
+  market,
+}) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [tempValue, setTempValue] = useState(price)
-
-  
 
   const inputRef = useRef(null)
   useEffect(() => {
@@ -129,16 +132,46 @@ const ExitSellOrdersPriceDrawer = ({ opinion_type, price, setPrice }) => {
           <div className="flex items-center justify-center gap-28">
             <div className="flex flex-col items-center gap-2">
               <span className="font-inter font-semibold text-xl">
-                &#8377;5.5
+                &#8377;
+                {opinion_type === 'yes' && market?.ACTIVE?.YES?.total_invested}
+                {opinion_type === 'no' && market?.ACTIVE?.NO?.total_invested}
               </span>
               <span className="font-normal text-xs text-[#5F5F5F]">
                 Investment
               </span>
             </div>
             <div className="flex flex-col items-center gap-2">
-              <span className="font-inter font-semibold text-xl">
-                &#8377;5.5
-              </span>
+              {(() => {
+                const yesExitReturns =
+                  opinion_type === 'yes'
+                    ? tempValue *
+                        (market?.ACTIVE?.YES?.total_quantity -
+                          market?.ACTIVE?.YES?.total_filled_quantity) -
+                      market?.ACTIVE?.YES?.total_invested
+                    : tempValue *
+                        (market?.ACTIVE?.NO?.total_quantity -
+                          market?.ACTIVE?.NO?.total_filled_quantity) -
+                      market?.ACTIVE?.NO?.total_invested
+
+                return (
+                  <span
+                    className={`font-inter font-semibold text-xl ${
+                      yesExitReturns < 0 && 'text-[#DB342C]'
+                    } ${yesExitReturns > 0 && 'text-green-500'}`}
+                  >
+                    &#8377;
+                    {opinion_type === 'yes' &&
+                      tempValue *
+                        (market?.ACTIVE?.YES?.total_quantity -
+                          market?.ACTIVE?.YES?.total_filled_quantity)}
+                    {opinion_type === 'no' &&
+                      tempValue *
+                        (market?.ACTIVE?.NO?.total_quantity -
+                          market?.ACTIVE?.NO?.total_filled_quantity)}
+                  </span>
+                )
+              })()}
+
               <span className="font-normal text-xs text-[#5F5F5F]">
                 Exit Value
               </span>
