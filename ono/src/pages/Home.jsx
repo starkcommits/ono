@@ -136,7 +136,7 @@ const Home = () => {
   }
 
   return (
-    <div className=" bg-[#F5F5F5]">
+    <div className="">
       <div className="flex flex-col gap-6 mx-auto max-w-md py-4 px-4">
         {/* Categories */}
         <div className="flex flex-col gap-2">

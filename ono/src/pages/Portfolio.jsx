@@ -5,10 +5,11 @@ import ClosedEventsInactiveIcon from '@/assets/ClosedEventsInactiveIcon.svg'
 import OpenEventsActiveIcon from '@/assets/OpenEventsActiveIcon.svg'
 import OpenEventsInActiveIcon from '@/assets/OpenEventsInactiveIcon.svg'
 import ClosedEventsActiveIcon from '@/assets/ClosedEventsActiveIcon.svg'
-import { useNavigate, useParams } from 'react-router-dom'
-import { useEffect } from 'react'
+import { Navigate, useNavigate, useParams } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 import InfoIcon from '@/assets/Info.svg'
 import CricketIcon from '@/assets/CricketImage.svg'
+import ExitDoorIcon from '@/assets/ExitDoorIcon.svg'
 import UnmatchedIcon from '@/assets/UnmatchedIcon.svg'
 import { ChevronRight, CircleGauge } from 'lucide-react'
 import {
@@ -21,10 +22,15 @@ import CancelSellOrders from '../components/CancelSellOrders'
 import CancelBuyOrders from '../components/CancelBuyOrders'
 
 const Portfolio = () => {
-  const { status = 'open' } = useParams()
+  // const { status = 'open' } = useParams()
+
   const navigate = useNavigate()
 
-  const validTabs = ['open', 'closed']
+  const [currentPortfolioTab, setCurrentPortfolioTab] = useState(
+    localStorage.getItem('currentPortfolioTab') || 'open'
+  )
+
+  // const validTabs = ['open', 'closed']
   // If the status is invalid (e.g. `/events/foo`) → redirect to open
 
   const {
@@ -32,16 +38,14 @@ const Portfolio = () => {
     isLoading: marketwiseActiveHoldingsLoading,
   } = useFrappeGetCall(
     'rewardapp.engine.get_marketwise_holding',
-    status === 'active' ? ['active_marketwise_holdings'] : null
+    currentPortfolioTab === 'open' ? ['active_marketwise_holdings'] : null
   )
 
   console.log('Portfolio: ', marketwiseActiveHoldings)
 
   const handleTabChange = (value) => {
-    // Save to localStorage
     localStorage.setItem('currentPortfolioTab', value)
-    // Navigate to new tab
-    navigate(`/portfolio/${value}`)
+    setCurrentPortfolioTab(value)
   }
 
   function getMarketPortfolioStatus(positionObj) {
@@ -88,11 +92,11 @@ const Portfolio = () => {
       case 'UNMATCHED':
         return 'bg-[#FEF0E8] text-[#EF7C35]'
       case 'EXITING':
-        return 'bg-[#FF5722] text-white'
+        return 'bg-[#EAF3FF] text-[#0058CC]'
       case 'CANCELLED':
         return 'bg-[#F2F2F2] text-[#5F5F5F]'
       case 'EXITED':
-        return 'bg-[#4CAF50] text-white'
+        return 'bg-[#FFEDEA] text-[#E02400]'
       case 'ACTIVE':
         return 'bg-[#337265]/20 text-[#1C895E]'
       default:
@@ -110,10 +114,10 @@ const Portfolio = () => {
         </div>
         <Tabs
           className="w-full font-[500] text-xs"
-          value={status}
+          value={currentPortfolioTab}
           onValueChange={handleTabChange}
         >
-          <div className="w-full left-0 right-0 bg-[#F5F5F5] z-[50] px-4 py-4">
+          <div className="w-full left-0 right-0 bg-[#F5F5F5] z-[50] px-4 py-6">
             <TabsList className="w-full rounded-full space-x-2 bg-transparent text-[#2C2D32] p-0 h-8">
               <TabsTrigger
                 value="open"
@@ -122,7 +126,7 @@ const Portfolio = () => {
                 <span>
                   <img
                     src={
-                      status === 'open'
+                      currentPortfolioTab === 'open'
                         ? OpenEventsActiveIcon
                         : OpenEventsInActiveIcon
                     }
@@ -133,12 +137,12 @@ const Portfolio = () => {
               </TabsTrigger>
               <TabsTrigger
                 value="closed"
-                className="w-full py-2.5 space-x-2 rounded-full border bg-white data-[state=active]:text-[#EFF0FF] data-[state=active]:bg-[#E26F64] text-[13px] font-light"
+                className="w-full py-2.5 space-x-2 rounded-full border bg-white data-[state=active]:text-[#EFF0FF] data-[state=active]:bg-[#E26F64] text-[13px] font-light h-auto"
               >
                 <span>
                   <img
                     src={
-                      status === 'closed'
+                      currentPortfolioTab === 'closed'
                         ? ClosedEventsActiveIcon
                         : ClosedEventsInactiveIcon
                     }
@@ -152,7 +156,7 @@ const Portfolio = () => {
         </Tabs>
       </div>
 
-      {status === 'open' && (
+      {currentPortfolioTab === 'open' && (
         <>
           <div className="bg-[#F5F5F5] pb-2 max-w-md mx-auto relative px-4">
             <div className="bg-[#FFF8F2] p-4 flex flex-col font-inter gap-4 rounded-[5px] border-[0.5px] border-[#E26F64]">
@@ -201,6 +205,9 @@ const Portfolio = () => {
                     <div
                       key={marketHolding.market_id}
                       className="bg-white p-4 flex flex-col font-inter gap-4 rounded-[5px]"
+                      onClick={() => {
+                        navigate(`/portfolio/${marketHolding.market_id}`)
+                      }}
                     >
                       <div className="flex items-center gap-1">
                         {statuses.map((status) => (
@@ -239,17 +246,14 @@ const Portfolio = () => {
                       {!statuses.includes('UNMATCHED') &&
                         statuses.includes('EXITING') && (
                           <div className="flex items-center justify-between border-t-[0.7px] pt-3">
-                            <span
-                              className="font-normal text-[10px] flex items-center gap-2 p-1"
-                              style={{
-                                background:
-                                  'linear-gradient(90deg, #FFD6D3 0%, rgba(255, 231, 228, 0) 100%)',
-                              }}
-                            >
-                              Invested &#8377;5.5{' '}
-                              <span className="flex border bg-[#2C2D32] -mx-1"></span>{' '}
-                              <span>Gains - &#8377;0.1</span>
-                            </span>
+                            <div className="font-normal text-[10px] flex items-center gap-1 p-1 bg-[linear-gradient(90deg,_#FFEAD3_0%,_#FFFFFF_100%)]">
+                              <span>
+                                <img src={ExitDoorIcon} alt="" />
+                              </span>
+                              <span className="font-normal text-[10px] text-[#9C3C00]">
+                                Exited: <span className="font-inter">0/5</span>
+                              </span>
+                            </div>
                             <CancelSellOrders market={marketHolding} />
                           </div>
                         )}
@@ -278,7 +282,7 @@ const Portfolio = () => {
           </div>
         </>
       )}
-      {status === 'closed' && (
+      {currentPortfolioTab === 'closed' && (
         <>
           <div className="bg-[#F5F5F5] pb-2 max-w-md mx-auto relative px-4">
             <div className="bg-[#FFF8F2] p-4 flex flex-col font-inter gap-4 rounded-[5px] border-[0.5px] border-[#E26F64]">

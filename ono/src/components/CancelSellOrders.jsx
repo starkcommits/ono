@@ -91,6 +91,7 @@ const CancelSellOrders = ({ market }) => {
                       <span
                         className={`font-semibold text-sm font-inter text-[#2C2D32]`}
                       >
+                        &#8377;
                         {(
                           market?.EXITING?.NO?.total_quantity -
                           market?.EXITING?.NO?.total_filled_quantity
@@ -134,6 +135,7 @@ const CancelSellOrders = ({ market }) => {
                       <span
                         className={`font-semibold text-sm font-inter text-[#2C2D32]`}
                       >
+                        &#8377;
                         {(
                           market?.EXITING?.YES?.total_quantity -
                           market?.EXITING?.YES?.total_filled_quantity

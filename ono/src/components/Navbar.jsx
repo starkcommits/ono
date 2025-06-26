@@ -44,7 +44,7 @@ const Navbar = () => {
         onClick={() => {
           const portfolioTab = localStorage.getItem('currentPortfolioTab')
 
-          handleNavigatePage(`/portfolio/${portfolioTab || 'open'}`)
+          handleNavigatePage(`/portfolio`)
         }}
       >
         <img src={BriefcaseIcon} alt="" />
