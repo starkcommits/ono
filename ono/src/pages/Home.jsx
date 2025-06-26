@@ -33,35 +33,45 @@ import {
 import { Users } from 'lucide-react'
 import scrollbarHide from 'tailwind-scrollbar-hide'
 import { Navigate, useNavigate } from 'react-router-dom'
-import Widget from '../components/Widget'
 
 const Home = () => {
   const navigate = useNavigate()
   const [markets, setMarkets] = useState({})
   const [marketId, setMarketId] = useState('')
-  const {
-    data: marketData,
-    isLoading: marketDataLoading,
-    mutate: refetchMarketData,
-  } = useFrappeGetDocList('Market', {
-    fields: [
-      'name',
-      'question',
-      'category',
-      'yes_price',
-      'no_price',
-      'closing_time',
-      'status',
-      'total_traders',
-    ],
-    filters: [['status', '=', 'OPEN']],
-    orderBy: {
-      field: 'total_traders',
-      order: 'desc',
-    },
-    limit: 5,
-  })
-  
+  const { data: marketData, isLoading: marketDataLoading } =
+    useFrappeGetDocList(
+      'Market',
+      {
+        fields: [
+          'name',
+          'question',
+          'category',
+          'yes_price',
+          'no_price',
+          'closing_time',
+          'status',
+          'total_traders',
+        ],
+        filters: [['status', '=', 'OPEN']],
+        orderBy: {
+          field: 'total_traders',
+          order: 'desc',
+        },
+        limit: 5,
+      },
+      'market_data'
+    )
+
+  const { data: marketFixturesData, isLoading: marketFixturesDataLoading } =
+    useFrappeGetDocList('Market Fixtures', {
+      fields: ['name', 'title', 'category', 'image'],
+    })
+
+  const fixtures = marketFixturesData || []
+  const total = fixtures.length
+  const showRows = total <= 5 ? 1 : total <= 10 ? 2 : 3
+
+  console.log('Market Fixtures:', marketFixturesData)
 
   useEffect(() => {
     if (!marketDataLoading && marketData?.length > 0) {
@@ -82,7 +92,7 @@ const Home = () => {
         [updatedMarket.name]: updatedMarket,
       }
 
-      // ❌ Remove market if it's closed
+      // Remove market if it's closed
       if (updatedMarket.status === 'CLOSED') {
         delete updatedMarkets[updatedMarket.name]
       }
@@ -121,17 +131,17 @@ const Home = () => {
   const trending2 = useRef(createAutoplayPlugin(2500))
   const trending3 = useRef(createAutoplayPlugin(3000))
 
-  const   handleMarketClick = (market_id) => {
+  const handleMarketClick = (market_id) => {
     navigate(`/event/${market_id}`)
   }
 
   return (
-    <div className=" bg-[#F5F5F5]">
+    <div className="">
       <div className="flex flex-col gap-6 mx-auto max-w-md py-4 px-4">
         {/* Categories */}
         <div className="flex flex-col gap-2">
           <h2 className="font-medium text-sm leading-[100%]">Categories</h2>
-          <div className="w-full grid grid-cols-4 gap-1 gap-y-0 font-normal text-[10px] leading-[100%] overflow-hidden">
+          <div className="w-full grid grid-cols-4 gap-y-2 font-normal text-[10px] leading-[100%] overflow-hidden">
             {marketCategoryData?.map((category, index) => (
               // <div
               //   className="relative h-[90px] flex justify-center items-center"
@@ -158,10 +168,10 @@ const Home = () => {
                 style={{
                   backgroundImage: `url(${Squircle})`,
                   backgroundRepeat: 'no-repeat',
-                  backgroundSize: '100% 95%',
+                  backgroundSize: '80px 75px',
                   backgroundPosition: 'center',
                 }}
-                className="relative w-full h-[95px] flex flex-col gap-2 justify-center items-start px-4 border-white"
+                className="relative w-[80px] h-[75px] justify-center items-start px-4 border-white"
               >
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 space-y-2.5">
                   <div className="flex justify-center">
@@ -177,11 +187,11 @@ const Home = () => {
               </div>
             ))}
           </div>
-          <div className="w-full relative z-[1]">
+          <div className="w-full relative z-[1] min-h-[70px]">
             <Carousel className="w-full" plugins={[bannerPlugin.current]}>
               <CarouselContent>
-                {marketingBannerData?.slice(0, 3)?.map((_, index) => (
-                  <CarouselItem key={_?.name} className="basis-3/4">
+                {marketingBannerData?.slice(0, 4)?.map((_, index) => (
+                  <CarouselItem key={_?.name} className="basis-[80%]">
                     <div className="p-1 w-full">
                       <img src={_?.image} alt="" className="w-full" />
                     </div>
@@ -191,7 +201,7 @@ const Home = () => {
             </Carousel>
           </div>
         </div>
-        {/* Trending */}
+        {/* Trending Fixtures */}
         <div className="flex flex-col gap-2">
           <div className="flex justify-between items-center">
             <div className="flex gap-4 items-center">
@@ -211,99 +221,118 @@ const Home = () => {
             </div>
           </div>
           <div className="flex flex-col gap-4">
-            <div className="overflow-hidden">
-              <Marquee pauseOnHover className="[--duration:25s] p-0">
-                {Array.from({ length: 5 }).map((_, index) => (
-                  <Card
-                    key={index}
-                    className="rounded-[8px] shadow-[0_0_1px_0_rgba(0,0,0,0.2)]"
-                  >
-                    <CardHeader className="p-2">
-                      <div className="flex gap-[7px]">
-                        <div className="">
-                          <img
-                            src={CricketIcon}
-                            alt=""
-                            height={30}
-                            width={30}
-                          />
-                        </div>
-                        <div className="">
-                          <CardTitle className="font-normal text-[10px] text-[#606060]">
-                            Cricket
-                          </CardTitle>
-                          <CardDescription className="font-semibold text-[10px] text-[#272727]">
-                            Mumbai V/S Bengaluru
-                          </CardDescription>
-                        </div>
-                      </div>
-                    </CardHeader>
-                  </Card>
-                ))}
-              </Marquee>
-            </div>
-            <div className="overflow-hidden">
-              <Marquee pauseOnHover reverse className="[--duration:30s] p-0">
-                {Array.from({ length: 5 }).map((_, index) => (
-                  <Card
-                    key={index}
-                    className="rounded-[8px] shadow-[0_0_1px_0_rgba(0,0,0,0.2)]"
-                  >
-                    <CardHeader className="p-2">
-                      <div className="flex gap-[7px]">
-                        <div className="">
-                          <img
-                            src={CricketIcon}
-                            alt=""
-                            height={30}
-                            width={30}
-                          />
-                        </div>
-                        <div className="">
-                          <CardTitle className="font-normal text-[10px] text-[#606060]">
-                            Cricket
-                          </CardTitle>
-                          <CardDescription className="font-semibold text-[10px] text-[#272727]">
-                            Mumbai V/S Bengaluru
-                          </CardDescription>
-                        </div>
-                      </div>
-                    </CardHeader>
-                  </Card>
-                ))}
-              </Marquee>
-            </div>
-            <div className="overflow-hidden">
-              <Marquee pauseOnHover className="[--duration:40s] p-0">
-                {Array.from({ length: 5 }).map((_, index) => (
-                  <Card
-                    key={index}
-                    className="rounded-[8px] shadow-[0_0_1px_0_rgba(0,0,0,0.2)]"
-                  >
-                    <CardHeader className="p-2">
-                      <div className="flex gap-[7px]">
-                        <div className="">
-                          <img
-                            src={CricketIcon}
-                            alt=""
-                            height={30}
-                            width={30}
-                          />
-                        </div>
-                        <div className="">
-                          <CardTitle className="font-normal text-[10px] text-[#606060]">
-                            Cricket
-                          </CardTitle>
-                          <CardDescription className="font-semibold text-[10px] text-[#272727]">
-                            Mumbai V/S Bengaluru
-                          </CardDescription>
-                        </div>
-                      </div>
-                    </CardHeader>
-                  </Card>
-                ))}
-              </Marquee>
-            </div>
+            {total > 0 && (
+              <div className=" overflow-hidden">
+                <Marquee pauseOnHover className="[--duration:25s] p-0 py-0.5">
+                  {marketFixturesData
+                    ?.slice(0, Math.ceil(total / showRows))
+                    ?.map((_, index) => (
+                      <Card
+                        key={_.name}
+                        className="rounded-[8px] shadow-[0_0_1px_0_rgba(0,0,0,0.2)]"
+                      >
+                        <CardHeader className="p-2">
+                          <div className="flex gap-2.5">
+                            <div className="">
+                              <img
+                                src={_.image}
+                                alt=""
+                                height={30}
+                                width={30}
+                              />
+                            </div>
+                            <div className="">
+                              <CardTitle className="font-normal text-[10px] text-[#606060]">
+                                {_.category}
+                              </CardTitle>
+                              <CardDescription className="font-semibold text-[10px] text-[#272727]">
+                                {_.title}
+                              </CardDescription>
+                            </div>
+                          </div>
+                        </CardHeader>
+                      </Card>
+                    ))}
+                </Marquee>
+              </div>
+            )}
+            {total > 5 && (
+              <div className="overflow-hidden">
+                <Marquee
+                  pauseOnHover
+                  reverse
+                  className="[--duration:30s] p-0 py-0.5"
+                >
+                  {marketFixturesData
+                    ?.slice(
+                      Math.ceil(total / showRows),
+                      Math.ceil(total / showRows) * 2
+                    )
+                    ?.map((_, index) => (
+                      <Card
+                        key={_.name}
+                        className="rounded-[8px] shadow-[0_0_1px_0_rgba(0,0,0,0.2)]"
+                      >
+                        <CardHeader className="p-2">
+                          <div className="flex gap-2.5">
+                            <div className="">
+                              <img
+                                src={_.image}
+                                alt=""
+                                height={30}
+                                width={30}
+                              />
+                            </div>
+                            <div className="">
+                              <CardTitle className="font-normal text-[10px] text-[#606060]">
+                                {_.category}
+                              </CardTitle>
+                              <CardDescription className="font-semibold text-[10px] text-[#272727]">
+                                {_.title}
+                              </CardDescription>
+                            </div>
+                          </div>
+                        </CardHeader>
+                      </Card>
+                    ))}
+                </Marquee>
+              </div>
+            )}
+            {total > 10 && (
+              <div className="overflow-hidden">
+                <Marquee pauseOnHover className="[--duration:40s] p-0 py-0.5">
+                  {marketFixturesData
+                    ?.slice(Math.ceil(total / showRows) * 2)
+                    ?.map((_, index) => (
+                      <Card
+                        key={_.index}
+                        className="rounded-[8px] shadow-[0_0_1px_0_rgba(0,0,0,0.2)]"
+                      >
+                        <CardHeader className="p-2">
+                          <div className="flex gap-2.5">
+                            <div className="">
+                              <img
+                                src={_.image}
+                                alt=""
+                                height={30}
+                                width={30}
+                              />
+                            </div>
+                            <div className="">
+                              <CardTitle className="font-normal text-[10px] text-[#606060]">
+                                {_.category}
+                              </CardTitle>
+                              <CardDescription className="font-semibold text-[10px] text-[#272727]">
+                                {_.title}
+                              </CardDescription>
+                            </div>
+                          </div>
+                        </CardHeader>
+                      </Card>
+                    ))}
+                </Marquee>
+              </div>
+            )}
           </div>
         </div>
         {/* Trending Market */}
@@ -322,7 +351,7 @@ const Home = () => {
                   onClick={() => {
                     handleMarketClick(market.name)
                   }}
-                  className="rounded-[10px] p-4 bg-white space-y-4 shadow-[0_1px_1px_0_rgba(0,0,0,0.25)]"
+                  className="rounded-[10px] p-4 bg-white space-y-4 shadow-[0_1px_1px_0_rgba(0,0,0,0.25)] cursor-pointer"
                 >
                   <div className="flex items-center gap-2">
                     <span className="border-[0.5px] rounded-[5px] px-1.5 bg-[#EEEEEE] text-[#606060] font-medium text-[8px] tracking-[2%] border-[#8D8D8D]">
@@ -390,8 +419,8 @@ const Home = () => {
           <BuyDrawer
             isDrawerOpen={isDrawerOpen}
             setIsDrawerOpen={setIsDrawerOpen}
-            choice={selectedChoice}
-            setChoice={setSelectedChoice}
+            selectedChoice={selectedChoice}
+            setSelectedChoice={setSelectedChoice}
             marketId={marketId}
           />
         )}

@@ -11,7 +11,7 @@ const Layout = () => {
 
   // Define paths or patterns where Header should be hidden
   const homeRoute = path === '/' // dynamically hide for /event/:id
-  const portfolioRoute = path.startsWith('/portfolio') // dynamically hide for /event/:id
+  const portfolioRoute = path === '/portfolio' // dynamically hide for /event/:id
   const eventRoute = path.startsWith('/event/')
 
   return (
@@ -26,7 +26,7 @@ const Layout = () => {
           <EventHeader />
         </div>
       )} */}
-      <div className="flex-1">
+      <div className="flex-1 bg-[#F5F5F5]">
         <Outlet />
       </div>
       {/* Widget */}

@@ -4,7 +4,6 @@ import NewsIcon from '@/assets/NewsNavbar.svg'
 import BriefcaseIcon from '@/assets/BriefcaseNavbar.svg'
 import UserIcon from '@/assets/UserNavbar.svg'
 import { useNavigate } from 'react-router-dom'
-import { Search, House, Newspaper } from 'lucide-react'
 
 const Navbar = () => {
   const navigate = useNavigate()
@@ -43,7 +42,9 @@ const Navbar = () => {
       <div
         className="flex flex-col justify-center items-center gap-2 cursor-pointer"
         onClick={() => {
-          handleNavigatePage('/portfolio')
+          const portfolioTab = localStorage.getItem('currentPortfolioTab')
+
+          handleNavigatePage(`/portfolio`)
         }}
       >
         <img src={BriefcaseIcon} alt="" />

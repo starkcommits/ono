@@ -45,20 +45,19 @@ import OrderBook from './OrderBook'
 import CricketIcon from '@/assets/Cricket.svg'
 import OrderBookIcon from '@/assets/OrderBook.svg'
 import { DateTimePicker } from './ui/date-picker'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import HigherQuantityDrawer from './HigherQuantityDrawer'
 
 const BuyDrawer = ({
   isDrawerOpen,
   setIsDrawerOpen,
-  choice,
-  setChoice,
+  selectedChoice,
+  setSelectedChoice,
   marketId,
 }) => {
   const { createDoc, isLoading } = useFrappeCreateDoc()
   const { currentUser } = useFrappeAuth()
   const { id } = useParams()
-  const { toast } = useToast()
   const [market, setMarket] = useState({})
   const { data: marketData, isLoading: marketDataLoading } = useFrappeGetDoc(
     'Market',
@@ -69,9 +68,9 @@ const BuyDrawer = ({
     useFrappeGetDoc('User Wallet', currentUser, currentUser ? undefined : null)
 
   const [price, setPrice] = useState(
-    choice === 'YES' ? market.yes_price : market.no_price
+    selectedChoice === 'YES' ? market.yes_price : market.no_price
   )
-  console.log(isLoading)
+
   const [quantity, setQuantity] = useState(2)
 
   const [selectedDateTime, setSelectedDateTime] = useState(null)
@@ -96,6 +95,10 @@ const BuyDrawer = ({
   const inputRef = useRef(null)
 
   const [maxQuantity, setMaxQuantity] = useState(market.max_allowed_quantity)
+
+  useEffect(() => {
+    setMaxQuantity(market.max_allowed_quantity || 5)
+  }, [market.max_allowed_quantity])
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
@@ -161,7 +164,7 @@ const BuyDrawer = ({
   })
 
   useEffect(() => {
-    setPrice(choice === 'YES' ? market.yes_price : market.no_price)
+    setPrice(selectedChoice === 'YES' ? market.yes_price : market.no_price)
   }, [market])
 
   useEffect(() => {
@@ -170,9 +173,9 @@ const BuyDrawer = ({
 
     // Reset book profit value when price changes
     setBookProfitValue(price + 0.5)
-  }, [price, choice])
+  }, [price, selectedChoice])
 
-  console.log(market)
+  console.log(maxQuantity)
 
   const handleConfirmBuy = async () => {
     if (isOrderProcessing) return // Prevent multiple submissions
@@ -184,12 +187,11 @@ const BuyDrawer = ({
     try {
       const orderData = {
         market_id: marketId,
+        user_id: currentUser,
         order_type: 'BUY',
         quantity: quantity,
-        opinion_type: choice,
+        opinion_type: selectedChoice,
         amount: price,
-        sell_order_id: '',
-        buy_order_id: '',
       }
 
       if (stopLossEnabled) {
@@ -208,14 +210,13 @@ const BuyDrawer = ({
         orderData.cancel_time = formatToFrappeLDatetime(selectedDateTime)
       }
 
+      console.log('asdasdasdasd', orderData)
+
       await createDoc('Orders', orderData)
 
       setIsSwipeSwiped(true)
 
-      toast({
-        title: 'Success',
-        description: 'Your Order is successfully placed.',
-      })
+      toast.success('Your Order is successfully placed.')
 
       console.log(orderData)
 
@@ -224,11 +225,7 @@ const BuyDrawer = ({
       }, 1000)
     } catch (err) {
       setHasOrderError(true)
-      toast({
-        variant: 'destructive',
-        title: 'Uh oh! Something went wrong.',
-        description: 'Error in placing the order.',
-      })
+      toast.error('Error occured in placing the order.')
       console.error('Order creation error:', err)
     } finally {
       setIsOrderProcessing(false)
@@ -238,6 +235,8 @@ const BuyDrawer = ({
   const handleErrorReset = () => {
     setHasOrderError(false)
   }
+
+  console.log('selectedChoice: ', selectedChoice)
 
   useEffect(() => {
     if (!isDrawerOpen) {
@@ -260,13 +259,13 @@ const BuyDrawer = ({
           </div>
         </DrawerHeader>
         <div className="p-4">
-          <Tabs defaultValue={choice} className="w-full">
+          <Tabs defaultValue={selectedChoice} className="w-full">
             <TabsList className="w-full rounded-full text-[#2C2D32] p-0 h-8">
               <TabsTrigger
                 value="YES"
                 className="w-full px-10 py-[5px] rounded-l-full data-[state=active]:text-[#EFF0FF] data-[state=active]:bg-[#492C82] text-[13px] font-light h-auto"
                 onClick={() => {
-                  setChoice('YES')
+                  setSelectedChoice('YES')
                 }}
               >
                 YES &#8377;{market.yes_price}
@@ -275,7 +274,7 @@ const BuyDrawer = ({
                 value="NO"
                 className="w-full px-10 py-[5px] rounded-r-full data-[state=active]:text-[#EFF0FF] data-[state=active]:bg-[#E26F64] text-[13px] font-light"
                 onClick={() => {
-                  setChoice('NO')
+                  setSelectedChoice('NO')
                 }}
               >
                 NO &#8377;{market.no_price}
@@ -367,9 +366,11 @@ const BuyDrawer = ({
                       value={[quantity]}
                       className={`cursor-pointer`}
                       onValueChange={(values) => {
-                        if (quantity <= market.max_allowed_quantity)
+                        // console.log('Value:', values[0])
+                        // console.log('Max:', market.max_allowed_quantity)
+
+                        if (values[0] <= market.max_allowed_quantity)
                           setQuantity(values[0])
-                        else setQuantity(market.max_allowed_quantity)
                       }}
                     />
                     <button
@@ -708,10 +709,12 @@ const BuyDrawer = ({
             <div className="px-2">
               <SwipeButton
                 fullWidth={true}
-                text={choice === 'YES' ? 'Swipe for Yes' : 'Swipe for No'}
+                text={
+                  selectedChoice === 'YES' ? 'Swipe for Yes' : 'Swipe for No'
+                }
                 className="py-[18px] px-4"
-                startColor={choice === 'YES' ? '#492C82' : '#E26F64'}
-                endColor={choice === 'YES' ? '#34C759' : '#34C759'}
+                startColor={selectedChoice === 'YES' ? '#492C82' : '#E26F64'}
+                endColor={selectedChoice === 'YES' ? '#34C759' : '#34C759'}
                 handleConfirmBuy={handleConfirmBuy}
                 swiped={isSwipeSwiped}
                 onSwipedChange={setIsSwipeSwiped}
