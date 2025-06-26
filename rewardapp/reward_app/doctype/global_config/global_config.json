@@ -14,7 +14,7 @@
  "fields": [
   {
    "fieldname": "logo",
-   "fieldtype": "Data",
+   "fieldtype": "Attach",
    "label": "Logo"
   },
   {
@@ -40,7 +40,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-05-03 17:30:08.373217",
+ "modified": "2025-06-26 14:50:29.711158",
  "modified_by": "Administrator",
  "module": "Reward App",
  "name": "Global Config",
