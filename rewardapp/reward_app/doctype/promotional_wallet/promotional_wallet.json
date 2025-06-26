@@ -59,7 +59,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-05-10 13:20:59.982977",
+ "modified": "2025-06-26 18:51:28.070816",
  "modified_by": "Administrator",
  "module": "Reward App",
  "name": "Promotional Wallet",
@@ -94,5 +94,6 @@
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1
 }

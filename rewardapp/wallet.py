@@ -330,9 +330,15 @@ def recharge_wallet(user, amount):
         # if gst_config:
         #     sgst_amount = amount * (gst_config[0]['sgst_rate']/100)
         #     cgst_amount = amount * (gst_config[0]['cgst_rate']/100)
+        
+        gst, gst_percentage = frappe.db.get_value(
+            "Taxes and Fees",
+            None,
+            ["gst", "gst_percentage"]
+        )
 
-        gst_rate = 28
-        total_gst = round(amount - (amount * (100/ (100 + gst_rate))),2)
+        gst_rate = gst_percentage if gst else 0
+        total_gst = round(amount - (amount * (100/ (100 + float(gst_rate)))),2)
         
         # Get referrer's promotional wallet
         wallet_balance = frappe.db.get_value("Promotional Wallet",user,'balance')
