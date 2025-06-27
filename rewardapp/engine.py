@@ -143,8 +143,8 @@ def trades():
                     holding_doc.filled_quantity = holding_doc.quantity
 
                     # Reward logic
-                    reward = quantity * (holding_doc.exit_price - holding_doc.price)
-                    holding_doc.returns += reward
+                    winning_amount = quantity * (holding_doc.exit_price - holding_doc.price)
+                    holding_doc.returns += (quantity * holding_doc.exit_price)
                     
                     holding_doc.save(ignore_permissions=True)
                     
@@ -154,12 +154,23 @@ def trades():
                         ["winning_fee_applicable", "winning_fee_percentage"]
                     )
                     if winning_fee_applicable:
-                        reward = reward * float(winning_fee_percentage)/100
+                        winning_amount = winning_amount * float(winning_fee_percentage)/100
 
                     available_balance = frappe.db.get_value("User Wallet",trade["first_user_id"],'balance')
-                    new_balance = available_balance + reward
+                    new_balance = available_balance + holding_doc.price + winning_amount
                     frappe.db.set_value("User Wallet",trade["first_user_id"],'balance',new_balance)
-
+                    
+                    frappe.get_doc({
+                        'doctype': "Transaction Logs",
+                        'market_id': trade["market_id"],
+                        'user': trade["first_user_id"],
+                        'wallet_type': 'Main',
+                        'order_id': trade["first_user_order_id"],
+                        'transaction_amount': holding_doc.price + winning_amount,
+                        'transaction_type': 'Credit',
+                        'transaction_status': 'Success',
+                        'transaction_method': 'WALLET'
+                    }).insert(ignore_permissions=True)
                 else:
                     result = frappe.db.sql("""
                         SELECT name
@@ -308,7 +319,7 @@ def market(doc, method):
             # For debugging
             frappe.logger().info(f"Sending payload to market engine: {payload}")
             
-            url = "http://127.0.0.1:8086/markets/"
+            url = "http://13.202.185.148:8086/markets/"
             response = requests.post(url, json=payload)
             
             if response.status_code != 201:
@@ -343,7 +354,7 @@ def market(doc, method):
                 order_doc.save()  # Triggers hooks
 
             frappe.db.commit()
-            url=f"http://127.0.0.1:8086/markets/{doc.name}/close"
+            url=f"http://13.202.185.148:8086/markets/{doc.name}/close"
             response = requests.post(url)
                 
             if response.status_code != 200:
@@ -785,7 +796,7 @@ def holding(doc,method):
 
         # API call to sync order update
         try:
-            url = "http://127.0.0.1:8086/orders/update_quantity"
+            url = "http://13.202.185.148:8086/orders/update_quantity"
             response = requests.put(url, json=payload)
             if response.status_code != 201:
                 frappe.log_error(f"Error response: {response.text}")
@@ -938,7 +949,7 @@ def update_order_price(user_id, order_id, price):
             "new_price": price
         }
         try:
-            url = "http://127.0.0.1:8086/orders/update_price"
+            url = "http://13.202.185.148:8086/orders/update_price"
             response = requests.put(url, json=payload)
             
             if response.status_code != 201:
