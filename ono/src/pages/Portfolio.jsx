@@ -17,6 +17,7 @@ import {
   useFrappeGetDocList,
   useSWRConfig,
 } from 'frappe-react-sdk'
+import Back from '@/assets/Back.svg'
 import ExitSellOrders from '../components/ExitSellOrders'
 import CancelSellOrders from '../components/CancelSellOrders'
 import CancelBuyOrders from '../components/CancelBuyOrders'
@@ -106,11 +107,19 @@ const Portfolio = () => {
 
   return (
     <div className="leading-[100%] bg-[#F5F5F5] ">
-      <div className="sticky z-[50] top-0 left-0 right-0 flex flex-col font-inter max-w-md mx-auto pt-4 bg-white mb-auto">
-        <div className="border-[0.33px] border-x-0 border-t-0 border-b border-[#DBC5F7] w-full flex justify-center pb-2">
-          <h1 className="text-xl font-[500] text-[#2C2D32] mx-auto">
-            My Portfolio
-          </h1>
+      <div className="sticky z-[50] top-0 left-0 right-0 flex flex-col max-w-md mx-auto pt-4 bg-white mb-auto">
+        <div className="border-[0.33px] border-x-0 border-t-0 border-b border-[#DBC5F7] w-full flex items-center gap-2 pb-4 px-4">
+          <span>
+            <img
+              className="h-4 w-4 cursor-pointer"
+              onClick={() => {
+                navigate(-1)
+              }}
+              src={Back}
+              alt=""
+            />
+          </span>
+          <h1 className="text-xl font-[500] text-[#2C2D32]">My Portfolio</h1>
         </div>
         <Tabs
           className="w-full font-[500] text-xs"
@@ -206,7 +215,7 @@ const Portfolio = () => {
                       key={marketHolding.market_id}
                       className="bg-white p-4 flex flex-col font-inter gap-4 rounded-[5px]"
                       onClick={() => {
-                        navigate(`/portfolio/${marketHolding.market_id}`)
+                        navigate(`/portfolio/open/${marketHolding.market_id}`)
                       }}
                     >
                       <div className="flex items-center gap-1">

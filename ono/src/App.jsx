@@ -15,7 +15,8 @@ import CategoryDetails from './pages/CategoryDetails'
 import FixtureDetails from './pages/FixtureDetails'
 import ScrollToTop from './components/ScrollToTop'
 import Leaderboard from './pages/Leaderboard'
-import ActiveMarketHoldings from './pages/ActiveMarketHoldings'
+
+import OpenClosedMarketHoldings from './pages/OpenClosedMarketHoldings'
 
 function App() {
   return (
@@ -32,9 +33,13 @@ function App() {
           <Route path="/news" element={<News />} />
           <Route path="/portfolio" element={<Portfolio />} />
           <Route
-            path="/portfolio/:market_id"
-            element={<ActiveMarketHoldings />}
+            path="/portfolio/open/:market_id"
+            element={<OpenClosedMarketHoldings />}
           />
+          {/* <Route
+            path="/portfolio/closed/:market_id"
+            element={<ResolvedMarketHoldings />}
+          /> */}
           <Route path="/profile" element={<Profile />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/event/:id" element={<EventDetails />} />

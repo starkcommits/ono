@@ -294,4 +294,4 @@ api = {
 # }
 
 
-website_route_rules = [{'from_route': '/admin/<path:app_path>', 'to_route': 'admin'}, {'from_route': '/ono/<path:app_path>', 'to_route': 'ono'},]
+website_route_rules = [{'from_route': '/admin/<path:app_path>', 'to_route': 'admin'}, {'from_route': '/trade/<path:app_path>', 'to_route': 'trade'},]

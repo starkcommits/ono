@@ -1,4 +1,3 @@
-import CricketIcon from '@/assets/Cricket.svg'
 import CricketImage from '@/assets/CricketImage.svg'
 import Squircle from '@/assets/Squircle.png'
 import TradersIcon from '@/assets/Traders.svg'
