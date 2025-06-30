@@ -23,6 +23,7 @@
     "total_traders",
     "best_ask",
     "max_allowed_quantity",
+    "description",
     "ui_detail_section",
     "yes_color",
     "yes_side_label",
@@ -199,12 +200,17 @@
       "fieldname": "icon",
       "fieldtype": "Attach",
       "label": "Icon"
+    },
+    {
+      "fieldname": "description",
+      "fieldtype": "Data",
+      "label": "Description"
     }
   ],
   "index_web_pages_for_search": 1,
   "is_tree": 1,
   "links": [],
-  "modified": "2025-06-09 13:20:55.911074",
+  "modified": "2025-06-27 10:52:13.593061",
   "modified_by": "Administrator",
   "module": "Reward App",
   "name": "Market",
