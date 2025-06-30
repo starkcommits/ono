@@ -234,7 +234,7 @@ def wallet_operation(doc, method):
                         'transaction_method': 'WALLET'
                     }).insert(ignore_permissions=True)
 
-                frappe.db.set_value("Holdings",doc.holding_id, 'status','CANCELED')
+                frappe.db.set_value("Holding",doc.holding_id, 'status','CANCELED')
             else:
                 if not doc.holding_id:
                     frappe.db.sql("""
