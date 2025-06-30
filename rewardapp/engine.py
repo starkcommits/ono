@@ -813,7 +813,7 @@ def holding(doc,method):
             return False
 
 @frappe.whitelist(allow_guest=True)
-def cancel_order(market_id, user_id):
+def cancel_order(market_id, user_id, order_type):
     # frappe.db.sql("""
     #     UPDATE `tabOrders`
     #     SET status = 'CANCELED'
@@ -826,7 +826,7 @@ def cancel_order(market_id, user_id):
             filters={
                 "market_id": market_id,
                 "user_id": user_id,
-                "order_type": "SELL",
+                "order_type": order_type,
                 "status": ["not in", ["MATCHED", "CANCELED"]]
             },
             pluck="name"
