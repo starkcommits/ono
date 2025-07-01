@@ -33,6 +33,7 @@ def update_order():
         
         # Send realtime updates
         frappe.publish_realtime('order_event', {
+            'market_id': order.market_id,
             "order_id": data.order_id,
             "status": data.status,
             "filled_quantity": data.filled_quantity
@@ -649,21 +650,16 @@ def get_marketwise_holding():
     # """, (user_id,), as_dict=True)
     results = frappe.db.sql("""
         SELECT
+            h.name AS holding_id,
             h.market_id,
             h.opinion_type,
             h.status,
-            SUM(
-                CASE WHEN h.status = 'EXITING' THEN o.quantity ELSE h.quantity END
-            ) AS total_quantity,
-            SUM(
-                CASE WHEN h.status = 'EXITING' THEN o.filled_quantity ELSE h.filled_quantity END
-            ) AS total_filled_quantity,
-            SUM(
-                CASE 
-                    WHEN h.status = 'EXITING' THEN (o.quantity - o.filled_quantity) * o.amount 
-                    ELSE (h.quantity - h.filled_quantity) * h.price 
-                END
-            ) AS total_invested,
+            h.quantity AS holding_quantity,
+            h.filled_quantity AS holding_filled_quantity,
+            h.price AS holding_price,
+            o.quantity AS order_quantity,
+            o.filled_quantity AS order_filled_quantity,
+            o.amount AS order_amount,
             m.question,
             m.yes_price,
             m.no_price
@@ -676,13 +672,6 @@ def get_marketwise_holding():
         WHERE
             m.status = 'OPEN'
             AND h.user_id = %(user_id)s
-        GROUP BY
-            h.market_id,
-            h.opinion_type,
-            h.status,
-            m.question,
-            m.yes_price,
-            m.no_price
     """, {"user_id": user_id}, as_dict=True)
 
     output = {}
@@ -691,24 +680,29 @@ def get_marketwise_holding():
         status = row['status']
         opinion = row['opinion_type']
 
-        # Set basic market-level info
         if market not in output:
             output[market] = {
                 "market_id": market,
                 "question": row["question"],
                 "yes_price": row["yes_price"],
                 "no_price": row["no_price"],
-                "total_invested": 0  # Init here
+                "total_invested": 0
             }
 
-        # Accumulate invested amount
-        output[market]["total_invested"] += row["total_invested"]
+        if status == "EXITING":
+            qty = row["order_quantity"] or 0
+            filled_qty = row["order_filled_quantity"] or 0
+            invested = (qty - filled_qty) * (row["order_amount"] or 0)
+        else:
+            qty = row["holding_quantity"] or 0
+            filled_qty = row["holding_filled_quantity"] or 0
+            invested = (qty - filled_qty) * (row["holding_price"] or 0)
 
-        # Set opinion-type breakdown
+        output[market]["total_invested"] += invested
         output[market].setdefault(status, {})[opinion] = {
-            "total_quantity": row["total_quantity"],
-            "total_filled_quantity": row["total_filled_quantity"],
-            "total_invested": row["total_invested"]
+            "total_quantity": qty,
+            "total_filled_quantity": filled_qty,
+            "total_invested": invested
         }
 
     return output
