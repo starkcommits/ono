@@ -652,9 +652,18 @@ def get_marketwise_holding():
             h.market_id,
             h.opinion_type,
             h.status,
-            SUM(h.quantity) AS total_quantity,
-            SUM(h.filled_quantity) AS total_filled_quantity,
-            SUM((h.quantity - h.filled_quantity) * h.price) AS total_invested,
+            SUM(
+                CASE WHEN h.status = 'EXITING' THEN o.quantity ELSE h.quantity END
+            ) AS total_quantity,
+            SUM(
+                CASE WHEN h.status = 'EXITING' THEN o.filled_quantity ELSE h.filled_quantity END
+            ) AS total_filled_quantity,
+            SUM(
+                CASE 
+                    WHEN h.status = 'EXITING' THEN (o.quantity - o.filled_quantity) * o.amount 
+                    ELSE (h.quantity - h.filled_quantity) * h.price 
+                END
+            ) AS total_invested,
             m.question,
             m.yes_price,
             m.no_price
@@ -662,6 +671,8 @@ def get_marketwise_holding():
             `tabHolding` h
         JOIN
             `tabMarket` m ON h.market_id = m.name
+        LEFT JOIN
+            `tabOrders` o ON o.name = h.order_id
         WHERE
             m.status = 'OPEN'
             AND h.user_id = %(user_id)s
