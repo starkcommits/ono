@@ -47,6 +47,7 @@ import OrderBookIcon from '@/assets/OrderBook.svg'
 import { DateTimePicker } from './ui/date-picker'
 import { toast } from 'sonner'
 import HigherQuantityDrawer from './HigherQuantityDrawer'
+import { trackEvent } from '../analytics/ga'
 
 const BuyDrawer = ({
   isDrawerOpen,
@@ -223,6 +224,11 @@ const BuyDrawer = ({
       setTimeout(() => {
         setIsDrawerOpen(false)
       }, 1000)
+      trackEvent({
+        category: 'Order',
+        action: 'Placed Buy Order',
+        label: `Market: ${market.name}, Choice: ${selectedChoice}, Price: ${price}, Quantity: ${quantity}, User: ${currentUser}`,
+      })
     } catch (err) {
       setHasOrderError(true)
       toast.error('Error occured in placing the order.')

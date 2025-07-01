@@ -1801,6 +1801,18 @@ lodash.merge@^4.6.2:
   resolved "https://registry.npmjs.org/lodash.merge/-/lodash.merge-4.6.2.tgz"
   integrity sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==
 
+lottie-react@^2.4.1:
+  version "2.4.1"
+  resolved "https://registry.npmjs.org/lottie-react/-/lottie-react-2.4.1.tgz"
+  integrity sha512-LQrH7jlkigIIv++wIyrOYFLHSKQpEY4zehPicL9bQsrt1rnoKRYCYgpCUe5maqylNtacy58/sQDZTkwMcTRxZw==
+  dependencies:
+    lottie-web "^5.10.2"
+
+lottie-web@^5.10.2:
+  version "5.13.0"
+  resolved "https://registry.npmjs.org/lottie-web/-/lottie-web-5.13.0.tgz"
+  integrity sha512-+gfBXl6sxXMPe8tKQm7qzLnUy5DUPJPKIyRHwtpCpyUEYjHYRJC/5gjUvdkuO2c3JllrPtHXH5UJJK8LRYl5yQ==
+
 lru-cache@^10.2.0:
   version "10.4.3"
   resolved "https://registry.npmjs.org/lru-cache/-/lru-cache-10.4.3.tgz"
@@ -2116,12 +2128,17 @@ queue-microtask@^1.2.2:
   resolved "https://registry.npmjs.org/queue-microtask/-/queue-microtask-1.2.3.tgz"
   integrity sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==
 
-"react-dom@^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc", "react-dom@^16.8 || ^17.0 || ^18.0 || ^19.0.0 || ^19.0.0-rc", "react-dom@^18.0.0 || ^19.0.0", "react-dom@^18.0.0 || ^19.0.0 || ^19.0.0-rc", react-dom@^19.1.0, react-dom@>=16, react-dom@>=18:
+"react-dom@^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc", "react-dom@^16.8 || ^17.0 || ^18.0 || ^19.0.0 || ^19.0.0-rc", "react-dom@^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react-dom@^18.0.0 || ^19.0.0", "react-dom@^18.0.0 || ^19.0.0 || ^19.0.0-rc", react-dom@^19.1.0, react-dom@>=16, react-dom@>=18:
   version "19.1.0"
   resolved "https://registry.npmjs.org/react-dom/-/react-dom-19.1.0.tgz"
   integrity sha512-Xs1hdnE+DyKgeHJeJznQmYMIBG3TKIHJJT95Q58nHLSrElKlGQqDTR2HQ9fx5CN/Gk6Vh/kupBTDLU11/nDk/g==
   dependencies:
     scheduler "^0.26.0"
+
+react-ga4@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.npmjs.org/react-ga4/-/react-ga4-2.1.0.tgz"
+  integrity sha512-ZKS7PGNFqqMd3PJ6+C2Jtz/o1iU9ggiy8Y8nUeksgVuvNISbmrQtJiZNvC/TjDsqD0QlU5Wkgs7i+w9+OjHhhQ==
 
 react-hot-toast@^2.5.2:
   version "2.5.2"

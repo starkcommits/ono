@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes, useLocation } from 'react-router-dom'
 import Home from './pages/Home'
 import Layout from './components/Layout'
 
@@ -17,12 +17,14 @@ import ScrollToTop from './components/ScrollToTop'
 import Leaderboard from './pages/Leaderboard'
 
 import OpenClosedMarketHoldings from './pages/OpenClosedMarketHoldings'
+import { AnalyticsProvider } from './analytics/AnalyticsProvider'
 
 function App() {
   return (
     <div className="max-w-md mx-auto relative">
       <Toaster richColors position="top-right" />
       <ScrollToTop />
+      <AnalyticsProvider />
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/otp" element={<OTPScreen />} />

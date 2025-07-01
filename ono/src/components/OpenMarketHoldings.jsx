@@ -14,6 +14,7 @@ import {
   useFrappeGetDoc,
   useFrappeGetDocList,
 } from 'frappe-react-sdk'
+import ExitSellOrders from './ExitSellOrders'
 
 const OpenMarketHoldings = ({ marketPrices }) => {
   const { market_id } = useParams()
@@ -108,7 +109,7 @@ const OpenMarketHoldings = ({ marketPrices }) => {
           </div>
           <div>
             <p className="font-normal text-[22px] text-[#492C82]">
-              53% probability of YES
+              {marketPrices.market_yes_price * 10}% probability of YES
             </p>
           </div>
         </div>
@@ -158,6 +159,7 @@ const OpenMarketHoldings = ({ marketPrices }) => {
                       acc + holding.quantity - holding.filled_quantity,
                     0
                   )
+                if (unmatchedHoldings === 0) return null
                 return (
                   <div className="flex items-center gap-2 border rounded-full cursor-pointer">
                     <span className="font-normal font-inter text-[10px] text-[#2C2D32] px-1 pl-3.5">
@@ -178,6 +180,8 @@ const OpenMarketHoldings = ({ marketPrices }) => {
                       acc + holding.quantity - holding.filled_quantity,
                     0
                   )
+                console.log('Exiting hldings:', exitingHoldings)
+                if (exitingHoldings === 0) return null
                 return (
                   <div className="flex items-center gap-2 border rounded-full cursor-pointer">
                     <span className="font-normal font-inter text-[10px] text-[#2C2D32] px-1 pl-3.5">
