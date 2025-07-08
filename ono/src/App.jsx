@@ -18,11 +18,29 @@ import Leaderboard from './pages/Leaderboard'
 
 import OpenClosedMarketHoldings from './pages/OpenClosedMarketHoldings'
 import { AnalyticsProvider } from './analytics/AnalyticsProvider'
+import { NovuInbox } from './components/ui/inbox/NovuInbox'
+import { useEffect } from 'react'
 
 function App() {
+  useEffect(() => {
+    const trigger = async () => {
+      await novu.trigger({
+        to: {
+          subscriberId: '68667a2b9915b98edbe9949e',
+          firstName: 'Harshit',
+          lastName: 'Adhikari',
+          email: 'harshit@adhikari.com',
+          phone: '+918448954679',
+        },
+        workflowId: 'workflow_identifier',
+      })
+      trigger()
+    }
+  }, [])
   return (
     <div className="max-w-md mx-auto relative">
       <Toaster richColors position="top-right" />
+
       <ScrollToTop />
       <AnalyticsProvider />
       <Routes>

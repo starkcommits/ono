@@ -45,6 +45,11 @@ const ExitSellOrders = ({ market }) => {
 
   const handleCreateSellOrders = async () => {
     try {
+      console.log(
+        'HRGRGDFD',
+        market?.ACTIVE?.YES?.total_quantity -
+          market?.ACTIVE?.YES?.total_filled_quantity
+      )
       const yesSellOrder = {
         market_id: market.market_id,
         user_id: currentUser,

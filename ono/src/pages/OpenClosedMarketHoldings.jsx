@@ -42,7 +42,7 @@ const OpenClosedMarketHoldings = () => {
   }, [market])
 
   useFrappeEventListener('market_event', (market) => {
-    console.log(market)
+    console.log('Updated: ', market)
     if (market.name === market_id) {
       setMarketPrices({
         market_yes_price: parseFloat(market.yes_price),

@@ -151,6 +151,17 @@ const BuyDrawer = ({
     setSelectedDateTime(futureTime)
   }
 
+  const formatToFrappeLDatetime = (dateObj) => {
+    const yyyy = dateObj.getFullYear()
+    const mm = String(dateObj.getMonth() + 1).padStart(2, '0')
+    const dd = String(dateObj.getDate()).padStart(2, '0')
+    const hh = String(dateObj.getHours()).padStart(2, '0')
+    const mi = String(dateObj.getMinutes()).padStart(2, '0')
+    const ss = String(dateObj.getSeconds()).padStart(2, '0')
+
+    return `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}`
+  }
+
   useEffect(() => {
     if (!marketDataLoading && Object.values(marketData)) {
       setMarket(marketData)
@@ -256,7 +267,7 @@ const BuyDrawer = ({
       <DrawerContent className="max-w-md mx-auto w-full max-h-full bg-[#F5F5F5]">
         <DrawerHeader className="p-0 pb-2">
           <div className="flex justify-between items-center gap-4 px-4">
-            <DrawerTitle className="font-normal font-inter text-left text-[13px] leading-[100%] w-[90%]">
+            <DrawerTitle className="font-normal font-inter text-left text-[13px] leading-[18px] w-[90%]">
               {market.question}
             </DrawerTitle>
             <DrawerDescription className="w-[10%]">

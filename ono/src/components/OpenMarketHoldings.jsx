@@ -52,7 +52,173 @@ const OpenMarketHoldings = ({ marketPrices }) => {
       currentUser && market_id ? undefined : null
     )
 
-  console.log(openMarketHoldings)
+  const {
+    data: pendingOpenMarketHoldings,
+    isLoading: pendingOpenMarketHoldingsLoading,
+  } = useFrappeGetDocList(
+    'Holding',
+    {
+      fields: [
+        'name',
+        'market_id',
+        'order_id',
+        'price',
+        'buy_order',
+        'returns',
+        'quantity',
+        'opinion_type',
+        'status',
+        'exit_price',
+        'market_yes_price',
+        'market_no_price',
+        'filled_quantity',
+      ],
+      filters: [
+        ['user_id', '=', currentUser],
+        ['market_id', '=', market_id],
+        ['market_status', '=', 'OPEN'],
+        ['status', '=', 'UNMATCHED'],
+      ],
+    },
+    currentUser && market_id && openMarketHoldingsPortfolioTab === 'pending'
+      ? undefined
+      : null
+  )
+
+  const {
+    data: matchedOpenMarketHoldings,
+    isLoading: matchedOpenMarketHoldingsLoading,
+  } = useFrappeGetDocList(
+    'Holding',
+    {
+      fields: [
+        'name',
+        'market_id',
+        'order_id',
+        'price',
+        'buy_order',
+        'returns',
+        'quantity',
+        'opinion_type',
+        'status',
+        'exit_price',
+        'market_yes_price',
+        'market_no_price',
+        'filled_quantity',
+      ],
+      filters: [
+        ['user_id', '=', currentUser],
+        ['market_id', '=', market_id],
+        ['market_status', '=', 'OPEN'],
+        ['status', '=', 'MATCHED'],
+      ],
+    },
+    currentUser && market_id && openMarketHoldingsPortfolioTab === 'matched'
+      ? undefined
+      : null
+  )
+
+  const {
+    data: exitingOpenMarketHoldings,
+    isLoading: exitingOpenMarketHoldingsLoading,
+  } = useFrappeGetDocList(
+    'Holding',
+    {
+      fields: [
+        'name',
+        'market_id',
+        'order_id',
+        'price',
+        'buy_order',
+        'returns',
+        'quantity',
+        'opinion_type',
+        'status',
+        'exit_price',
+        'market_yes_price',
+        'market_no_price',
+        'filled_quantity',
+      ],
+      filters: [
+        ['user_id', '=', currentUser],
+        ['market_id', '=', market_id],
+        ['market_status', '=', 'OPEN'],
+        ['status', '=', 'EXITING'],
+      ],
+    },
+    currentUser && market_id && openMarketHoldingsPortfolioTab === 'exiting'
+      ? undefined
+      : null
+  )
+
+  const {
+    data: exitedOpenMarketHoldings,
+    isLoading: exitedOpenMarketHoldingsLoading,
+  } = useFrappeGetDocList(
+    'Holding',
+    {
+      fields: [
+        'name',
+        'market_id',
+        'order_id',
+        'price',
+        'buy_order',
+        'returns',
+        'quantity',
+        'opinion_type',
+        'status',
+        'exit_price',
+        'market_yes_price',
+        'market_no_price',
+        'filled_quantity',
+      ],
+      filters: [
+        ['user_id', '=', currentUser],
+        ['market_id', '=', market_id],
+        ['market_status', '=', 'OPEN'],
+        ['status', '=', 'EXITED'],
+      ],
+    },
+    currentUser && market_id && openMarketHoldingsPortfolioTab === 'exited'
+      ? undefined
+      : null
+  )
+
+  const {
+    data: canceledOpenMarketHoldings,
+    isLoading: canceledOpenMarketHoldingsLoading,
+  } = useFrappeGetDocList(
+    'Holding',
+    {
+      fields: [
+        'name',
+        'market_id',
+        'order_id',
+        'price',
+        'buy_order',
+        'returns',
+        'quantity',
+        'opinion_type',
+        'status',
+        'exit_price',
+        'market_yes_price',
+        'market_no_price',
+        'filled_quantity',
+      ],
+      filters: [
+        ['user_id', '=', currentUser],
+        ['market_id', '=', market_id],
+        ['market_status', '=', 'OPEN'],
+        ['status', '=', 'CANCELED'],
+      ],
+    },
+    currentUser && market_id && openMarketHoldingsPortfolioTab === 'canceled'
+      ? undefined
+      : null
+  )
+
+  console.log('Open :', openMarketHoldings)
+  console.log('market: ', marketPrices)
 
   const handleTabChange = (value) => {
     localStorage.setItem('openMarketHoldingsPortfolioTab', value)
@@ -122,20 +288,69 @@ const OpenMarketHoldings = ({ marketPrices }) => {
                   <img src={DownArrowIcon} alt="" />
                 </span>
                 <span className="font-inter font-semibold text-sm">
-                  - &#8377;0.1
+                  &#8377;
+                  {openMarketHoldings
+                    ?.reduce((acc, holding) => {
+                      if (holding.opinion_type === 'YES') {
+                        acc =
+                          acc +
+                          marketPrices.market_yes_price *
+                            (holding.quantity - holding.filled_quantity) -
+                          holding.price *
+                            (holding.quantity - holding.filled_quantity)
+                      } else {
+                        acc =
+                          acc +
+                          marketPrices.market_no_price *
+                            (holding.quantity - holding.filled_quantity) -
+                          holding.price *
+                            (holding.quantity - holding.filled_quantity)
+                      }
+                      return acc
+                    }, 0)
+                    .toFixed(1)}
                 </span>
               </p>
             </div>
             <div className="w-full flex items-center justify-between">
               <div className="flex flex-col items-start">
                 <p className="font-normal text-xs text-[#5F5F5F]">Investment</p>
-                <p className="font-inter font-semibold text-xl">&#8377;5.5</p>
+                <p className="font-inter font-semibold text-xl">
+                  &#8377;
+                  {openMarketHoldings
+                    ?.reduce(
+                      (acc, holding) =>
+                        acc +
+                        holding.price *
+                          (holding.quantity - holding.filled_quantity),
+                      0
+                    )
+                    .toFixed(1)}
+                </p>
               </div>
               <div className="flex flex-col items-end">
                 <p className="font-normal text-xs text-[#5F5F5F]">
                   Current Value
                 </p>
-                <p className="font-inter font-semibold text-xl">&#8377;5.5</p>
+                <p className="font-inter font-semibold text-xl">
+                  &#8377;
+                  {openMarketHoldings
+                    ?.reduce((acc, holding) => {
+                      if (holding.opinion_type === 'YES') {
+                        acc =
+                          acc +
+                          marketPrices.market_yes_price *
+                            (holding.quantity - holding.filled_quantity)
+                      } else {
+                        acc =
+                          acc +
+                          marketPrices.market_no_price *
+                            (holding.quantity - holding.filled_quantity)
+                      }
+                      return acc
+                    }, 0)
+                    .toFixed(1)}
+                </p>
               </div>
             </div>
             <div className="w-full flex items-center justify-between gap-4 text-xs font-medium">
@@ -148,19 +363,27 @@ const OpenMarketHoldings = ({ marketPrices }) => {
             </div>
             <div className="w-full flex justify-between items-center pt-4 border-dashed border-t-[0.7px] text-[#2C2D32]">
               <span className="font-normal text-xs">Exited Returns</span>
-              <span className="font-inter text-xs font-medium">- &#8377;3</span>
+              <span className="font-inter text-xs font-medium">
+                &#8377;{' '}
+                {openMarketHoldings?.reduce((acc, holding) => {
+                  return (acc += holding.returns)
+                }, 0)}
+              </span>
             </div>
-            <div className="w-full flex gap-4 items-center border-dashed border-t-[0.7px] pt-4">
-              {(() => {
-                const unmatchedHoldings = openMarketHoldings
-                  ?.filter((holding) => holding.status === 'UNMATCHED')
-                  ?.reduce(
-                    (acc, holding) =>
-                      acc + holding.quantity - holding.filled_quantity,
-                    0
-                  )
-                if (unmatchedHoldings === 0) return null
-                return (
+
+            {(() => {
+              const unmatchedHoldings = openMarketHoldings
+                ?.filter((holding) => holding.status === 'UNMATCHED')
+                ?.reduce(
+                  (acc, holding) =>
+                    acc + holding.quantity - holding.filled_quantity,
+                  0
+                )
+
+              if (unmatchedHoldings === 0) return null
+
+              return (
+                <div className="w-full flex gap-4 items-center border-dashed border-t-[0.7px] pt-4">
                   <div className="flex items-center gap-2 border rounded-full cursor-pointer">
                     <span className="font-normal font-inter text-[10px] text-[#2C2D32] px-1 pl-3.5">
                       {unmatchedHoldings} unmatched
@@ -170,19 +393,20 @@ const OpenMarketHoldings = ({ marketPrices }) => {
                       <img src={CircleCrossIcon} alt="" />
                     </span>
                   </div>
+                </div>
+              )
+            })()}
+            {(() => {
+              const exitingHoldings = openMarketHoldings
+                ?.filter((holding) => holding.status === 'EXITING')
+                ?.reduce(
+                  (acc, holding) =>
+                    acc + holding.quantity - holding.filled_quantity,
+                  0
                 )
-              })()}
-              {(() => {
-                const exitingHoldings = openMarketHoldings
-                  ?.filter((holding) => holding.status === 'EXITING')
-                  ?.reduce(
-                    (acc, holding) =>
-                      acc + holding.quantity - holding.filled_quantity,
-                    0
-                  )
-                console.log('Exiting hldings:', exitingHoldings)
-                if (exitingHoldings === 0) return null
-                return (
+              if (exitingHoldings === 0) return null
+              return (
+                <div className="w-full flex gap-4 items-center border-dashed border-t-[0.7px] pt-4">
                   <div className="flex items-center gap-2 border rounded-full cursor-pointer">
                     <span className="font-normal font-inter text-[10px] text-[#2C2D32] px-1 pl-3.5">
                       {exitingHoldings} exiting
@@ -192,9 +416,9 @@ const OpenMarketHoldings = ({ marketPrices }) => {
                       <img src={CircleCrossIcon} alt="" />
                     </span>
                   </div>
-                )
-              })()}
-            </div>
+                </div>
+              )
+            })()}
           </div>
         </div>
 
@@ -206,33 +430,36 @@ const OpenMarketHoldings = ({ marketPrices }) => {
           >
             <div className="bg-[#F5F5F5]">
               <TabsList className="flex flex-nowrap w-max rounded-full space-x-2 bg-transparent text-[#2C2D32] p-0 h-6 pl-4 pr-4">
-                {['all', 'matched', 'exiting', 'exited', 'cancelled'].map(
-                  (tab) => (
-                    <TabsTrigger
-                      key={tab}
-                      value={tab}
-                      ref={tabRefs[tab]}
-                      className={`flex items-center flex-shrink-0 px-5 py-1.5 space-x-2 rounded-full border-[0.5px] border-[#CBCBCB] bg-white data-[state=active]:border-[0.7px] data-[state=active]:border-[#5F5F5F] text-sm text-[#5F5F5F] font-normal h-auto`}
-                    >
-                      <span className="whitespace-nowrap capitalize">
-                        {tab}
-                      </span>
-                      {openMarketHoldingsPortfolioTab === tab && (
-                        <img src={X} alt="Close" />
-                      )}
-                    </TabsTrigger>
-                  )
-                )}
+                {[
+                  'all',
+                  'pending',
+                  'matched',
+                  'exiting',
+                  'exited',
+                  'canceled',
+                ].map((tab) => (
+                  <TabsTrigger
+                    key={tab}
+                    value={tab}
+                    ref={tabRefs[tab]}
+                    className={`flex items-center flex-shrink-0 px-5 py-1.5 space-x-2 rounded-full border-[0.5px] border-[#CBCBCB] bg-white data-[state=active]:border-[0.7px] data-[state=active]:border-[#5F5F5F] text-sm text-[#5F5F5F] font-normal h-auto`}
+                  >
+                    <span className="whitespace-nowrap capitalize">{tab}</span>
+                    {openMarketHoldingsPortfolioTab === tab && (
+                      <img src={X} alt="Close" />
+                    )}
+                  </TabsTrigger>
+                ))}
               </TabsList>
             </div>
           </Tabs>
         </div>
 
         <div className="flex flex-col gap-4 p-4">
-          {openMarketHoldings?.length > 0 &&
+          {  openMarketHoldings?.length > 0 &&
             openMarketHoldings.map((holding) => {
               return (
-                <div
+                <div    
                   key={holding.name}
                   className="bg-white rounded-[5px] p-4 flex flex-col gap-4"
                 >

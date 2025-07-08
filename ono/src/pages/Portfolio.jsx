@@ -59,8 +59,6 @@ const Portfolio = () => {
 
       // Check if market exists in current state
       if (!prevHoldings[marketId]) {
-        console.log(`Market ID ${marketId} not found in holdings`)
-        console.log(marketwiseActiveHoldings)
         return prevHoldings
       }
 
@@ -78,8 +76,6 @@ const Portfolio = () => {
   useFrappeEventListener('order_event', (updatedOrder) => {
     const { market_id, opinion_type, filled_quantity } = updatedOrder
 
-    console.log(updatedOrder)
-
     setMarketwiseActiveHoldings((prev) => {
       const market = prev[market_id]
       if (!market || !market.EXITING || !market.EXITING[opinion_type])
@@ -92,7 +88,9 @@ const Portfolio = () => {
           ...market.EXITING,
           [opinion_type]: {
             ...market.EXITING[opinion_type],
-            total_filled_quantity: market.EXITING.opinion_type.total_filled_quantity + filled_quantity, // updated fill
+            total_filled_quantity:
+              market.EXITING.opinion_type.total_filled_quantity +
+              filled_quantity, // updated fill
           },
         },
       }
@@ -352,7 +350,8 @@ const Portfolio = () => {
                             : ''
                         }`}
                       >
-                        &#8377;{Math.abs(current_value - total_investment)}
+                        &#8377;
+                        {Math.abs(current_value - total_investment).toFixed(1)}
                       </span>
                       <span>
                         {current_value > total_investment && (
