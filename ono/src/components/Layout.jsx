@@ -17,7 +17,7 @@ const Layout = () => {
   return (
     <div className="min-h-screen flex flex-col">
       {homeRoute && (
-        <div className="sticky top-0 left-0 right-0 z-[50] bg-white">
+        <div className="sticky top-0 left-0 right-0 z-[51] bg-white">
           <HomeHeader />
         </div>
       )}

@@ -56,6 +56,7 @@ const EventDetails = () => {
         field: 'creation',
         order: 'desc',
       },
+      limit: 6,
     },
     activeTab === 'activity' ? undefined : null
   )
@@ -161,7 +162,7 @@ const EventDetails = () => {
             </TabsList>
             <TabsContent value="activity">
               <div className="border-none">
-                {tradesData?.map((_) => {
+                {tradesData?.slice(0, 5)?.map((_) => {
                   const formatName = (name) =>
                     name?.length > 10
                       ? name?.slice(0, 10) + '…'
@@ -190,13 +191,15 @@ const EventDetails = () => {
                               style={{ width: `50%` }}
                               className={`font-inter py-[5px] px-[10px] bg-gradient-to-r from-[rgba(255,255,255,0.5)] to-[rgba(73,44,130,0.5)] text-[#492C82] flex justify-start text-xs font-semibold`}
                             >
-                              &#8377;{_.first_user_price}
+                              &#8377;
+                              {parseFloat(_.first_user_price)?.toFixed(1)}
                             </div>
                             <div
                               style={{ width: `50%` }}
                               className={`font-inter py-[5px] px-[10px] bg-gradient-to-r from-[rgba(226,111,100,0.5)] to-[rgba(255,255,255,0.5)] text-[#B74136] flex justify-end text-xs font-semibold`}
                             >
-                              &#8377;{_.second_user_price}
+                              &#8377;
+                              {parseFloat(_.second_user_price)?.toFixed(1)}
                             </div>
                           </div>
                         ) : (
@@ -205,13 +208,15 @@ const EventDetails = () => {
                               style={{ width: `${_.first_user_price * 10}%` }}
                               className={`font-inter py-[5px] px-[10px] bg-gradient-to-r from-[rgba(255,255,255,0.5)] to-[rgba(73,44,130,0.5)] text-[#492C82] flex justify-start text-xs font-semibold`}
                             >
-                              &#8377;{_.first_user_price}
+                              &#8377;
+                              {parseFloat(_.first_user_price)?.toFixed(1)}
                             </div>
                             <div
                               style={{ width: `${_.second_user_price * 10}%` }}
                               className={`font-inter py-[5px] px-[10px] bg-gradient-to-r from-[rgba(226,111,100,0.5)] to-[rgba(255,255,255,0.5)] text-[#B74136] flex justify-end text-xs font-semibold`}
                             >
-                              &#8377;{_.second_user_price}
+                              &#8377;
+                              {parseFloat(_.second_user_price)?.toFixed(1)}
                             </div>
                           </div>
                         )}
@@ -233,9 +238,11 @@ const EventDetails = () => {
                     </div>
                   )
                 })}
-                <div className="flex justify-center items-center py-6 bg-[#F5F5F5]">
-                  <MarketActivityDrawer />
-                </div>
+                {tradesData?.length > 5 && (
+                  <div className="flex justify-center items-center py-6 bg-[#F5F5F5]">
+                    <MarketActivityDrawer />
+                  </div>
+                )}
               </div>
             </TabsContent>
             <TabsContent value="order_book">
@@ -349,7 +356,7 @@ const EventDetails = () => {
           >
             <span>YES</span>
             <span className="font-inter font-normal">
-              &#8377;{market.yes_price}
+              &#8377;{market.yes_price?.toFixed(1)}
             </span>
           </button>
 
@@ -362,7 +369,7 @@ const EventDetails = () => {
           >
             <span>NO</span>
             <span className="font-inter font-normal">
-              &#8377;{market.no_price}
+              &#8377;{market.no_price?.toFixed(1)}
             </span>
           </button>
         </div>

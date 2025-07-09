@@ -1,10 +1,10 @@
-import CricketIcon from '@/assets/Cricket.svg'
 import CricketImage from '@/assets/CricketImage.svg'
 import Squircle from '@/assets/Squircle.png'
 import TradersIcon from '@/assets/Traders.svg'
 import LiveDotIcon from '@/assets/Live.svg'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
+import { Skeleton } from '@/components/ui/skeleton'
 import {
   Carousel,
   CarouselContent,
@@ -29,6 +29,8 @@ import {
   useFrappeEventListener,
   useFrappeGetCall,
   useFrappeGetDocList,
+  useSWR,
+  useSWRConfig,
 } from 'frappe-react-sdk'
 import { Users } from 'lucide-react'
 import scrollbarHide from 'tailwind-scrollbar-hide'
@@ -36,6 +38,8 @@ import { Navigate, useNavigate } from 'react-router-dom'
 
 const Home = () => {
   const navigate = useNavigate()
+  const { cache } = useSWRConfig()
+  console.log(cache)
   const [markets, setMarkets] = useState({})
   const [marketId, setMarketId] = useState('')
   const { data: marketData, isLoading: marketDataLoading } =
@@ -57,6 +61,7 @@ const Home = () => {
           field: 'total_traders',
           order: 'desc',
         },
+
         limit: 5,
       },
       'market_data'
@@ -116,10 +121,15 @@ const Home = () => {
 
   // console.log('categoryData:', marketCategoryData)
   const { data: marketingBannerData, isLoading: marketingBannerDataLoading } =
-    useFrappeGetDocList('Market Banner', {
-      fields: ['*'],
-      filters: [['home', '=', true]],
-    })
+    useFrappeGetDocList(
+      'Market Banner',
+      {
+        fields: ['*'],
+        filters: [['home', '=', true]],
+      },
+      'banner_data',
+      {}
+    )
 
   console.log('Market Category Data:', marketingBannerData)
 
@@ -187,16 +197,26 @@ const Home = () => {
               </div>
             ))}
           </div>
-          <div className="w-full relative z-[1] min-h-[70px]">
+
+          <div className="w-full relative z-[1] min-h-[87px]">
+            {marketingBannerDataLoading && (
+              <Skeleton className="min-h-[87px] w-full" />
+            )}
             <Carousel className="w-full" plugins={[bannerPlugin.current]}>
               <CarouselContent>
-                {marketingBannerData?.slice(0, 4)?.map((_, index) => (
-                  <CarouselItem key={_?.name} className="basis-[80%]">
-                    <div className="p-1 w-full">
-                      <img src={_?.image} alt="" className="w-full" />
-                    </div>
-                  </CarouselItem>
-                ))}
+                {!marketingBannerDataLoading &&
+                  marketingBannerData?.slice(0, 4)?.map((_, index) => (
+                    <CarouselItem key={_?.name} className="basis-[80%]">
+                      <div className="p-1 w-full">
+                        <img
+                          src={_?.image}
+                          alt=""
+                          className="w-full"
+                          loading="eager"
+                        />
+                      </div>
+                    </CarouselItem>
+                  ))}
               </CarouselContent>
             </Carousel>
           </div>
@@ -379,7 +399,7 @@ const Home = () => {
                       <img src={CricketImage} alt="" />
                     </div>
                     <div className="flex flex-col gap-2 w-[70%]">
-                      <h3 className="font-normal text-sm leading-[100%] text-[#181818]">
+                      <h3 className="font-normal text-sm leading-[20px] text-[#181818]">
                         {market.question}
                       </h3>
                       <p className="font-medium text-[10px] leading-[100%] text-[#606060]">
@@ -387,7 +407,7 @@ const Home = () => {
                       </p>
                       <div className="flex gap-2 items-center w-full">
                         <button
-                          className="bg-[#492C82] rounded-[6px] text-center text-white font-light text-[13px] leading-[100%] w-[50%] py-2"
+                          className="bg-[#492C82] rounded-[6px] text-center font-inter text-white font-light text-[13px] leading-[100%] w-[50%] py-2"
                           onClick={(e) => {
                             e.stopPropagation()
                             setSelectedChoice('YES')
@@ -395,10 +415,10 @@ const Home = () => {
                             setIsDrawerOpen(true)
                           }}
                         >
-                          YES &#8377;{market.yes_price}
+                          YES &#8377;{market.yes_price.toFixed(1)}
                         </button>
                         <button
-                          className="bg-[#E8685A] rounded-[6px] text-center text-white font-light text-[13px] leading-[100%] w-[50%] py-2"
+                          className="bg-[#E8685A] rounded-[6px] text-center font-inter text-white font-light text-[13px] leading-[100%] w-[50%] py-2"
                           onClick={(e) => {
                             e.stopPropagation()
                             setSelectedChoice('NO')
@@ -406,7 +426,7 @@ const Home = () => {
                             setIsDrawerOpen(true)
                           }}
                         >
-                          NO &#8377;{market.no_price}
+                          NO &#8377;{market.no_price.toFixed(1)}
                         </button>
                       </div>
                     </div>

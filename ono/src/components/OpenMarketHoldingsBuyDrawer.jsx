@@ -28,6 +28,7 @@ import {
   useFrappeCreateDoc,
   useFrappeEventListener,
   useFrappeGetDoc,
+  useSWRConfig,
 } from 'frappe-react-sdk'
 import { useParams } from 'react-router-dom'
 import {
@@ -49,14 +50,11 @@ import { toast } from 'sonner'
 import HigherQuantityDrawer from './HigherQuantityDrawer'
 import { trackEvent } from '../analytics/ga'
 
-const BuyDrawer = ({
-  isDrawerOpen,
-  setIsDrawerOpen,
-  selectedChoice,
-  setSelectedChoice,
-  marketId,
-}) => {
-  const { createDoc, isLoading } = useFrappeCreateDoc()
+const OpenMarketHoldingsBuyDrawer = ({ marketId, marketPrices }) => {
+  const { createDoc } = useFrappeCreateDoc()
+  const { mutate } = useSWRConfig()
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const [selectedChoice, setSelectedChoice] = useState('YES')
   const { currentUser } = useFrappeAuth()
   const { id } = useParams()
   const [market, setMarket] = useState({})
@@ -65,8 +63,24 @@ const BuyDrawer = ({
     marketId || id
   )
 
-  const { data: userWalletData, isLoading: userWalletDataLoading } =
-    useFrappeGetDoc('User Wallet', currentUser, currentUser ? undefined : null)
+  const { data: userWalletData } = useFrappeGetDoc(
+    'User Wallet',
+    currentUser,
+    currentUser ? undefined : null
+  )
+
+  useEffect(() => {
+    setMarket((prev) => {
+      return {
+        ...prev,
+        yes_price: marketPrices.market_yes_price,
+        no_price: marketPrices.market_no_price,
+      }
+    })
+  }, [marketPrices])
+
+  console.log('Market:   ', market)
+  console.log('Market Prices: ', marketPrices)
 
   const [price, setPrice] = useState(
     selectedChoice === 'YES' ? marketData?.yes_price : marketData?.no_price
@@ -81,9 +95,6 @@ const BuyDrawer = ({
 
   const [stopLossValue, setStopLossValue] = useState(price - 0.5)
   const [bookProfitValue, setBookProfitValue] = useState(price + 0.5)
-
-  const [stopLossError, setStopLossError] = useState('')
-  const [bookProfitError, setBookProfitError] = useState('')
 
   // Added state to control the swipe button from this component
   const [isSwipeSwiped, setIsSwipeSwiped] = useState(false)
@@ -163,7 +174,7 @@ const BuyDrawer = ({
   }
 
   useEffect(() => {
-    if (!marketDataLoading && Object.values(marketData)) {
+    if (!marketDataLoading && marketData) {
       setMarket(marketData)
     }
   }, [marketData])
@@ -174,13 +185,6 @@ const BuyDrawer = ({
     )
   }, [marketData])
 
-  useFrappeEventListener('market_event', (updatedData) => {
-    console.log('Hello: ', updatedData)
-    if (updatedData.name !== market.name) return
-    console.log('Updated Data: ', updatedData)
-    setMarket(updatedData)
-  })
-
   useEffect(() => {
     // Reset stop loss value when price changes
     setStopLossValue(price - 0.5)
@@ -188,8 +192,6 @@ const BuyDrawer = ({
     // Reset book profit value when price changes
     setBookProfitValue(price + 0.5)
   }, [price, selectedChoice])
-
-  console.log(maxQuantity)
 
   const handleConfirmBuy = async () => {
     if (isOrderProcessing) return // Prevent multiple submissions
@@ -224,19 +226,18 @@ const BuyDrawer = ({
         orderData.cancel_time = formatToFrappeLDatetime(selectedDateTime)
       }
 
-      console.log('asdasdasdasd', orderData)
-
       await createDoc('Orders', orderData)
 
       setIsSwipeSwiped(true)
 
       toast.success('Your Order is successfully placed.')
 
-      console.log(orderData)
-
       setTimeout(() => {
         setIsDrawerOpen(false)
       }, 1000)
+
+      mutate((key) => Array.isArray(key) && key[0] === 'open_market_holdings')
+
       trackEvent({
         category: 'Order',
         action: 'Placed Buy Order',
@@ -255,8 +256,6 @@ const BuyDrawer = ({
     setHasOrderError(false)
   }
 
-  console.log('selectedChoice: ', selectedChoice)
-
   useEffect(() => {
     if (!isDrawerOpen) {
       setIsSwipeSwiped(false)
@@ -266,6 +265,11 @@ const BuyDrawer = ({
   }, [isDrawerOpen])
   return (
     <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen} className="">
+      <DrawerTrigger className="w-[50%]">
+        <div className="text-center rounded-[20px] border py-2.5 px-4 bg-white text-[#2C2D32] hover:bg-[#2C2D32]/10 transition-all duration-300 cursor-pointer">
+          INVEST
+        </div>
+      </DrawerTrigger>
       <DrawerContent className="max-w-md mx-auto w-full max-h-full bg-[#F5F5F5]">
         <DrawerHeader className="p-0 pb-2">
           <div className="flex justify-between items-center gap-4 px-4">
@@ -751,4 +755,4 @@ const BuyDrawer = ({
   )
 }
 
-export default BuyDrawer
+export default OpenMarketHoldingsBuyDrawer

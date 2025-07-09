@@ -1,6 +1,7 @@
 import HamburgerIcon from '@/assets/HamburgerHeader.svg'
 import WalletIcon from '@/assets/WalletHeader.svg'
 import BellIcon from '@/assets/BellHeader.svg'
+import { NovuInbox } from './ui/inbox/NovuInbox'
 
 const HomeHeader = () => {
   return (
@@ -10,14 +11,13 @@ const HomeHeader = () => {
         <span className="text-[#E26F64] text-lg">ONO</span>
       </div>
 
-      <div className="flex gap-2.5 items-center">
+      <div className="flex gap-1 items-center">
         <div className="rounded-[20px] px-[11px] py-1.5 flex gap-2.5 border">
           <img src={WalletIcon} alt="" />
           <span className="text-md">&#8377;1,250.56</span>
         </div>
-        <div>
-          <img src={BellIcon} alt="" />
-        </div>
+
+        <NovuInbox />
       </div>
     </div>
   )

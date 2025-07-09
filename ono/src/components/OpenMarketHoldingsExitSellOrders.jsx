@@ -22,7 +22,7 @@ import {
 } from 'frappe-react-sdk'
 import { toast } from 'sonner'
 
-const ExitSellOrders = ({ market }) => {
+const OpenMarketHoldingsExitSellOrders = ({ market }) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
   const { createDoc } = useFrappeCreateDoc()
@@ -34,18 +34,13 @@ const ExitSellOrders = ({ market }) => {
   const [isNoChecked, setIsNoChecked] = useState(
     market?.ACTIVE?.NO ? true : false
   )
-  const [yesExitPrice, setYesExitPrice] = useState(market.yes_price)
-  const [noExitPrice, setNoExitPrice] = useState(market.no_price)
+  const [yesExitPrice, setYesExitPrice] = useState(market?.yes_price)
+  const [noExitPrice, setNoExitPrice] = useState(market?.no_price)
 
   const { mutate } = useSWRConfig()
 
   const handleCreateSellOrders = async () => {
     try {
-      console.log(
-        'HRGRGDFD',
-        market?.ACTIVE?.YES?.total_quantity -
-          market?.ACTIVE?.YES?.total_filled_quantity
-      )
       const yesSellOrder = {
         market_id: market.market_id,
         user_id: currentUser,
@@ -75,9 +70,7 @@ const ExitSellOrders = ({ market }) => {
       if (isNoChecked) {
         await createDoc('Orders', noSellOrder)
       }
-      mutate(
-        (key) => Array.isArray(key) && key[0] === 'open_marketwise_holdings'
-      )
+      mutate((key) => Array.isArray(key) && key[0] === 'open_market_holdings')
       toast.success(`Sell orders created successfully.`)
       setIsDrawerOpen(false)
     } catch (error) {
@@ -90,10 +83,13 @@ const ExitSellOrders = ({ market }) => {
       onClick={(e) => {
         e.stopPropagation()
       }}
+      className="w-[50%]"
     >
       <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-        <DrawerTrigger className="font-semibold text-xs flex items-center">
-          Exit <ChevronRight className="h-4 w-4" />
+        <DrawerTrigger className="w-full font-semibold text-xs">
+          <div className="text-center rounded-[20px] border py-2.5 px-4 bg-[#2C2D32] text-white hover:bg-[#2C2D32]/90 transition-all duration-300 cursor-pointer">
+            EXIT
+          </div>
         </DrawerTrigger>
         <DrawerContent className="max-w-md mx-auto w-full max-h-full">
           <DrawerHeader className="p-0">
@@ -218,7 +214,6 @@ const ExitSellOrders = ({ market }) => {
                               (market?.ACTIVE?.YES?.total_quantity -
                                 market?.ACTIVE?.YES?.total_filled_quantity) -
                             market?.ACTIVE?.YES?.total_invested
-                          console.log(exitReturns)
 
                           return (
                             <span
@@ -271,8 +266,6 @@ const ExitSellOrders = ({ market }) => {
                           (market?.ACTIVE?.NO?.total_quantity -
                             market?.ACTIVE?.NO?.total_filled_quantity) -
                         market.total_invested
-
-                      console.log('Hello: ', exitValue)
 
                       return (
                         <>
@@ -367,4 +360,4 @@ const ExitSellOrders = ({ market }) => {
   )
 }
 
-export default ExitSellOrders
+export default OpenMarketHoldingsExitSellOrders

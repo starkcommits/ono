@@ -14,9 +14,7 @@ const Widget = () => {
         </div>
         <div className="flex gap-2 text-white items-center">
           <span className="font-normal text-xs">Returns</span>
-          <span className="font-semibold text-xs text-[#337265]">
-            &#8377;2.2K
-          </span>
+          <span className="font-semibold text-xs text-white">&#8377;2.2K</span>
         </div>
       </div>
       <div className="text-white flex gap-2">
