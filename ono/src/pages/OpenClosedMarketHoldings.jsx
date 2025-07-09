@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useFrappeEventListener, useFrappeGetDoc } from 'frappe-react-sdk'
 import OpenMarketHoldings from '../components/OpenMarketHoldings'
+import ResolvedMarketHoldings from './ResolvedMarketHoldings'
 
 const OpenClosedMarketHoldings = () => {
   const [marketPrices, setMarketPrices] = useState({
@@ -49,7 +50,7 @@ const OpenClosedMarketHoldings = () => {
     )
 
   if (marketPrices.market_status === 'CLOSED') {
-    return
+    return <ResolvedMarketHoldings marketPrices={marketPrices} />
   }
 }
 
