@@ -1,4 +1,3 @@
-import React from 'react'
 import {
   Drawer,
   DrawerContent,
@@ -15,17 +14,18 @@ import { ChevronRight } from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import { useState } from 'react'
 import CancelAnimation from '@/assets/CancelAnimation.json'
+import CircleCrossIcon from '@/assets/CircleCrossIcon.svg'
+
 import {
   useFrappeAuth,
-  useFrappeCreateDoc,
-  useFrappeGetCall,
   useFrappePostCall,
   useSWRConfig,
 } from 'frappe-react-sdk'
 import { toast } from 'sonner'
 import Lottie from 'lottie-react'
 
-const CancelSellOrders = ({ market }) => {
+const OpenMarketHoldingsCancelSellOrders = ({ market, exitingHoldings }) => {
+  console.log('Holdingsadasdas', market)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const { call: cancelSellOrders } = useFrappePostCall(
     'rewardapp.engine.cancel_order'
@@ -94,7 +94,15 @@ const CancelSellOrders = ({ market }) => {
     >
       <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
         <DrawerTrigger className="font-semibold text-xs flex items-center">
-          Cancel <ChevronRight className="h-4 w-4" />
+          <div className="flex items-center gap-2 border rounded-full cursor-pointer hover:bg-[#2C2D32]/5 group">
+            <span className="font-normal font-inter text-[10px] text-[#2C2D32] px-1 pl-3.5">
+              {exitingHoldings} exiting
+            </span>
+            <Separator orientation="vertical" className="h-8" />
+            <span className="flex items-center justify-center px-1 pr-4">
+              <img src={CircleCrossIcon} alt="" />
+            </span>
+          </div>
         </DrawerTrigger>
         <DrawerContent className="max-w-md mx-auto w-full max-h-full">
           {showAnimation ? (
@@ -247,4 +255,4 @@ const CancelSellOrders = ({ market }) => {
   )
 }
 
-export default CancelSellOrders
+export default OpenMarketHoldingsCancelSellOrders

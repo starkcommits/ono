@@ -4,10 +4,11 @@ import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import X from '@/assets/X.svg'
 import Back from '@/assets/Back.svg'
+import UpArrowIcon from '@/assets/UpArrowIcon.svg'
 
 import CircleCrossIcon from '@/assets/CircleCrossIcon.svg'
 import { useEffect, useRef, useState } from 'react'
-import { Navigate, useNavigate, useParams } from 'react-router-dom'
+import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
 import {
   useFrappeAuth,
   useFrappeEventListener,
@@ -15,9 +16,18 @@ import {
   useFrappeGetDocList,
 } from 'frappe-react-sdk'
 import ExitSellOrders from './ExitSellOrders'
+import OpenMarketHoldingsBuyDrawer from './OpenMarketHoldingsBuyDrawer'
+import OpenMarketHoldingsExitSellOrders from './OpenMarketHoldingsExitSellOrders'
+import ExitSellOrder from './ExitSellOrder'
+import OpenMarketHoldingsCancelSellOrders from './OpenMarketHoldingsCancelSellOrders'
+import OpenMarketHoldingsCancelBuyOrders from './OpenMarketHoldingsCancelBuyOrders'
 
-const OpenMarketHoldings = ({ marketPrices }) => {
+const OpenMarketHoldings = ({ marketPrices, setMarketPrices }) => {
   const { market_id } = useParams()
+
+  const { state } = useLocation()
+
+  console.log(state)
 
   const { currentUser } = useFrappeAuth()
 
@@ -49,7 +59,7 @@ const OpenMarketHoldings = ({ marketPrices }) => {
           ['market_status', '=', 'OPEN'],
         ],
       },
-      currentUser && market_id ? undefined : null
+      currentUser && market_id ? ['open_market_holdings'] : null
     )
 
   const {
@@ -217,9 +227,6 @@ const OpenMarketHoldings = ({ marketPrices }) => {
       : null
   )
 
-  console.log('Open :', openMarketHoldings)
-  console.log('market: ', marketPrices)
-
   const handleTabChange = (value) => {
     localStorage.setItem('openMarketHoldingsPortfolioTab', value)
     setOpenMarketHoldingsPortfolioTab(value)
@@ -283,34 +290,138 @@ const OpenMarketHoldings = ({ marketPrices }) => {
           <div className="flex flex-col gap-4 items-center p-4 rounded-[5px] bg-white">
             <div className="flex flex-col gap-1 items-center">
               <p className="font-normal text-xs">Live Returns</p>
-              <p className="flex items-center gap-1">
-                <span>
-                  <img src={DownArrowIcon} alt="" />
-                </span>
-                <span className="font-inter font-semibold text-sm">
-                  &#8377;
-                  {openMarketHoldings
-                    ?.reduce((acc, holding) => {
-                      if (holding.opinion_type === 'YES') {
-                        acc =
-                          acc +
-                          marketPrices.market_yes_price *
-                            (holding.quantity - holding.filled_quantity) -
-                          holding.price *
-                            (holding.quantity - holding.filled_quantity)
-                      } else {
-                        acc =
-                          acc +
-                          marketPrices.market_no_price *
-                            (holding.quantity - holding.filled_quantity) -
-                          holding.price *
-                            (holding.quantity - holding.filled_quantity)
-                      }
-                      return acc
-                    }, 0)
-                    .toFixed(1)}
-                </span>
-              </p>
+              {openMarketHoldings?.reduce((acc, holding) => {
+                if (holding.opinion_type === 'YES') {
+                  acc =
+                    acc +
+                    marketPrices.market_yes_price *
+                      (holding.quantity - holding.filled_quantity) -
+                    holding.price * (holding.quantity - holding.filled_quantity)
+                } else {
+                  acc =
+                    acc +
+                    marketPrices.market_no_price *
+                      (holding.quantity - holding.filled_quantity) -
+                    holding.price * (holding.quantity - holding.filled_quantity)
+                }
+                return acc
+              }, 0) === 0 && (
+                <p className="flex items-center gap-1">
+                  <span className="font-inter font-semibold text-sm">
+                    &#8377;
+                    {openMarketHoldings
+                      ?.reduce((acc, holding) => {
+                        if (holding.opinion_type === 'YES') {
+                          acc =
+                            acc +
+                            marketPrices.market_yes_price *
+                              (holding.quantity - holding.filled_quantity) -
+                            holding.price *
+                              (holding.quantity - holding.filled_quantity)
+                        } else {
+                          acc =
+                            acc +
+                            marketPrices.market_no_price *
+                              (holding.quantity - holding.filled_quantity) -
+                            holding.price *
+                              (holding.quantity - holding.filled_quantity)
+                        }
+                        return acc
+                      }, 0)
+                      .toFixed(1)}
+                  </span>
+                </p>
+              )}
+              {openMarketHoldings?.reduce((acc, holding) => {
+                if (holding.opinion_type === 'YES') {
+                  acc =
+                    acc +
+                    marketPrices.market_yes_price *
+                      (holding.quantity - holding.filled_quantity) -
+                    holding.price * (holding.quantity - holding.filled_quantity)
+                } else {
+                  acc =
+                    acc +
+                    marketPrices.market_no_price *
+                      (holding.quantity - holding.filled_quantity) -
+                    holding.price * (holding.quantity - holding.filled_quantity)
+                }
+                return acc
+              }, 0) > 0 && (
+                <p className="flex items-center gap-1">
+                  <span>
+                    <img className="" src={UpArrowIcon} alt="" />
+                  </span>
+                  <span className="font-inter font-semibold text-sm text-[#337265]">
+                    &#8377;
+                    {openMarketHoldings
+                      ?.reduce((acc, holding) => {
+                        if (holding.opinion_type === 'YES') {
+                          acc =
+                            acc +
+                            marketPrices.market_yes_price *
+                              (holding.quantity - holding.filled_quantity) -
+                            holding.price *
+                              (holding.quantity - holding.filled_quantity)
+                        } else {
+                          acc =
+                            acc +
+                            marketPrices.market_no_price *
+                              (holding.quantity - holding.filled_quantity) -
+                            holding.price *
+                              (holding.quantity - holding.filled_quantity)
+                        }
+                        return acc
+                      }, 0)
+                      .toFixed(1)}
+                  </span>
+                </p>
+              )}
+              {openMarketHoldings?.reduce((acc, holding) => {
+                if (holding.opinion_type === 'YES') {
+                  acc =
+                    acc +
+                    marketPrices.market_yes_price *
+                      (holding.quantity - holding.filled_quantity) -
+                    holding.price * (holding.quantity - holding.filled_quantity)
+                } else {
+                  acc =
+                    acc +
+                    marketPrices.market_no_price *
+                      (holding.quantity - holding.filled_quantity) -
+                    holding.price * (holding.quantity - holding.filled_quantity)
+                }
+                return acc
+              }, 0) < 0 && (
+                <p className="flex items-center gap-1">
+                  <span>
+                    <img src={DownArrowIcon} alt="" />
+                  </span>
+                  <span className="font-inter font-semibold text-sm text-[#E26F64]">
+                    &#8377;
+                    {openMarketHoldings
+                      ?.reduce((acc, holding) => {
+                        if (holding.opinion_type === 'YES') {
+                          acc =
+                            acc +
+                            marketPrices.market_yes_price *
+                              (holding.quantity - holding.filled_quantity) -
+                            holding.price *
+                              (holding.quantity - holding.filled_quantity)
+                        } else {
+                          acc =
+                            acc +
+                            marketPrices.market_no_price *
+                              (holding.quantity - holding.filled_quantity) -
+                            holding.price *
+                              (holding.quantity - holding.filled_quantity)
+                        }
+                        return acc
+                      }, 0)
+                      .toFixed(1)}
+                  </span>
+                </p>
+              )}
             </div>
             <div className="w-full flex items-center justify-between">
               <div className="flex flex-col items-start">
@@ -354,12 +465,11 @@ const OpenMarketHoldings = ({ marketPrices }) => {
               </div>
             </div>
             <div className="w-full flex items-center justify-between gap-4 text-xs font-medium">
-              <div className="w-[50%] text-center rounded-[20px] border py-2.5 px-4 bg-white text-[#2C2D32] cursor-pointer">
-                INVEST
-              </div>
-              <div className="w-[50%] text-center rounded-[20px] border py-2.5 px-4 bg-[#2C2D32] text-white cursor-pointer">
-                EXIT
-              </div>
+              <OpenMarketHoldingsBuyDrawer
+                marketId={market_id}
+                marketPrices={marketPrices}
+              />
+              <OpenMarketHoldingsExitSellOrders market={state.market} />
             </div>
             <div className="w-full flex justify-between items-center pt-4 border-dashed border-t-[0.7px] text-[#2C2D32]">
               <span className="font-normal text-xs">Exited Returns</span>
@@ -384,15 +494,10 @@ const OpenMarketHoldings = ({ marketPrices }) => {
 
               return (
                 <div className="w-full flex gap-4 items-center border-dashed border-t-[0.7px] pt-4">
-                  <div className="flex items-center gap-2 border rounded-full cursor-pointer">
-                    <span className="font-normal font-inter text-[10px] text-[#2C2D32] px-1 pl-3.5">
-                      {unmatchedHoldings} unmatched
-                    </span>
-                    <Separator orientation="vertical" className="h-8" />
-                    <span className="flex items-center justify-center px-1 pr-4">
-                      <img src={CircleCrossIcon} alt="" />
-                    </span>
-                  </div>
+                  <OpenMarketHoldingsCancelBuyOrders
+                    market={state.market}
+                    unmatchedHoldings={unmatchedHoldings}
+                  />
                 </div>
               )
             })()}
@@ -407,134 +512,124 @@ const OpenMarketHoldings = ({ marketPrices }) => {
               if (exitingHoldings === 0) return null
               return (
                 <div className="w-full flex gap-4 items-center border-dashed border-t-[0.7px] pt-4">
-                  <div className="flex items-center gap-2 border rounded-full cursor-pointer">
-                    <span className="font-normal font-inter text-[10px] text-[#2C2D32] px-1 pl-3.5">
-                      {exitingHoldings} exiting
-                    </span>
-                    <Separator orientation="vertical" className="h-8" />
-                    <span className="flex items-center justify-center px-1 pr-4">
-                      <img src={CircleCrossIcon} alt="" />
-                    </span>
-                  </div>
+                  <OpenMarketHoldingsCancelSellOrders
+                    market={state.market}
+                    exitingHoldings={exitingHoldings}
+                  />
                 </div>
               )
             })()}
           </div>
         </div>
-
-        <div className="w-full overflow-x-auto scrollbar-hide">
-          <Tabs
-            className="w-full py-4 font-[500] text-xs"
-            value={openMarketHoldingsPortfolioTab}
-            onValueChange={handleTabChange}
-          >
-            <div className="bg-[#F5F5F5]">
-              <TabsList className="flex flex-nowrap w-max rounded-full space-x-2 bg-transparent text-[#2C2D32] p-0 h-6 pl-4 pr-4">
-                {[
-                  'all',
-                  'pending',
-                  'matched',
-                  'exiting',
-                  'exited',
-                  'canceled',
-                ].map((tab) => (
-                  <TabsTrigger
-                    key={tab}
-                    value={tab}
-                    ref={tabRefs[tab]}
-                    className={`flex items-center flex-shrink-0 px-5 py-1.5 space-x-2 rounded-full border-[0.5px] border-[#CBCBCB] bg-white data-[state=active]:border-[0.7px] data-[state=active]:border-[#5F5F5F] text-sm text-[#5F5F5F] font-normal h-auto`}
-                  >
-                    <span className="whitespace-nowrap capitalize">{tab}</span>
-                    {openMarketHoldingsPortfolioTab === tab && (
-                      <img src={X} alt="Close" />
-                    )}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </div>
-          </Tabs>
-        </div>
-
-        <div className="flex flex-col gap-4 p-4">
-          {  openMarketHoldings?.length > 0 &&
-            openMarketHoldings.map((holding) => {
-              return (
-                <div    
-                  key={holding.name}
-                  className="bg-white rounded-[5px] p-4 flex flex-col gap-4"
+      </div>
+      <div className="w-full overflow-x-auto scrollbar-hide sticky top-0">
+        <Tabs
+          className="w-full py-4 font-[500] text-xs"
+          value={openMarketHoldingsPortfolioTab}
+          onValueChange={handleTabChange}
+        >
+          <div className="bg-[#F5F5F5]">
+            <TabsList className="flex flex-nowrap w-max rounded-full space-x-2 bg-transparent text-[#2C2D32] p-0 h-6 pl-4 pr-4">
+              {[
+                'all',
+                'pending',
+                'matched',
+                'exiting',
+                'exited',
+                'canceled',
+              ].map((tab) => (
+                <TabsTrigger
+                  key={tab}
+                  value={tab}
+                  ref={tabRefs[tab]}
+                  className={`flex items-center flex-shrink-0 px-5 py-1.5 space-x-2 rounded-full border-[0.5px] border-[#CBCBCB] bg-white data-[state=active]:border-[0.7px] data-[state=active]:border-[#5F5F5F] text-sm text-[#5F5F5F] font-normal h-auto`}
                 >
-                  <div className="flex items-center justify-between">
-                    {holding.opinion_type === 'YES' && (
-                      <p className="font-semibold text-xl text-[#492C82]">
-                        YES
-                      </p>
-                    )}
-                    {holding.opinion_type === 'NO' && (
-                      <p className="font-semibold text-xl text-[#E26F64]">NO</p>
-                    )}
-                    {holding.status === 'UNMATCHED' && (
-                      <div className="flex items-center gap-2 border rounded-full cursor-pointer">
-                        <span className="font-normal font-inter text-[10px] text-[#2C2D32] px-1 pl-3.5">
-                          {holding.quantity - holding.filled_quantity} unmatched
-                        </span>
-                        <Separator orientation="vertical" className="h-8" />
-                        <span className="flex items-center justify-center px-1 pr-4">
-                          <img src={CircleCrossIcon} alt="" />
-                        </span>
-                      </div>
-                    )}
-                    {holding.status === 'EXITING' && (
-                      <div className="flex items-center gap-2 border rounded-full cursor-pointer">
-                        <span className="font-normal font-inter text-[10px] text-[#2C2D32] px-1 pl-3.5">
-                          {holding.quantity - holding.filled_quantity} exiting
-                        </span>
-                        <Separator orientation="vertical" className="h-8" />
-                        <span className="flex items-center justify-center px-1 pr-4">
-                          <img src={CircleCrossIcon} alt="" />
-                        </span>
-                      </div>
-                    )}
-                    {holding.status === 'ACTIVE' && (
-                      <div className="font-medium text-xs text-[#2C2D32] border border-[#CBCBCB] rounded-[20px] py-2.5 px-7">
-                        Exit
-                      </div>
-                    )}
+                  <span className="whitespace-nowrap capitalize">{tab}</span>
+                  {openMarketHoldingsPortfolioTab === tab && (
+                    <img src={X} alt="Close" />
+                  )}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
+        </Tabs>
+      </div>
+
+      <div className="flex flex-col gap-4 p-4">
+        {openMarketHoldings?.length > 0 &&
+          openMarketHoldings.map((holding) => {
+            return (
+              <div
+                key={holding.name}
+                className="bg-white rounded-[5px] p-4 flex flex-col gap-4"
+              >
+                <div className="flex items-center justify-between">
+                  {holding.opinion_type === 'YES' && (
+                    <p className="font-semibold text-xl text-[#492C82]">YES</p>
+                  )}
+                  {holding.opinion_type === 'NO' && (
+                    <p className="font-semibold text-xl text-[#E26F64]">NO</p>
+                  )}
+                  {holding.status === 'UNMATCHED' && (
+                    <div className="flex items-center gap-2 border rounded-full cursor-pointer">
+                      <span className="font-normal font-inter text-[10px] text-[#2C2D32] hover:bg-[#2C2D32]/5 group px-1 pl-3.5">
+                        {holding.quantity - holding.filled_quantity} unmatched
+                      </span>
+                      <Separator orientation="vertical" className="h-8" />
+                      <span className="flex items-center justify-center px-1 pr-4">
+                        <img src={CircleCrossIcon} alt="" />
+                      </span>
+                    </div>
+                  )}
+                  {holding.status === 'EXITING' && (
+                    <div className="flex items-center gap-2 border rounded-full cursor-pointer group hover:bg-[#2C2D32]/5">
+                      <span className="font-normal font-inter text-[10px] text-[#2C2D32]  px-1 pl-3.5">
+                        {holding.quantity - holding.filled_quantity} exiting
+                      </span>
+                      <Separator orientation="vertical" className="h-8" />
+                      <span className="flex items-center justify-center px-1 pr-4">
+                        <img src={CircleCrossIcon} alt="" />
+                      </span>
+                    </div>
+                  )}
+                  {holding.status === 'ACTIVE' && (
+                    <ExitSellOrder holding={holding} />
+                  )}
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex flex-col gap-1 items-start">
+                    <p className="font-normal text-xs text-[#5F5F5F]">
+                      Investment
+                    </p>
+                    <p className="font-inter font-semibold text-sm text-[#2C2D32]">
+                      &#8377;
+                      {holding.price *
+                        (holding.quantity - holding.filled_quantity)}
+                    </p>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex flex-col gap-1 items-start">
-                      <p className="font-normal text-xs text-[#5F5F5F]">
-                        Investment
-                      </p>
+                  <div className="flex flex-col gap-1 items-end">
+                    <p className="font-normal text-xs text-[#5F5F5F]">
+                      Current Value
+                    </p>
+                    {holding.opinion_type === 'YES' ? (
                       <p className="font-inter font-semibold text-sm text-[#2C2D32]">
                         &#8377;
-                        {holding.price *
+                        {marketPrices.market_yes_price *
                           (holding.quantity - holding.filled_quantity)}
                       </p>
-                    </div>
-                    <div className="flex flex-col gap-1 items-end">
-                      <p className="font-normal text-xs text-[#5F5F5F]">
-                        Current Value
+                    ) : null}
+                    {holding.opinion_type === 'NO' ? (
+                      <p className="font-inter font-semibold text-sm text-[#2C2D32]">
+                        &#8377;
+                        {marketPrices.market_no_price *
+                          (holding.quantity - holding.filled_quantity)}
                       </p>
-                      {holding.opinion_type === 'YES' ? (
-                        <p className="font-inter font-semibold text-sm text-[#2C2D32]">
-                          &#8377;
-                          {marketPrices.market_yes_price *
-                            (holding.quantity - holding.filled_quantity)}
-                        </p>
-                      ) : null}
-                      {holding.opinion_type === 'NO' ? (
-                        <p className="font-inter font-semibold text-sm text-[#2C2D32]">
-                          &#8377;
-                          {marketPrices.market_no_price *
-                            (holding.quantity - holding.filled_quantity)}
-                        </p>
-                      ) : null}
-                    </div>
+                    ) : null}
                   </div>
                 </div>
-              )
-            })}
-        </div>
+              </div>
+            )
+          })}
       </div>
     </div>
   )

@@ -1,19 +1,6 @@
-import CricketImage from '@/assets/CricketImage.svg'
-import DownArrowIcon from '@/assets/DownArrowIcon.svg'
-import { Separator } from '@/components/ui/separator'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import X from '@/assets/X.svg'
-import Back from '@/assets/Back.svg'
-
-import CircleCrossIcon from '@/assets/CircleCrossIcon.svg'
-import { useEffect, useRef, useState } from 'react'
-import { Navigate, useNavigate, useParams } from 'react-router-dom'
-import {
-  useFrappeAuth,
-  useFrappeEventListener,
-  useFrappeGetDoc,
-  useFrappeGetDocList,
-} from 'frappe-react-sdk'
+import { useEffect, useState } from 'react'
+import { useParams } from 'react-router-dom'
+import { useFrappeEventListener, useFrappeGetDoc } from 'frappe-react-sdk'
 import OpenMarketHoldings from '../components/OpenMarketHoldings'
 
 const OpenClosedMarketHoldings = () => {
@@ -25,7 +12,7 @@ const OpenClosedMarketHoldings = () => {
 
   const { market_id } = useParams()
 
-  const { data: market, isLoading: marketLoading } = useFrappeGetDoc(
+  const { data: market } = useFrappeGetDoc(
     'Market',
     market_id,
     market_id ? undefined : null
@@ -41,22 +28,28 @@ const OpenClosedMarketHoldings = () => {
     }
   }, [market])
 
-  useFrappeEventListener('market_event', (market) => {
-    console.log('Updated: ', market)
-    if (market.name === market_id) {
+  useFrappeEventListener('market_event', (marketUpdated) => {
+    console.log('Updated open cclosed: ', marketUpdated)
+    if (marketUpdated.name === market_id) {
       setMarketPrices({
-        market_yes_price: parseFloat(market.yes_price),
-        market_no_price: parseFloat(market.no_price),
-        market_status: market.status,
+        market_yes_price: parseFloat(marketUpdated.yes_price),
+        market_no_price: parseFloat(marketUpdated.no_price),
+        market_status: marketUpdated.status,
       })
     }
   })
+  console.log('Open closed marketPrices', marketPrices)
 
   if (marketPrices.market_status === 'OPEN')
-    return <OpenMarketHoldings marketPrices={marketPrices} />
+    return (
+      <OpenMarketHoldings
+        marketPrices={marketPrices}
+        setMarketPrices={setMarketPrices}
+      />
+    )
 
   if (marketPrices.market_status === 'CLOSED') {
-    return 
+    return
   }
 }
 

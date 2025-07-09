@@ -20,6 +20,7 @@ import OpenClosedMarketHoldings from './pages/OpenClosedMarketHoldings'
 import { AnalyticsProvider } from './analytics/AnalyticsProvider'
 import { NovuInbox } from './components/ui/inbox/NovuInbox'
 import { useEffect } from 'react'
+import TransactionHistory from './pages/TransactionsHistory'
 
 function App() {
   useEffect(() => {
@@ -65,6 +66,7 @@ function App() {
           <Route path="/event/:id" element={<EventDetails />} />
           <Route path="/category/:id" element={<CategoryDetails />} />
           <Route path="/fixture/:id" element={<FixtureDetails />} />
+          <Route path="/transactions" element={<TransactionHistory />} />
         </Route>
       </Routes>
     </div>

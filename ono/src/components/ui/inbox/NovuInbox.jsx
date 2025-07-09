@@ -5,7 +5,7 @@ import { dark } from '@novu/react/themes'
 
 export function NovuInbox() {
   // Using provided subscriber ID - replace with your actual subscriber ID from your auth system
-  const temporarySubscriberId = '68679f0e89b471d45d3f232a'
+  const temporarySubscriberId = '686d1213c896dbac5ae3efea'
 
   const tabs = [
     // Basic tab with no filtering (shows all notifications)
@@ -50,8 +50,8 @@ export function NovuInbox() {
     <Inbox
       applicationIdentifier={import.meta.env.VITE_NOVU_APP_ID || ''}
       subscriberId={temporarySubscriberId}
-      backendUrl="http://13.202.185.148:3000/"
-      socketUrl="http://13.202.185.148:3002/"
+      backendUrl="https://guerilla.onoapp.in/api"
+      socketUrl="https://guerilla.onoapp.in/ws"
       tabs={tabs}
       appearance={{
         // To enable dark theme support, uncomment the following line:

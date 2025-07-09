@@ -53,9 +53,10 @@ const Portfolio = () => {
   }, [marketwiseActiveHoldingsData])
 
   useFrappeEventListener('market_event', (updatedMarket) => {
-    console.log(updatedMarket)
     setMarketwiseActiveHoldings((prevHoldings) => {
       const marketId = updatedMarket.name
+
+      console.log('Updated Market protfolio', updatedMarket)
 
       // Check if market exists in current state
       if (!prevHoldings[marketId]) {
@@ -102,7 +103,7 @@ const Portfolio = () => {
     })
   })
 
-  console.log('Portfolio: ', marketwiseActiveHoldings)
+  console.log('Portfolio marketwise: ', marketwiseActiveHoldings)
 
   const handleTabChange = (value) => {
     localStorage.setItem('currentPortfolioTab', value)
@@ -379,7 +380,11 @@ const Portfolio = () => {
                     key={marketHolding.market_id}
                     className="bg-white p-4 flex flex-col font-inter gap-4 rounded-[5px]"
                     onClick={(e) => {
-                      navigate(`/portfolio/open/${marketHolding.market_id}`)
+                      navigate(`/portfolio/open/${marketHolding.market_id}`, {
+                        state: {
+                          market: marketHolding,
+                        },
+                      })
                     }}
                   >
                     <div className="flex items-center gap-1">
