@@ -649,37 +649,52 @@ def get_marketwise_holding():
     #     GROUP BY h.market_id, m.question, m.yes_price, m.no_price
     # """, (user_id,), as_dict=True)
     results = frappe.db.sql("""
-        SELECT
-            h.name AS holding_id,
+        SELECT 
             h.market_id,
             h.opinion_type,
             h.status,
-            h.quantity AS holding_quantity,
-            h.filled_quantity AS holding_filled_quantity,
-            h.price AS holding_price,
-            o.quantity AS order_quantity,
-            o.filled_quantity AS order_filled_quantity,
-            o.amount AS order_amount,
             m.question,
             m.yes_price,
-            m.no_price
-        FROM
+            m.no_price,
+            CASE 
+                WHEN h.status = 'EXITING' THEN 
+                    SUM(DISTINCT CASE WHEN o.name IS NOT NULL THEN 
+                        (COALESCE(o.quantity, 0) - COALESCE(o.filled_quantity, 0)) * COALESCE(o.amount, 0)
+                        ELSE 0 END)
+                ELSE 
+                    SUM((COALESCE(h.quantity, 0) - COALESCE(h.filled_quantity, 0)) * COALESCE(h.price, 0))
+            END AS total_invested,
+            CASE 
+                WHEN h.status = 'EXITING' THEN 
+                    MAX(COALESCE(o.quantity, 0))
+                ELSE 
+                    SUM(COALESCE(h.quantity, 0))
+            END AS total_quantity,
+            CASE 
+                WHEN h.status = 'EXITING' THEN 
+                    MAX(COALESCE(o.filled_quantity, 0))
+                ELSE 
+                    SUM(COALESCE(h.filled_quantity, 0))
+            END AS total_filled_quantity
+        FROM 
             `tabHolding` h
-        JOIN
+        JOIN 
             `tabMarket` m ON h.market_id = m.name
-        LEFT JOIN
+        LEFT JOIN 
             `tabOrders` o ON o.name = h.order_id
-        WHERE
+        WHERE 
             m.status = 'OPEN'
             AND h.user_id = %(user_id)s
-    """, {"user_id": user_id}, as_dict=True)
+        GROUP BY 
+            h.market_id, h.opinion_type, h.status, m.question, m.yes_price, m.no_price
+        """, {"user_id": user_id}, as_dict=True)
 
     output = {}
     for row in results:
         market = row['market_id']
         status = row['status']
         opinion = row['opinion_type']
-
+        
         if market not in output:
             output[market] = {
                 "market_id": market,
@@ -688,21 +703,12 @@ def get_marketwise_holding():
                 "no_price": row["no_price"],
                 "total_invested": 0
             }
-
-        if status == "EXITING":
-            qty = row["order_quantity"] or 0
-            filled_qty = row["order_filled_quantity"] or 0
-            invested = (qty - filled_qty) * (row["order_amount"] or 0)
-        else:
-            qty = row["holding_quantity"] or 0
-            filled_qty = row["holding_filled_quantity"] or 0
-            invested = (qty - filled_qty) * (row["holding_price"] or 0)
-
-        output[market]["total_invested"] += invested
+        
+        output[market]["total_invested"] += row["total_invested"]
         output[market].setdefault(status, {})[opinion] = {
-            "total_quantity": qty,
-            "total_filled_quantity": filled_qty,
-            "total_invested": invested
+            "total_quantity": row["total_quantity"],
+            "total_filled_quantity": row["total_filled_quantity"],
+            "total_invested": row["total_invested"]
         }
 
     return output
