@@ -628,26 +628,6 @@ def get_marketwise_transaction_summary():
 def get_marketwise_holding():
     user_id = frappe.session.user  # replace this with actual user ID
 
-    # result = frappe.db.sql("""
-    #     SELECT
-    #         h.market_id,
-    #         m.question,
-    #         m.yes_price,
-    #         m.no_price,
-    #         SUM(h.quantity - h.filled_quantity) AS total_quantity,
-    #         CASE 
-    #             WHEN SUM(h.quantity - h.filled_quantity) > 0 THEN
-    #                 SUM((h.quantity - h.filled_quantity) * h.price)
-    #             ELSE 0
-    #         END AS invested_amount,
-    #         SUM(CASE WHEN h.opinion_type = 'yes' THEN h.quantity - h.filled_quantity ELSE 0 END) AS yes_quantity,
-    #         SUM(CASE WHEN h.opinion_type = 'no' THEN h.quantity - h.filled_quantity ELSE 0 END) AS no_quantity
-    #     FROM `tabHolding` h
-    #     JOIN `tabMarket` m ON h.market_id = m.name
-    #     WHERE h.user_id = %s
-    #     AND h.status = 'ACTIVE'
-    #     GROUP BY h.market_id, m.question, m.yes_price, m.no_price
-    # """, (user_id,), as_dict=True)
     results = frappe.db.sql("""
         SELECT 
             h.market_id,
@@ -675,7 +655,13 @@ def get_marketwise_holding():
                     MAX(COALESCE(o.filled_quantity, 0))
                 ELSE 
                     SUM(COALESCE(h.filled_quantity, 0))
-            END AS total_filled_quantity
+            END AS total_filled_quantity,
+            CASE 
+                WHEN h.status = 'EXITING' THEN 
+                    MAX(COALESCE(o.amount, 0))
+                ELSE 
+                    SUM(COALESCE(h.exit_price, 0))
+            END AS exit_value
         FROM 
             `tabHolding` h
         JOIN 
@@ -708,12 +694,89 @@ def get_marketwise_holding():
         output[market].setdefault(status, {})[opinion] = {
             "total_quantity": row["total_quantity"],
             "total_filled_quantity": row["total_filled_quantity"],
-            "total_invested": row["total_invested"]
+            "total_invested": row["total_invested"],
+            "exit_value": row["exit_value"]
         }
 
     return output
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
+def get_market_holdings():
+    data = frappe.request.get_json()
+    results = frappe.db.sql("""
+        SELECT 
+            h.market_id,
+            h.opinion_type,
+            h.status,
+            m.question,
+            m.yes_price,
+            m.no_price,
+            CASE 
+                WHEN h.status = 'EXITING' THEN 
+                    SUM(DISTINCT CASE WHEN o.name IS NOT NULL THEN 
+                        (COALESCE(o.quantity, 0) - COALESCE(o.filled_quantity, 0)) * COALESCE(o.amount, 0)
+                        ELSE 0 END)
+                ELSE 
+                    SUM((COALESCE(h.quantity, 0) - COALESCE(h.filled_quantity, 0)) * COALESCE(h.price, 0))
+            END AS total_invested,
+            CASE 
+                WHEN h.status = 'EXITING' THEN 
+                    MAX(COALESCE(o.quantity, 0))
+                ELSE 
+                    SUM(COALESCE(h.quantity, 0))
+            END AS total_quantity,
+            CASE 
+                WHEN h.status = 'EXITING' THEN 
+                    MAX(COALESCE(o.filled_quantity, 0))
+                ELSE 
+                    SUM(COALESCE(h.filled_quantity, 0))
+            END AS total_filled_quantity,
+            CASE 
+                WHEN h.status = 'EXITING' THEN 
+                    MAX(COALESCE(o.amount, 0))
+                ELSE 
+                    SUM(COALESCE(h.exit_price, 0))
+            END AS exit_value
+        FROM 
+            `tabHolding` h
+        JOIN 
+            `tabMarket` m ON h.market_id = m.name
+        LEFT JOIN 
+            `tabOrders` o ON o.name = h.order_id
+        WHERE 
+            m.status = 'OPEN'
+            AND m.name = %(market_id)s
+            AND h.user_id = %(user_id)s
+        GROUP BY 
+            h.market_id, h.opinion_type, h.status, m.question, m.yes_price, m.no_price
+        """,{"market_id": data.get("market_id"), "user_id": data.get("user_id")}, as_dict=True)
+
+    output = {}
+    for row in results:
+        market = row['market_id']
+        status = row['status']
+        opinion = row['opinion_type']
+        
+        if market not in output:
+            output[market] = {
+                "market_id": market,
+                "question": row["question"],
+                "yes_price": row["yes_price"],
+                "no_price": row["no_price"],
+                "total_invested": 0
+            }
+        
+        output[market]["total_invested"] += row["total_invested"]
+        output[market].setdefault(status, {})[opinion] = {
+            "total_quantity": row["total_quantity"],
+            "total_filled_quantity": row["total_filled_quantity"],
+            "total_invested": row["total_invested"],
+            "exit_value": row["exit_value"]
+        }
+
+    return output
+
+@frappe.whitelist()
 def get_available_quantity(market_id):
     query = """
         SELECT 
