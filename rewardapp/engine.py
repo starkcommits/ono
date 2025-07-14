@@ -755,7 +755,7 @@ def get_market_holdings():
     if not results:
         return {}
     
-    # Since we're filtering by specific market_id, we can simplify
+    # Initialize output with market info from first row
     first_row = results[0]
     output = {
         "market_id": first_row["market_id"],
@@ -770,7 +770,12 @@ def get_market_holdings():
         opinion = row['opinion_type']
         
         output["total_invested"] += row["total_invested"]
-        output.setdefault(status, {})[opinion] = {
+        
+        # Properly handle multiple statuses
+        if status not in output:
+            output[status] = {}
+        
+        output[status][opinion] = {
             "total_quantity": row["total_quantity"],
             "total_filled_quantity": row["total_filled_quantity"],
             "total_invested": row["total_invested"],
