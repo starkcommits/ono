@@ -244,14 +244,21 @@ def verify_otp(mobile, otp):
         else:
             frappe.local.cookie_manager.set_cookie("system_user", "yes")
 
+        user_doc.api_key = frappe.generate_hash(length=15)
+        raw = frappe.generate_hash(length=30)
+        user_doc.api_secret = raw
+        user_doc.save(ignore_permissions=True)
         frappe.db.commit()
 
         return {
             "message": "Logged in",
             "user_id": user,
             "sid": frappe.session.sid,
-            "user_exist":user_exist
+            "user_exist":user_exist,
+            "api_key": user_doc.api_key,
+            "api_secret": raw
         }
+        
     except Exception as e:
         frappe.log_error("Error in otp validation",f"{str(e)}")
         frappe.throw(f"Error in otp validation {str(e)}")

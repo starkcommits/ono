@@ -759,7 +759,7 @@ def get_market_holdings():
         opinion = row['opinion_type']
         
         if market not in output:
-            output[market] = {
+            output = {
                 "market_id": market,
                 "question": row["question"],
                 "yes_price": row["yes_price"],
@@ -767,8 +767,8 @@ def get_market_holdings():
                 "total_invested": 0
             }
         
-        output[market]["total_invested"] += row["total_invested"]
-        output[market].setdefault(status, {})[opinion] = {
+        output["total_invested"] += row["total_invested"]
+        output.setdefault(status, {})[opinion] = {
             "total_quantity": row["total_quantity"],
             "total_filled_quantity": row["total_filled_quantity"],
             "total_invested": row["total_invested"],
