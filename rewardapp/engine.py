@@ -85,7 +85,7 @@ def trades():
                 frappe.db.delete("Holding", first_order.holding_id)
                 first_order.holding_id = ''
             else:
-                frappe.db.set_value("Holding",first_order.holding_id,'filled_quantity', holding1["filled_quantity"] + trade["quantity"])
+                frappe.db.set_value("Holding",first_order.holding_id,'filled_quantity', total_filled1)
 
             if trade["first_user_option"] != trade["second_user_option"]:
                 holding_doc1 = frappe.get_doc({
@@ -109,7 +109,7 @@ def trades():
                     frappe.db.delete("Holding",second_order.holding_id)
                     second_order.holding_id=''
                 else:
-                    frappe.db.set_value("Holding",second_order.holding_id,'filled_quantity', filled_holding2 + trade["quantity"])
+                    frappe.db.set_value("Holding",second_order.holding_id,'filled_quantity', total_filled2)
 
                 holding_doc2 = frappe.get_doc({
                     "doctype": "Holding",
