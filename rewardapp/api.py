@@ -244,6 +244,7 @@ def verify_otp(mobile, otp):
         else:
             frappe.local.cookie_manager.set_cookie("system_user", "yes")
 
+        user_doc = frappe.get_doc("User",user)
         user_doc.api_key = frappe.generate_hash(length=15)
         raw = frappe.generate_hash(length=30)
         user_doc.api_secret = raw

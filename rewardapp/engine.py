@@ -752,29 +752,35 @@ def get_market_holdings():
             h.market_id, h.opinion_type, h.status, m.question, m.yes_price, m.no_price
         """,{"market_id": market_id, "user_id": user_id}, as_dict=True)
 
-    output = {}
+    if not results:
+        return {}
+    
+    # Initialize output with market info from first row
+    first_row = results[0]
+    output = {
+        "market_id": first_row["market_id"],
+        "question": first_row["question"],
+        "yes_price": first_row["yes_price"],
+        "no_price": first_row["no_price"],
+        "total_invested": 0
+    }
+    
     for row in results:
-        market = row['market_id']
         status = row['status']
         opinion = row['opinion_type']
         
-        if market not in output:
-            output = {
-                "market_id": market,
-                "question": row["question"],
-                "yes_price": row["yes_price"],
-                "no_price": row["no_price"],
-                "total_invested": 0
-            }
-        
         output["total_invested"] += row["total_invested"]
-        output.setdefault(status, {})[opinion] = {
+        
+        # Properly handle multiple statuses
+        if status not in output:
+            output[status] = {}
+        
+        output[status][opinion] = {
             "total_quantity": row["total_quantity"],
             "total_filled_quantity": row["total_filled_quantity"],
             "total_invested": row["total_invested"],
             "exit_value": row["exit_value"]
         }
-
     return output
 
 @frappe.whitelist()
