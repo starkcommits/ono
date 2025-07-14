@@ -380,7 +380,7 @@ const Portfolio = () => {
                     key={marketHolding.market_id}
                     className="bg-white p-4 flex flex-col font-inter gap-4 rounded-[5px]"
                     onClick={(e) => {
-                      navigate(`/portfolio/open/${marketHolding.market_id}`, {
+                      navigate(`/portfolio/${marketHolding.market_id}`, {
                         state: {
                           market: marketHolding,
                         },

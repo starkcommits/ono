@@ -42,6 +42,7 @@ const Home = () => {
   console.log(cache)
   const [markets, setMarkets] = useState({})
   const [marketId, setMarketId] = useState('')
+
   const { data: marketData, isLoading: marketDataLoading } =
     useFrappeGetDocList(
       'Market',

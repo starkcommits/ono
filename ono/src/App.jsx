@@ -15,12 +15,12 @@ import CategoryDetails from './pages/CategoryDetails'
 import FixtureDetails from './pages/FixtureDetails'
 import ScrollToTop from './components/ScrollToTop'
 import Leaderboard from './pages/Leaderboard'
-
-import OpenClosedMarketHoldings from './pages/OpenClosedMarketHoldings'
 import { AnalyticsProvider } from './analytics/AnalyticsProvider'
-import { NovuInbox } from './components/ui/inbox/NovuInbox'
+
 import { useEffect } from 'react'
 import TransactionHistory from './pages/TransactionsHistory'
+import OpenClosedResolvedMarketHoldings from './pages/OpenClosedResolvedMarketHoldings'
+import TrackPixel from './components/TrackPixel'
 
 function App() {
   useEffect(() => {
@@ -41,7 +41,7 @@ function App() {
   return (
     <div className="max-w-md mx-auto relative">
       <Toaster richColors position="top-right" />
-
+      <TrackPixel />
       <ScrollToTop />
       <AnalyticsProvider />
       <Routes>
@@ -54,13 +54,10 @@ function App() {
           <Route path="/news" element={<News />} />
           <Route path="/portfolio" element={<Portfolio />} />
           <Route
-            path="/portfolio/open/:market_id"
-            element={<OpenClosedMarketHoldings />}
+            path="/portfolio/:market_id"
+            element={<OpenClosedResolvedMarketHoldings />}
           />
-          {/* <Route
-            path="/portfolio/closed/:market_id"
-            element={<ResolvedMarketHoldings />}
-          /> */}
+
           <Route path="/profile" element={<Profile />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/event/:id" element={<EventDetails />} />

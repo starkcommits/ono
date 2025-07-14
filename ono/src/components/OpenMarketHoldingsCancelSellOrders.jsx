@@ -25,11 +25,12 @@ import { toast } from 'sonner'
 import Lottie from 'lottie-react'
 
 const OpenMarketHoldingsCancelSellOrders = ({ market, exitingHoldings }) => {
-  console.log('Holdingsadasdas', market)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const { call: cancelSellOrders } = useFrappePostCall(
     'rewardapp.engine.cancel_order'
   )
+
+  console.log('Market', market)
 
   const { currentUser } = useFrappeAuth()
 

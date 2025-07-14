@@ -4,7 +4,7 @@ import { useFrappeEventListener, useFrappeGetDoc } from 'frappe-react-sdk'
 import OpenMarketHoldings from '../components/OpenMarketHoldings'
 import ResolvedMarketHoldings from './ResolvedMarketHoldings'
 
-const OpenClosedMarketHoldings = () => {
+const OpenClosedResolvedMarketHoldings = () => {
   const [marketPrices, setMarketPrices] = useState({
     market_yes_price: 0,
     market_no_price: 0,
@@ -39,7 +39,6 @@ const OpenClosedMarketHoldings = () => {
       })
     }
   })
-  console.log('Open closed marketPrices', marketPrices)
 
   if (marketPrices.market_status === 'OPEN')
     return (
@@ -49,9 +48,12 @@ const OpenClosedMarketHoldings = () => {
       />
     )
 
-  if (marketPrices.market_status === 'CLOSED') {
+  if (
+    marketPrices.market_status === 'CLOSED' ||
+    marketPrices.market_status === 'RESOLVED'
+  ) {
     return <ResolvedMarketHoldings marketPrices={marketPrices} />
   }
 }
 
-export default OpenClosedMarketHoldings
+export default OpenClosedResolvedMarketHoldings

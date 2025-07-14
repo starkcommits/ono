@@ -7,7 +7,6 @@ const Layout = () => {
   const location = useLocation()
 
   const path = location.pathname
-  console.log(path)
 
   // Define paths or patterns where Header should be hidden
   const homeRoute = path === '/' // dynamically hide for /event/:id

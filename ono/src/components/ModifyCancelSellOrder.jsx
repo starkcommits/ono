@@ -26,7 +26,6 @@ import {
   useFrappeCreateDoc,
   useFrappeEventListener,
   useFrappeGetDoc,
-  useFrappeUpdateDoc,
 } from 'frappe-react-sdk'
 import { useParams } from 'react-router-dom'
 import {
@@ -39,18 +38,20 @@ import {
 } from 'lucide-react'
 
 import OrderBook from './OrderBook'
-
+import CircleCrossIcon from '@/assets/CircleCrossIcon.svg'
 import CricketIcon from '@/assets/Cricket.svg'
 import OrderBookIcon from '@/assets/OrderBook.svg'
+import { Separator } from '@/components/ui/separator'
 import { toast } from 'sonner'
 
-const ExitSellOrder = ({ holding }) => {
-  const { createDoc, updateDoc } = useFrappeUpdateDoc()
+const ModifyCancelSellOrder = ({ holding }) => {
+  const { createDoc } = useFrappeCreateDoc()
 
   const { currentUser } = useFrappeAuth()
   const { id } = useParams()
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
-  const [buttonState, setButtonState] = useState('idle') // idle | processing | done
+  const [modifyButtonState, setModifyButtonState] = useState('idle')
+  const [cancelButtonState, setCancelButtonState] = useState('idle')
 
   const [market, setMarket] = useState({})
   const { data: marketData, isLoading: marketDataLoading } = useFrappeGetDoc(
@@ -68,7 +69,7 @@ const ExitSellOrder = ({ holding }) => {
     holding.opinion_type === 'YES' ? market.yes_price : market.no_price
   )
 
-  // const [quantity, setQuantity] = useState(2)
+  const [quantity, setQuantity] = useState(2)
 
   //   const [isEditing, setIsEditing] = useState(false)
   //   const [tempValue, setTempValue] = useState('')
@@ -136,16 +137,18 @@ const ExitSellOrder = ({ holding }) => {
     )
   }, [market])
 
-  const handleConfirmSell = async () => {
+  const handleModifySellOrder = async () => {
     try {
-      setButtonState('processing')
+      const orderData = {
+        market_id: holding.market_id,
+        user_id: currentUser,
+        order_type: 'SELL',
+        quantity: holding.quantity,
+        opinion_type: holding.opinion_type,
+        amount: price,
+      }
 
-      const response = await updateDoc('Holding', holding.name, {
-        exit_price: price,
-        status: 'EXITING',
-      })
-
-      setButtonState('done')
+      const response = await createDoc('Orders', orderData)
 
       toast.success('Your Sell Order is successfully placed.')
 
@@ -153,11 +156,32 @@ const ExitSellOrder = ({ holding }) => {
 
       setTimeout(() => {
         setIsDrawerOpen(false)
-        setButtonState('idle')
       }, 1000)
     } catch (err) {
       toast.error('Error occured in placing the order.')
-      setButtonState('idle')
+    }
+  }
+
+  const handleCancelSellOrder = async () => {
+    try {
+      const orderData = {
+        market_id: holding.market_id,
+        user_id: currentUser,
+        order_type: 'SELL',
+        quantity: holding.quantity,
+        opinion_type: holding.opinion_type,
+        amount: price,
+      }
+
+      toast.success('Your Sell Order is successfully placed.')
+
+      console.log('Response: ', response)
+
+      setTimeout(() => {
+        setIsDrawerOpen(false)
+      }, 1000)
+    } catch (err) {
+      toast.error('Error occured in placing the order.')
     }
   }
 
@@ -169,8 +193,14 @@ const ExitSellOrder = ({ holding }) => {
     >
       <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen} className="">
         <DrawerTrigger className="">
-          <div className="font-medium text-xs text-[#2C2D32] border border-[#CBCBCB] rounded-[20px] py-2.5 px-7">
-            Exit
+          <div className="flex items-center gap-2 border rounded-full cursor-pointer group hover:bg-[#2C2D32]/5">
+            <span className="font-normal font-inter text-[10px] text-[#2C2D32]  px-1 pl-3.5">
+              {holding.quantity - holding.filled_quantity} exiting
+            </span>
+            <Separator orientation="vertical" className="h-8" />
+            <span className="flex items-center justify-center px-1 pr-4">
+              <img src={CircleCrossIcon} alt="" />
+            </span>
           </div>
         </DrawerTrigger>
         <DrawerContent className="max-w-md mx-auto w-full max-h-full bg-[#F5F5F5]">
@@ -223,7 +253,7 @@ const ExitSellOrder = ({ holding }) => {
                 <div className="flex flex-col gap-8 border rounded-[10px] bg-white p-4 text-sm leading-[100%] font-inter font-semibold">
                   <div className="flex flex-col gap-4">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="">Price</span>
+                      <span className="">Exit Price</span>
                       <div className="flex items-center">
                         <span className="">₹{price}</span>
                       </div>
@@ -310,25 +340,22 @@ const ExitSellOrder = ({ holding }) => {
                       <span className="text-[#5F5F5F] text-xs font-semibold">
                         &#8377;{price * holding.quantity}
                       </span>
-                      {price * holding.quantity >
-                        holding.price * holding.quantity && (
+                      {price * quantity > holding.price * holding.quantity && (
                         <span className="text-[#337265] text-xs font-semibold">
                           (&#8377;+
                           {(
-                            price * holding.quantity -
+                            price * quantity -
                             holding.price * holding.quantity
                           ).toFixed(1)}
                           )
                         </span>
                       )}
 
-                      {price * holding.quantity <
-                        holding.price * holding.quantity && (
+                      {price * quantity < holding.price * holding.quantity && (
                         <span className="text-[#DB342C] text-xs font-semibold">
                           (-&#8377;
                           {Math.abs(
-                            price * holding.quantity -
-                              holding.price * holding.quantity
+                            price * quantity - holding.price * holding.quantity
                           ).toFixed(1)}
                           )
                         </span>
@@ -362,17 +389,18 @@ const ExitSellOrder = ({ holding }) => {
             </div>
             {/* Floating Swipe Button (Footer) */}
           </div>
-          <DrawerFooter className="mx-auto w-full bg-white sticky bottom-0">
+          <DrawerFooter className="mx-auto w-full bg-white sticky bottom-0 flex flex-col">
             <button
-              className="text-white bg-[#2C2D32] hover:bg-[#2C2D32]/90 rounded-[5px] py-[18.5px] px-[162px] transition-all duration-300"
-              disabled={buttonState !== 'idle'}
-              onClick={handleConfirmSell}
+              className="text-white bg-[#2C2D32] hover:bg-[#2C2D32]/90 rounded-[5px] py-[18.5px] px-[162px] text-sm font-medium tracking-[1px] transition-all duration-300"
+              onClick={handleModifySellOrder}
             >
-              {buttonState === 'idle'
-                ? 'EXIT'
-                : buttonState === 'processing'
-                ? 'Processing...'
-                : 'Order Placed'}
+              Modify Exit
+            </button>
+            <button
+              className="text-[#2C2D32] hover:text-[#2C2D32]/70 rounded-[5px] py-[16px] text-sm font-medium tracking-[1px] transition-all duration-300"
+              onClick={handleCancelSellOrder}
+            >
+              Cancel Exiting Qty
             </button>
           </DrawerFooter>
         </DrawerContent>
@@ -381,4 +409,4 @@ const ExitSellOrder = ({ holding }) => {
   )
 }
 
-export default ExitSellOrder
+export default ModifyCancelSellOrder

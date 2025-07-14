@@ -79,9 +79,6 @@ const OpenMarketHoldingsBuyDrawer = ({ marketId, marketPrices }) => {
     })
   }, [marketPrices])
 
-  console.log('Market:   ', market)
-  console.log('Market Prices: ', marketPrices)
-
   const [price, setPrice] = useState(
     selectedChoice === 'YES' ? marketData?.yes_price : marketData?.no_price
   )

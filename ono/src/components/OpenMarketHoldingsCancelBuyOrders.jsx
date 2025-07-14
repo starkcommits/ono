@@ -86,7 +86,6 @@ const OpenMarketHoldingsCancelBuyOrders = ({ market, unmatchedHoldings }) => {
     }
   }
 
-  console.log(currentUser)
   return (
     <div
       onClick={(e) => {
