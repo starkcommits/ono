@@ -434,7 +434,8 @@ def resolve_market():
         update_data = {
             "name": market.name,
             "status": market.status,
-            "category": market.category
+            "category": market.category,
+            "end_result": data.winning_side
         }
         
         frappe.publish_realtime("market_event",update_data,after_commit=True)
@@ -639,7 +640,7 @@ def get_marketwise_holding():
             CASE 
                 WHEN h.status = 'EXITING' THEN 
                     SUM(DISTINCT CASE WHEN o.name IS NOT NULL THEN 
-                        (COALESCE(o.quantity, 0) - COALESCE(o.filled_quantity, 0)) * COALESCE(o.amount, 0)
+                        (COALESCE(o.quantity, 0) - COALESCE(o.filled_quantity, 0)) * COALESCE(h.price, 0)
                         ELSE 0 END)
                 ELSE 
                     SUM((COALESCE(h.quantity, 0) - COALESCE(h.filled_quantity, 0)) * COALESCE(h.price, 0))
@@ -658,9 +659,11 @@ def get_marketwise_holding():
             END AS total_filled_quantity,
             CASE 
                 WHEN h.status = 'EXITING' THEN 
-                    MAX(COALESCE(o.amount, 0))
+                    SUM(DISTINCT CASE WHEN o.name IS NOT NULL THEN 
+                        (COALESCE(o.quantity, 0) - COALESCE(o.filled_quantity, 0)) * COALESCE(o.amount, 0)
+                        ELSE 0 END)
                 ELSE 
-                    SUM(COALESCE(h.exit_price, 0))
+                    SUM((COALESCE(h.quantity, 0) - COALESCE(h.filled_quantity, 0)) * COALESCE(h.price, 0))
             END AS exit_value
         FROM 
             `tabHolding` h
@@ -715,7 +718,7 @@ def get_market_holdings():
             CASE 
                 WHEN h.status = 'EXITING' THEN 
                     SUM(DISTINCT CASE WHEN o.name IS NOT NULL THEN 
-                        (COALESCE(o.quantity, 0) - COALESCE(o.filled_quantity, 0)) * COALESCE(o.amount, 0)
+                        (COALESCE(o.quantity, 0) - COALESCE(o.filled_quantity, 0)) * COALESCE(h.price, 0)
                         ELSE 0 END)
                 ELSE 
                     SUM((COALESCE(h.quantity, 0) - COALESCE(h.filled_quantity, 0)) * COALESCE(h.price, 0))
@@ -734,9 +737,11 @@ def get_market_holdings():
             END AS total_filled_quantity,
             CASE 
                 WHEN h.status = 'EXITING' THEN 
-                    MAX(COALESCE(o.amount, 0))
+                    SUM(DISTINCT CASE WHEN o.name IS NOT NULL THEN 
+                        (COALESCE(o.quantity, 0) - COALESCE(o.filled_quantity, 0)) * COALESCE(o.amount, 0)
+                        ELSE 0 END)
                 ELSE 
-                    SUM(COALESCE(h.exit_price, 0))
+                    SUM((COALESCE(h.quantity, 0) - COALESCE(h.filled_quantity, 0)) * COALESCE(h.price, 0))
             END AS exit_value
         FROM 
             `tabHolding` h
@@ -963,6 +968,7 @@ def total_returns(user_id):
         SELECT
             h.market_id,
             m.question,
+            m.end_result,
             SUM(h.quantity * h.price) AS total_invested,
             SUM(h.returns) AS total_returns
         FROM
