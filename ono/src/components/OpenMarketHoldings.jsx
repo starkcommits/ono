@@ -309,22 +309,28 @@ const OpenMarketHoldings = ({ marketPrices, setMarketPrices }) => {
             const yesPrice = marketPrices.market_yes_price || 0
             const noPrice = marketPrices.market_no_price || 0
 
-            const current_value = [
-              openMarketHoldingsOverall?.ACTIVE,
-              openMarketHoldingsOverall?.EXITING,
-            ].reduce((positionAcc, position) => {
-              if (!position) return positionAcc
+            const current_value =
+              [
+                openMarketHoldingsOverall?.ACTIVE,
+                openMarketHoldingsOverall?.EXITING,
+              ].reduce((positionAcc, position) => {
+                if (!position) return positionAcc
 
-              const yesQty =
-                (position?.YES?.total_quantity || 0) -
-                (position?.YES?.total_filled_quantity || 0)
+                const yesQty =
+                  (position?.YES?.total_quantity || 0) -
+                  (position?.YES?.total_filled_quantity || 0)
 
-              const noQty =
-                (position?.NO?.total_quantity || 0) -
-                (position?.NO?.total_filled_quantity || 0)
+                const noQty =
+                  (position?.NO?.total_quantity || 0) -
+                  (position?.NO?.total_filled_quantity || 0)
 
-              return positionAcc + yesQty * yesPrice + noQty * noPrice
-            }, 0)
+                return positionAcc + yesQty * yesPrice + noQty * noPrice
+              }, 0) +
+              +(
+                (openMarketHoldingsOverall?.UNMATCHED?.YES?.total_invested ||
+                  0) +
+                (openMarketHoldingsOverall?.UNMATCHED?.NO?.total_invested || 0)
+              )
 
             return (
               <div className="flex flex-col gap-4 items-center p-4 rounded-[5px] bg-white">

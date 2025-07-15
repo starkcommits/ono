@@ -241,7 +241,7 @@ const Portfolio = () => {
 
       {currentPortfolioTab === 'open' && (
         <>
-          <div className="bg-[#F5F5F5] pb-2 max-w-md mx-auto relative px-4">
+          <div className="pb-2 relative px-4">
             {(() => {
               const total_investment = Object.values(
                 marketwiseActiveHoldings
@@ -256,25 +256,32 @@ const Portfolio = () => {
                 const yesPrice = market.yes_price || 0
                 const noPrice = market.no_price || 0
 
-                return (
-                  acc +
-                  [market.ACTIVE, market.EXITING].reduce(
-                    (positionAcc, position) => {
-                      if (!position) return positionAcc
+                // Calculate value from ACTIVE and EXITING positions
+                const activeExitingValue = [
+                  market.ACTIVE,
+                  market.EXITING,
+                ].reduce((positionAcc, position) => {
+                  if (!position) return positionAcc
 
-                      const yesQty =
-                        (position?.YES?.total_quantity || 0) -
-                        (position?.YES?.total_filled_quantity || 0)
+                  const yesQty =
+                    (position?.YES?.total_quantity || 0) -
+                    (position?.YES?.total_filled_quantity || 0)
+                  const noQty =
+                    (position?.NO?.total_quantity || 0) -
+                    (position?.NO?.total_filled_quantity || 0)
 
-                      const noQty =
-                        (position?.NO?.total_quantity || 0) -
-                        (position?.NO?.total_filled_quantity || 0)
+                  return positionAcc + yesQty * yesPrice + noQty * noPrice
+                }, 0)
 
-                      return positionAcc + yesQty * yesPrice + noQty * noPrice
-                    },
-                    0
-                  )
-                )
+                const unmatchedYesInvested =
+                  market?.UNMATCHED?.YES?.total_invested || 0
+                const unmatchedNoInvested =
+                  market?.UNMATCHED?.NO?.total_invested || 0
+
+                const unmatchedValue =
+                  unmatchedYesInvested + unmatchedNoInvested
+
+                return acc + activeExitingValue + unmatchedValue
               }, 0)
 
               return (
@@ -351,7 +358,7 @@ const Portfolio = () => {
                     <Separator></Separator>
                   </div>
                   <span className="font-normal text-xs flex items-center gap-1">
-                    <span>Live Gains -</span>
+                    <span>Live Gains: </span>
                     <span className="font-inter font-medium flex items-center gap-0.5">
                       <span
                         className={`${
