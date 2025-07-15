@@ -12,7 +12,7 @@ import { Separator } from '@/components/ui/separator'
 import { Checkbox } from '@/components/ui/checkbox'
 import { ChevronRight } from 'lucide-react'
 import { Label } from '@/components/ui/label'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import ExitSellOrdersPriceDrawer from './ExitSellOrdersPriceDrawer'
 import {
   useFrappeAuth,
@@ -22,7 +22,7 @@ import {
 } from 'frappe-react-sdk'
 import { toast } from 'sonner'
 
-const OpenMarketHoldingsExitSellOrders = ({ market }) => {
+const OpenMarketHoldingsExitSellOrders = ({ market, marketPrices }) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
   const { createDoc } = useFrappeCreateDoc()
@@ -37,12 +37,21 @@ const OpenMarketHoldingsExitSellOrders = ({ market }) => {
   const [yesExitPrice, setYesExitPrice] = useState(market?.yes_price)
   const [noExitPrice, setNoExitPrice] = useState(market?.no_price)
 
+  useEffect(() => {
+    setYesExitPrice(market?.yes_price)
+    setNoExitPrice(market?.no_price)
+  }, [market])
+
   const { mutate } = useSWRConfig()
 
   const handleCreateSellOrders = async () => {
     try {
+      if (!isYesChecked && !isNoChecked) {
+        toast.error('Please check YES or NO to continue with selling.')
+        return
+      }
       const yesSellOrder = {
-        market_id: market.market_id,
+        market_id: market?.market_id,
         user_id: currentUser,
         order_type: 'SELL',
         quantity:
@@ -53,7 +62,7 @@ const OpenMarketHoldingsExitSellOrders = ({ market }) => {
         amount: yesExitPrice,
       }
       const noSellOrder = {
-        market_id: market.market_id,
+        market_id: market?.market_id,
         user_id: currentUser,
         order_type: 'SELL',
         quantity:
@@ -71,6 +80,9 @@ const OpenMarketHoldingsExitSellOrders = ({ market }) => {
         await createDoc('Orders', noSellOrder)
       }
       mutate((key) => Array.isArray(key) && key[0] === 'open_market_holdings')
+      mutate(
+        (key) => Array.isArray(key) && key[0] === 'open_market_holdings_overall'
+      )
       toast.success(`Sell orders created successfully.`)
       setIsDrawerOpen(false)
     } catch (error) {
@@ -95,7 +107,7 @@ const OpenMarketHoldingsExitSellOrders = ({ market }) => {
           <DrawerHeader className="p-0">
             <div className="flex justify-between items-center gap-4 p-4">
               <DrawerTitle className="font-normal font-inter text-left text-[13px] leading-[18px] w-[90%]">
-                {market.question}
+                {market?.question}
               </DrawerTitle>
               <DrawerDescription className="w-[10%]">
                 <img src={CricketIcon} alt="" />

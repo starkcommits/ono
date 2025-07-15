@@ -72,8 +72,10 @@ const OpenMarketHoldingsCancelBuyOrders = ({ market, unmatchedHoldings }) => {
       setShowAnimation(true)
 
       setTimeout(() => {
+        mutate((key) => Array.isArray(key) && key[0] === 'open_market_holdings')
         mutate(
-          (key) => Array.isArray(key) && key[0] === 'open_marketwise_holdings'
+          (key) =>
+            Array.isArray(key) && key[0] === 'open_market_holdings_overall'
         )
 
         setIsDrawerOpen(false)

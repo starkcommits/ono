@@ -29,9 +29,9 @@ import { LeafyGreen } from 'lucide-react'
 const OpenMarketHoldings = ({ marketPrices, setMarketPrices }) => {
   const { market_id } = useParams()
 
-  const { state } = useLocation()
-
   const { currentUser } = useFrappeAuth()
+
+  console.log('MArket Prices', marketPrices)
 
   const [openMarketHoldingsPortfolioTab, setOpenMarketHoldingsPortfolioTab] =
     useState(localStorage.getItem('openMarketHoldingsPortfolioTab') || 'all')
@@ -43,7 +43,7 @@ const OpenMarketHoldings = ({ marketPrices, setMarketPrices }) => {
         market_id: market_id,
         user_id: currentUser,
       },
-      currentUser ? undefined : null
+      currentUser ? ['open_market_holdings_overall'] : null
     )
 
   console.log('Overall:', openMarketHoldingsOverall)
@@ -303,143 +303,153 @@ const OpenMarketHoldings = ({ marketPrices, setMarketPrices }) => {
           </div>
         </div>
         <div className="p-4 pt-0">
-          <div className="flex flex-col gap-4 items-center p-4 rounded-[5px] bg-white">
-            {(() => {
-              const total_investment = openMarketHoldingsOverall
-                ? Object.values(openMarketHoldingsOverall)[0]?.total_invested
-                : 0
+          {(() => {
+            const total_investment = openMarketHoldingsOverall?.total_invested
 
-              const current_value = openMarketHoldingsOverall
-                ? Object.values(openMarketHoldingsOverall).reduce(
-                    (acc, market) => {
-                      const yesPrice = market.yes_price || 0
-                      const noPrice = market.no_price || 0
+            const yesPrice = marketPrices.market_yes_price || 0
+            const noPrice = marketPrices.market_no_price || 0
 
-                      return (
-                        acc +
-                        [market.ACTIVE, market.EXITING].reduce(
-                          (positionAcc, position) => {
-                            if (!position) return positionAcc
+            const current_value = [
+              openMarketHoldingsOverall?.ACTIVE,
+              openMarketHoldingsOverall?.EXITING,
+            ].reduce((positionAcc, position) => {
+              if (!position) return positionAcc
 
-                            const yesQty =
-                              (position?.YES?.total_quantity || 0) -
-                              (position?.YES?.total_filled_quantity || 0)
+              const yesQty =
+                (position?.YES?.total_quantity || 0) -
+                (position?.YES?.total_filled_quantity || 0)
 
-                            const noQty =
-                              (position?.NO?.total_quantity || 0) -
-                              (position?.NO?.total_filled_quantity || 0)
+              const noQty =
+                (position?.NO?.total_quantity || 0) -
+                (position?.NO?.total_filled_quantity || 0)
 
-                            return (
-                              positionAcc + yesQty * yesPrice + noQty * noPrice
-                            )
-                          },
-                          0
-                        )
-                      )
-                    },
-                    0
-                  )
-                : 0
+              return positionAcc + yesQty * yesPrice + noQty * noPrice
+            }, 0)
 
-              return (
-                <>
-                  <div className="flex flex-col gap-1 items-center">
-                    <p className="font-normal text-xs">Live Returns</p>
+            return (
+              <div className="flex flex-col gap-4 items-center p-4 rounded-[5px] bg-white">
+                <div className="flex flex-col gap-1 items-center">
+                  <p className="font-normal text-xs">Live Returns</p>
 
-                    <p className="flex items-center gap-1">
-                      <span>
-                        {current_value > total_investment ? (
-                          <img className="" src={UpArrowIcon} alt="" />
-                        ) : null}
-                        {current_value < total_investment ? (
-                          <img className="" src={DownArrowIcon} alt="" />
-                        ) : null}
-                      </span>
-                      <span className="font-inter font-semibold text-sm text-[#337265]">
-                        &#8377;
-                      </span>
+                  <p className="flex items-center gap-1">
+                    <span>
+                      {current_value > total_investment ? (
+                        <img className="" src={UpArrowIcon} alt="" />
+                      ) : null}
+                      {current_value < total_investment ? (
+                        <img className="" src={DownArrowIcon} alt="" />
+                      ) : null}
+                    </span>
+                    <span
+                      className={`font-inter font-semibold text-sm ${
+                        current_value > total_investment
+                          ? 'text-[#1C895E]'
+                          : null
+                      } ${
+                        current_value < total_investment
+                          ? 'text-[#DB342C]'
+                          : null
+                      }`}
+                    >
+                      &#8377;{current_value - total_investment}
+                    </span>
+                  </p>
+                </div>
+                <div className="w-full flex items-center justify-between">
+                  <div className="flex flex-col items-start">
+                    <p className="font-normal text-xs text-[#5F5F5F]">
+                      Investment
+                    </p>
+                    <p className="font-inter font-semibold text-xl">
+                      &#8377;{total_investment}
                     </p>
                   </div>
-                  <div className="w-full flex items-center justify-between">
-                    <div className="flex flex-col items-start">
-                      <p className="font-normal text-xs text-[#5F5F5F]">
-                        Investment
-                      </p>
-                      <p className="font-inter font-semibold text-xl">
-                        &#8377;
-                      </p>
-                    </div>
-                    <div className="flex flex-col items-end">
-                      <p className="font-normal text-xs text-[#5F5F5F]">
-                        Current Value
-                      </p>
-                      <p className="font-inter font-semibold text-xl">
-                        &#8377;
-                      </p>
-                    </div>
+                  <div className="flex flex-col items-end">
+                    <p className="font-normal text-xs text-[#5F5F5F]">
+                      Current Value
+                    </p>
+                    <p
+                      className={`font-inter font-semibold text-xl ${
+                        current_value > total_investment
+                          ? 'text-[#1C895E]'
+                          : null
+                      } ${
+                        current_value < total_investment
+                          ? 'text-[#DB342C]'
+                          : null
+                      }`}
+                    >
+                      &#8377;{current_value}
+                    </p>
                   </div>
-                </>
-              )
-            })()}
+                </div>
 
-            <div className="w-full flex items-center justify-between gap-4 text-xs font-medium">
-              <OpenMarketHoldingsBuyDrawer
-                marketId={market_id}
-                marketPrices={marketPrices}
-              />
-              <OpenMarketHoldingsExitSellOrders market={state.market} />
-            </div>
-            <div className="w-full flex justify-between items-center pt-4 border-dashed border-t-[0.7px] text-[#2C2D32]">
-              <span className="font-normal text-xs">Exited Returns</span>
-              <span className="font-inter text-xs font-medium">
-                &#8377;{' '}
-                {openMarketHoldings?.reduce((acc, holding) => {
-                  return (acc += holding.returns)
-                }, 0)}
-              </span>
-            </div>
+                <div className="w-full flex items-center justify-between gap-4 text-xs font-medium">
+                  <OpenMarketHoldingsBuyDrawer
+                    marketId={market_id}
+                    marketPrices={marketPrices}
+                  />
+                  <OpenMarketHoldingsExitSellOrders
+                    market={openMarketHoldingsOverall}
+                    marketPrices={marketPrices}
+                  />
+                </div>
+                <div className="w-full flex justify-between items-center pt-4 border-dashed border-t-[0.7px] text-[#2C2D32]">
+                  <span className="font-normal text-xs">Exited Returns</span>
+                  <span className="font-inter text-xs font-medium">
+                    &#8377;{' '}
+                    {openMarketHoldings?.reduce((acc, holding) => {
+                      return (acc += holding.returns)
+                    }, 0)}
+                  </span>
+                </div>
 
-            <div className="border-dashed border-t-[0.7px] pt-4 w-full flex gap-2 items-center">
-              {(() => {
-                const unmatchedHoldings = openMarketHoldings
-                  ?.filter((holding) => holding.status === 'UNMATCHED')
-                  ?.reduce(
-                    (acc, holding) =>
-                      acc + holding.quantity - holding.filled_quantity,
-                    0
-                  )
+                {(openMarketHoldingsOverall?.UNMATCHED ||
+                  openMarketHoldingsOverall?.EXITING) && (
+                  <div className="border-dashed border-t-[0.7px] pt-4 w-full flex gap-2 items-center">
+                    {(() => {
+                      const unmatchedHoldings = openMarketHoldings
+                        ?.filter((holding) => holding.status === 'UNMATCHED')
+                        ?.reduce(
+                          (acc, holding) =>
+                            acc + holding.quantity - holding.filled_quantity,
+                          0
+                        )
 
-                if (unmatchedHoldings === 0) return null
+                      if (unmatchedHoldings === 0) return null
 
-                return (
-                  <div className="flex gap-4 items-center ">
-                    <OpenMarketHoldingsCancelBuyOrders
-                      market={state.market}
-                      unmatchedHoldings={unmatchedHoldings}
-                    />
+                      return (
+                        <div className="flex gap-4 items-center ">
+                          <OpenMarketHoldingsCancelBuyOrders
+                            market={openMarketHoldingsOverall}
+                            unmatchedHoldings={unmatchedHoldings}
+                          />
+                        </div>
+                      )
+                    })()}
+                    {(() => {
+                      const exitingHoldings = openMarketHoldings
+                        ?.filter((holding) => holding.status === 'EXITING')
+                        ?.reduce(
+                          (acc, holding) =>
+                            acc + holding.quantity - holding.filled_quantity,
+                          0
+                        )
+                      if (exitingHoldings === 0) return null
+                      return (
+                        <div className="flex gap-4 items-center">
+                          <OpenMarketHoldingsCancelSellOrders
+                            market={openMarketHoldingsOverall}
+                            exitingHoldings={exitingHoldings}
+                          />
+                        </div>
+                      )
+                    })()}
                   </div>
-                )
-              })()}
-              {(() => {
-                const exitingHoldings = openMarketHoldings
-                  ?.filter((holding) => holding.status === 'EXITING')
-                  ?.reduce(
-                    (acc, holding) =>
-                      acc + holding.quantity - holding.filled_quantity,
-                    0
-                  )
-                if (exitingHoldings === 0) return null
-                return (
-                  <div className="flex gap-4 items-center">
-                    <OpenMarketHoldingsCancelSellOrders
-                      market={state.market}
-                      exitingHoldings={exitingHoldings}
-                    />
-                  </div>
-                )
-              })()}
-            </div>
-          </div>
+                )}
+              </div>
+            )
+          })()}
         </div>
       </div>
       <div className="w-full overflow-x-auto scrollbar-hide sticky top-0">

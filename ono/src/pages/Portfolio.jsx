@@ -11,11 +11,15 @@ import ClosedEventsActiveIcon from '@/assets/ClosedEventsActiveIcon.svg'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import InfoIcon from '@/assets/Info.svg'
+import BriefcasePurple from '@/assets/BriefcasePurple.svg'
 import CricketIcon from '@/assets/CricketImage.svg'
 import ExitDoorIcon from '@/assets/ExitDoorIcon.svg'
 import UnmatchedIcon from '@/assets/UnmatchedIcon.svg'
-import { ChevronRight, CircleGauge } from 'lucide-react'
+import ClosedYesOpinionIcon from '@/assets/ClosedYesOpinionIcon.svg'
+import ClosedNoOpinionIcon from '@/assets/ClosedNoOpinionIcon.svg'
+
 import {
+  useFrappeAuth,
   useFrappeEventListener,
   useFrappeGetCall,
   useFrappeGetDocList,
@@ -28,6 +32,8 @@ import CancelBuyOrders from '../components/CancelBuyOrders'
 
 const Portfolio = () => {
   // const { status = 'open' } = useParams()
+
+  const { currentUser } = useFrappeAuth()
 
   const navigate = useNavigate()
 
@@ -46,6 +52,17 @@ const Portfolio = () => {
     currentPortfolioTab === 'open' ? ['open_marketwise_holdings'] : null
   )
 
+  const { data: { message: marketwiseClosedHoldingsData } = {} } =
+    useFrappeGetCall(
+      'rewardapp.engine.total_returns',
+      {
+        user_id: currentUser,
+      },
+      currentUser && currentPortfolioTab === 'closed'
+        ? ['closed_marketwise_holdings']
+        : null
+    )
+
   useEffect(() => {
     if (marketwiseActiveHoldingsData && marketwiseActiveHoldingsData.message) {
       setMarketwiseActiveHoldings(marketwiseActiveHoldingsData.message)
@@ -55,8 +72,6 @@ const Portfolio = () => {
   useFrappeEventListener('market_event', (updatedMarket) => {
     setMarketwiseActiveHoldings((prevHoldings) => {
       const marketId = updatedMarket.name
-
-      console.log('Updated Market protfolio', updatedMarket)
 
       // Check if market exists in current state
       if (!prevHoldings[marketId]) {
@@ -102,8 +117,6 @@ const Portfolio = () => {
       }
     })
   })
-
-  console.log('Portfolio marketwise: ', marketwiseActiveHoldings)
 
   const handleTabChange = (value) => {
     localStorage.setItem('currentPortfolioTab', value)
@@ -564,138 +577,136 @@ const Portfolio = () => {
       {currentPortfolioTab === 'closed' && (
         <>
           <div className="bg-[#F5F5F5] pb-2 max-w-md mx-auto relative px-4">
-            <div className="bg-[#FFF8F2] p-4 flex flex-col font-inter gap-4 rounded-[5px] border-[0.5px] border-[#E26F64]">
+            <div className="bg-white p-4 flex flex-col font-inter gap-4 rounded-[5px]">
               <div className="flex gap-1 justify-between items-center">
                 <div className="flex items-center gap-1">
                   <div>
-                    <img src={BriefcaseGreen} className="" alt="" />
+                    <img src={BriefcasePurple} className="" alt="" />
                   </div>
-                  <div className="font-inter text-sm text-[#E26F64]">
-                    Portfolio
-                  </div>
+                  <div className="font-inter text-sm">Portfolio</div>
                 </div>
                 <div>
                   <img src={InfoIcon} alt="" />
                 </div>
               </div>
-              <div className="flex justify-between items-center">
-                <div className="flex flex-col  items-center">
-                  <span className="font-semibold text-xl">&#8377;5.5</span>
-                  <span className="font-normal text-xs">Investment</span>
-                </div>
-                <div className="flex flex-col items-center">
-                  <span className="font-semibold text-xl text-[#DB342C]">
-                    &#8377;5.4
+              <div className="flex justify-between items-center px-2">
+                <div className="flex flex-col gap-1 items-center">
+                  <span className="font-semibold text-[18px] text-[#2C2D32]">
+                    &#8377;
+                    {marketwiseClosedHoldingsData?.reduce((acc, market) => {
+                      acc = acc + market.total_invested
+                      return acc
+                    }, 0)}
                   </span>
                   <span className="font-normal text-xs">Investment</span>
+                </div>
+                <div className="flex flex-col gap-1 items-center">
+                  {(() => {
+                    const returns = marketwiseClosedHoldingsData?.reduce(
+                      (acc, market) => {
+                        acc = acc + market.total_returns
+                        return acc
+                      },
+                      0
+                    )
+                    if (returns === 0)
+                      return (
+                        <span className="font-semibold text-[18px] text-[#2C2D32]">
+                          &#8377;{returns}
+                        </span>
+                      )
+                    if (returns > 0)
+                      return (
+                        <span className="font-semibold text-[18px] text-[#2C2D32]">
+                          +&#8377;{returns}
+                        </span>
+                      )
+                    if (returns > 0)
+                      return (
+                        <span className="font-semibold text-[18px] text-[#2C2D32]">
+                          -&#8377;{Math.abs(returns)}
+                        </span>
+                      )
+                  })()}
+
+                  <span className="font-normal text-xs">Returns</span>
                 </div>
               </div>
               <div className="w-full">
                 <Separator></Separator>
               </div>
-              <span className="font-normal text-xs">
-                Live Gains - &#8377;0.1
+              <span className="flex gap-1 items-center">
+                <span className="text-[10px] font-normal text-[#2C2D32]">
+                  Today's Returns:
+                </span>
+                <span className="text-xs text-[#2C2D32] font-normal">
+                  &#8377;0.1
+                </span>
               </span>
             </div>
           </div>
 
-          <div className="pb-2 pt-2 space-y-4 px-4">
-            <div className="bg-white p-4 flex flex-col font-inter gap-4 rounded-[5px]">
-              <div className="flex items-center gap-1">
-                <p className="bg-[#33726533] px-1.5 text-[8px] font-[500] tracking-[2%] text-[#1C895E] rounded-[2px]">
-                  Matched
-                </p>
-              </div>
-              <div className="flex justify-between items-start gap-4">
-                <div className="w-[10%]">
-                  <img src={CricketIcon} alt="" />
-                </div>
-                <div className="w-[90%] flex font-normal text-xs">
-                  Hyderabad to win the match vs Mumbai?
-                </div>
-              </div>
-              <div className="w-full">
-                <Separator></Separator>
-              </div>
-              <div className="flex items-center justify-between">
-                <span
-                  className="font-normal text-[10px] flex items-center gap-2 p-1"
-                  style={{
-                    background:
-                      'linear-gradient(90deg, #FFD6D3 0%, rgba(255, 231, 228, 0) 100%)',
+          <div className="py-2 space-y-4 px-4">
+            {marketwiseClosedHoldingsData?.map((marketHolding) => {
+              return (
+                <div
+                  className="bg-white p-4 flex flex-col font-inter gap-4 rounded-[5px]"
+                  onClick={() => {
+                    navigate(`/portfolio/${marketHolding.market_id}`)
                   }}
                 >
-                  Invested &#8377;5.5{' '}
-                  <span className="flex border bg-[#2C2D32] -mx-1"></span>{' '}
-                  <span>Gains - &#8377;0.1</span>
-                </span>
-                <div>
-                  <button className="font-semibold text-xs flex ">
-                    Exit <ChevronRight className="h-4 w-4" />
-                  </button>
+                  <div className="flex justify-between items-start w-full">
+                    <div className="flex items-start gap-4 w-[80%]">
+                      <div className="w-[15%]">
+                        <img src={CricketIcon} alt="" />
+                      </div>
+                      <div className="w-[85%] flex font-normal text-xs">
+                        {marketHolding?.question}
+                      </div>
+                    </div>
+                    <div className="flex justify-end w-[20%]">
+                      <img src={ClosedYesOpinionIcon} alt="" />
+                    </div>
+                  </div>
+                  <div className="w-full">
+                    <Separator></Separator>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span
+                      className="font-normal text-[10px] flex items-center gap-2 p-1"
+                      style={{
+                        background:
+                          'linear-gradient(90deg, #FFD6D3 0%, rgba(255, 231, 228, 0) 100%)',
+                      }}
+                    >
+                      <span>
+                        Invested &#8377;{marketHolding?.total_invested}
+                      </span>
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span className="text-[10px] font-normal text-[#2C2D32]">
+                        Returns
+                      </span>
+                      {marketHolding?.total_returns === 0 && (
+                        <span className="font-bold text-[10px] font-inter">
+                          &#8377;{marketHolding?.total_returns}
+                        </span>
+                      )}
+                      {marketHolding?.total_returns > 0 && (
+                        <span className="font-bold text-[10px] font-inter text-[#1C895E]">
+                          +&#8377;{marketHolding?.total_returns}
+                        </span>
+                      )}
+                      {marketHolding?.total_returns < 0 && (
+                        <span className="font-bold text-[10px] font-inter text-[#DB342C]">
+                          -&#8377;{Math.abs(marketHolding?.total_returns)}
+                        </span>
+                      )}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            </div>
-            <div className="bg-white p-4 flex flex-col font-inter gap-4 rounded-[5px]">
-              <div className="flex items-center gap-1">
-                <p className="bg-[#33726533] px-1.5 text-[8px] font-[500] tracking-[2%] text-[#1C895E] rounded-[2px]">
-                  Matched
-                </p>
-              </div>
-              <div className="flex justify-between items-start gap-4">
-                <div className="w-[10%]">
-                  <img src={CricketIcon} alt="" />
-                </div>
-                <div className="w-[90%] flex font-normal text-xs">
-                  Hyderabad to win the match vs Mumbai?
-                </div>
-              </div>
-              <div className="w-full">
-                <Separator></Separator>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="font-normal text-[10px] flex items-center gap-2">
-                  Invested &#8377;5.5{' '}
-                  <span className="flex border bg-[#2C2D32] -mx-1"></span> Gains
-                  - &#8377;0.1
-                </span>
-                <div>
-                  <button className="font-semibold text-xs flex ">
-                    Exit <ChevronRight className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div className="bg-white p-4 flex flex-col font-inter gap-4 rounded-[5px]">
-              <div className="flex items-center gap-1">
-                <p className="bg-[#33726533] px-1.5 text-[8px] font-[500] tracking-[2%] text-[#1C895E] rounded-[2px]">
-                  Matched
-                </p>
-              </div>
-              <div className="flex justify-between items-start gap-4">
-                <div className="w-[10%]">
-                  <img src={CricketIcon} alt="" />
-                </div>
-                <div className="w-[90%] flex font-normal text-xs">
-                  Hyderabad to win the match vs Mumbai?
-                </div>
-              </div>
-              <div className="w-full">
-                <Separator></Separator>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="font-normal text-[10px] flex items-center gap-2">
-                  Invested &#8377;5.5{' '}
-                  <span className="flex border bg-[#2C2D32] -mx-1"></span> Gains
-                  - &#8377;0.1
-                </span>
-                <div>
-                  <button className="font-semibold text-xs flex ">
-                    Exit <ChevronRight className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
+              )
+            })}
           </div>
         </>
       )}

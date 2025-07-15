@@ -32,6 +32,8 @@ const OpenMarketHoldingsCancelSellOrders = ({ market, exitingHoldings }) => {
 
   console.log('Market', market)
 
+  console.log('Exiting NO', market?.EXITING?.NO)
+
   const { currentUser } = useFrappeAuth()
 
   const [isYesChecked, setIsYesChecked] = useState(
@@ -74,8 +76,10 @@ const OpenMarketHoldingsCancelSellOrders = ({ market, exitingHoldings }) => {
       setShowAnimation(true)
 
       setTimeout(() => {
+        mutate((key) => Array.isArray(key) && key[0] === 'open_market_holdings')
         mutate(
-          (key) => Array.isArray(key) && key[0] === 'open_marketwise_holdings'
+          (key) =>
+            Array.isArray(key) && key[0] === 'open_market_holdings_overall'
         )
 
         setIsDrawerOpen(false)
@@ -161,13 +165,20 @@ const OpenMarketHoldingsCancelSellOrders = ({ market, exitingHoldings }) => {
                         <div className=" flex items-start gap-3">
                           <div className="flex flex-col items-end">
                             <span
-                              className={`font-semibold text-sm font-inter text-[#2C2D32]`}
+                              className={`font-semibold text-sm font-inter text-[#2C2D32] ${
+                                market?.EXITING?.NO?.exit_value >
+                                market?.EXITING?.NO?.total_invested
+                                  ? 'text-[#1C895E]'
+                                  : null
+                              } ${
+                                market?.EXITING?.NO?.exit_value <
+                                market?.EXITING?.NO?.total_invested
+                                  ? 'text-[#DB342C]'
+                                  : null
+                              }`}
                             >
                               &#8377;
-                              {(
-                                market?.EXITING?.NO?.total_quantity -
-                                market?.EXITING?.NO?.total_filled_quantity
-                              ).toFixed(1)}
+                              {(market?.EXITING?.NO?.exit_value).toFixed(1)}
                             </span>
 
                             <span className="font-normal text-xs text-[#5F5F5F]">
@@ -208,14 +219,20 @@ const OpenMarketHoldingsCancelSellOrders = ({ market, exitingHoldings }) => {
                         <div className=" flex items-start gap-3">
                           <div className="flex flex-col items-end">
                             <span
-                              className={`font-semibold text-sm font-inter text-[#2C2D32]`}
+                              className={`font-semibold text-sm font-inter text-[#2C2D32] ${
+                                market?.EXITING?.YES?.exit_value >
+                                market?.EXITING?.YES?.total_invested
+                                  ? 'text-[#1C895E]'
+                                  : null
+                              } ${
+                                market?.EXITING?.YES?.exit_value <
+                                market?.EXITING?.YES?.total_invested
+                                  ? 'text-[#DB342C]'
+                                  : null
+                              }`}
                             >
                               &#8377;
-                              {(
-                                (market?.EXITING?.YES?.total_quantity -
-                                  market?.EXITING?.YES?.total_filled_quantity) *
-                                market.yes_price
-                              ).toFixed(1)}
+                              {(market?.EXITING?.YES?.exit_value).toFixed(1)}
                             </span>
                             <span className="font-normal text-xs text-[#5F5F5F]">
                               Exit Value

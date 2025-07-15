@@ -64,7 +64,7 @@ const ExitSellOrdersPriceDrawer = ({
     // Only allow numbers
     const value = e.target.value
     if (/^\d*\.?\d*$/.test(value)) {
-      setTempValue(value)
+      if (value >= 0.5 && value <= 9.5) setTempValue(value)
     }
   }
   return (

@@ -234,6 +234,9 @@ const OpenMarketHoldingsBuyDrawer = ({ marketId, marketPrices }) => {
       }, 1000)
 
       mutate((key) => Array.isArray(key) && key[0] === 'open_market_holdings')
+      mutate(
+        (key) => Array.isArray(key) && key[0] === 'open_market_holdings_overall'
+      )
 
       trackEvent({
         category: 'Order',

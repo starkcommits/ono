@@ -15,6 +15,7 @@ import CircleCrossIcon from '@/assets/CircleCrossIcon.svg'
 import ExitSellOrder from './ExitSellOrder'
 import ModifyCancelSellOrder from './ModifyCancelSellOrder'
 import { Separator } from '@/components/ui/separator'
+import CancelBuyOrder from './CancelBuyOrder'
 
 const HoldingCardDrawer = ({ holding, marketPrices }) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
@@ -41,15 +42,7 @@ const HoldingCardDrawer = ({ holding, marketPrices }) => {
                 <p className="font-semibold text-xl text-[#E26F64]">NO</p>
               )}
               {holding.status === 'UNMATCHED' && (
-                <div className="flex items-center gap-2 border rounded-full cursor-pointer">
-                  <span className="font-normal font-inter text-[10px] text-[#2C2D32] hover:bg-[#2C2D32]/5 group px-1 pl-3.5">
-                    {holding.quantity - holding.filled_quantity} unmatched
-                  </span>
-                  <Separator orientation="vertical" className="h-8" />
-                  <span className="flex items-center justify-center px-1 pr-4">
-                    <img src={CircleCrossIcon} alt="" />
-                  </span>
-                </div>
+                <CancelBuyOrder holding={holding} />
               )}
               {holding.status === 'EXITING' && (
                 <ModifyCancelSellOrder holding={holding} />
@@ -88,6 +81,42 @@ const HoldingCardDrawer = ({ holding, marketPrices }) => {
                     ) : null}
                   </>
                 ) : null}
+                {holding.status === 'CANCELED' ||
+                holding.status === 'UNMATCHED' ? (
+                  <>
+                    <p className="font-normal text-xs text-[#5F5F5F]">
+                      Buy Price
+                    </p>
+                    <p className="font-inter font-semibold text-sm text-[#2C2D32]">
+                      &#8377;
+                      {holding.price}
+                    </p>
+                  </>
+                ) : null}
+                {holding.status === 'EXITING' && (
+                  <>
+                    <p className="font-normal text-xs text-[#5F5F5F]">
+                      Exit Value
+                    </p>
+                    <p className="font-inter font-semibold text-sm text-[#2C2D32]">
+                      &#8377;
+                      {holding.exit_price * holding.quantity}
+                    </p>
+                  </>
+                )}
+                {holding.status === 'EXITED' && (
+                  <>
+                    <p className="font-normal text-xs text-[#5F5F5F]">
+                      Returns
+                    </p>
+                    <p className="font-inter font-semibold text-sm text-[#2C2D32]">
+                      &#8377;
+                      {holding.returns > 0 ? `+${holding.returns}` : null}
+                      {holding.returns < 0 ? `${holding.returns}` : null}
+                      {holding.returns === 0 ? `${holding.returns}` : null}
+                    </p>
+                  </>
+                )}
               </div>
             </div>
           </div>

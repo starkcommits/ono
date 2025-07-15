@@ -2,13 +2,14 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useFrappeEventListener, useFrappeGetDoc } from 'frappe-react-sdk'
 import OpenMarketHoldings from '../components/OpenMarketHoldings'
-import ResolvedMarketHoldings from './ResolvedMarketHoldings'
+import ResolvedMarketHoldings from '../components/ResolvedMarketHoldings'
 
 const OpenClosedResolvedMarketHoldings = () => {
   const [marketPrices, setMarketPrices] = useState({
     market_yes_price: 0,
     market_no_price: 0,
     market_status: 'OPEN',
+    market_result: '',
   })
 
   const { market_id } = useParams()
@@ -25,6 +26,7 @@ const OpenClosedResolvedMarketHoldings = () => {
         market_yes_price: parseFloat(market.yes_price),
         market_no_price: parseFloat(market.no_price),
         market_status: market.status,
+        market_result: market.end_result,
       })
     }
   }, [market])
@@ -36,6 +38,7 @@ const OpenClosedResolvedMarketHoldings = () => {
         market_yes_price: parseFloat(marketUpdated.yes_price),
         market_no_price: parseFloat(marketUpdated.no_price),
         market_status: marketUpdated.status,
+        market_result: marketUpdated.end_result,
       })
     }
   })
@@ -51,9 +54,8 @@ const OpenClosedResolvedMarketHoldings = () => {
   if (
     marketPrices.market_status === 'CLOSED' ||
     marketPrices.market_status === 'RESOLVED'
-  ) {
+  )
     return <ResolvedMarketHoldings marketPrices={marketPrices} />
-  }
 }
 
 export default OpenClosedResolvedMarketHoldings

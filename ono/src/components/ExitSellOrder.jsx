@@ -27,6 +27,7 @@ import {
   useFrappeEventListener,
   useFrappeGetDoc,
   useFrappeUpdateDoc,
+  useSWRConfig,
 } from 'frappe-react-sdk'
 import { useParams } from 'react-router-dom'
 import {
@@ -46,6 +47,8 @@ import { toast } from 'sonner'
 
 const ExitSellOrder = ({ holding }) => {
   const { createDoc, updateDoc } = useFrappeUpdateDoc()
+
+  const { mutate } = useSWRConfig()
 
   const { currentUser } = useFrappeAuth()
   const { id } = useParams()
@@ -146,6 +149,11 @@ const ExitSellOrder = ({ holding }) => {
       })
 
       setButtonState('done')
+
+      mutate((key) => Array.isArray(key) && key[0] === 'open_market_holdings')
+      mutate(
+        (key) => Array.isArray(key) && key[0] === 'open_market_holdings_overall'
+      )
 
       toast.success('Your Sell Order is successfully placed.')
 
@@ -364,7 +372,7 @@ const ExitSellOrder = ({ holding }) => {
           </div>
           <DrawerFooter className="mx-auto w-full bg-white sticky bottom-0">
             <button
-              className="text-white bg-[#2C2D32] hover:bg-[#2C2D32]/90 rounded-[5px] py-[18.5px] px-[162px] transition-all duration-300"
+              className="text-white bg-[#2C2D32] hover:bg-[#2C2D32]/90 rounded-[5px] py-[18.5px] transition-all duration-300"
               disabled={buttonState !== 'idle'}
               onClick={handleConfirmSell}
             >
