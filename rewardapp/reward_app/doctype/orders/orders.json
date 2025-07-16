@@ -31,6 +31,7 @@
  ],
  "fields": [
   {
+   "default": "0",
    "fieldname": "quantity",
    "fieldtype": "Int",
    "label": "Quantity"
@@ -171,7 +172,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-05-14 14:28:40.101350",
+ "modified": "2025-07-16 11:59:54.076504",
  "modified_by": "Administrator",
  "module": "Reward App",
  "name": "Orders",

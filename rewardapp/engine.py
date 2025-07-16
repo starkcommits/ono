@@ -364,6 +364,20 @@ def market(doc, method):
             if response.status_code != 200:
                 frappe.logger().error(f"Error response: {response.text}")
                 frappe.throw(f"API error: {response.status_code} - {response.text}")
+            
+            """Send real-time update via WebSockets"""
+            update_data = {
+                "name": doc.name,
+                "status": doc.status,
+                "category": doc.category,
+                "question": doc.question,
+                "yes_price": doc.yes_price,
+                "no_price": doc.no_price,
+                "closing_time": doc.closing_time,
+                "total_traders": doc.total_traders
+            }
+                
+            frappe.publish_realtime("market_event",update_data,after_commit=True)
         else:
             result = frappe.db.sql("""
                 SELECT
@@ -416,7 +430,22 @@ def market(doc, method):
                 SET status = 'EXITED', remark = 'Market Resolved', market_status = 'RESOLVED'
                 WHERE market_id = %s
                 AND status IN ('ACTIVE', 'EXITING', 'EXITED')
-            """, (doc.name,))    
+            """, (doc.name,))
+
+            """Send real-time update via WebSockets"""
+            update_data = {
+                "name": doc.name,
+                "status": doc.status,
+                "category": doc.category,
+                "question": doc.question,
+                "yes_price": doc.yes_price,
+                "no_price": doc.no_price,
+                "closing_time": doc.closing_time,
+                "total_traders": doc.total_traders,
+                "end_result": doc.end_result
+            }
+                
+            frappe.publish_realtime("market_event", update_data, after_commit=True)    
     except Exception as e:
         frappe.log_error(f"Exception market: {str(e)}")
 
@@ -693,7 +722,9 @@ def get_marketwise_holding():
                 "total_invested": 0
             }
         
-        output[market]["total_invested"] += row["total_invested"]
+        if status != "CANCELED" and status != 'EXITED':
+            output[market]["total_invested"] += row["total_invested"]
+
         output[market].setdefault(status, {})[opinion] = {
             "total_quantity": row["total_quantity"],
             "total_filled_quantity": row["total_filled_quantity"],
@@ -774,8 +805,8 @@ def get_market_holdings():
         status = row['status']
         opinion = row['opinion_type']
         
-        output["total_invested"] += row["total_invested"]
-        
+        if status != "CANCELED" and status != 'EXITED':
+            output["total_invested"] += row["total_invested"]
         # Properly handle multiple statuses
         if status not in output:
             output[status] = {}
