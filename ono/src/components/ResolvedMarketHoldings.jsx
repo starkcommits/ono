@@ -62,8 +62,12 @@ const ResolvedMarketHoldings = ({ marketPrices, setMarketPrices }) => {
         ['market_status', 'in', ['CLOSED', 'RESOLVED']],
       ],
     },
-    currentUser && market_id ? ['closed_market_holdings'] : null
+    currentUser && market_id && resolvedMarketHoldingsPortfolioTab === 'all'
+      ? ['closed_market_holdings']
+      : null
   )
+
+  console.log(resolvedMarketHoldingsPortfolioTab)
 
   const {
     data: settledResolvedMarketHoldings,
@@ -93,7 +97,9 @@ const ResolvedMarketHoldings = ({ marketPrices, setMarketPrices }) => {
         ['status', '=', 'SETTLED'],
       ],
     },
-    currentUser && market_id ? ['closed_market_holdings'] : null
+    currentUser && market_id && resolvedMarketHoldingsPortfolioTab === 'settled'
+      ? ['settled_closed_market_holdings']
+      : null
   )
 
   const {
@@ -124,7 +130,11 @@ const ResolvedMarketHoldings = ({ marketPrices, setMarketPrices }) => {
         ['status', '=', 'CANCELED'],
       ],
     },
-    currentUser && market_id ? ['closed_market_holdings'] : null
+    currentUser &&
+      market_id &&
+      resolvedMarketHoldingsPortfolioTab === 'canceled'
+      ? ['canceled_closed_market_holdings']
+      : null
   )
 
   console.log('Open market holdings: ', resolvedMarketHoldings)
@@ -153,7 +163,7 @@ const ResolvedMarketHoldings = ({ marketPrices, setMarketPrices }) => {
   const navigate = useNavigate()
   return (
     <div className="leading-[100%] bg-[#F5F5F5] w-full select-none">
-      <div className="sticky z-[50] top-0 left-0 right-0 flex flex-col font-inter max-w-md mx-auto pt-4 bg-white mb-auto w-full select-none">
+      <div className="sticky h-12 z-[50] top-0 left-0 right-0 flex flex-col font-inter max-w-md mx-auto pt-4 bg-white mb-auto w-full select-none">
         <div className="border-[0.33px] border-x-0 border-t-0 border-b border-[#DBC5F7] w-full flex justify-start items-center pb-4 px-4">
           <h1 className="text-xl font-[500] text-[#2C2D32] ">
             <img
@@ -165,6 +175,7 @@ const ResolvedMarketHoldings = ({ marketPrices, setMarketPrices }) => {
               className="cursor-pointer w-4 h-4"
             />
           </h1>
+          <div className="absolute bottom-0 left-0 right-0 h-[0.7px] bg-gray-200 z-10"></div>
         </div>
       </div>
       <div className="flex flex-col w-full">
@@ -252,33 +263,35 @@ const ResolvedMarketHoldings = ({ marketPrices, setMarketPrices }) => {
           </div>
         </div>
       </div>
-      <div className="w-full overflow-x-auto scrollbar-hide sticky top-0">
-        <Tabs
-          className="w-full py-4 font-[500] text-xs"
-          value={resolvedMarketHoldingsPortfolioTab}
-          onValueChange={handleTabChange}
-        >
-          <div className="bg-[#F5F5F5]">
-            <TabsList className="flex flex-nowrap w-max rounded-full space-x-2 bg-transparent text-[#2C2D32] p-0 h-6 pl-4 pr-4">
-              {['all', 'settled', 'canceled'].map((tab) => (
-                <TabsTrigger
-                  key={tab}
-                  value={tab}
-                  ref={tabRefs[tab]}
-                  className={`flex items-center flex-shrink-0 px-5 py-1.5 space-x-2 rounded-full border-[0.5px] border-[#CBCBCB] bg-white data-[state=active]:border-[0.7px] data-[state=active]:border-[#5F5F5F] text-sm text-[#5F5F5F] font-normal h-auto`}
-                >
-                  <span className="whitespace-nowrap capitalize">{tab}</span>
-                  {resolvedMarketHoldingsPortfolioTab === tab && (
-                    <img src={X} alt="Close" />
-                  )}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </div>
-        </Tabs>
+      <div className="bg-[#F5F5F5] sticky top-12 z-[50] border-b">
+        <div className="w-full overflow-x-auto scrollbar-hide">
+          <Tabs
+            className="w-full font-[500] text-xs py-6 overflow-x-auto scrollbar-hide"
+            value={resolvedMarketHoldingsPortfolioTab}
+            onValueChange={handleTabChange}
+          >
+            <div className="bg-[#F5F5F5]">
+              <TabsList className="flex flex-nowrap w-max rounded-full space-x-2 bg-transparent text-[#2C2D32] p-0 h-6 pl-4 pr-4">
+                {['all', 'settled', 'canceled'].map((tab) => (
+                  <TabsTrigger
+                    key={tab}
+                    value={tab}
+                    ref={tabRefs[tab]}
+                    className={`flex items-center flex-shrink-0 px-5 py-1.5 space-x-2 rounded-full border-[0.5px] border-[#CBCBCB] bg-white data-[state=active]:border-[0.7px] data-[state=active]:border-[#5F5F5F] text-sm text-[#5F5F5F] font-normal h-auto`}
+                  >
+                    <span className="whitespace-nowrap capitalize">{tab}</span>
+                    {resolvedMarketHoldingsPortfolioTab === tab && (
+                      <img src={X} alt="Close" />
+                    )}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
+          </Tabs>
+        </div>
       </div>
 
-      <div className="flex flex-col gap-4 p-4 min-h-[calc(100vh-122px)] relative z-[30]">
+      <div className="flex flex-col gap-4 p-4 min-h-[calc(100vh-124px)] relative">
         {resolvedMarketHoldingsPortfolioTab === 'all' &&
           !resolvedMarketHoldingsLoading &&
           resolvedMarketHoldings?.length === 0 && (
