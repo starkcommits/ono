@@ -45,7 +45,7 @@ import CricketIcon from '@/assets/Cricket.svg'
 import OrderBookIcon from '@/assets/OrderBook.svg'
 import { toast } from 'sonner'
 
-const ExitSellOrder = ({ holding }) => {
+const ExitSellOrder = ({ holding, openMarketHoldingsPortfolioTab }) => {
   const { createDoc, updateDoc } = useFrappeUpdateDoc()
 
   const { mutate } = useSWRConfig()
@@ -66,6 +66,8 @@ const ExitSellOrder = ({ holding }) => {
     currentUser,
     currentUser ? undefined : null
   )
+
+  console.log(openMarketHoldingsPortfolioTab)
 
   const [price, setPrice] = useState(
     holding.opinion_type === 'YES' ? market.yes_price : market.no_price
@@ -154,6 +156,11 @@ const ExitSellOrder = ({ holding }) => {
       mutate(
         (key) => Array.isArray(key) && key[0] === 'open_market_holdings_overall'
       )
+
+      if (openMarketHoldingsPortfolioTab === 'matched')
+        mutate(
+          (key) => Array.isArray(key) && key[0] === 'matched_market_holdings'
+        )
 
       toast.success('Your Sell Order is successfully placed.')
 

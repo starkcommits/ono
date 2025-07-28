@@ -2,6 +2,9 @@ import Navbar from './Navbar'
 import { Outlet, useLocation } from 'react-router-dom'
 import Widget from './Widget'
 import HomeHeader from './HomeHeader'
+import { useFrappeEventListener } from 'frappe-react-sdk'
+import { MarketEventListener } from './MarketEventListener'
+import { OrderBookEventListener } from './OrderBookEventListener'
 
 const Layout = () => {
   const location = useLocation()
@@ -10,8 +13,17 @@ const Layout = () => {
 
   // Define paths or patterns where Header should be hidden
   const homeRoute = path === '/' // dynamically hide for /event/:id
+  const searchRoute = path === '/search'
   const portfolioRoute = path === '/portfolio' // dynamically hide for /event/:id
   const eventRoute = path.startsWith('/event/')
+
+  useFrappeEventListener('market_event', (event) => {
+    MarketEventListener.emit(event)
+  })
+
+  useFrappeEventListener('order_book_event', (event) => {
+    OrderBookEventListener.emit(event)
+  })
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -29,9 +41,14 @@ const Layout = () => {
         <Outlet />
       </div>
       {/* Widget */}
-      {(homeRoute || portfolioRoute) && (
+      {homeRoute && (
         <div className="sticky left-0 right-0 bottom-0 flex flex-col pb-8 z-[50] bg-white mt-auto">
           <Widget />
+          <Navbar />
+        </div>
+      )}
+      {(portfolioRoute || searchRoute) && (
+        <div className="sticky left-0 right-0 bottom-0 flex flex-col pb-8 z-[50] bg-white mt-auto">
           <Navbar />
         </div>
       )}

@@ -1,5 +1,6 @@
 import { useFrappeEventListener, useFrappeGetCall } from 'frappe-react-sdk'
 import { useEffect, useState } from 'react'
+import { OrderBookEventListener } from './OrderBookEventListener'
 
 const OrderBook = ({ marketId }) => {
   const [orderBook, setOrderBook] = useState({})
@@ -12,7 +13,24 @@ const OrderBook = ({ marketId }) => {
     market_id: marketId,
   })
 
-  console.log(orderBookData)
+  console.log('Order book data:', orderBookData)
+
+  console.log('Order book:', orderBook)
+
+  useEffect(() => {
+    const id = 'orderbook'
+
+    OrderBookEventListener.subscribe(id, (order) => {
+      console.log('Received Order:', order)
+      if (order.market_id !== marketId) return
+
+      refetchOrderBook()
+    })
+
+    return () => {
+      OrderBookEventListener.unsubscribe(id)
+    }
+  }, [])
 
   useEffect(() => {
     // First, handle the case when we have data from API
@@ -104,60 +122,47 @@ const OrderBook = ({ marketId }) => {
     }
   }, [orderBookData])
 
-  console.log('Message: ', orderBookData?.message)
+  // useFrappeEventListener('order_book_event', (order) => {
+  //   console.log('Received Order:', order)
+  //   if (order.market_id !== marketId) return
 
-  useFrappeEventListener('order_book_event', (order) => {
-    console.log('Received Order:', order)
-    if (order.market_id !== marketId) return
+  //   refetchOrderBook()
 
-    console.log('entered')
-    console.log('Type Order Price: ', typeof order.price)
+  //   // setOrderBook((prevOrderBook) => {
+  //   //   const priceKey = parseFloat(order.price).toFixed(1) // Ensure consistent price format
 
-    console.log('Type of order:', typeof order.quantity, typeof order.price)
+  //   //   console.log('Previous OrderBook:', prevOrderBook)
 
-    refetchOrderBook()
+  //   //   // Clone the order book
+  //   //   const updatedOrderBook = { ...prevOrderBook }
 
-    // setOrderBook((prevOrderBook) => {
-    //   const priceKey = parseFloat(order.price).toFixed(1) // Ensure consistent price format
+  //   //   // Ensure the price entry exists
+  //   //   if (!updatedOrderBook[priceKey]) {
+  //   //     updatedOrderBook[priceKey] = { price: priceKey, yesQty: 0, noQty: 0 }
+  //   //   }
+  //   //   const currentYesQty = Number(updatedOrderBook[priceKey].yesQty) || 0
+  //   //   const currentNoQty = Number(updatedOrderBook[priceKey].noQty) || 0
+  //   //   const orderQuantity = Number(order.quantity) || 0
 
-    //   console.log('Previous OrderBook:', prevOrderBook)
+  //   //   console.log(currentYesQty, currentNoQty, orderQuantity)
 
-    //   // Clone the order book
-    //   const updatedOrderBook = { ...prevOrderBook }
+  //   //   updatedOrderBook[priceKey] = {
+  //   //     price: priceKey,
+  //   //     yesQty:
+  //   //       order.opinion_type === 'YES'
+  //   //         ? currentYesQty + orderQuantity
+  //   //         : currentYesQty,
+  //   //     noQty:
+  //   //       order.opinion_type === 'NO'
+  //   //         ? currentNoQty + orderQuantity
+  //   //         : currentNoQty,
+  //   //   }
 
-    //   // Ensure the price entry exists
-    //   if (!updatedOrderBook[priceKey]) {
-    //     updatedOrderBook[priceKey] = { price: priceKey, yesQty: 0, noQty: 0 }
-    //   }
-    //   const currentYesQty = Number(updatedOrderBook[priceKey].yesQty) || 0
-    //   const currentNoQty = Number(updatedOrderBook[priceKey].noQty) || 0
-    //   const orderQuantity = Number(order.quantity) || 0
+  //   //   console.log('Updated OrderBook:', updatedOrderBook)
 
-    //   console.log(currentYesQty, currentNoQty, orderQuantity)
-
-    //   updatedOrderBook[priceKey] = {
-    //     price: priceKey,
-    //     yesQty:
-    //       order.opinion_type === 'YES'
-    //         ? currentYesQty + orderQuantity
-    //         : currentYesQty,
-    //     noQty:
-    //       order.opinion_type === 'NO'
-    //         ? currentNoQty + orderQuantity
-    //         : currentNoQty,
-    //   }
-
-    //   console.log('Updated OrderBook:', updatedOrderBook)
-
-    //   return updatedOrderBook
-    // })
-  })
-
-  useEffect(() => {
-    console.log('Order book state changed:', orderBook)
-  }, [orderBook])
-
-  // console.log('Sorted Entries:', sortedYesEntries, sortedNoEntries)
+  //   //   return updatedOrderBook
+  //   // })
+  // })
 
   return (
     <div className="mb-4">
@@ -182,17 +187,22 @@ const OrderBook = ({ marketId }) => {
               )
               .slice(0, 5)
               .map((entry) => (
-                <div
-                  key={entry.price}
-                  className="grid grid-cols-2 gap-4 px-0 py-1"
-                >
-                  {console.log('Entry:', entry)}
-                  <span className="font-semibold text-[10px]">
-                    ₹{entry.price}
-                  </span>
-                  <span className="text-center font-normal text-[9px]">
-                    {entry.yesQty}
-                  </span>
+                <div key={entry.price} className="relative w-full px-0 py-1">
+                  {/* Background fill from RIGHT to LEFT */}
+                  <div
+                    className="absolute right-0 top-0 h-full transition-all"
+                    style={{ width: `100%`, zIndex: 0 }} // replace 70 with dynamic %
+                  />
+
+                  {/* Foreground content */}
+                  <div className="grid grid-cols-2 gap-4 relative z-10 w-full">
+                    <span className="font-semibold text-[10px]">
+                      ₹{entry.price}
+                    </span>
+                    <span className="text-right font-normal text-[9px] pr-1">
+                      {entry.yesQty}
+                    </span>
+                  </div>
                 </div>
               ))}
           </div>

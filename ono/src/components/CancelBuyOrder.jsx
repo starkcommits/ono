@@ -20,6 +20,7 @@ import { Slider } from '@/components/ui/slider'
 
 import { useEffect, useRef, useState } from 'react'
 import {
+  FrappeContext,
   useFrappeAuth,
   useFrappeCreateDoc,
   useFrappeEventListener,
@@ -46,12 +47,14 @@ import { Separator } from '@/components/ui/separator'
 import { toast } from 'sonner'
 import Lottie from 'lottie-react'
 
-const CancelBuyOrder = ({ holding }) => {
+const CancelBuyOrder = ({ holding, openMarketHoldingsPortfolioTab }) => {
   const { mutate } = useSWRConfig()
   const { updateDoc } = useFrappeUpdateDoc()
   const { call: cancelBuyOrder } = useFrappePostCall(
     'rewardapp.engine.cancel_order'
   )
+
+  // const { call: fetchHolding } = useFrappePostCall('frappe.client.')
 
   const [showAnimation, setShowAnimation] = useState(false)
   const [buttonState, setButtonState] = useState('idle')
@@ -76,11 +79,8 @@ const CancelBuyOrder = ({ holding }) => {
     try {
       setButtonState('processing')
 
-      await cancelBuyOrder({
-        order_type: 'BUY',
-        market_id: holding.market_id,
-        user_id: currentUser,
-        opinion_type: holding.opinion_type,
+      await updateDoc('Orders', holding.buy_order, {
+        status: 'CANCELED',
       })
 
       setButtonState('done')
@@ -92,6 +92,10 @@ const CancelBuyOrder = ({ holding }) => {
           (key) =>
             Array.isArray(key) && key[0] === 'open_market_holdings_overall'
         )
+        if (openMarketHoldingsPortfolioTab === 'pending')
+          mutate(
+            (key) => Array.isArray(key) && key[0] === 'pending_market_holdings'
+          )
 
         setIsDrawerOpen(false)
         setShowAnimation(false)

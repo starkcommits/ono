@@ -8,8 +8,9 @@ const OpenClosedResolvedMarketHoldings = () => {
   const [marketPrices, setMarketPrices] = useState({
     market_yes_price: 0,
     market_no_price: 0,
-    market_status: 'OPEN',
+    market_status: '',
     market_result: '',
+    market_question: '',
   })
 
   const { market_id } = useParams()
@@ -27,6 +28,7 @@ const OpenClosedResolvedMarketHoldings = () => {
         market_no_price: parseFloat(market.no_price),
         market_status: market.status,
         market_result: market.end_result,
+        market_question: market.question,
       })
     }
   }, [market])
@@ -39,6 +41,7 @@ const OpenClosedResolvedMarketHoldings = () => {
         market_no_price: parseFloat(marketUpdated.no_price),
         market_status: marketUpdated.status,
         market_result: marketUpdated.end_result,
+        market_question: marketUpdated.question,
       })
     }
   })

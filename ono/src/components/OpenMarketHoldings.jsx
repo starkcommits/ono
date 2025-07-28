@@ -7,7 +7,7 @@ import Back from '@/assets/Back.svg'
 import UpArrowIcon from '@/assets/UpArrowIcon.svg'
 
 import CircleCrossIcon from '@/assets/CircleCrossIcon.svg'
-import { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
 import {
   useFrappeAuth,
@@ -107,7 +107,7 @@ const OpenMarketHoldings = ({ marketPrices, setMarketPrices }) => {
       ],
     },
     currentUser && market_id && openMarketHoldingsPortfolioTab === 'pending'
-      ? undefined
+      ? ['pending_market_holdings']
       : null
   )
 
@@ -136,11 +136,11 @@ const OpenMarketHoldings = ({ marketPrices, setMarketPrices }) => {
         ['user_id', '=', currentUser],
         ['market_id', '=', market_id],
         ['market_status', '=', 'OPEN'],
-        ['status', '=', 'MATCHED'],
+        ['status', '=', 'ACTIVE'],
       ],
     },
     currentUser && market_id && openMarketHoldingsPortfolioTab === 'matched'
-      ? undefined
+      ? ['matched_market_holdings']
       : null
   )
 
@@ -173,7 +173,7 @@ const OpenMarketHoldings = ({ marketPrices, setMarketPrices }) => {
       ],
     },
     currentUser && market_id && openMarketHoldingsPortfolioTab === 'exiting'
-      ? undefined
+      ? ['exiting_market_holdings']
       : null
   )
 
@@ -206,7 +206,7 @@ const OpenMarketHoldings = ({ marketPrices, setMarketPrices }) => {
       ],
     },
     currentUser && market_id && openMarketHoldingsPortfolioTab === 'exited'
-      ? undefined
+      ? ['exited_market_holdings']
       : null
   )
 
@@ -239,7 +239,7 @@ const OpenMarketHoldings = ({ marketPrices, setMarketPrices }) => {
       ],
     },
     currentUser && market_id && openMarketHoldingsPortfolioTab === 'canceled'
-      ? undefined
+      ? ['canceled_market_holdings']
       : null
   )
 
@@ -248,26 +248,37 @@ const OpenMarketHoldings = ({ marketPrices, setMarketPrices }) => {
     setOpenMarketHoldingsPortfolioTab(value)
   }
 
-  const tabKeys = ['all', 'matched', 'exiting', 'exited', 'cancelled']
-  const tabRefs = tabKeys.reduce((acc, key) => {
-    acc[key] = useRef(null)
-    return acc
-  }, {})
+  const tabKeys = ['all', 'pending', 'matched', 'exiting', 'exited', 'canceled']
+  const tabRefs = useRef({})
+  const tabsContainerRef = useRef(null)
 
+  // Initialize refs once
   useEffect(() => {
-    if (tabRefs[openMarketHoldingsPortfolioTab]?.current) {
-      tabRefs[openMarketHoldingsPortfolioTab].current.scrollIntoView({
+    tabKeys.forEach((key) => {
+      if (!tabRefs.current[key]) {
+        tabRefs.current[key] = React.createRef()
+      }
+    })
+  }, [])
+
+  // Scroll into view when tab changes
+  useEffect(() => {
+    const selectedTab = tabRefs.current[openMarketHoldingsPortfolioTab]?.current
+    const container = tabsContainerRef.current
+
+    if (selectedTab && container) {
+      selectedTab.scrollIntoView({
         behavior: 'smooth',
-        inline: 'center',
         block: 'nearest',
+        inline: 'center',
       })
     }
   }, [openMarketHoldingsPortfolioTab])
 
   const navigate = useNavigate()
   return (
-    <div className="leading-[100%] bg-[#F5F5F5] w-full">
-      <div className="sticky z-[50] top-0 left-0 right-0 flex flex-col font-inter max-w-md mx-auto pt-4 bg-white mb-auto w-full select-none">
+    <div className="leading-[100%] bg-[#F5F5F5] w-full select-none">
+      <div className="h-12 sticky z-[50] top-0 left-0 right-0 flex flex-col font-inter max-w-md mx-auto pt-4 bg-white mb-auto w-full select-none">
         <div className="border-[0.33px] border-x-0 border-t-0 border-b border-[#DBC5F7] w-full flex justify-start items-center pb-4 px-4">
           <h1 className="text-xl font-[500] text-[#2C2D32] ">
             <img
@@ -280,6 +291,7 @@ const OpenMarketHoldings = ({ marketPrices, setMarketPrices }) => {
             />
           </h1>
         </div>
+        <div className="absolute bottom-0 left-0 right-0 h-[0.7px] bg-gray-200 z-10"></div>
       </div>
       <div className="flex flex-col w-full">
         <div className="flex flex-col gap-4 items-center pb-8 pt-6">
@@ -458,47 +470,179 @@ const OpenMarketHoldings = ({ marketPrices, setMarketPrices }) => {
           })()}
         </div>
       </div>
-      <div className="w-full overflow-x-auto scrollbar-hide sticky top-0">
-        <Tabs
-          className="w-full py-4 font-[500] text-xs"
-          value={openMarketHoldingsPortfolioTab}
-          onValueChange={handleTabChange}
+      <div className={`bg-[#F5F5F5] sticky top-12 z-[50] border-b`}>
+        <div
+          className="w-full overflow-x-auto scrollbar-hide"
+          ref={tabsContainerRef} // Moved ref here from TabsList
         >
-          <div className="bg-[#F5F5F5]">
-            <TabsList className="flex flex-nowrap w-max rounded-full space-x-2 bg-transparent text-[#2C2D32] p-0 h-6 pl-4 pr-4">
-              {[
-                'all',
-                'pending',
-                'matched',
-                'exiting',
-                'exited',
-                'canceled',
-              ].map((tab) => (
-                <TabsTrigger
-                  key={tab}
-                  value={tab}
-                  ref={tabRefs[tab]}
-                  className={`flex items-center flex-shrink-0 px-5 py-1.5 space-x-2 rounded-full border-[0.5px] border-[#CBCBCB] bg-white data-[state=active]:border-[0.7px] data-[state=active]:border-[#5F5F5F] text-sm text-[#5F5F5F] font-normal h-auto`}
-                >
-                  <span className="whitespace-nowrap capitalize">{tab}</span>
-                  {openMarketHoldingsPortfolioTab === tab && (
-                    <img src={X} alt="Close" />
-                  )}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </div>
-        </Tabs>
+          <Tabs
+            className="w-full py-6 font-[500] text-xs"
+            value={openMarketHoldingsPortfolioTab}
+            onValueChange={handleTabChange}
+          >
+            <div className="bg-[#F5F5F5]">
+              <TabsList className="flex flex-nowrap w-max rounded-full space-x-2 bg-[#F5F5F5] text-[#2C2D32] p-0 h-6 pl-4 pr-4">
+                {tabKeys.map((tab) => (
+                  <TabsTrigger
+                    key={tab}
+                    value={tab}
+                    ref={tabRefs.current[tab]}
+                    className={`flex items-center flex-shrink-0 px-5 py-1.5 space-x-2 rounded-full border-[0.5px] border-[#CBCBCB] bg-white data-[state=active]:border-[0.7px] data-[state=active]:border-[#5F5F5F] text-sm text-[#5F5F5F] font-normal h-auto`}
+                  >
+                    <span className="whitespace-nowrap capitalize">{tab}</span>
+                    {openMarketHoldingsPortfolioTab === tab && (
+                      <img src={X} alt="Close" />
+                    )}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
+          </Tabs>
+        </div>
       </div>
 
-      <div className="flex flex-col gap-4 p-4">
-        {openMarketHoldings?.length > 0 &&
+      <div className="flex flex-col gap-4 p-4 min-h-[calc(100vh-122px)] relative z-[30]">
+        {openMarketHoldingsPortfolioTab === 'all' &&
+          !openMarketHoldingsLoading &&
+          openMarketHoldings?.length === 0 && (
+            <div className="flex flex-col gap-1 items-center pt-12">
+              <p className="text-gray-600 text-md">
+                Nothing to see here... yet
+              </p>
+              <p className="text-neutral-400 text-sm">
+                Your orders will appear here
+              </p>
+            </div>
+          )}
+        {openMarketHoldingsPortfolioTab === 'all' &&
+          openMarketHoldings?.length > 0 &&
           openMarketHoldings.map((holding) => {
             return (
               <HoldingCardDrawer
                 key={holding.name}
                 marketPrices={marketPrices}
                 holding={holding}
+                openMarketHoldingsPortfolioTab={openMarketHoldingsPortfolioTab}
+              />
+            )
+          })}
+        {openMarketHoldingsPortfolioTab === 'pending' &&
+          !pendingOpenMarketHoldingsLoading &&
+          pendingOpenMarketHoldings?.length === 0 && (
+            <div className="flex flex-col gap-1 items-center pt-12">
+              <p className="text-gray-600 text-md">
+                Nothing to see here... yet
+              </p>
+              <p className="text-neutral-400 text-sm">
+                Your pending orders will appear here
+              </p>
+            </div>
+          )}
+        {openMarketHoldingsPortfolioTab === 'pending' &&
+          pendingOpenMarketHoldings?.length > 0 &&
+          pendingOpenMarketHoldings.map((holding) => {
+            return (
+              <HoldingCardDrawer
+                key={holding.name}
+                marketPrices={marketPrices}
+                holding={holding}
+                openMarketHoldingsPortfolioTab={openMarketHoldingsPortfolioTab}
+              />
+            )
+          })}
+        {openMarketHoldingsPortfolioTab === 'matched' &&
+          !matchedOpenMarketHoldingsLoading &&
+          matchedOpenMarketHoldings?.length === 0 && (
+            <div className="flex flex-col gap-1 items-center pt-12">
+              <p className="text-gray-600 text-md">
+                Nothing to see here... yet
+              </p>
+              <p className="text-neutral-400 text-sm">
+                Your matched orders will appear here
+              </p>
+            </div>
+          )}
+        {openMarketHoldingsPortfolioTab === 'matched' &&
+          matchedOpenMarketHoldings?.length > 0 &&
+          matchedOpenMarketHoldings.map((holding) => {
+            return (
+              <HoldingCardDrawer
+                key={holding.name}
+                marketPrices={marketPrices}
+                holding={holding}
+                openMarketHoldingsPortfolioTab={openMarketHoldingsPortfolioTab}
+              />
+            )
+          })}
+        {openMarketHoldingsPortfolioTab === 'canceled' &&
+          !canceledOpenMarketHoldingsLoading &&
+          canceledOpenMarketHoldings?.length === 0 && (
+            <div className="flex flex-col gap-1 items-center pt-12">
+              <p className="text-gray-600 text-md">
+                Nothing to see here... yet
+              </p>
+              <p className="text-neutral-400 text-sm">
+                Your canceled orders will appear here
+              </p>
+            </div>
+          )}
+        {openMarketHoldingsPortfolioTab === 'canceled' &&
+          canceledOpenMarketHoldings?.length > 0 &&
+          canceledOpenMarketHoldings.map((holding) => {
+            return (
+              <HoldingCardDrawer
+                key={holding.name}
+                marketPrices={marketPrices}
+                holding={holding}
+              />
+            )
+          })}
+
+        {openMarketHoldingsPortfolioTab === 'exiting' &&
+          !exitingOpenMarketHoldingsLoading &&
+          exitingOpenMarketHoldings?.length === 0 && (
+            <div className="flex flex-col gap-1 items-center pt-12">
+              <p className="text-gray-600 text-md">
+                Nothing to see here... yet
+              </p>
+              <p className="text-neutral-400 text-sm">
+                Your Exiting orders will appear here
+              </p>
+            </div>
+          )}
+        {openMarketHoldingsPortfolioTab === 'exiting' &&
+          exitingOpenMarketHoldings?.length > 0 &&
+          exitingOpenMarketHoldings.map((holding) => {
+            return (
+              <HoldingCardDrawer
+                key={holding.name}
+                marketPrices={marketPrices}
+                holding={holding}
+                openMarketHoldingsPortfolioTab={openMarketHoldingsPortfolioTab}
+              />
+            )
+          })}
+        {openMarketHoldingsPortfolioTab === 'exited' &&
+          !exitedOpenMarketHoldingsLoading &&
+          exitedOpenMarketHoldings?.length === 0 && (
+            <div className="flex flex-col gap-1 items-center pt-12">
+              <p className="text-gray-600 text-md">
+                Nothing to see here... yet
+              </p>
+              <p className="text-neutral-400 text-sm">
+                Your exited orders will appear here
+              </p>
+            </div>
+          )}
+        {openMarketHoldingsPortfolioTab === 'exited' &&
+          exitedOpenMarketHoldings?.length > 0 &&
+          exitedOpenMarketHoldings.map((holding) => {
+            return (
+              <HoldingCardDrawer
+                key={holding.name}
+                marketPrices={marketPrices}
+                holding={holding}
+                openMarketHoldingsPortfolioTab={openMarketHoldingsPortfolioTab}
               />
             )
           })}

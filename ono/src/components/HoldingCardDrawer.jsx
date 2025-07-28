@@ -17,7 +17,11 @@ import ModifyCancelSellOrder from './ModifyCancelSellOrder'
 import { Separator } from '@/components/ui/separator'
 import CancelBuyOrder from './CancelBuyOrder'
 
-const HoldingCardDrawer = ({ holding, marketPrices }) => {
+const HoldingCardDrawer = ({
+  holding,
+  marketPrices,
+  openMarketHoldingsPortfolioTab,
+}) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [buttonState, setButtonState] = useState('idle')
   console.log(holding)
@@ -42,13 +46,28 @@ const HoldingCardDrawer = ({ holding, marketPrices }) => {
                 <p className="font-semibold text-xl text-[#E26F64]">NO</p>
               )}
               {holding.status === 'UNMATCHED' && (
-                <CancelBuyOrder holding={holding} />
+                <CancelBuyOrder
+                  holding={holding}
+                  openMarketHoldingsPortfolioTab={
+                    openMarketHoldingsPortfolioTab
+                  }
+                />
               )}
               {holding.status === 'EXITING' && (
-                <ModifyCancelSellOrder holding={holding} />
+                <ModifyCancelSellOrder
+                  holding={holding}
+                  openMarketHoldingsPortfolioTab={
+                    openMarketHoldingsPortfolioTab
+                  }
+                />
               )}
               {holding.status === 'ACTIVE' && (
-                <ExitSellOrder holding={holding} />
+                <ExitSellOrder
+                  holding={holding}
+                  openMarketHoldingsPortfolioTab={
+                    openMarketHoldingsPortfolioTab
+                  }
+                />
               )}
             </div>
             <div className="flex items-center justify-between">
@@ -104,7 +123,8 @@ const HoldingCardDrawer = ({ holding, marketPrices }) => {
                     </p>
                   </>
                 )}
-                {holding.status === 'EXITED' && (
+                {(holding.status === 'EXITED' ||
+                  holding.status === 'SETTLED') && (
                   <>
                     <p className="font-normal text-xs text-[#5F5F5F]">
                       Returns
@@ -161,6 +181,13 @@ const HoldingCardDrawer = ({ holding, marketPrices }) => {
                   )}
 
                   {holding.status === 'EXITED' && (
+                    <p
+                      className={`px-1.5 text-[8px] font-medium tracking-[2%] rounded-[2px] bg-[#FFEDEA] text-[#E02400] uppercase`}
+                    >
+                      {holding.status}
+                    </p>
+                  )}
+                  {holding.status === 'SETTLED' && (
                     <p
                       className={`px-1.5 text-[8px] font-medium tracking-[2%] rounded-[2px] bg-[#FFEDEA] text-[#E02400] uppercase`}
                     >
@@ -254,17 +281,15 @@ const HoldingCardDrawer = ({ holding, marketPrices }) => {
                 </div>
               )}
 
-              {holding.status === 'EXITED' ||
-                (holding.status === 'EXITING' && (
-                  <div className="flex justify-between items-center px-4">
-                    <p className="text-[#2C2D32] text-xs font-normal">
-                      Exit Price
-                    </p>
-                    <p className="font-semibold text-xs">
-                      {holding.exit_price}
-                    </p>
-                  </div>
-                ))}
+              {(holding.status === 'EXITED' ||
+                holding.status === 'EXITING') && (
+                <div className="flex justify-between items-center px-4">
+                  <p className="text-[#2C2D32] text-xs font-normal">
+                    Exit Price
+                  </p>
+                  <p className="font-semibold text-xs">{holding.exit_price}</p>
+                </div>
+              )}
               {holding.status === 'EXITED' && (
                 <div className="flex justify-between items-center px-4">
                   <p className="text-[#2C2D32] text-xs font-normal">Profit</p>

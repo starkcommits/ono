@@ -32,41 +32,24 @@ import {
   useSWR,
   useSWRConfig,
 } from 'frappe-react-sdk'
-import { Users } from 'lucide-react'
-import scrollbarHide from 'tailwind-scrollbar-hide'
-import { Navigate, useNavigate } from 'react-router-dom'
+
+import { useNavigate, useParams } from 'react-router-dom'
+import CircularProgress from '../components/CircularProgress'
+import { MarketEventListener } from '../components/MarketEventListener'
+import { useSharedMarketData } from '../hooks/useSharedMarketData'
 
 const Home = () => {
   const navigate = useNavigate()
-  const { cache } = useSWRConfig()
-  console.log(cache)
+
   const [markets, setMarkets] = useState({})
   const [marketId, setMarketId] = useState('')
+  const { cache } = useSWRConfig()
 
-  const { data: marketData, isLoading: marketDataLoading } =
-    useFrappeGetDocList(
-      'Market',
-      {
-        fields: [
-          'name',
-          'question',
-          'category',
-          'yes_price',
-          'no_price',
-          'closing_time',
-          'status',
-          'total_traders',
-        ],
-        filters: [['status', '=', 'OPEN']],
-        orderBy: {
-          field: 'total_traders',
-          order: 'desc',
-        },
+  const { marketData, marketDataLoading } = useSharedMarketData()
 
-        limit: 5,
-      },
-      'market_data'
-    )
+  console.log(marketData)
+
+  console.log(cache)
 
   const { data: marketFixturesData, isLoading: marketFixturesDataLoading } =
     useFrappeGetDocList('Market Fixtures', {
@@ -89,23 +72,35 @@ const Home = () => {
     }
   }, [marketData])
 
-  useFrappeEventListener('market_event', (updatedMarket) => {
-    console.log('Updated Market:', updatedMarket)
+  useEffect(() => {
+    const id = 'home'
 
-    setMarkets((prevMarkets) => {
-      const updatedMarkets = {
-        ...prevMarkets,
-        [updatedMarket.name]: updatedMarket,
-      }
+    console.log('Widget mounted. Subscribing...')
 
-      // Remove market if it's closed
-      if (updatedMarket.status === 'CLOSED') {
-        delete updatedMarkets[updatedMarket.name]
-      }
+    MarketEventListener.subscribe(id, (updatedMarket) => {
+      console.log('Updated Market:', updatedMarket)
 
-      return updatedMarkets
+      setMarkets((prevMarkets) => {
+        const updatedMarkets = {
+          ...prevMarkets,
+          [updatedMarket.name]: updatedMarket,
+        }
+
+        // Remove market if it's closed
+        if (updatedMarket.status === 'CLOSED') {
+          delete updatedMarkets[updatedMarket.name]
+        }
+
+        return updatedMarkets
+      })
     })
-  })
+
+    return () => {
+      MarketEventListener.unsubscribe(id)
+    }
+  }, [])
+
+  // useFrappeEventListener('market_event', )
 
   const createAutoplayPlugin = (delay) =>
     Autoplay({
@@ -135,19 +130,24 @@ const Home = () => {
   console.log('Market Category Data:', marketingBannerData)
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
-  const [selectedChoice, setSelectedChoice] = useState()
+  const [selectedChoice, setSelectedChoice] = useState('')
 
   const bannerPlugin = useRef(createAutoplayPlugin(2000))
-  const trending1 = useRef(createAutoplayPlugin(1500))
-  const trending2 = useRef(createAutoplayPlugin(2500))
-  const trending3 = useRef(createAutoplayPlugin(3000))
 
   const handleMarketClick = (market_id) => {
     navigate(`/event/${market_id}`)
   }
 
+  const handleFixtureClick = (fixture_id) => {
+    navigate(`/fixture/${fixture_id}`)
+  }
+
+  const handleCategoryClick = (category_id) => {
+    navigate(`/category/${category_id}`)
+  }
+
   return (
-    <div className="">
+    <div className="select-none">
       <div className="flex flex-col gap-6 mx-auto max-w-md py-4 px-4">
         {/* Categories */}
         <div className="flex flex-col gap-2">
@@ -176,13 +176,16 @@ const Home = () => {
 
               <div
                 key={index}
+                onClick={() => {
+                  handleCategoryClick(category.name)
+                }}
                 style={{
                   backgroundImage: `url(${Squircle})`,
                   backgroundRepeat: 'no-repeat',
                   backgroundSize: '80px 75px',
                   backgroundPosition: 'center',
                 }}
-                className="relative w-[80px] h-[75px] justify-center items-start px-4 border-white"
+                className="cursor-pointer relative w-[80px] h-[75px] justify-center items-start px-4 border-white"
               >
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 space-y-2.5">
                   <div className="flex justify-center">
@@ -227,7 +230,7 @@ const Home = () => {
           <div className="flex justify-between items-center">
             <div className="flex gap-4 items-center">
               <span className="font-medium text-sm">Trending</span>
-              <div className="flex items-center gap-1">
+              {/* <div className="flex items-center gap-1">
                 <Label
                   htmlFor="live"
                   className="text-xs font-medium text-[#606060]"
@@ -235,10 +238,17 @@ const Home = () => {
                   Live
                 </Label>
                 <Switch id="live" />
-              </div>
+              </div> */}
             </div>
-            <div className="flex gap-2 items-center">
-              <span className="font-medium text-xs">See All &gt;</span>
+            <div className="flex gap-2 items-center cursor-pointer">
+              <span
+                className="font-medium text-xs"
+                onClick={() => {
+                  navigate('/topics')
+                }}
+              >
+                See All &gt;
+              </span>
             </div>
           </div>
           <div className="flex flex-col gap-4">
@@ -250,7 +260,10 @@ const Home = () => {
                     ?.map((_, index) => (
                       <Card
                         key={_.name}
-                        className="rounded-[8px] shadow-[0_0_1px_0_rgba(0,0,0,0.2)]"
+                        onClick={() => {
+                          handleFixtureClick(_.name)
+                        }}
+                        className="cursor-pointer rounded-[8px] shadow-[0_0_1px_0_rgba(0,0,0,0.2)]"
                       >
                         <CardHeader className="p-2">
                           <div className="flex gap-2.5">
@@ -292,7 +305,10 @@ const Home = () => {
                     ?.map((_, index) => (
                       <Card
                         key={_.name}
-                        className="rounded-[8px] shadow-[0_0_1px_0_rgba(0,0,0,0.2)]"
+                        onClick={() => {
+                          handleFixtureClick(_.name)
+                        }}
+                        className="cursor-pointer rounded-[8px] shadow-[0_0_1px_0_rgba(0,0,0,0.2)]"
                       >
                         <CardHeader className="p-2">
                           <div className="flex gap-2.5">
@@ -327,7 +343,10 @@ const Home = () => {
                     ?.map((_, index) => (
                       <Card
                         key={_.index}
-                        className="rounded-[8px] shadow-[0_0_1px_0_rgba(0,0,0,0.2)]"
+                        onClick={() => {
+                          handleFixtureClick(_.name)
+                        }}
+                        className="cursor-pointer rounded-[8px] shadow-[0_0_1px_0_rgba(0,0,0,0.2)]"
                       >
                         <CardHeader className="p-2">
                           <div className="flex gap-2.5">
@@ -372,64 +391,70 @@ const Home = () => {
                   onClick={() => {
                     handleMarketClick(market.name)
                   }}
-                  className="rounded-[10px] p-4 bg-white space-y-4 shadow-[0_1px_1px_0_rgba(0,0,0,0.25)] cursor-pointer"
+                  className="relative rounded-[10px] p-4 bg-white space-y-4 shadow-[0_1px_1px_0_rgba(0,0,0,0.25)] cursor-pointer"
                 >
-                  <div className="flex items-center gap-2">
-                    <span className="border-[0.5px] rounded-[5px] px-1.5 bg-[#EEEEEE] text-[#606060] font-medium text-[8px] tracking-[2%] border-[#8D8D8D]">
-                      {market.category}
-                    </span>
-                    <span className="flex items-center gap-0.5">
-                      <span>
-                        <img src={TradersIcon} alt="" />
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="border-[0.5px] rounded-[5px] px-1.5 bg-[#EEEEEE] text-[#606060] font-medium text-[8px] tracking-[2%] border-[#8D8D8D]">
+                        {market.category}
                       </span>
-                      <span className="font-normal text-[8px] text-[#606060]">
-                        {market.total_traders}
+                      <span className="flex items-center gap-0.5">
+                        <span>
+                          <img src={TradersIcon} alt="" />
+                        </span>
+                        <span className="font-normal text-[8px] text-[#606060]">
+                          {market.total_traders}
+                        </span>
                       </span>
-                    </span>
-                    <span className="flex items-center gap-0.5">
-                      <span>
-                        <img src={LiveDotIcon} alt="" />
+                      <span className="flex items-center gap-0.5">
+                        <span>
+                          <img src={LiveDotIcon} alt="" />
+                        </span>
+                        <span className="font-medium text-[8px] leading-[100%] text-[#606060]">
+                          Live
+                        </span>
                       </span>
-                      <span className="font-medium text-[8px] leading-[100%] text-[#606060]">
-                        Live
-                      </span>
-                    </span>
-                  </div>
-                  <div className="flex gap-4">
-                    <div className="w-[20%]">
-                      <img src={CricketImage} alt="" />
                     </div>
-                    <div className="flex flex-col gap-2 w-[70%]">
-                      <h3 className="font-normal text-sm leading-[20px] text-[#181818]">
-                        {market.question}
-                      </h3>
-                      <p className="font-medium text-[10px] leading-[100%] text-[#606060]">
-                        H2H last 5 T20: New Zealand 4, Pak 1
-                      </p>
-                      <div className="flex gap-2 items-center w-full">
-                        <button
-                          className="bg-[#492C82] rounded-[6px] text-center font-inter text-white font-light text-[13px] leading-[100%] w-[50%] py-2"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            setSelectedChoice('YES')
-                            setMarketId(market.name)
-                            setIsDrawerOpen(true)
-                          }}
-                        >
-                          YES &#8377;{market.yes_price.toFixed(1)}
-                        </button>
-                        <button
-                          className="bg-[#E8685A] rounded-[6px] text-center font-inter text-white font-light text-[13px] leading-[100%] w-[50%] py-2"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            setSelectedChoice('NO')
-                            setMarketId(market.name)
-                            setIsDrawerOpen(true)
-                          }}
-                        >
-                          NO &#8377;{market.no_price.toFixed(1)}
-                        </button>
+
+                    <CircularProgress percentage={market.yes_price * 10} />
+                  </div>
+                  <div className="flex flex-col gap-3">
+                    <div className="flex gap-4 items-start">
+                      <div className="w-[20%]">
+                        <img src={CricketImage} alt="" />
                       </div>
+                      <div className="flex flex-col gap-2 w-[60%]">
+                        <h3 className="font-normal text-sm leading-[20px] text-[#181818]">
+                          {market.question}
+                        </h3>
+                        <p className="font-medium text-[10px] leading-[100%] text-[#606060]">
+                          H2H last 5 T20: New Zealand 4, Pak 1
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2 items-center w-full">
+                      <button
+                        className="bg-[#EFF0FF] rounded-[6px] text-center font-inter text-[#0819D4] font-light text-[13px] leading-[100%] w-[50%] py-2"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setSelectedChoice('YES')
+                          setMarketId(market.name)
+                          setIsDrawerOpen(true)
+                        }}
+                      >
+                        YES &#8377;{market.yes_price.toFixed(1)}
+                      </button>
+                      <button
+                        className="bg-[#FFEBEB] rounded-[6px] text-center font-inter text-[#FF1A1A] font-light text-[13px] leading-[100%] w-[50%] py-2"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setSelectedChoice('NO')
+                          setMarketId(market.name)
+                          setIsDrawerOpen(true)
+                        }}
+                      >
+                        NO &#8377;{market.no_price.toFixed(1)}
+                      </button>
                     </div>
                   </div>
                 </div>

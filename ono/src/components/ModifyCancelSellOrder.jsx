@@ -46,7 +46,7 @@ import { Separator } from '@/components/ui/separator'
 import { toast } from 'sonner'
 import Lottie from 'lottie-react'
 
-const ModifyCancelSellOrder = ({ holding }) => {
+const ModifyCancelSellOrder = ({ holding, openMarketHoldingsPortfolioTab }) => {
   const { mutate } = useSWRConfig()
   const { updateDoc } = useFrappeUpdateDoc()
   const { call: cancelSellOrder } = useFrappePostCall(
@@ -117,11 +117,8 @@ const ModifyCancelSellOrder = ({ holding }) => {
     try {
       setButtonState('processing')
 
-      await cancelSellOrder({
-        order_type: 'SELL',
-        market_id: holding.market_id,
-        user_id: currentUser,
-        opinion_type: holding.opinion_type,
+      await updateDoc('Holding', holding.name, {
+        status: 'ACTIVE',
       })
 
       setButtonState('done')
@@ -133,6 +130,10 @@ const ModifyCancelSellOrder = ({ holding }) => {
           (key) =>
             Array.isArray(key) && key[0] === 'open_market_holdings_overall'
         )
+        if (openMarketHoldingsPortfolioTab === 'exiting')
+          mutate(
+            (key) => Array.isArray(key) && key[0] === 'exiting_market_holdings'
+          )
 
         setIsDrawerOpen(false)
         setShowAnimation(false)

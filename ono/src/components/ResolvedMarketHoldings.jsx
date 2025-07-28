@@ -32,10 +32,13 @@ const ResolvedMarketHoldings = ({ marketPrices, setMarketPrices }) => {
     resolvedMarketHoldingsPortfolioTab,
     setResolvedMarketHoldingsPortfolioTab,
   ] = useState(
-    localStorage.getItem('ResolvedMarketHoldingsPortfolioTab') || 'all'
+    localStorage.getItem('resolvedMarketHoldingsPortfolioTab') || 'all'
   )
 
-  const { data: resolvedMarketHoldings } = useFrappeGetDocList(
+  const {
+    data: resolvedMarketHoldings,
+    isLoading: resolvedMarketHoldingsLoading,
+  } = useFrappeGetDocList(
     'Holding',
     {
       fields: [
@@ -62,10 +65,72 @@ const ResolvedMarketHoldings = ({ marketPrices, setMarketPrices }) => {
     currentUser && market_id ? ['closed_market_holdings'] : null
   )
 
+  const {
+    data: settledResolvedMarketHoldings,
+    isLoading: settledResolvedMarketHoldingsLoading,
+  } = useFrappeGetDocList(
+    'Holding',
+    {
+      fields: [
+        'name',
+        'market_id',
+        'order_id',
+        'price',
+        'buy_order',
+        'returns',
+        'quantity',
+        'opinion_type',
+        'status',
+        'exit_price',
+        'market_yes_price',
+        'market_no_price',
+        'filled_quantity',
+      ],
+      filters: [
+        ['user_id', '=', currentUser],
+        ['market_id', '=', market_id],
+        ['market_status', 'in', ['CLOSED', 'RESOLVED']],
+        ['status', '=', 'SETTLED'],
+      ],
+    },
+    currentUser && market_id ? ['closed_market_holdings'] : null
+  )
+
+  const {
+    data: canceledResolvedMarketHoldings,
+    isLoading: canceledResolvedMarketHoldingsLoading,
+  } = useFrappeGetDocList(
+    'Holding',
+    {
+      fields: [
+        'name',
+        'market_id',
+        'order_id',
+        'price',
+        'buy_order',
+        'returns',
+        'quantity',
+        'opinion_type',
+        'status',
+        'exit_price',
+        'market_yes_price',
+        'market_no_price',
+        'filled_quantity',
+      ],
+      filters: [
+        ['user_id', '=', currentUser],
+        ['market_id', '=', market_id],
+        ['market_status', 'in', ['CLOSED', 'RESOLVED']],
+        ['status', '=', 'CANCELED'],
+      ],
+    },
+    currentUser && market_id ? ['closed_market_holdings'] : null
+  )
+
   console.log('Open market holdings: ', resolvedMarketHoldings)
 
   const handleTabChange = (value) => {
-    localStorage.setItem('ResolvedMarketHoldingsPortfolioTab', value)
+    localStorage.setItem('resolvedMarketHoldingsPortfolioTab', value)
     setResolvedMarketHoldingsPortfolioTab(value)
   }
 
@@ -87,7 +152,7 @@ const ResolvedMarketHoldings = ({ marketPrices, setMarketPrices }) => {
 
   const navigate = useNavigate()
   return (
-    <div className="leading-[100%] bg-[#F5F5F5] w-full">
+    <div className="leading-[100%] bg-[#F5F5F5] w-full select-none">
       <div className="sticky z-[50] top-0 left-0 right-0 flex flex-col font-inter max-w-md mx-auto pt-4 bg-white mb-auto w-full select-none">
         <div className="border-[0.33px] border-x-0 border-t-0 border-b border-[#DBC5F7] w-full flex justify-start items-center pb-4 px-4">
           <h1 className="text-xl font-[500] text-[#2C2D32] ">
@@ -108,8 +173,8 @@ const ResolvedMarketHoldings = ({ marketPrices, setMarketPrices }) => {
             <img src={CricketImage} alt="" />
           </div>
           <div>
-            <p className="font-medium text-base text-[#337265]">
-              Hyderabad to win the match vs Mumbai?
+            <p className="font-medium text-base text-[#337265] w-[90%] text-center mx-auto">
+              {marketPrices.market_question}
             </p>
           </div>
           <div>
@@ -127,7 +192,11 @@ const ResolvedMarketHoldings = ({ marketPrices, setMarketPrices }) => {
               </div>
               <div className="flex items-center gap-1">
                 <p className="text-[#2C2D32] font-medium text-xs">
-                  Auto closed at price 107176.41
+                  Auto closed at price{' '}
+                  {marketPrices.market_result === 'YES'
+                    ? marketPrices.market_yes_price.toFixed(1)
+                    : marketPrices.market_no_price.toFixed(1)}
+                  .
                 </p>
                 <span className="text-[#337265] font-semibold text-xs">
                   Know more
@@ -209,17 +278,86 @@ const ResolvedMarketHoldings = ({ marketPrices, setMarketPrices }) => {
         </Tabs>
       </div>
 
-      <div className="flex flex-col gap-4 p-4">
-        {/* {openMarketHoldings?.length > 0 &&
-          openMarketHoldings.map((holding) => {
+      <div className="flex flex-col gap-4 p-4 min-h-[calc(100vh-122px)] relative z-[30]">
+        {resolvedMarketHoldingsPortfolioTab === 'all' &&
+          !resolvedMarketHoldingsLoading &&
+          resolvedMarketHoldings?.length === 0 && (
+            <div className="flex flex-col gap-1 items-center pt-12">
+              <p className="text-gray-600 text-md">
+                Nothing to see here... yet
+              </p>
+              <p className="text-neutral-400 text-sm">
+                Your orders will appear here
+              </p>
+            </div>
+          )}
+        {resolvedMarketHoldingsPortfolioTab === 'all' &&
+          resolvedMarketHoldings?.length > 0 &&
+          resolvedMarketHoldings.map((holding) => {
             return (
               <HoldingCardDrawer
                 key={holding.name}
                 marketPrices={marketPrices}
                 holding={holding}
+                resolvedMarketHoldingsPortfolioTab={
+                  resolvedMarketHoldingsPortfolioTab
+                }
               />
             )
-          })} */}
+          })}
+
+        {resolvedMarketHoldingsPortfolioTab === 'settled' &&
+          !settledResolvedMarketHoldingsLoading &&
+          settledResolvedMarketHoldings?.length === 0 && (
+            <div className="flex flex-col gap-1 items-center pt-12">
+              <p className="text-gray-600 text-md">
+                Nothing to see here... yet
+              </p>
+              <p className="text-neutral-400 text-sm">
+                Your matched orders will appear here
+              </p>
+            </div>
+          )}
+        {resolvedMarketHoldingsPortfolioTab === 'settled' &&
+          settledResolvedMarketHoldings?.length > 0 &&
+          settledResolvedMarketHoldings.map((holding) => {
+            return (
+              <HoldingCardDrawer
+                key={holding.name}
+                marketPrices={marketPrices}
+                holding={holding}
+                resolvedMarketHoldingsPortfolioTab={
+                  resolvedMarketHoldingsPortfolioTab
+                }
+              />
+            )
+          })}
+        {resolvedMarketHoldingsPortfolioTab === 'canceled' &&
+          !canceledResolvedMarketHoldingsLoading &&
+          canceledResolvedMarketHoldings?.length === 0 && (
+            <div className="flex flex-col gap-1 items-center pt-12">
+              <p className="text-gray-600 text-md">
+                Nothing to see here... yet
+              </p>
+              <p className="text-neutral-400 text-sm">
+                Your canceled orders will appear here
+              </p>
+            </div>
+          )}
+        {resolvedMarketHoldingsPortfolioTab === 'canceled' &&
+          canceledResolvedMarketHoldingsLoading?.length > 0 &&
+          canceledResolvedMarketHoldings.map((holding) => {
+            return (
+              <HoldingCardDrawer
+                key={holding.name}
+                marketPrices={marketPrices}
+                holding={holding}
+                resolvedMarketHoldingsPortfolioTab={
+                  resolvedMarketHoldingsPortfolioTab
+                }
+              />
+            )
+          })}
       </div>
     </div>
   )
