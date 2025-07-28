@@ -87,15 +87,16 @@ const CancelBuyOrder = ({ holding, openMarketHoldingsPortfolioTab }) => {
       setShowAnimation(true)
 
       setTimeout(() => {
-        mutate((key) => Array.isArray(key) && key[0] === 'open_market_holdings')
         mutate(
           (key) =>
             Array.isArray(key) && key[0] === 'open_market_holdings_overall'
         )
-        if (openMarketHoldingsPortfolioTab === 'pending')
-          mutate(
-            (key) => Array.isArray(key) && key[0] === 'pending_market_holdings'
-          )
+
+        mutate(
+          (key) =>
+            Array.isArray(key) &&
+            key[0] === `${openMarketHoldingsPortfolioTab}_open_market_holdings`
+        )
 
         setIsDrawerOpen(false)
         setShowAnimation(false)

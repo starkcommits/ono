@@ -98,7 +98,11 @@ const ModifyCancelSellOrder = ({ holding, openMarketHoldingsPortfolioTab }) => {
         exit_price: price,
       })
 
-      mutate((key) => Array.isArray(key) && key[0] === 'open_market_holdings')
+      mutate(
+        (key) =>
+          Array.isArray(key) &&
+          key[0] === `${openMarketHoldingsPortfolioTab}_open_market_holdings`
+      )
       mutate(
         (key) => Array.isArray(key) && key[0] === 'open_market_holdings_overall'
       )
@@ -125,15 +129,15 @@ const ModifyCancelSellOrder = ({ holding, openMarketHoldingsPortfolioTab }) => {
       setShowAnimation(true)
 
       setTimeout(() => {
-        mutate((key) => Array.isArray(key) && key[0] === 'open_market_holdings')
         mutate(
           (key) =>
             Array.isArray(key) && key[0] === 'open_market_holdings_overall'
         )
-        if (openMarketHoldingsPortfolioTab === 'exiting')
-          mutate(
-            (key) => Array.isArray(key) && key[0] === 'exiting_market_holdings'
-          )
+        mutate(
+          (key) =>
+            Array.isArray(key) &&
+            key[0] === `${openMarketHoldingsPortfolioTab}_open_market_holdings`
+        )
 
         setIsDrawerOpen(false)
         setShowAnimation(false)

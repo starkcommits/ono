@@ -67,181 +67,48 @@ const OpenMarketHoldings = ({ marketPrices, setMarketPrices }) => {
           'market_no_price',
           'filled_quantity',
         ],
-        filters: [
-          ['user_id', '=', currentUser],
-          ['market_id', '=', market_id],
-          ['market_status', '=', 'OPEN'],
-        ],
+        filters:
+          openMarketHoldingsPortfolioTab === 'all'
+            ? [
+                ['user_id', '=', currentUser],
+                ['market_id', '=', market_id],
+                ['market_status', '=', 'OPEN'],
+              ]
+            : openMarketHoldingsPortfolioTab === 'matched'
+            ? [
+                ['user_id', '=', currentUser],
+                ['market_id', '=', market_id],
+                ['market_status', '=', 'OPEN'],
+                ['status', '=', 'ACTIVE'],
+              ]
+            : openMarketHoldingsPortfolioTab === 'pending'
+            ? [
+                ['user_id', '=', currentUser],
+                ['market_id', '=', market_id],
+                ['market_status', '=', 'OPEN'],
+                ['status', '=', `UNMATCHED`],
+              ]
+            : [
+                ['user_id', '=', currentUser],
+                ['market_id', '=', market_id],
+                ['market_status', '=', 'OPEN'],
+                [
+                  'status',
+                  '=',
+                  `${openMarketHoldingsPortfolioTab.toUpperCase()}`,
+                ],
+              ],
+        orderBy: {
+          field: 'creation',
+          order: 'desc',
+        },
       },
-      currentUser && market_id ? ['open_market_holdings'] : null
+      currentUser && market_id
+        ? [`${openMarketHoldingsPortfolioTab}_open_market_holdings`]
+        : null
     )
 
   console.log('Open market holdings: ', openMarketHoldings)
-
-  const {
-    data: pendingOpenMarketHoldings,
-    isLoading: pendingOpenMarketHoldingsLoading,
-  } = useFrappeGetDocList(
-    'Holding',
-    {
-      fields: [
-        'name',
-        'market_id',
-        'order_id',
-        'price',
-        'buy_order',
-        'returns',
-        'quantity',
-        'opinion_type',
-        'status',
-        'exit_price',
-        'market_yes_price',
-        'market_no_price',
-        'filled_quantity',
-      ],
-      filters: [
-        ['user_id', '=', currentUser],
-        ['market_id', '=', market_id],
-        ['market_status', '=', 'OPEN'],
-        ['status', '=', 'UNMATCHED'],
-      ],
-    },
-    currentUser && market_id && openMarketHoldingsPortfolioTab === 'pending'
-      ? ['pending_market_holdings']
-      : null
-  )
-
-  const {
-    data: matchedOpenMarketHoldings,
-    isLoading: matchedOpenMarketHoldingsLoading,
-  } = useFrappeGetDocList(
-    'Holding',
-    {
-      fields: [
-        'name',
-        'market_id',
-        'order_id',
-        'price',
-        'buy_order',
-        'returns',
-        'quantity',
-        'opinion_type',
-        'status',
-        'exit_price',
-        'market_yes_price',
-        'market_no_price',
-        'filled_quantity',
-      ],
-      filters: [
-        ['user_id', '=', currentUser],
-        ['market_id', '=', market_id],
-        ['market_status', '=', 'OPEN'],
-        ['status', '=', 'ACTIVE'],
-      ],
-    },
-    currentUser && market_id && openMarketHoldingsPortfolioTab === 'matched'
-      ? ['matched_market_holdings']
-      : null
-  )
-
-  const {
-    data: exitingOpenMarketHoldings,
-    isLoading: exitingOpenMarketHoldingsLoading,
-  } = useFrappeGetDocList(
-    'Holding',
-    {
-      fields: [
-        'name',
-        'market_id',
-        'order_id',
-        'price',
-        'buy_order',
-        'returns',
-        'quantity',
-        'opinion_type',
-        'status',
-        'exit_price',
-        'market_yes_price',
-        'market_no_price',
-        'filled_quantity',
-      ],
-      filters: [
-        ['user_id', '=', currentUser],
-        ['market_id', '=', market_id],
-        ['market_status', '=', 'OPEN'],
-        ['status', '=', 'EXITING'],
-      ],
-    },
-    currentUser && market_id && openMarketHoldingsPortfolioTab === 'exiting'
-      ? ['exiting_market_holdings']
-      : null
-  )
-
-  const {
-    data: exitedOpenMarketHoldings,
-    isLoading: exitedOpenMarketHoldingsLoading,
-  } = useFrappeGetDocList(
-    'Holding',
-    {
-      fields: [
-        'name',
-        'market_id',
-        'order_id',
-        'price',
-        'buy_order',
-        'returns',
-        'quantity',
-        'opinion_type',
-        'status',
-        'exit_price',
-        'market_yes_price',
-        'market_no_price',
-        'filled_quantity',
-      ],
-      filters: [
-        ['user_id', '=', currentUser],
-        ['market_id', '=', market_id],
-        ['market_status', '=', 'OPEN'],
-        ['status', '=', 'EXITED'],
-      ],
-    },
-    currentUser && market_id && openMarketHoldingsPortfolioTab === 'exited'
-      ? ['exited_market_holdings']
-      : null
-  )
-
-  const {
-    data: canceledOpenMarketHoldings,
-    isLoading: canceledOpenMarketHoldingsLoading,
-  } = useFrappeGetDocList(
-    'Holding',
-    {
-      fields: [
-        'name',
-        'market_id',
-        'order_id',
-        'price',
-        'buy_order',
-        'returns',
-        'quantity',
-        'opinion_type',
-        'status',
-        'exit_price',
-        'market_yes_price',
-        'market_no_price',
-        'filled_quantity',
-      ],
-      filters: [
-        ['user_id', '=', currentUser],
-        ['market_id', '=', market_id],
-        ['market_status', '=', 'OPEN'],
-        ['status', '=', 'CANCELED'],
-      ],
-    },
-    currentUser && market_id && openMarketHoldingsPortfolioTab === 'canceled'
-      ? ['canceled_market_holdings']
-      : null
-  )
 
   const handleTabChange = (value) => {
     localStorage.setItem('openMarketHoldingsPortfolioTab', value)
@@ -406,10 +273,17 @@ const OpenMarketHoldings = ({ marketPrices, setMarketPrices }) => {
                   <OpenMarketHoldingsBuyDrawer
                     marketId={market_id}
                     marketPrices={marketPrices}
+                    openMarketHoldingsPortfolioTab={
+                      openMarketHoldingsPortfolioTab
+                    }
                   />
                   <OpenMarketHoldingsExitSellOrders
                     market={openMarketHoldingsOverall}
+                    openMarketHoldingsOverall={openMarketHoldingsOverall}
                     marketPrices={marketPrices}
+                    openMarketHoldingsPortfolioTab={
+                      openMarketHoldingsPortfolioTab
+                    }
                   />
                 </div>
                 <div className="w-full flex justify-between items-center pt-4 border-dashed border-t-[0.7px] text-[#2C2D32]">
@@ -425,44 +299,27 @@ const OpenMarketHoldings = ({ marketPrices, setMarketPrices }) => {
                 {(openMarketHoldingsOverall?.UNMATCHED ||
                   openMarketHoldingsOverall?.EXITING) && (
                   <div className="border-dashed border-t-[0.7px] pt-4 w-full flex gap-2 items-center">
-                    {(() => {
-                      const unmatchedHoldings = openMarketHoldings
-                        ?.filter((holding) => holding.status === 'UNMATCHED')
-                        ?.reduce(
-                          (acc, holding) =>
-                            acc + holding.quantity - holding.filled_quantity,
-                          0
-                        )
+                    {openMarketHoldingsOverall?.UNMATCHED ? (
+                      <div className="flex gap-4 items-center">
+                        <OpenMarketHoldingsCancelBuyOrders
+                          market={openMarketHoldingsOverall}
+                          openMarketHoldingsPortfolioTab={
+                            openMarketHoldingsPortfolioTab
+                          }
+                        />
+                      </div>
+                    ) : null}
 
-                      if (unmatchedHoldings === 0) return null
-
-                      return (
-                        <div className="flex gap-4 items-center ">
-                          <OpenMarketHoldingsCancelBuyOrders
-                            market={openMarketHoldingsOverall}
-                            unmatchedHoldings={unmatchedHoldings}
-                          />
-                        </div>
-                      )
-                    })()}
-                    {(() => {
-                      const exitingHoldings = openMarketHoldings
-                        ?.filter((holding) => holding.status === 'EXITING')
-                        ?.reduce(
-                          (acc, holding) =>
-                            acc + holding.quantity - holding.filled_quantity,
-                          0
-                        )
-                      if (exitingHoldings === 0) return null
-                      return (
-                        <div className="flex gap-4 items-center">
-                          <OpenMarketHoldingsCancelSellOrders
-                            market={openMarketHoldingsOverall}
-                            exitingHoldings={exitingHoldings}
-                          />
-                        </div>
-                      )
-                    })()}
+                    {openMarketHoldingsOverall?.EXITING ? (
+                      <div className="flex gap-4 items-center">
+                        <OpenMarketHoldingsCancelSellOrders
+                          market={openMarketHoldingsOverall}
+                          openMarketHoldingsPortfolioTab={
+                            openMarketHoldingsPortfolioTab
+                          }
+                        />
+                      </div>
+                    ) : null}
                   </div>
                 )}
               </div>
@@ -502,141 +359,16 @@ const OpenMarketHoldings = ({ marketPrices, setMarketPrices }) => {
       </div>
 
       <div className="flex flex-col gap-4 p-4 min-h-[calc(100vh-122px)] relative z-[30]">
-        {openMarketHoldingsPortfolioTab === 'all' &&
-          !openMarketHoldingsLoading &&
-          openMarketHoldings?.length === 0 && (
-            <div className="flex flex-col gap-1 items-center pt-12">
-              <p className="text-gray-600 text-md">
-                Nothing to see here... yet
-              </p>
-              <p className="text-neutral-400 text-sm">
-                Your orders will appear here
-              </p>
-            </div>
-          )}
-        {openMarketHoldingsPortfolioTab === 'all' &&
-          openMarketHoldings?.length > 0 &&
+        {!openMarketHoldingsLoading && openMarketHoldings?.length === 0 && (
+          <div className="flex flex-col gap-1 items-center pt-12">
+            <p className="text-gray-600 text-md">Nothing to see here... yet</p>
+            <p className="text-neutral-400 text-sm">
+              Your orders will appear here
+            </p>
+          </div>
+        )}
+        {openMarketHoldings?.length > 0 &&
           openMarketHoldings.map((holding) => {
-            return (
-              <HoldingCardDrawer
-                key={holding.name}
-                marketPrices={marketPrices}
-                holding={holding}
-                openMarketHoldingsPortfolioTab={openMarketHoldingsPortfolioTab}
-              />
-            )
-          })}
-        {openMarketHoldingsPortfolioTab === 'pending' &&
-          !pendingOpenMarketHoldingsLoading &&
-          pendingOpenMarketHoldings?.length === 0 && (
-            <div className="flex flex-col gap-1 items-center pt-12">
-              <p className="text-gray-600 text-md">
-                Nothing to see here... yet
-              </p>
-              <p className="text-neutral-400 text-sm">
-                Your pending orders will appear here
-              </p>
-            </div>
-          )}
-        {openMarketHoldingsPortfolioTab === 'pending' &&
-          pendingOpenMarketHoldings?.length > 0 &&
-          pendingOpenMarketHoldings.map((holding) => {
-            return (
-              <HoldingCardDrawer
-                key={holding.name}
-                marketPrices={marketPrices}
-                holding={holding}
-                openMarketHoldingsPortfolioTab={openMarketHoldingsPortfolioTab}
-              />
-            )
-          })}
-        {openMarketHoldingsPortfolioTab === 'matched' &&
-          !matchedOpenMarketHoldingsLoading &&
-          matchedOpenMarketHoldings?.length === 0 && (
-            <div className="flex flex-col gap-1 items-center pt-12">
-              <p className="text-gray-600 text-md">
-                Nothing to see here... yet
-              </p>
-              <p className="text-neutral-400 text-sm">
-                Your matched orders will appear here
-              </p>
-            </div>
-          )}
-        {openMarketHoldingsPortfolioTab === 'matched' &&
-          matchedOpenMarketHoldings?.length > 0 &&
-          matchedOpenMarketHoldings.map((holding) => {
-            return (
-              <HoldingCardDrawer
-                key={holding.name}
-                marketPrices={marketPrices}
-                holding={holding}
-                openMarketHoldingsPortfolioTab={openMarketHoldingsPortfolioTab}
-              />
-            )
-          })}
-        {openMarketHoldingsPortfolioTab === 'canceled' &&
-          !canceledOpenMarketHoldingsLoading &&
-          canceledOpenMarketHoldings?.length === 0 && (
-            <div className="flex flex-col gap-1 items-center pt-12">
-              <p className="text-gray-600 text-md">
-                Nothing to see here... yet
-              </p>
-              <p className="text-neutral-400 text-sm">
-                Your canceled orders will appear here
-              </p>
-            </div>
-          )}
-        {openMarketHoldingsPortfolioTab === 'canceled' &&
-          canceledOpenMarketHoldings?.length > 0 &&
-          canceledOpenMarketHoldings.map((holding) => {
-            return (
-              <HoldingCardDrawer
-                key={holding.name}
-                marketPrices={marketPrices}
-                holding={holding}
-              />
-            )
-          })}
-
-        {openMarketHoldingsPortfolioTab === 'exiting' &&
-          !exitingOpenMarketHoldingsLoading &&
-          exitingOpenMarketHoldings?.length === 0 && (
-            <div className="flex flex-col gap-1 items-center pt-12">
-              <p className="text-gray-600 text-md">
-                Nothing to see here... yet
-              </p>
-              <p className="text-neutral-400 text-sm">
-                Your Exiting orders will appear here
-              </p>
-            </div>
-          )}
-        {openMarketHoldingsPortfolioTab === 'exiting' &&
-          exitingOpenMarketHoldings?.length > 0 &&
-          exitingOpenMarketHoldings.map((holding) => {
-            return (
-              <HoldingCardDrawer
-                key={holding.name}
-                marketPrices={marketPrices}
-                holding={holding}
-                openMarketHoldingsPortfolioTab={openMarketHoldingsPortfolioTab}
-              />
-            )
-          })}
-        {openMarketHoldingsPortfolioTab === 'exited' &&
-          !exitedOpenMarketHoldingsLoading &&
-          exitedOpenMarketHoldings?.length === 0 && (
-            <div className="flex flex-col gap-1 items-center pt-12">
-              <p className="text-gray-600 text-md">
-                Nothing to see here... yet
-              </p>
-              <p className="text-neutral-400 text-sm">
-                Your exited orders will appear here
-              </p>
-            </div>
-          )}
-        {openMarketHoldingsPortfolioTab === 'exited' &&
-          exitedOpenMarketHoldings?.length > 0 &&
-          exitedOpenMarketHoldings.map((holding) => {
             return (
               <HoldingCardDrawer
                 key={holding.name}

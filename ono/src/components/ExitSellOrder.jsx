@@ -152,21 +152,19 @@ const ExitSellOrder = ({ holding, openMarketHoldingsPortfolioTab }) => {
 
       setButtonState('done')
 
-      mutate((key) => Array.isArray(key) && key[0] === 'open_market_holdings')
-      mutate(
-        (key) => Array.isArray(key) && key[0] === 'open_market_holdings_overall'
-      )
-
-      if (openMarketHoldingsPortfolioTab === 'matched')
+      setTimeout(() => {
         mutate(
-          (key) => Array.isArray(key) && key[0] === 'matched_market_holdings'
+          (key) =>
+            Array.isArray(key) && key[0] === 'open_market_holdings_overall'
         )
 
-      toast.success('Your Sell Order is successfully placed.')
+        mutate(
+          (key) =>
+            Array.isArray(key) &&
+            key[0] === `${openMarketHoldingsPortfolioTab}_open_market_holdings`
+        )
 
-      console.log('Response: ', response)
-
-      setTimeout(() => {
+        toast.success('Your Sell Order is successfully placed.')
         setIsDrawerOpen(false)
         setButtonState('idle')
       }, 1000)

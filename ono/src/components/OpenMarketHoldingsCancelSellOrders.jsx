@@ -24,7 +24,10 @@ import {
 import { toast } from 'sonner'
 import Lottie from 'lottie-react'
 
-const OpenMarketHoldingsCancelSellOrders = ({ market, exitingHoldings }) => {
+const OpenMarketHoldingsCancelSellOrders = ({
+  market,
+  openMarketHoldingsPortfolioTab,
+}) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const { call: cancelSellOrders } = useFrappePostCall(
     'rewardapp.engine.cancel_order'
@@ -42,6 +45,15 @@ const OpenMarketHoldingsCancelSellOrders = ({ market, exitingHoldings }) => {
   const [isNoChecked, setIsNoChecked] = useState(
     market?.EXITING?.NO ? true : false
   )
+
+  const exitingYesHoldings =
+    market?.EXITING?.YES?.total_quantity -
+    market?.EXITING?.YES?.total_filled_quantity
+  const exitingNoHoldings =
+    market?.EXITING?.NO?.total_quantity -
+    market?.EXITING?.NO?.total_filled_quantity
+
+  console.log(exitingYesHoldings, exitingNoHoldings)
 
   const [showAnimation, setShowAnimation] = useState(false)
   const [buttonState, setButtonState] = useState('idle') // idle | processing | done
@@ -76,7 +88,11 @@ const OpenMarketHoldingsCancelSellOrders = ({ market, exitingHoldings }) => {
       setShowAnimation(true)
 
       setTimeout(() => {
-        mutate((key) => Array.isArray(key) && key[0] === 'open_market_holdings')
+        mutate(
+          (key) =>
+            Array.isArray(key) &&
+            key[0] === `${openMarketHoldingsPortfolioTab}_open_market_holdings`
+        )
         mutate(
           (key) =>
             Array.isArray(key) && key[0] === 'open_market_holdings_overall'
@@ -99,15 +115,29 @@ const OpenMarketHoldingsCancelSellOrders = ({ market, exitingHoldings }) => {
     >
       <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
         <DrawerTrigger className="font-semibold text-xs flex items-center">
-          <div className="flex items-center gap-2 border rounded-full cursor-pointer hover:bg-[#2C2D32]/5 group">
-            <span className="font-normal font-inter text-[10px] text-[#2C2D32] px-1 pl-3.5">
-              {exitingHoldings} exiting
-            </span>
-            <Separator orientation="vertical" className="h-8" />
-            <span className="flex items-center justify-center px-1 pr-4">
-              <img src={CircleCrossIcon} alt="" />
-            </span>
-          </div>
+          {exitingNoHoldings || exitingYesHoldings ? (
+            <div className="flex items-center gap-2 border rounded-full cursor-pointer hover:bg-[#2C2D32]/5 group">
+              {exitingNoHoldings && exitingYesHoldings ? (
+                <span className="font-normal font-inter text-[10px] text-[#2C2D32] px-1 pl-3.5">
+                  {exitingNoHoldings + exitingYesHoldings} exiting
+                </span>
+              ) : null}
+              {exitingNoHoldings && !exitingYesHoldings ? (
+                <span className="font-normal font-inter text-[10px] text-[#2C2D32] px-1 pl-3.5">
+                  {exitingNoHoldings} exiting
+                </span>
+              ) : null}
+              {!exitingNoHoldings && exitingYesHoldings ? (
+                <span className="font-normal font-inter text-[10px] text-[#2C2D32] px-1 pl-3.5">
+                  {exitingYesHoldings} exiting
+                </span>
+              ) : null}
+              <Separator orientation="vertical" className="h-8" />
+              <span className="flex items-center justify-center px-1 pr-4">
+                <img src={CircleCrossIcon} alt="" />
+              </span>
+            </div>
+          ) : null}
         </DrawerTrigger>
         <DrawerContent className="max-w-md mx-auto w-full max-h-full">
           {showAnimation ? (

@@ -22,7 +22,10 @@ import {
 } from 'frappe-react-sdk'
 import { toast } from 'sonner'
 
-const OpenMarketHoldingsExitSellOrders = ({ market, marketPrices }) => {
+const OpenMarketHoldingsExitSellOrders = ({
+  market,
+  openMarketHoldingsPortfolioTab,
+}) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
   const { createDoc } = useFrappeCreateDoc()
@@ -79,10 +82,16 @@ const OpenMarketHoldingsExitSellOrders = ({ market, marketPrices }) => {
       if (isNoChecked) {
         await createDoc('Orders', noSellOrder)
       }
-      mutate((key) => Array.isArray(key) && key[0] === 'open_market_holdings')
       mutate(
         (key) => Array.isArray(key) && key[0] === 'open_market_holdings_overall'
       )
+
+      mutate(
+        (key) =>
+          Array.isArray(key) &&
+          key[0] === `${openMarketHoldingsPortfolioTab}_open_market_holdings`
+      )
+
       toast.success(`Sell orders created successfully.`)
       setIsDrawerOpen(false)
     } catch (error) {
@@ -99,9 +108,18 @@ const OpenMarketHoldingsExitSellOrders = ({ market, marketPrices }) => {
     >
       <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
         <DrawerTrigger className="w-full font-semibold text-xs">
-          <div className="text-center rounded-[20px] border py-2.5 px-4 bg-[#2C2D32] text-white hover:bg-[#2C2D32]/90 transition-all duration-300 cursor-pointer">
-            EXIT
-          </div>
+          {market?.ACTIVE ? (
+            <button className="w-full text-center rounded-[20px] border py-2.5 px-4 bg-[#2C2D32] text-white hover:bg-[#2C2D32]/90 transition-all duration-300 cursor-pointer">
+              EXIT
+            </button>
+          ) : (
+            <button
+              disabled
+              className="disabled:cursor-not-allowed w-full text-center rounded-[20px] border py-2.5 px-4 bg-[#2C2D32]/30 text-white  transition-all duration-300 cursor-pointer"
+            >
+              EXIT
+            </button>
+          )}
         </DrawerTrigger>
         <DrawerContent className="max-w-md mx-auto w-full max-h-full">
           <DrawerHeader className="p-0">

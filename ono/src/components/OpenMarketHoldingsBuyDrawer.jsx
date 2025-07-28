@@ -50,7 +50,11 @@ import { toast } from 'sonner'
 import HigherQuantityDrawer from './HigherQuantityDrawer'
 import { trackEvent } from '../analytics/ga'
 
-const OpenMarketHoldingsBuyDrawer = ({ marketId, marketPrices }) => {
+const OpenMarketHoldingsBuyDrawer = ({
+  marketId,
+  marketPrices,
+  openMarketHoldingsPortfolioTab,
+}) => {
   const { createDoc } = useFrappeCreateDoc()
   const { mutate } = useSWRConfig()
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
@@ -233,9 +237,14 @@ const OpenMarketHoldingsBuyDrawer = ({ marketId, marketPrices }) => {
         setIsDrawerOpen(false)
       }, 1000)
 
-      mutate((key) => Array.isArray(key) && key[0] === 'open_market_holdings')
       mutate(
         (key) => Array.isArray(key) && key[0] === 'open_market_holdings_overall'
+      )
+
+      mutate(
+        (key) =>
+          Array.isArray(key) &&
+          key[0] === `${openMarketHoldingsPortfolioTab}_open_market_holdings`
       )
 
       trackEvent({

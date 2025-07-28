@@ -56,109 +56,37 @@ const ResolvedMarketHoldings = ({ marketPrices, setMarketPrices }) => {
         'market_no_price',
         'filled_quantity',
       ],
-      filters: [
-        ['user_id', '=', currentUser],
-        ['market_id', '=', market_id],
-        ['market_status', 'in', ['CLOSED', 'RESOLVED']],
-      ],
+      filters:
+        resolvedMarketHoldingsPortfolioTab === 'all'
+          ? [
+              ['user_id', '=', currentUser],
+              ['market_id', '=', market_id],
+              ['market_status', 'in', ['CLOSED', 'RESOLVED']],
+            ]
+          : [
+              ['user_id', '=', currentUser],
+              ['market_id', '=', market_id],
+              ['market_status', 'in', ['CLOSED', 'RESOLVED']],
+              [
+                'status',
+                '=',
+                `${resolvedMarketHoldingsPortfolioTab.toUpperCase()}`,
+              ],
+            ],
     },
-    currentUser && market_id && resolvedMarketHoldingsPortfolioTab === 'all'
-      ? ['closed_market_holdings']
+    currentUser && market_id
+      ? [`${resolvedMarketHoldingsPortfolioTab}_closed_market_holdings`]
       : null
   )
 
-  console.log(resolvedMarketHoldingsPortfolioTab)
+  // console.log(resolvedMarketHoldingsPortfolioTab.toUpperCase())
 
-  const {
-    data: settledResolvedMarketHoldings,
-    isLoading: settledResolvedMarketHoldingsLoading,
-  } = useFrappeGetDocList(
-    'Holding',
-    {
-      fields: [
-        'name',
-        'market_id',
-        'order_id',
-        'price',
-        'buy_order',
-        'returns',
-        'quantity',
-        'opinion_type',
-        'status',
-        'exit_price',
-        'market_yes_price',
-        'market_no_price',
-        'filled_quantity',
-      ],
-      filters: [
-        ['user_id', '=', currentUser],
-        ['market_id', '=', market_id],
-        ['market_status', 'in', ['CLOSED', 'RESOLVED']],
-        ['status', '=', 'SETTLED'],
-      ],
-    },
-    currentUser && market_id && resolvedMarketHoldingsPortfolioTab === 'settled'
-      ? ['settled_closed_market_holdings']
-      : null
-  )
-
-  const {
-    data: canceledResolvedMarketHoldings,
-    isLoading: canceledResolvedMarketHoldingsLoading,
-  } = useFrappeGetDocList(
-    'Holding',
-    {
-      fields: [
-        'name',
-        'market_id',
-        'order_id',
-        'price',
-        'buy_order',
-        'returns',
-        'quantity',
-        'opinion_type',
-        'status',
-        'exit_price',
-        'market_yes_price',
-        'market_no_price',
-        'filled_quantity',
-      ],
-      filters: [
-        ['user_id', '=', currentUser],
-        ['market_id', '=', market_id],
-        ['market_status', 'in', ['CLOSED', 'RESOLVED']],
-        ['status', '=', 'CANCELED'],
-      ],
-    },
-    currentUser &&
-      market_id &&
-      resolvedMarketHoldingsPortfolioTab === 'canceled'
-      ? ['canceled_closed_market_holdings']
-      : null
-  )
-
-  console.log('Open market holdings: ', resolvedMarketHoldings)
+  // console.log('Open market holdings: ', resolvedMarketHoldings)
 
   const handleTabChange = (value) => {
     localStorage.setItem('resolvedMarketHoldingsPortfolioTab', value)
     setResolvedMarketHoldingsPortfolioTab(value)
   }
-
-  const tabKeys = ['all', 'settled', 'canceled']
-  const tabRefs = tabKeys.reduce((acc, key) => {
-    acc[key] = useRef(null)
-    return acc
-  }, {})
-
-  useEffect(() => {
-    if (tabRefs[resolvedMarketHoldingsPortfolioTab]?.current) {
-      tabRefs[resolvedMarketHoldingsPortfolioTab].current.scrollIntoView({
-        behavior: 'smooth',
-        inline: 'center',
-        block: 'nearest',
-      })
-    }
-  }, [resolvedMarketHoldingsPortfolioTab])
 
   const navigate = useNavigate()
   return (
@@ -272,19 +200,32 @@ const ResolvedMarketHoldings = ({ marketPrices, setMarketPrices }) => {
           >
             <div className="bg-[#F5F5F5]">
               <TabsList className="flex flex-nowrap w-max rounded-full space-x-2 bg-transparent text-[#2C2D32] p-0 h-6 pl-4 pr-4">
-                {['all', 'settled', 'canceled'].map((tab) => (
+                <>
                   <TabsTrigger
-                    key={tab}
-                    value={tab}
-                    ref={tabRefs[tab]}
+                    key="all"
+                    value="all"
                     className={`flex items-center flex-shrink-0 px-5 py-1.5 space-x-2 rounded-full border-[0.5px] border-[#CBCBCB] bg-white data-[state=active]:border-[0.7px] data-[state=active]:border-[#5F5F5F] text-sm text-[#5F5F5F] font-normal h-auto`}
                   >
-                    <span className="whitespace-nowrap capitalize">{tab}</span>
-                    {resolvedMarketHoldingsPortfolioTab === tab && (
+                    <span className="whitespace-nowrap capitalize">All</span>
+                    {resolvedMarketHoldingsPortfolioTab === 'all' && (
                       <img src={X} alt="Close" />
                     )}
                   </TabsTrigger>
-                ))}
+                  {['settled', 'canceled'].map((tab) => (
+                    <TabsTrigger
+                      key={tab}
+                      value={tab}
+                      className={`flex items-center flex-shrink-0 px-5 py-1.5 space-x-2 rounded-full border-[0.5px] border-[#CBCBCB] bg-white data-[state=active]:border-[0.7px] data-[state=active]:border-[#5F5F5F] text-sm text-[#5F5F5F] font-normal h-auto`}
+                    >
+                      <span className="whitespace-nowrap capitalize">
+                        {tab}
+                      </span>
+                      {resolvedMarketHoldingsPortfolioTab === tab && (
+                        <img src={X} alt="Close" />
+                      )}
+                    </TabsTrigger>
+                  ))}
+                </>
               </TabsList>
             </div>
           </Tabs>
@@ -292,8 +233,7 @@ const ResolvedMarketHoldings = ({ marketPrices, setMarketPrices }) => {
       </div>
 
       <div className="flex flex-col gap-4 p-4 min-h-[calc(100vh-124px)] relative">
-        {resolvedMarketHoldingsPortfolioTab === 'all' &&
-          !resolvedMarketHoldingsLoading &&
+        {!resolvedMarketHoldingsLoading &&
           resolvedMarketHoldings?.length === 0 && (
             <div className="flex flex-col gap-1 items-center pt-12">
               <p className="text-gray-600 text-md">
@@ -304,62 +244,8 @@ const ResolvedMarketHoldings = ({ marketPrices, setMarketPrices }) => {
               </p>
             </div>
           )}
-        {resolvedMarketHoldingsPortfolioTab === 'all' &&
-          resolvedMarketHoldings?.length > 0 &&
+        {resolvedMarketHoldings?.length > 0 &&
           resolvedMarketHoldings.map((holding) => {
-            return (
-              <HoldingCardDrawer
-                key={holding.name}
-                marketPrices={marketPrices}
-                holding={holding}
-                resolvedMarketHoldingsPortfolioTab={
-                  resolvedMarketHoldingsPortfolioTab
-                }
-              />
-            )
-          })}
-
-        {resolvedMarketHoldingsPortfolioTab === 'settled' &&
-          !settledResolvedMarketHoldingsLoading &&
-          settledResolvedMarketHoldings?.length === 0 && (
-            <div className="flex flex-col gap-1 items-center pt-12">
-              <p className="text-gray-600 text-md">
-                Nothing to see here... yet
-              </p>
-              <p className="text-neutral-400 text-sm">
-                Your matched orders will appear here
-              </p>
-            </div>
-          )}
-        {resolvedMarketHoldingsPortfolioTab === 'settled' &&
-          settledResolvedMarketHoldings?.length > 0 &&
-          settledResolvedMarketHoldings.map((holding) => {
-            return (
-              <HoldingCardDrawer
-                key={holding.name}
-                marketPrices={marketPrices}
-                holding={holding}
-                resolvedMarketHoldingsPortfolioTab={
-                  resolvedMarketHoldingsPortfolioTab
-                }
-              />
-            )
-          })}
-        {resolvedMarketHoldingsPortfolioTab === 'canceled' &&
-          !canceledResolvedMarketHoldingsLoading &&
-          canceledResolvedMarketHoldings?.length === 0 && (
-            <div className="flex flex-col gap-1 items-center pt-12">
-              <p className="text-gray-600 text-md">
-                Nothing to see here... yet
-              </p>
-              <p className="text-neutral-400 text-sm">
-                Your canceled orders will appear here
-              </p>
-            </div>
-          )}
-        {resolvedMarketHoldingsPortfolioTab === 'canceled' &&
-          canceledResolvedMarketHoldingsLoading?.length > 0 &&
-          canceledResolvedMarketHoldings.map((holding) => {
             return (
               <HoldingCardDrawer
                 key={holding.name}
