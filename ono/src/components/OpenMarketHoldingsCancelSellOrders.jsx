@@ -24,12 +24,18 @@ import {
 import { toast } from 'sonner'
 import Lottie from 'lottie-react'
 
-const OpenMarketHoldingsCancelSellOrders = ({ market, exitingHoldings }) => {
-  console.log('Holdingsadasdas', market)
+const OpenMarketHoldingsCancelSellOrders = ({
+  market,
+  openMarketHoldingsPortfolioTab,
+}) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const { call: cancelSellOrders } = useFrappePostCall(
     'rewardapp.engine.cancel_order'
   )
+
+  console.log('Market', market)
+
+  console.log('Exiting NO', market?.EXITING?.NO)
 
   const { currentUser } = useFrappeAuth()
 
@@ -39,6 +45,15 @@ const OpenMarketHoldingsCancelSellOrders = ({ market, exitingHoldings }) => {
   const [isNoChecked, setIsNoChecked] = useState(
     market?.EXITING?.NO ? true : false
   )
+
+  const exitingYesHoldings =
+    market?.EXITING?.YES?.total_quantity -
+    market?.EXITING?.YES?.total_filled_quantity
+  const exitingNoHoldings =
+    market?.EXITING?.NO?.total_quantity -
+    market?.EXITING?.NO?.total_filled_quantity
+
+  console.log(exitingYesHoldings, exitingNoHoldings)
 
   const [showAnimation, setShowAnimation] = useState(false)
   const [buttonState, setButtonState] = useState('idle') // idle | processing | done
@@ -74,7 +89,13 @@ const OpenMarketHoldingsCancelSellOrders = ({ market, exitingHoldings }) => {
 
       setTimeout(() => {
         mutate(
-          (key) => Array.isArray(key) && key[0] === 'open_marketwise_holdings'
+          (key) =>
+            Array.isArray(key) &&
+            key[0] === `${openMarketHoldingsPortfolioTab}_open_market_holdings`
+        )
+        mutate(
+          (key) =>
+            Array.isArray(key) && key[0] === 'open_market_holdings_overall'
         )
 
         setIsDrawerOpen(false)
@@ -94,15 +115,29 @@ const OpenMarketHoldingsCancelSellOrders = ({ market, exitingHoldings }) => {
     >
       <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
         <DrawerTrigger className="font-semibold text-xs flex items-center">
-          <div className="flex items-center gap-2 border rounded-full cursor-pointer hover:bg-[#2C2D32]/5 group">
-            <span className="font-normal font-inter text-[10px] text-[#2C2D32] px-1 pl-3.5">
-              {exitingHoldings} exiting
-            </span>
-            <Separator orientation="vertical" className="h-8" />
-            <span className="flex items-center justify-center px-1 pr-4">
-              <img src={CircleCrossIcon} alt="" />
-            </span>
-          </div>
+          {exitingNoHoldings || exitingYesHoldings ? (
+            <div className="flex items-center gap-2 border rounded-full cursor-pointer hover:bg-[#2C2D32]/5 group">
+              {exitingNoHoldings && exitingYesHoldings ? (
+                <span className="font-normal font-inter text-[10px] text-[#2C2D32] px-1 pl-3.5">
+                  {exitingNoHoldings + exitingYesHoldings} exiting
+                </span>
+              ) : null}
+              {exitingNoHoldings && !exitingYesHoldings ? (
+                <span className="font-normal font-inter text-[10px] text-[#2C2D32] px-1 pl-3.5">
+                  {exitingNoHoldings} exiting
+                </span>
+              ) : null}
+              {!exitingNoHoldings && exitingYesHoldings ? (
+                <span className="font-normal font-inter text-[10px] text-[#2C2D32] px-1 pl-3.5">
+                  {exitingYesHoldings} exiting
+                </span>
+              ) : null}
+              <Separator orientation="vertical" className="h-8" />
+              <span className="flex items-center justify-center px-1 pr-4">
+                <img src={CircleCrossIcon} alt="" />
+              </span>
+            </div>
+          ) : null}
         </DrawerTrigger>
         <DrawerContent className="max-w-md mx-auto w-full max-h-full">
           {showAnimation ? (
@@ -160,13 +195,20 @@ const OpenMarketHoldingsCancelSellOrders = ({ market, exitingHoldings }) => {
                         <div className=" flex items-start gap-3">
                           <div className="flex flex-col items-end">
                             <span
-                              className={`font-semibold text-sm font-inter text-[#2C2D32]`}
+                              className={`font-semibold text-sm font-inter text-[#2C2D32] ${
+                                market?.EXITING?.NO?.exit_value >
+                                market?.EXITING?.NO?.total_invested
+                                  ? 'text-[#1C895E]'
+                                  : null
+                              } ${
+                                market?.EXITING?.NO?.exit_value <
+                                market?.EXITING?.NO?.total_invested
+                                  ? 'text-[#DB342C]'
+                                  : null
+                              }`}
                             >
                               &#8377;
-                              {(
-                                market?.EXITING?.NO?.total_quantity -
-                                market?.EXITING?.NO?.total_filled_quantity
-                              ).toFixed(1)}
+                              {(market?.EXITING?.NO?.exit_value).toFixed(1)}
                             </span>
 
                             <span className="font-normal text-xs text-[#5F5F5F]">
@@ -207,14 +249,20 @@ const OpenMarketHoldingsCancelSellOrders = ({ market, exitingHoldings }) => {
                         <div className=" flex items-start gap-3">
                           <div className="flex flex-col items-end">
                             <span
-                              className={`font-semibold text-sm font-inter text-[#2C2D32]`}
+                              className={`font-semibold text-sm font-inter text-[#2C2D32] ${
+                                market?.EXITING?.YES?.exit_value >
+                                market?.EXITING?.YES?.total_invested
+                                  ? 'text-[#1C895E]'
+                                  : null
+                              } ${
+                                market?.EXITING?.YES?.exit_value <
+                                market?.EXITING?.YES?.total_invested
+                                  ? 'text-[#DB342C]'
+                                  : null
+                              }`}
                             >
                               &#8377;
-                              {(
-                                (market?.EXITING?.YES?.total_quantity -
-                                  market?.EXITING?.YES?.total_filled_quantity) *
-                                market.yes_price
-                              ).toFixed(1)}
+                              {(market?.EXITING?.YES?.exit_value).toFixed(1)}
                             </span>
                             <span className="font-normal text-xs text-[#5F5F5F]">
                               Exit Value

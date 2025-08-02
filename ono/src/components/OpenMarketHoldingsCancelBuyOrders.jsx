@@ -25,7 +25,10 @@ import Lottie from 'lottie-react'
 import CancelAnimation from '@/assets/CancelAnimation.json'
 import CircleCrossIcon from '@/assets/CircleCrossIcon.svg'
 
-const OpenMarketHoldingsCancelBuyOrders = ({ market, unmatchedHoldings }) => {
+const OpenMarketHoldingsCancelBuyOrders = ({
+  market,
+  openMarketHoldingsPortfolioTab,
+}) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const { call: cancelBuyOrders } = useFrappePostCall(
     'rewardapp.engine.cancel_order'
@@ -73,7 +76,13 @@ const OpenMarketHoldingsCancelBuyOrders = ({ market, unmatchedHoldings }) => {
 
       setTimeout(() => {
         mutate(
-          (key) => Array.isArray(key) && key[0] === 'open_marketwise_holdings'
+          (key) =>
+            Array.isArray(key) &&
+            key[0] === `${openMarketHoldingsPortfolioTab}_open_market_holdings`
+        )
+        mutate(
+          (key) =>
+            Array.isArray(key) && key[0] === 'open_market_holdings_overall'
         )
 
         setIsDrawerOpen(false)
@@ -86,7 +95,15 @@ const OpenMarketHoldingsCancelBuyOrders = ({ market, unmatchedHoldings }) => {
     }
   }
 
-  console.log(currentUser)
+  const unmatchedYesHoldings =
+    market?.UNMATCHED?.YES?.total_quantity -
+    market?.UNMATCHED?.YES?.total_filled_quantity
+  const unmatchedNoHoldings =
+    market?.UNMATCHED?.NO?.total_quantity -
+    market?.UNMATCHED?.NO?.total_filled_quantity
+
+  console.log(unmatchedYesHoldings, unmatchedNoHoldings)
+
   return (
     <div
       onClick={(e) => {
@@ -100,15 +117,29 @@ const OpenMarketHoldingsCancelBuyOrders = ({ market, unmatchedHoldings }) => {
             setIsDrawerOpen(true)
           }}
         >
-          <div className="flex items-center gap-2 border rounded-full cursor-pointer">
-            <span className="font-normal font-inter text-[10px] text-[#2C2D32] px-1 pl-3.5">
-              {unmatchedHoldings} unmatched
-            </span>
-            <Separator orientation="vertical" className="h-8" />
-            <span className="flex items-center justify-center px-1 pr-4">
-              <img src={CircleCrossIcon} alt="" />
-            </span>
-          </div>
+          {unmatchedNoHoldings || unmatchedYesHoldings ? (
+            <div className="flex items-center gap-2 border rounded-full cursor-pointer">
+              {unmatchedNoHoldings && unmatchedYesHoldings ? (
+                <span className="font-normal font-inter text-[10px] text-[#2C2D32] px-1 pl-3.5">
+                  {unmatchedNoHoldings + unmatchedYesHoldings} unmatched
+                </span>
+              ) : null}
+              {unmatchedNoHoldings && !unmatchedYesHoldings ? (
+                <span className="font-normal font-inter text-[10px] text-[#2C2D32] px-1 pl-3.5">
+                  {unmatchedNoHoldings} unmatched
+                </span>
+              ) : null}
+              {!unmatchedNoHoldings && unmatchedYesHoldings ? (
+                <span className="font-normal font-inter text-[10px] text-[#2C2D32] px-1 pl-3.5">
+                  {unmatchedYesHoldings} unmatched
+                </span>
+              ) : null}
+              <Separator orientation="vertical" className="h-8" />
+              <span className="flex items-center justify-center px-1 pr-4">
+                <img src={CircleCrossIcon} alt="" />
+              </span>
+            </div>
+          ) : null}
         </DrawerTrigger>
 
         <DrawerContent className="max-w-md mx-auto w-full max-h-full">
@@ -136,7 +167,7 @@ const OpenMarketHoldingsCancelBuyOrders = ({ market, unmatchedHoldings }) => {
                 <div className="flex flex-col gap-4">
                   <div className="flex items-center justify-between mt-4">
                     <span className="font-semibold text-xs text-[#2C2D32]">
-                      Exiting Orders
+                      Unmatched Orders
                     </span>
                   </div>
                   {market?.UNMATCHED?.NO && (

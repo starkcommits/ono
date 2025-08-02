@@ -151,15 +151,33 @@ const CancelSellOrders = ({ market }) => {
                         </div>
                         <div className=" flex items-start gap-3">
                           <div className="flex flex-col items-end">
-                            <span
-                              className={`font-semibold text-sm font-inter text-[#2C2D32]`}
-                            >
-                              &#8377;
-                              {(
-                                market?.EXITING?.NO?.total_quantity -
-                                market?.EXITING?.NO?.total_filled_quantity
-                              ).toFixed(1)}
-                            </span>
+                            {market?.EXITING?.NO?.exit_value >
+                            market?.EXITING?.NO?.total_invested ? (
+                              <span
+                                className={`font-semibold text-sm font-inter text-[#1C895E]`}
+                              >
+                                &#8377;
+                                {(market?.EXITING?.NO?.exit_value).toFixed(1)}
+                              </span>
+                            ) : null}
+                            {market?.EXITING?.NO?.exit_value <
+                            market?.EXITING?.NO?.total_invested ? (
+                              <span
+                                className={`font-semibold text-sm font-inter text-[#DB342C]`}
+                              >
+                                &#8377;
+                                {(market?.EXITING?.NO?.exit_value).toFixed(1)}
+                              </span>
+                            ) : null}
+                            {market?.EXITING?.NO?.exit_value ===
+                            market?.EXITING?.NO?.total_invested ? (
+                              <span
+                                className={`font-semibold text-sm font-inter text-[#2C2D32]`}
+                              >
+                                &#8377;
+                                {(market?.EXITING?.NO?.exit_value).toFixed(1)}
+                              </span>
+                            ) : null}
 
                             <span className="font-normal text-xs text-[#5F5F5F]">
                               Exit Value
@@ -198,16 +216,34 @@ const CancelSellOrders = ({ market }) => {
                         </div>
                         <div className=" flex items-start gap-3">
                           <div className="flex flex-col items-end">
-                            <span
-                              className={`font-semibold text-sm font-inter text-[#2C2D32]`}
-                            >
-                              &#8377;
-                              {(
-                                (market?.EXITING?.YES?.total_quantity -
-                                  market?.EXITING?.YES?.total_filled_quantity) *
-                                market.yes_price
-                              ).toFixed(1)}
-                            </span>
+                            {market?.EXITING?.YES?.exit_value >
+                            market?.EXITING?.YES?.total_invested ? (
+                              <span
+                                className={`font-semibold text-sm font-inter text-[#1C895E]`}
+                              >
+                                &#8377;
+                                {(market?.EXITING?.YES?.exit_value).toFixed(1)}
+                              </span>
+                            ) : null}
+                            {market?.EXITING?.YES?.exit_value <
+                            market?.EXITING?.YES?.total_invested ? (
+                              <span
+                                className={`font-semibold text-sm font-inter text-[#DB342C]`}
+                              >
+                                &#8377;
+                                {(market?.EXITING?.YES?.exit_value).toFixed(1)}
+                              </span>
+                            ) : null}
+                            {market?.EXITING?.YES?.exit_value ===
+                            market?.EXITING?.YES?.total_invested ? (
+                              <span
+                                className={`font-semibold text-sm font-inter text-[#1C895E]`}
+                              >
+                                &#8377;
+                                {(market?.EXITING?.YES?.exit_value).toFixed(1)}
+                              </span>
+                            ) : null}
+
                             <span className="font-normal text-xs text-[#5F5F5F]">
                               Exit Value
                             </span>

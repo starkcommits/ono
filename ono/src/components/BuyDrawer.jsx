@@ -309,7 +309,7 @@ const BuyDrawer = ({
                   <div className="flex items-center justify-between mb-2">
                     <span className="">Price</span>
                     <div className="flex items-center">
-                      <span className="">₹{price}</span>
+                      <span className="">₹{price?.toFixed(1)}</span>
                     </div>
                   </div>
 
@@ -437,14 +437,14 @@ const BuyDrawer = ({
                       </div>
                     </AccordionTrigger>
                     <AccordionContent>
-                      <OrderBook marketId={marketId} />
+                      <OrderBook marketId={marketId || id} />
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>
               </div>
             </div>
 
-            <div className="p-0 px-4  ">
+            <div className="p-0 px-4">
               <div className="flex flex-col leading-[100%] font-inter">
                 <Accordion type="single" collapsible className="w-full">
                   <AccordionItem value="order-book" className="border-none">

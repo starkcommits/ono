@@ -11,11 +11,16 @@ import ClosedEventsActiveIcon from '@/assets/ClosedEventsActiveIcon.svg'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import InfoIcon from '@/assets/Info.svg'
+import BriefcasePurple from '@/assets/BriefcasePurple.svg'
 import CricketIcon from '@/assets/CricketImage.svg'
 import ExitDoorIcon from '@/assets/ExitDoorIcon.svg'
 import UnmatchedIcon from '@/assets/UnmatchedIcon.svg'
-import { ChevronRight, CircleGauge } from 'lucide-react'
+import ClosedYesOpinionIcon from '@/assets/ClosedYesOpinionIcon.svg'
+import ClosedNoOpinionIcon from '@/assets/ClosedNoOpinionIcon.svg'
+import NoTrades from '@/assets/NoTrades.svg'
+
 import {
+  useFrappeAuth,
   useFrappeEventListener,
   useFrappeGetCall,
   useFrappeGetDocList,
@@ -28,6 +33,8 @@ import CancelBuyOrders from '../components/CancelBuyOrders'
 
 const Portfolio = () => {
   // const { status = 'open' } = useParams()
+
+  const { currentUser } = useFrappeAuth()
 
   const navigate = useNavigate()
 
@@ -46,6 +53,17 @@ const Portfolio = () => {
     currentPortfolioTab === 'open' ? ['open_marketwise_holdings'] : null
   )
 
+  const { data: { message: marketwiseClosedHoldingsData } = {} } =
+    useFrappeGetCall(
+      'rewardapp.engine.total_returns',
+      {
+        user_id: currentUser,
+      },
+      currentUser && currentPortfolioTab === 'closed'
+        ? ['closed_marketwise_holdings']
+        : null
+    )
+
   useEffect(() => {
     if (marketwiseActiveHoldingsData && marketwiseActiveHoldingsData.message) {
       setMarketwiseActiveHoldings(marketwiseActiveHoldingsData.message)
@@ -55,8 +73,6 @@ const Portfolio = () => {
   useFrappeEventListener('market_event', (updatedMarket) => {
     setMarketwiseActiveHoldings((prevHoldings) => {
       const marketId = updatedMarket.name
-
-      console.log('Updated Market protfolio', updatedMarket)
 
       // Check if market exists in current state
       if (!prevHoldings[marketId]) {
@@ -102,8 +118,6 @@ const Portfolio = () => {
       }
     })
   })
-
-  console.log('Portfolio marketwise: ', marketwiseActiveHoldings)
 
   const handleTabChange = (value) => {
     localStorage.setItem('currentPortfolioTab', value)
@@ -167,7 +181,7 @@ const Portfolio = () => {
   }
 
   return (
-    <div className="leading-[100%] bg-[#F5F5F5] ">
+    <div className="leading-[100%] bg-[#F5F5F5] select-none">
       <div className="sticky z-[50] top-0 left-0 right-0 flex flex-col max-w-md mx-auto pt-4 bg-white mb-auto">
         <div className="border-[0.33px] border-x-0 border-t-0 border-b border-[#DBC5F7] w-full flex items-center gap-2 pb-4 px-4">
           <span>
@@ -225,10 +239,9 @@ const Portfolio = () => {
           </div>
         </Tabs>
       </div>
-
       {currentPortfolioTab === 'open' && (
         <>
-          <div className="bg-[#F5F5F5] pb-2 max-w-md mx-auto relative px-4">
+          <div className="pb-2 relative px-4">
             {(() => {
               const total_investment = Object.values(
                 marketwiseActiveHoldings
@@ -243,129 +256,151 @@ const Portfolio = () => {
                 const yesPrice = market.yes_price || 0
                 const noPrice = market.no_price || 0
 
-                return (
-                  acc +
-                  [market.ACTIVE, market.EXITING].reduce(
-                    (positionAcc, position) => {
-                      if (!position) return positionAcc
+                // Calculate value from ACTIVE and EXITING positions
+                const activeExitingValue = [
+                  market.ACTIVE,
+                  market.EXITING,
+                ].reduce((positionAcc, position) => {
+                  if (!position) return positionAcc
 
-                      const yesQty =
-                        (position?.YES?.total_quantity || 0) -
-                        (position?.YES?.total_filled_quantity || 0)
+                  const yesQty =
+                    (position?.YES?.total_quantity || 0) -
+                    (position?.YES?.total_filled_quantity || 0)
+                  const noQty =
+                    (position?.NO?.total_quantity || 0) -
+                    (position?.NO?.total_filled_quantity || 0)
 
-                      const noQty =
-                        (position?.NO?.total_quantity || 0) -
-                        (position?.NO?.total_filled_quantity || 0)
+                  return positionAcc + yesQty * yesPrice + noQty * noPrice
+                }, 0)
 
-                      return positionAcc + yesQty * yesPrice + noQty * noPrice
-                    },
-                    0
-                  )
-                )
+                const unmatchedYesInvested =
+                  market?.UNMATCHED?.YES?.total_invested || 0
+                const unmatchedNoInvested =
+                  market?.UNMATCHED?.NO?.total_invested || 0
+
+                const unmatchedValue =
+                  unmatchedYesInvested + unmatchedNoInvested
+
+                return acc + activeExitingValue + unmatchedValue
               }, 0)
 
-              return (
-                <div
-                  className={`${
-                    current_value > total_investment
-                      ? 'border-[#337265] bg-[#F7FFFD]'
-                      : ''
-                  } ${
-                    current_value < total_investment
-                      ? 'border-[#E26F64] bg-[#FFF8F2]'
-                      : ''
-                  } ${
-                    current_value === total_investment
-                      ? 'bg-white border-transparent'
-                      : ''
-                  } p-4 flex flex-col font-inter gap-4 rounded-[5px] border-[0.5px] `}
-                >
-                  <div className="flex gap-1 justify-between items-center">
-                    <div className="flex items-center gap-1">
+              if (Object.values(marketwiseActiveHoldings).length === 0)
+                return (
+                  <div className="flex flex-col justify-center items-center text-black min-h-[400px]">
+                    <img src={NoTrades} className="h-20 w-20" alt="" />
+                    <p className="text-sm font-normal text-[#5F5F5F]">
+                      No Active Trades
+                    </p>
+                  </div>
+                )
+
+              if (total_investment > 0 && current_value > 0)
+                return (
+                  <div
+                    className={`${
+                      current_value > total_investment
+                        ? 'border-[#337265] bg-[#F7FFFD]'
+                        : ''
+                    } ${
+                      current_value < total_investment
+                        ? 'border-[#E26F64] bg-[#FFF8F2]'
+                        : ''
+                    } ${
+                      current_value === total_investment
+                        ? 'bg-white border-transparent'
+                        : ''
+                    } p-4 flex flex-col font-inter gap-4 rounded-[5px] border-[0.5px] `}
+                  >
+                    <div className="flex gap-1 justify-between items-center">
+                      <div className="flex items-center gap-1">
+                        <div>
+                          {current_value >= total_investment && (
+                            <img src={BriefcaseGreen} className="" alt="" />
+                          )}
+                          {current_value < total_investment && (
+                            <img src={BriefcaseRed} className="" alt="" />
+                          )}{' '}
+                        </div>
+                        <div
+                          className={`font-inter text-sm ${
+                            current_value > total_investment
+                              ? 'text-[#337265]'
+                              : ''
+                          } ${
+                            current_value < total_investment
+                              ? 'text-[#E26F64]'
+                              : ''
+                          }`}
+                        >
+                          Portfolio
+                        </div>
+                      </div>
                       <div>
-                        {current_value >= total_investment && (
-                          <img src={BriefcaseGreen} className="" alt="" />
-                        )}
-                        {current_value < total_investment && (
-                          <img src={BriefcaseRed} className="" alt="" />
-                        )}{' '}
-                      </div>
-                      <div
-                        className={`font-inter text-sm ${
-                          current_value > total_investment
-                            ? 'text-[#337265]'
-                            : ''
-                        } ${
-                          current_value < total_investment
-                            ? 'text-[#E26F64]'
-                            : ''
-                        }`}
-                      >
-                        Portfolio
+                        <img src={InfoIcon} alt="" />
                       </div>
                     </div>
-                    <div>
-                      <img src={InfoIcon} alt="" />
+                    <div className="flex justify-between items-center">
+                      <div className="flex flex-col items-center">
+                        <span className="font-semibold text-xl">
+                          &#8377;
+                          {total_investment.toFixed(1)}
+                        </span>
+                        <span className="font-normal text-xs">Investment</span>
+                      </div>
+                      <div className="flex flex-col items-center">
+                        <span
+                          className={`font-semibold text-xl ${
+                            current_value > total_investment
+                              ? 'text-[#337265]'
+                              : ''
+                          } ${
+                            current_value < total_investment
+                              ? 'text-[#E26F64]'
+                              : ''
+                          }`}
+                        >
+                          &#8377;
+                          {current_value.toFixed(1)}
+                        </span>
+                        <span className="font-normal text-xs">
+                          Current Value
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <div className="flex flex-col items-center">
-                      <span className="font-semibold text-xl">
-                        &#8377;
-                        {total_investment.toFixed(1)}
-                      </span>
-                      <span className="font-normal text-xs">Investment</span>
+                    <div className="w-full">
+                      <Separator></Separator>
                     </div>
-                    <div className="flex flex-col items-center">
-                      <span
-                        className={`font-semibold text-xl ${
-                          current_value > total_investment
-                            ? 'text-[#337265]'
-                            : ''
-                        } ${
-                          current_value < total_investment
-                            ? 'text-[#E26F64]'
-                            : ''
-                        }`}
-                      >
-                        &#8377;
-                        {current_value.toFixed(1)}
-                      </span>
-                      <span className="font-normal text-xs">Current Value</span>
-                    </div>
-                  </div>
-                  <div className="w-full">
-                    <Separator></Separator>
-                  </div>
-                  <span className="font-normal text-xs flex items-center gap-1">
-                    <span>Live Gains -</span>
-                    <span className="font-inter font-medium flex items-center gap-0.5">
-                      <span
-                        className={`${
-                          current_value > total_investment
-                            ? 'text-[#337265]'
-                            : ''
-                        } ${
-                          current_value < total_investment
-                            ? 'text-[#E26F64]'
-                            : ''
-                        }`}
-                      >
-                        &#8377;
-                        {Math.abs(current_value - total_investment).toFixed(1)}
-                      </span>
-                      <span>
-                        {current_value > total_investment && (
-                          <img src={ProfitUpArrow} alt="" />
-                        )}
-                        {current_value < total_investment && (
-                          <img src={LossDownArrow} alt="" />
-                        )}
+                    <span className="font-normal text-xs flex items-center gap-1">
+                      <span>Live Gains: </span>
+                      <span className="font-inter font-medium flex items-center gap-0.5">
+                        <span
+                          className={`${
+                            current_value > total_investment
+                              ? 'text-[#337265]'
+                              : ''
+                          } ${
+                            current_value < total_investment
+                              ? 'text-[#E26F64]'
+                              : ''
+                          }`}
+                        >
+                          &#8377;
+                          {Math.abs(current_value - total_investment).toFixed(
+                            1
+                          )}
+                        </span>
+                        <span>
+                          {current_value > total_investment && (
+                            <img src={ProfitUpArrow} alt="" />
+                          )}
+                          {current_value < total_investment && (
+                            <img src={LossDownArrow} alt="" />
+                          )}
+                        </span>
                       </span>
                     </span>
-                  </span>
-                </div>
-              )
+                  </div>
+                )
             })()}
           </div>
 
@@ -380,7 +415,7 @@ const Portfolio = () => {
                     key={marketHolding.market_id}
                     className="bg-white p-4 flex flex-col font-inter gap-4 rounded-[5px]"
                     onClick={(e) => {
-                      navigate(`/portfolio/open/${marketHolding.market_id}`, {
+                      navigate(`/portfolio/${marketHolding.market_id}`, {
                         state: {
                           market: marketHolding,
                         },
@@ -563,139 +598,155 @@ const Portfolio = () => {
       )}
       {currentPortfolioTab === 'closed' && (
         <>
-          <div className="bg-[#F5F5F5] pb-2 max-w-md mx-auto relative px-4">
-            <div className="bg-[#FFF8F2] p-4 flex flex-col font-inter gap-4 rounded-[5px] border-[0.5px] border-[#E26F64]">
-              <div className="flex gap-1 justify-between items-center">
-                <div className="flex items-center gap-1">
-                  <div>
-                    <img src={BriefcaseGreen} className="" alt="" />
+          <div className="bg-[#F5F5F5] pb-2 relative px-4">
+            {(() => {
+              const total_invested = marketwiseClosedHoldingsData?.reduce(
+                (acc, market) => {
+                  acc = acc + market.total_invested
+                  return acc
+                },
+                0
+              )
+              const returns = marketwiseClosedHoldingsData?.reduce(
+                (acc, market) => {
+                  acc = acc + market.total_returns
+                  return acc
+                },
+                0
+              )
+
+              if (
+                marketwiseClosedHoldingsData &&
+                Object.values(marketwiseClosedHoldingsData).length === 0
+              )
+                return (
+                  <div className="flex flex-col justify-center items-center text-black min-h-[400px]">
+                    <img src={NoTrades} className="h-20 w-20" alt="" />
+                    <p className="text-sm font-normal text-[#5F5F5F]">
+                      No Closed Trades
+                    </p>
                   </div>
-                  <div className="font-inter text-sm text-[#E26F64]">
-                    Portfolio
+                )
+
+              if (total_invested > 0 && returns !== 0)
+                return (
+                  <div className="bg-white p-4 flex flex-col font-inter gap-4 rounded-[5px]">
+                    <div className="flex gap-1 justify-between items-center">
+                      <div className="flex items-center gap-1">
+                        <div>
+                          <img src={BriefcasePurple} className="" alt="" />
+                        </div>
+                        <div className="font-inter text-sm">Portfolio</div>
+                      </div>
+                      <div>
+                        <img src={InfoIcon} alt="" />
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center px-2">
+                      <div className="flex flex-col gap-1 items-center">
+                        <span className="font-semibold text-[18px] text-[#2C2D32]">
+                          &#8377;
+                          {total_invested}
+                        </span>
+                        <span className="font-normal text-xs">Investment</span>
+                      </div>
+                      <div className="flex flex-col gap-1 items-center">
+                        {returns === 0 && (
+                          <span className="font-semibold text-[18px] text-[#2C2D32]">
+                            &#8377;{returns}
+                          </span>
+                        )}
+                        {returns > 0 && (
+                          <span className="font-semibold text-[18px] text-[#2C2D32]">
+                            +&#8377;{returns}
+                          </span>
+                        )}
+                        {returns < 0 && (
+                          <span className="font-semibold text-[18px] text-[#2C2D32]">
+                            -&#8377;{Math.abs(returns)}
+                          </span>
+                        )}
+                        <span className="font-normal text-xs">Returns</span>
+                      </div>
+                    </div>
+                    <div className="w-full">
+                      <Separator></Separator>
+                    </div>
+                    <span className="flex gap-1 items-center">
+                      <span className="text-[10px] font-normal text-[#2C2D32]">
+                        Today's Returns:
+                      </span>
+                      <span className="text-xs text-[#2C2D32] font-normal">
+                        &#8377;0.1
+                      </span>
+                    </span>
                   </div>
-                </div>
-                <div>
-                  <img src={InfoIcon} alt="" />
-                </div>
-              </div>
-              <div className="flex justify-between items-center">
-                <div className="flex flex-col  items-center">
-                  <span className="font-semibold text-xl">&#8377;5.5</span>
-                  <span className="font-normal text-xs">Investment</span>
-                </div>
-                <div className="flex flex-col items-center">
-                  <span className="font-semibold text-xl text-[#DB342C]">
-                    &#8377;5.4
-                  </span>
-                  <span className="font-normal text-xs">Investment</span>
-                </div>
-              </div>
-              <div className="w-full">
-                <Separator></Separator>
-              </div>
-              <span className="font-normal text-xs">
-                Live Gains - &#8377;0.1
-              </span>
-            </div>
+                )
+            })()}
           </div>
 
-          <div className="pb-2 pt-2 space-y-4 px-4">
-            <div className="bg-white p-4 flex flex-col font-inter gap-4 rounded-[5px]">
-              <div className="flex items-center gap-1">
-                <p className="bg-[#33726533] px-1.5 text-[8px] font-[500] tracking-[2%] text-[#1C895E] rounded-[2px]">
-                  Matched
-                </p>
-              </div>
-              <div className="flex justify-between items-start gap-4">
-                <div className="w-[10%]">
-                  <img src={CricketIcon} alt="" />
-                </div>
-                <div className="w-[90%] flex font-normal text-xs">
-                  Hyderabad to win the match vs Mumbai?
-                </div>
-              </div>
-              <div className="w-full">
-                <Separator></Separator>
-              </div>
-              <div className="flex items-center justify-between">
-                <span
-                  className="font-normal text-[10px] flex items-center gap-2 p-1"
-                  style={{
-                    background:
-                      'linear-gradient(90deg, #FFD6D3 0%, rgba(255, 231, 228, 0) 100%)',
+          <div className="py-2 space-y-4 px-4">
+            {marketwiseClosedHoldingsData?.map((marketHolding) => {
+              return (
+                <div
+                  key={marketHolding.market_id}
+                  className="bg-white p-4 flex flex-col font-inter gap-4 rounded-[5px]"
+                  onClick={() => {
+                    navigate(`/portfolio/${marketHolding.market_id}`)
                   }}
                 >
-                  Invested &#8377;5.5{' '}
-                  <span className="flex border bg-[#2C2D32] -mx-1"></span>{' '}
-                  <span>Gains - &#8377;0.1</span>
-                </span>
-                <div>
-                  <button className="font-semibold text-xs flex ">
-                    Exit <ChevronRight className="h-4 w-4" />
-                  </button>
+                  <div className="flex justify-between items-start w-full">
+                    <div className="flex items-start gap-4 w-[80%]">
+                      <div className="w-[15%]">
+                        <img src={CricketIcon} alt="" />
+                      </div>
+                      <div className="w-[85%] flex font-normal text-xs">
+                        {marketHolding?.question}
+                      </div>
+                    </div>
+                    <div className="flex justify-end w-[20%]">
+                      <img src={ClosedYesOpinionIcon} alt="" />
+                    </div>
+                  </div>
+                  <div className="w-full">
+                    <Separator></Separator>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span
+                      className="font-normal text-[10px] flex items-center gap-2 p-1"
+                      style={{
+                        background:
+                          'linear-gradient(90deg, #FFD6D3 0%, rgba(255, 231, 228, 0) 100%)',
+                      }}
+                    >
+                      <span>
+                        Invested &#8377;{marketHolding?.total_invested}
+                      </span>
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span className="text-[10px] font-normal text-[#2C2D32]">
+                        Returns
+                      </span>
+                      {marketHolding?.total_returns === 0 && (
+                        <span className="font-bold text-[10px] font-inter">
+                          &#8377;{marketHolding?.total_returns}
+                        </span>
+                      )}
+                      {marketHolding?.total_returns > 0 && (
+                        <span className="font-bold text-[10px] font-inter text-[#1C895E]">
+                          +&#8377;{marketHolding?.total_returns}
+                        </span>
+                      )}
+                      {marketHolding?.total_returns < 0 && (
+                        <span className="font-bold text-[10px] font-inter text-[#DB342C]">
+                          -&#8377;{Math.abs(marketHolding?.total_returns)}
+                        </span>
+                      )}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            </div>
-            <div className="bg-white p-4 flex flex-col font-inter gap-4 rounded-[5px]">
-              <div className="flex items-center gap-1">
-                <p className="bg-[#33726533] px-1.5 text-[8px] font-[500] tracking-[2%] text-[#1C895E] rounded-[2px]">
-                  Matched
-                </p>
-              </div>
-              <div className="flex justify-between items-start gap-4">
-                <div className="w-[10%]">
-                  <img src={CricketIcon} alt="" />
-                </div>
-                <div className="w-[90%] flex font-normal text-xs">
-                  Hyderabad to win the match vs Mumbai?
-                </div>
-              </div>
-              <div className="w-full">
-                <Separator></Separator>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="font-normal text-[10px] flex items-center gap-2">
-                  Invested &#8377;5.5{' '}
-                  <span className="flex border bg-[#2C2D32] -mx-1"></span> Gains
-                  - &#8377;0.1
-                </span>
-                <div>
-                  <button className="font-semibold text-xs flex ">
-                    Exit <ChevronRight className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div className="bg-white p-4 flex flex-col font-inter gap-4 rounded-[5px]">
-              <div className="flex items-center gap-1">
-                <p className="bg-[#33726533] px-1.5 text-[8px] font-[500] tracking-[2%] text-[#1C895E] rounded-[2px]">
-                  Matched
-                </p>
-              </div>
-              <div className="flex justify-between items-start gap-4">
-                <div className="w-[10%]">
-                  <img src={CricketIcon} alt="" />
-                </div>
-                <div className="w-[90%] flex font-normal text-xs">
-                  Hyderabad to win the match vs Mumbai?
-                </div>
-              </div>
-              <div className="w-full">
-                <Separator></Separator>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="font-normal text-[10px] flex items-center gap-2">
-                  Invested &#8377;5.5{' '}
-                  <span className="flex border bg-[#2C2D32] -mx-1"></span> Gains
-                  - &#8377;0.1
-                </span>
-                <div>
-                  <button className="font-semibold text-xs flex ">
-                    Exit <ChevronRight className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
+              )
+            })}
           </div>
         </>
       )}

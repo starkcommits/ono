@@ -15,35 +15,23 @@ import CategoryDetails from './pages/CategoryDetails'
 import FixtureDetails from './pages/FixtureDetails'
 import ScrollToTop from './components/ScrollToTop'
 import Leaderboard from './pages/Leaderboard'
+// import { AnalyticsProvider } from './analytics/AnalyticsProvider'
 
-import OpenClosedMarketHoldings from './pages/OpenClosedMarketHoldings'
-import { AnalyticsProvider } from './analytics/AnalyticsProvider'
-import { NovuInbox } from './components/ui/inbox/NovuInbox'
 import { useEffect } from 'react'
 import TransactionHistory from './pages/TransactionsHistory'
+import OpenClosedResolvedMarketHoldings from './pages/OpenClosedResolvedMarketHoldings'
+
+import Balance from './pages/Balance'
+import Topics from './components/Topics'
+import UserProfile from './pages/UserProfile'
+import EditProfile from './components/EditProfile'
+import FollowListPage from './pages/FollowListPage'
 
 function App() {
-  useEffect(() => {
-    const trigger = async () => {
-      await novu.trigger({
-        to: {
-          subscriberId: '68667a2b9915b98edbe9949e',
-          firstName: 'Harshit',
-          lastName: 'Adhikari',
-          email: 'harshit@adhikari.com',
-          phone: '+918448954679',
-        },
-        workflowId: 'workflow_identifier',
-      })
-      trigger()
-    }
-  }, [])
   return (
     <div className="max-w-md mx-auto relative">
       <Toaster richColors position="top-right" />
-
       <ScrollToTop />
-      <AnalyticsProvider />
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/otp" element={<OTPScreen />} />
@@ -54,14 +42,16 @@ function App() {
           <Route path="/news" element={<News />} />
           <Route path="/portfolio" element={<Portfolio />} />
           <Route
-            path="/portfolio/open/:market_id"
-            element={<OpenClosedMarketHoldings />}
+            path="/portfolio/:market_id"
+            element={<OpenClosedResolvedMarketHoldings />}
           />
-          {/* <Route
-            path="/portfolio/closed/:market_id"
-            element={<ResolvedMarketHoldings />}
-          /> */}
+
+          <Route path="/topics" element={<Topics />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/profile/:username" element={<UserProfile />} />
+          <Route path="/profile/:username/:type" element={<FollowListPage />} />
+          <Route path="/edit/" element={<EditProfile />} />
+          <Route path="/balance" element={<Balance />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/event/:id" element={<EventDetails />} />
           <Route path="/category/:id" element={<CategoryDetails />} />

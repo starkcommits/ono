@@ -26,6 +26,8 @@ import {
   useFrappeCreateDoc,
   useFrappeEventListener,
   useFrappeGetDoc,
+  useFrappeUpdateDoc,
+  useSWRConfig,
 } from 'frappe-react-sdk'
 import { useParams } from 'react-router-dom'
 import {
@@ -43,12 +45,16 @@ import CricketIcon from '@/assets/Cricket.svg'
 import OrderBookIcon from '@/assets/OrderBook.svg'
 import { toast } from 'sonner'
 
-const ExitSellOrder = ({ holding }) => {
-  const { createDoc } = useFrappeCreateDoc()
+const ExitSellOrder = ({ holding, openMarketHoldingsPortfolioTab }) => {
+  const { createDoc, updateDoc } = useFrappeUpdateDoc()
+
+  const { mutate } = useSWRConfig()
 
   const { currentUser } = useFrappeAuth()
   const { id } = useParams()
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const [buttonState, setButtonState] = useState('idle') // idle | processing | done
+
   const [market, setMarket] = useState({})
   const { data: marketData, isLoading: marketDataLoading } = useFrappeGetDoc(
     'Market',
@@ -61,11 +67,13 @@ const ExitSellOrder = ({ holding }) => {
     currentUser ? undefined : null
   )
 
+  console.log(openMarketHoldingsPortfolioTab)
+
   const [price, setPrice] = useState(
     holding.opinion_type === 'YES' ? market.yes_price : market.no_price
   )
 
-  const [quantity, setQuantity] = useState(2)
+  // const [quantity, setQuantity] = useState(2)
 
   //   const [isEditing, setIsEditing] = useState(false)
   //   const [tempValue, setTempValue] = useState('')
@@ -135,125 +143,138 @@ const ExitSellOrder = ({ holding }) => {
 
   const handleConfirmSell = async () => {
     try {
-      const orderData = {
-        market_id: holding.market_id,
-        user_id: currentUser,
-        order_type: 'SELL',
-        quantity: holding.quantity,
-        opinion_type: holding.opinion_type,
-        amount: price,
-      }
+      setButtonState('processing')
 
-      const response = await createDoc('Orders', orderData)
+      const response = await updateDoc('Holding', holding.name, {
+        exit_price: price,
+        status: 'EXITING',
+      })
 
-      toast.success('Your Sell Order is successfully placed.')
-
-      console.log('Response: ', response)
+      setButtonState('done')
 
       setTimeout(() => {
+        mutate(
+          (key) =>
+            Array.isArray(key) && key[0] === 'open_market_holdings_overall'
+        )
+
+        mutate(
+          (key) =>
+            Array.isArray(key) &&
+            key[0] === `${openMarketHoldingsPortfolioTab}_open_market_holdings`
+        )
+
+        toast.success('Your Sell Order is successfully placed.')
         setIsDrawerOpen(false)
+        setButtonState('idle')
       }, 1000)
     } catch (err) {
       toast.error('Error occured in placing the order.')
+      setButtonState('idle')
     }
   }
 
   return (
-    <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen} className="">
-      <DrawerTrigger className="">
-        <div className="font-medium text-xs text-[#2C2D32] border border-[#CBCBCB] rounded-[20px] py-2.5 px-7">
-          Exit
-        </div>
-      </DrawerTrigger>
-      <DrawerContent className="max-w-md mx-auto w-full max-h-full bg-[#F5F5F5]">
-        <DrawerHeader className="space-y-4 px-4 py-4">
-          <div className="flex justify-between items-center gap-4">
-            <DrawerTitle className="font-normal font-inter text-left text-[13px] leading-[18px] w-[90%]">
-              {market.question}
-            </DrawerTitle>
-            <DrawerDescription className="w-[10%]">
-              <img src={CricketIcon} alt="" />
-            </DrawerDescription>
+    <div
+      onClick={(e) => {
+        e.stopPropagation()
+      }}
+    >
+      <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen} className="">
+        <DrawerTrigger className="">
+          <div className="font-medium text-xs text-[#2C2D32] border border-[#CBCBCB] rounded-[20px] py-2.5 px-7">
+            Exit
           </div>
-          <div
-            className="flex justify-between items-center gap-2 p-[13px] w-full border border-dashed border-[#CBCBCB] rounded-[5px]"
-            style={{ borderDasharray: '2,2' }}
-          >
+        </DrawerTrigger>
+        <DrawerContent className="max-w-md mx-auto w-full max-h-full bg-[#F5F5F5]">
+          <DrawerHeader className="space-y-4 px-4 py-4">
+            <div className="flex justify-between items-center gap-4">
+              <DrawerTitle className="font-normal font-inter text-left text-[13px] leading-[18px] w-[90%]">
+                {market.question}
+              </DrawerTitle>
+              <DrawerDescription className="w-[10%]">
+                <img src={CricketIcon} alt="" />
+              </DrawerDescription>
+            </div>
             <div
-              className={`${holding.opinion_type === 'YES' ? 'bg-[]' : ''} ${
-                holding.opinion_type === 'NO'
-                  ? 'bg-[#F6DFDD] text-[#DB342C]'
-                  : 'bg-[#DBD4F0] text-[#492C82]'
-              } font-normal text-sm p-2.5`}
+              className="flex justify-between items-center gap-2 p-[13px] w-full border border-dashed border-[#CBCBCB] rounded-[5px]"
+              style={{ borderDasharray: '2,2' }}
             >
-              {holding.opinion_type}
+              <div
+                className={`${holding.opinion_type === 'YES' ? 'bg-[]' : ''} ${
+                  holding.opinion_type === 'NO'
+                    ? 'bg-[#F6DFDD] text-[#DB342C]'
+                    : 'bg-[#DBD4F0] text-[#492C82]'
+                } font-normal text-sm p-2.5`}
+              >
+                {holding.opinion_type}
+              </div>
+              <div className="flex flex-col gap-2 items-start">
+                <p className="font-normal text-xs text-[#5F5F5F]">Investment</p>
+                <p className="text-xs font-semibold text-[#2C2D32] font-inter">
+                  &#8377;{holding.price * holding.quantity}
+                </p>
+              </div>
+              <div className="flex flex-col gap-2 items-start">
+                <p className="font-normal text-xs text-[#5F5F5F]">Quantity</p>
+                <p className="text-xs font-semibold text-[#2C2D32] font-inter">
+                  &#8377;{holding.quantity}
+                </p>
+              </div>
+              <div className="flex flex-col gap-2 items-start">
+                <p className="font-normal text-xs text-[#5F5F5F]">Buy Price</p>
+                <p className="text-xs font-semibold text-[#2C2D32] font-inter">
+                  &#8377;{holding.price}
+                </p>
+              </div>
             </div>
-            <div className="flex flex-col gap-2 items-start">
-              <p className="font-normal text-xs text-[#5F5F5F]">Investment</p>
-              <p className="text-xs font-semibold text-[#2C2D32] font-inter">
-                &#8377;{holding.price * holding.quantity}
-              </p>
-            </div>
-            <div className="flex flex-col gap-2 items-start">
-              <p className="font-normal text-xs text-[#5F5F5F]">Quantity</p>
-              <p className="text-xs font-semibold text-[#2C2D32] font-inter">
-                &#8377;{holding.quantity}
-              </p>
-            </div>
-            <div className="flex flex-col gap-2 items-start">
-              <p className="font-normal text-xs text-[#5F5F5F]">Buy Price</p>
-              <p className="text-xs font-semibold text-[#2C2D32] font-inter">
-                &#8377;{holding.price}
-              </p>
-            </div>
-          </div>
-        </DrawerHeader>
+          </DrawerHeader>
 
-        <div className="overflow-y-auto flex-1 scrollbar-hide">
-          <div className="flex flex-col gap-0">
-            <div className="p-4">
-              <div className="flex flex-col gap-8 border rounded-[10px] bg-white p-4 text-sm leading-[100%] font-inter font-semibold">
-                <div className="flex flex-col gap-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="">Price</span>
-                    <div className="flex items-center">
-                      <span className="">₹{price}</span>
+          <div className="overflow-y-auto flex-1 scrollbar-hide">
+            <div className="flex flex-col gap-0">
+              <div className="p-4">
+                <div className="flex flex-col gap-8 border rounded-[10px] bg-white p-4 text-sm leading-[100%] font-inter font-semibold">
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="">Price</span>
+                      <div className="flex items-center">
+                        <span className="">₹{price}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between gap-2">
+                      <button
+                        className="border rounded-[5px] bg-white border-[#D9D9D980] p-1 cursor-pointer"
+                        onClick={() => {
+                          setPrice(price - 0.5)
+                        }}
+                        disabled={price <= 0.5}
+                      >
+                        <Minus className="w-5 h-5" strokeWidth={2} />
+                      </button>
+                      <Slider
+                        max={9.5}
+                        min={0.5}
+                        step={0.5}
+                        value={[price]}
+                        className={`cursor-pointer`}
+                        onValueChange={(values) => {
+                          setPrice(values[0])
+                        }}
+                      />
+                      <button
+                        className="border rounded-[5px] bg-white border-[#D9D9D980] p-1 cursor-pointer disabled:cursor-not-allowed"
+                        onClick={() => {
+                          setPrice(price + 0.5)
+                        }}
+                        disabled={price >= 9.5}
+                      >
+                        <Plus className="w-5 h-5" strokeWidth={2} />
+                      </button>
                     </div>
                   </div>
 
-                  <div className="flex justify-between gap-2">
-                    <button
-                      className="border rounded-[5px] bg-white border-[#D9D9D980] p-1 cursor-pointer"
-                      onClick={() => {
-                        setPrice(price - 0.5)
-                      }}
-                      disabled={price <= 0.5}
-                    >
-                      <Minus className="w-5 h-5" strokeWidth={2} />
-                    </button>
-                    <Slider
-                      max={9.5}
-                      min={0.5}
-                      step={0.5}
-                      value={[price]}
-                      className={`cursor-pointer`}
-                      onValueChange={(values) => {
-                        setPrice(values[0])
-                      }}
-                    />
-                    <button
-                      className="border rounded-[5px] bg-white border-[#D9D9D980] p-1 cursor-pointer disabled:cursor-not-allowed"
-                      onClick={() => {
-                        setPrice(price + 0.5)
-                      }}
-                      disabled={price >= 9.5}
-                    >
-                      <Plus className="w-5 h-5" strokeWidth={2} />
-                    </button>
-                  </div>
-                </div>
-
-                {/* <div className="flex flex-col gap-4">
+                  {/* <div className="flex flex-col gap-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="">Quantity</span>
                     {isEditing ? (
@@ -296,71 +317,80 @@ const ExitSellOrder = ({ holding }) => {
                   </div>
                 </div> */}
 
-                <div className="w-full flex justify-between items-center pt-4 border-dashed border-t-[0.7px] text-[#2C2D32]">
-                  <span className="font-normal text-xs">Exit Value</span>
-                  <span className="font-inter text-xs font-medium space-x-1">
-                    <span className="text-[#5F5F5F] text-xs font-semibold">
-                      &#8377;{price * holding.quantity}
-                    </span>
-                    {price * quantity > holding.price * holding.quantity && (
-                      <span className="text-[#337265] text-xs font-semibold">
-                        (&#8377;+
-                        {(
-                          price * quantity -
-                          holding.price * holding.quantity
-                        ).toFixed(1)}
-                        )
+                  <div className="w-full flex justify-between items-center pt-4 border-dashed border-t-[0.7px] text-[#2C2D32]">
+                    <span className="font-normal text-xs">Exit Value</span>
+                    <span className="font-inter text-xs font-medium space-x-1">
+                      <span className="text-[#5F5F5F] text-xs font-semibold">
+                        &#8377;{price * holding.quantity}
                       </span>
-                    )}
+                      {price * holding.quantity >
+                        holding.price * holding.quantity && (
+                        <span className="text-[#337265] text-xs font-semibold">
+                          (&#8377;+
+                          {(
+                            price * holding.quantity -
+                            holding.price * holding.quantity
+                          ).toFixed(1)}
+                          )
+                        </span>
+                      )}
 
-                    {price * quantity < holding.price * holding.quantity && (
-                      <span className="text-[#DB342C] text-xs font-semibold">
-                        (-&#8377;
-                        {Math.abs(
-                          price * quantity - holding.price * holding.quantity
-                        ).toFixed(1)}
-                        )
-                      </span>
-                    )}
-                  </span>
+                      {price * holding.quantity <
+                        holding.price * holding.quantity && (
+                        <span className="text-[#DB342C] text-xs font-semibold">
+                          (-&#8377;
+                          {Math.abs(
+                            price * holding.quantity -
+                              holding.price * holding.quantity
+                          ).toFixed(1)}
+                          )
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4">
+                <div className="bg-white border flex flex-col rounded-[10px] px-4 leading-[100%]">
+                  <Accordion type="single" collapsible className="w-full">
+                    <AccordionItem value="order-book" className="border-none">
+                      <AccordionTrigger className="hover:no-underline py-2">
+                        <div className="flex gap-2.5 items-center">
+                          <span className="bg-[#F6F6F6] p-2 rounded-[5px]">
+                            <img src={OrderBookIcon} alt="" />
+                          </span>
+                          <span className="font-semibold text-sm">
+                            Order Book
+                          </span>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <OrderBook marketId={holding.market_id} />
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
                 </div>
               </div>
             </div>
-
-            <div className="p-4">
-              <div className="bg-white border flex flex-col rounded-[10px] px-4 leading-[100%]">
-                <Accordion type="single" collapsible className="w-full">
-                  <AccordionItem value="order-book" className="border-none">
-                    <AccordionTrigger className="hover:no-underline py-2">
-                      <div className="flex gap-2.5 items-center">
-                        <span className="bg-[#F6F6F6] p-2 rounded-[5px]">
-                          <img src={OrderBookIcon} alt="" />
-                        </span>
-                        <span className="font-semibold text-sm">
-                          Order Book
-                        </span>
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <OrderBook marketId={holding.market_id} />
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
-              </div>
-            </div>
+            {/* Floating Swipe Button (Footer) */}
           </div>
-          {/* Floating Swipe Button (Footer) */}
-        </div>
-        <DrawerFooter className="mx-auto w-full bg-white sticky bottom-0">
-          <button
-            className="text-white bg-[#2C2D32] hover:bg-[#2C2D32]/90 rounded-[5px] py-[18.5px] px-[162px] transition-all duration-300"
-            onClick={handleConfirmSell}
-          >
-            Exit
-          </button>
-        </DrawerFooter>
-      </DrawerContent>
-    </Drawer>
+          <DrawerFooter className="mx-auto w-full bg-white sticky bottom-0">
+            <button
+              className="text-white bg-[#2C2D32] hover:bg-[#2C2D32]/90 rounded-[5px] py-[18.5px] transition-all duration-300"
+              disabled={buttonState !== 'idle'}
+              onClick={handleConfirmSell}
+            >
+              {buttonState === 'idle'
+                ? 'EXIT'
+                : buttonState === 'processing'
+                ? 'Processing...'
+                : 'Order Placed'}
+            </button>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
+    </div>
   )
 }
 
