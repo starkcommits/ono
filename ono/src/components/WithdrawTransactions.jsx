@@ -4,9 +4,7 @@ import { useFrappeAuth, useFrappeGetDocList } from 'frappe-react-sdk'
 import NoTransactionsIcon from '@/assets/NoTransactionsIcon.svg'
 
 const WithdrawTransactions = () => {
-  const [currentWithdrawTab, setCurrentWithdrawTab] = useState(
-    localStorage.getItem('currentWithdrawTab') || 'all'
-  )
+  const [currentWithdrawTab, setCurrentWithdrawTab] = useState('all')
 
   const { currentUser } = useFrappeAuth()
 
@@ -18,7 +16,6 @@ const WithdrawTransactions = () => {
     },
     currentWithdrawTab === 'all' && currentUser ? undefined : null
   )
-  console.log(accountTransactionsAll)
 
   const { data: accountTransactionsCredit } = useFrappeGetDocList(
     'Transaction Logs',
@@ -60,7 +57,6 @@ const WithdrawTransactions = () => {
   }, [currentWithdrawTab])
 
   const handleTabChange = (value) => {
-    localStorage.setItem('currentWithdrawTab', value)
     setCurrentWithdrawTab(value)
   }
 

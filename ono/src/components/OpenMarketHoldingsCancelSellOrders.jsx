@@ -33,10 +33,6 @@ const OpenMarketHoldingsCancelSellOrders = ({
     'rewardapp.engine.cancel_order'
   )
 
-  console.log('Market', market)
-
-  console.log('Exiting NO', market?.EXITING?.NO)
-
   const { currentUser } = useFrappeAuth()
 
   const [isYesChecked, setIsYesChecked] = useState(
@@ -52,8 +48,6 @@ const OpenMarketHoldingsCancelSellOrders = ({
   const exitingNoHoldings =
     market?.EXITING?.NO?.total_quantity -
     market?.EXITING?.NO?.total_filled_quantity
-
-  console.log(exitingYesHoldings, exitingNoHoldings)
 
   const [showAnimation, setShowAnimation] = useState(false)
   const [buttonState, setButtonState] = useState('idle') // idle | processing | done

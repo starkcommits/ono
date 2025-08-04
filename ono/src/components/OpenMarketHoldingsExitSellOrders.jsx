@@ -37,6 +37,9 @@ const OpenMarketHoldingsExitSellOrders = ({
   const [isNoChecked, setIsNoChecked] = useState(
     market?.ACTIVE?.NO ? true : false
   )
+
+  console.log(isYesChecked, isNoChecked)
+
   const [yesExitPrice, setYesExitPrice] = useState(market?.yes_price)
   const [noExitPrice, setNoExitPrice] = useState(market?.no_price)
 
@@ -78,9 +81,11 @@ const OpenMarketHoldingsExitSellOrders = ({
 
       if (isYesChecked) {
         await createDoc('Orders', yesSellOrder)
+        setIsYesChecked(false)
       }
       if (isNoChecked) {
         await createDoc('Orders', noSellOrder)
+        setIsNoChecked(false)
       }
       mutate(
         (key) => Array.isArray(key) && key[0] === 'open_market_holdings_overall'
@@ -325,6 +330,9 @@ const OpenMarketHoldingsExitSellOrders = ({
                           (market?.ACTIVE?.YES?.total_quantity -
                             market?.ACTIVE?.YES?.total_filled_quantity) -
                         market?.ACTIVE?.YES?.total_invested
+
+                      console.log(yesExitPrice, noExitPrice)
+                      console.log(exitValue, exitReturns)
                       return (
                         <>
                           <span>&#8377;{exitValue.toFixed(1)}</span>
@@ -353,6 +361,8 @@ const OpenMarketHoldingsExitSellOrders = ({
                           (market?.ACTIVE?.NO?.total_quantity -
                             market?.ACTIVE?.NO?.total_filled_quantity) -
                         market?.ACTIVE?.NO?.total_invested
+
+                      console.log(exitValue, exitReturns)
                       return (
                         <>
                           <span>&#8377;{exitValue.toFixed(1)}</span>

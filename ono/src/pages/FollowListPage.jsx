@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import Back from '@/assets/Back.svg'
 import NoProfilePic from '@/assets/NoProfilePic.svg'
 
@@ -37,6 +37,8 @@ const FollowListPage = () => {
   }
 
   const navigate = useNavigate()
+
+  if (!userDataLoading && userData === undefined) return <Navigate to="/" />
   return (
     <div className="bg-[#F5F5F5] min-h-screen select-none w-full">
       <div className="sticky z-[100] top-0 select-none w-full flex flex-col max-w-md mx-auto">

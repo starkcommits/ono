@@ -106,22 +106,29 @@ const Widget = () => {
         </div>
         <div className="text-white flex gap-2">
           <span className="font-normal text-xs">Live Gains</span>
-          <span className="text-xs font-semibold flex gap-1">
+          <span className="text-xs font-semibold flex gap-1.5 items-center">
             {current_value > total_investment && (
               <img src={ProfitUpArrow} alt="" />
             )}
             {current_value < total_investment && (
               <img src={LossDownArrow} alt="" />
             )}
-            {current_value - total_investment > 0
-              ? `+${Math.abs(current_value - total_investment).toFixed(1)}`
-              : null}
-            {current_value - total_investment < 0
-              ? (current_value - total_investment).toFixed(1)
-              : null}
-            {current_value - total_investment === 0
-              ? (current_value - total_investment).toFixed(1)
-              : null}
+            {current_value - total_investment > 0 ? (
+              <span>
+                +&#8377;
+                {Math.abs(current_value - total_investment).toFixed(1)}
+              </span>
+            ) : null}
+            {current_value - total_investment < 0 ? (
+              <span>
+                &#8377;{(current_value - total_investment).toFixed(1)}
+              </span>
+            ) : null}
+            {current_value - total_investment === 0 ? (
+              <span>
+                &#8377;{(current_value - total_investment).toFixed(1)}
+              </span>
+            ) : null}
           </span>
         </div>
       </div>

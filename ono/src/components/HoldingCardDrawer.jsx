@@ -24,7 +24,7 @@ const HoldingCardDrawer = ({
 }) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [buttonState, setButtonState] = useState('idle')
-  console.log(holding)
+
   return (
     <div
       onClick={(e) => {

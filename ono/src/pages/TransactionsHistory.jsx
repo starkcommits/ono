@@ -10,7 +10,7 @@ const TransactionHistory = () => {
   const navigate = useNavigate()
 
   const [currentTransactionTab, setCurrentTransactionTab] = useState(
-    localStorage.getItem('currentTransactionTab' || 'withdraw')
+    localStorage.getItem('currentTransactionTab') || 'account'
   )
   const handleTabChange = (value) => {
     localStorage.setItem('currentTransactionTab', value)
