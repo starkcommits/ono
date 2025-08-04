@@ -357,7 +357,7 @@ const EventDetails = () => {
             }}
           >
             <span>YES</span>
-            <span className="font-inter font-normal">
+            <span className="font-inter font-medium">
               &#8377;{market.yes_price?.toFixed(1)}
             </span>
           </button>
@@ -370,7 +370,7 @@ const EventDetails = () => {
             }}
           >
             <span>NO</span>
-            <span className="font-inter font-normal">
+            <span className="font-inter font-medium">
               &#8377;{market.no_price?.toFixed(1)}
             </span>
           </button>

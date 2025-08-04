@@ -28,8 +28,9 @@ import {
   useFrappeCreateDoc,
   useFrappeEventListener,
   useFrappeGetDoc,
+  useSWRConfig,
 } from 'frappe-react-sdk'
-import { useParams } from 'react-router-dom'
+import { useLocation, useParams } from 'react-router-dom'
 import {
   AlertTriangle,
   Clock,
@@ -59,6 +60,8 @@ const BuyDrawer = ({
   const { createDoc, isLoading } = useFrappeCreateDoc()
   const { currentUser } = useFrappeAuth()
   const { id } = useParams()
+  const location = useLocation()
+  const { mutate } = useSWRConfig()
   const [market, setMarket] = useState({})
   const { data: marketData, isLoading: marketDataLoading } = useFrappeGetDoc(
     'Market',
@@ -227,6 +230,11 @@ const BuyDrawer = ({
       console.log('asdasdasdasd', orderData)
 
       await createDoc('Orders', orderData)
+
+      if (location.pathname.startsWith('/fixture'))
+        mutate(
+          (key) => Array.isArray(key) && key[0] === 'open_marketwise_holdings'
+        )
 
       setIsSwipeSwiped(true)
 
@@ -717,12 +725,14 @@ const BuyDrawer = ({
           <DrawerFooter className="mx-auto w-full pb-12 fixed bottom-0 space-y-2 bg-white">
             <div className="flex justify-between items-center font-normal text-[10px] leading-[100%] text-[#5F5F5F] px-4">
               <div className="flex items-center gap-0.5">
-                <span>Available Balance:</span>
-                <span>&#8377;15.00</span>
+                <span className="">Available Balance:</span>
+                <span className="font-inter">
+                  &#8377; {userWalletData?.balance}
+                </span>
               </div>
               <div className="flex items-center gap-0.5">
                 <span>Commission: </span>
-                <span>20.0%</span>
+                <span className="font-inter">20.0%</span>
               </div>
             </div>
             <div className="px-2">

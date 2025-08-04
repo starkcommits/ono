@@ -26,6 +26,10 @@ import Topics from './components/Topics'
 import UserProfile from './pages/UserProfile'
 import EditProfile from './components/EditProfile'
 import FollowListPage from './pages/FollowListPage'
+import Transactions from './pages/Transactions'
+import PublicRoute from './components/PublicRoute'
+import ProtectedRoute from './components/ProtectedRoute'
+import GotReferralCode from './pages/GotReferralCode'
 
 function App() {
   return (
@@ -33,30 +37,38 @@ function App() {
       <Toaster richColors position="top-right" />
       <ScrollToTop />
       <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/otp" element={<OTPScreen />} />
+        <Route element={<PublicRoute />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/otp" element={<OTPScreen />} />
+        </Route>
+        <Route element={<ProtectedRoute />}>
+          <Route element={<Layout />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/search" element={<Search />} />
+            <Route path="/news" element={<News />} />
+            <Route path="/portfolio" element={<Portfolio />} />
+            <Route
+              path="/portfolio/:market_id"
+              element={<OpenClosedResolvedMarketHoldings />}
+            />
 
-        <Route element={<Layout />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/search" element={<Search />} />
-          <Route path="/news" element={<News />} />
-          <Route path="/portfolio" element={<Portfolio />} />
-          <Route
-            path="/portfolio/:market_id"
-            element={<OpenClosedResolvedMarketHoldings />}
-          />
-
-          <Route path="/topics" element={<Topics />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/profile/:username" element={<UserProfile />} />
-          <Route path="/profile/:username/:type" element={<FollowListPage />} />
-          <Route path="/edit/" element={<EditProfile />} />
-          <Route path="/balance" element={<Balance />} />
-          <Route path="/leaderboard" element={<Leaderboard />} />
-          <Route path="/event/:id" element={<EventDetails />} />
-          <Route path="/category/:id" element={<CategoryDetails />} />
-          <Route path="/fixture/:id" element={<FixtureDetails />} />
-          <Route path="/transactions" element={<TransactionHistory />} />
+            <Route path="/topics" element={<Topics />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/profile/:username" element={<UserProfile />} />
+            <Route
+              path="/profile/:username/:type"
+              element={<FollowListPage />}
+            />
+            <Route path="/edit/" element={<EditProfile />} />
+            <Route path="/balance" element={<Balance />} />
+            <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/event/:id" element={<EventDetails />} />
+            <Route path="/category/:id" element={<CategoryDetails />} />
+            <Route path="/fixture/:id" element={<FixtureDetails />} />
+            <Route path="/transactions" element={<TransactionHistory />} />
+            <Route path="/transactions/:id" element={<Transactions />} />
+          </Route>
+          <Route path="/got-referral-code" element={<GotReferralCode />} />
         </Route>
       </Routes>
     </div>

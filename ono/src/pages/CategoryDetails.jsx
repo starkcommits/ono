@@ -210,7 +210,7 @@ const CategoryDetails = () => {
                   </div>
                   <div className="flex gap-2 items-center w-full">
                     <button
-                      className="bg-[#EFF0FF] rounded-[6px] text-center font-inter text-[#0819D4] font-light text-[13px] leading-[100%] w-[50%] py-2"
+                      className="bg-[#EFF0FF] rounded-[6px] text-center font-inter text-[#0819D4] font-medium text-[13px] leading-[100%] w-[50%] py-2"
                       onClick={(e) => {
                         e.stopPropagation()
                         setSelectedChoice('YES')
@@ -221,7 +221,7 @@ const CategoryDetails = () => {
                       YES &#8377;{market.yes_price.toFixed(1)}
                     </button>
                     <button
-                      className="bg-[#FFEBEB] rounded-[6px] text-center font-inter text-[#FF1A1A] font-light text-[13px] leading-[100%] w-[50%] py-2"
+                      className="bg-[#FFEBEB] rounded-[6px] text-center font-inter text-[#FF1A1A] font-medium text-[13px] leading-[100%] w-[50%] py-2"
                       onClick={(e) => {
                         e.stopPropagation()
                         setSelectedChoice('NO')

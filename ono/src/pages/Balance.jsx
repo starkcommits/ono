@@ -16,6 +16,12 @@ import { ArrowRight } from 'lucide-react'
 import { NumberTicker } from '../components/ui/number-ticker'
 import TradingBalance from '@/assets/TradingBalance.svg'
 import RechargedBalance from '@/assets/RechargedBalance.svg'
+import TransactionHistory from '@/assets/TransactionHistory.svg'
+import Vault from '@/assets/Vault.svg'
+import KYC from '@/assets/KYC.svg'
+import ControlCentre from '@/assets/ControlCentre.svg'
+import Statements from '@/assets/Statements.svg'
+
 import { useFrappeAuth, useFrappeGetDoc } from 'frappe-react-sdk'
 
 const Balance = () => {
@@ -208,9 +214,16 @@ const Balance = () => {
           Quick Actions
         </h2>
         <div className="flex flex-col bg-white mt-4">
-          <div className="flex justify-between items-center p-4">
+          <div
+            className="flex justify-between items-center p-4"
+            onClick={() => {
+              navigate('/transactions')
+            }}
+          >
             <div className="flex gap-2 items-center">
-              <div className="rounded-full bg-[#CBCBCB] p-4"></div>
+              <div className="rounded-full">
+                <img src={TransactionHistory} alt="" />
+              </div>
               <div className="flex flex-col">
                 <p className="font-semibold text-sm text-[#2C2D32]">
                   Transaction History
@@ -226,7 +239,9 @@ const Balance = () => {
           </div>
           <div className="flex justify-between items-center p-4 border-t-[1px] border-[#CBCBCB]">
             <div className="flex gap-2 items-center">
-              <div className="rounded-full bg-[#CBCBCB] p-4"></div>
+              <div className="rounded-full">
+                <img src={Vault} alt="" />
+              </div>
               <div className="flex flex-col">
                 <p className="font-semibold text-sm text-[#2C2D32]">
                   ONO Vault
@@ -242,7 +257,9 @@ const Balance = () => {
           </div>
           <div className="flex justify-between items-center p-4 border-t-[1px] border-[#CBCBCB]">
             <div className="flex gap-2 items-center">
-              <div className="rounded-full bg-[#CBCBCB] p-4"></div>
+              <div className="rounded-full">
+                <img src={KYC} alt="" />
+              </div>
               <div className="flex flex-col">
                 <p className="font-semibold text-sm text-[#2C2D32]">
                   KYC Verification
@@ -258,7 +275,9 @@ const Balance = () => {
           </div>
           <div className="flex justify-between items-center p-4 border-t-[1px] border-[#CBCBCB]">
             <div className="flex gap-2 items-center">
-              <div className="rounded-full bg-[#CBCBCB] p-4"></div>
+              <div className="rounded-full">
+                <img src={ControlCentre} alt="" />
+              </div>
               <div className="flex flex-col">
                 <p className="font-semibold text-sm text-[#2C2D32]">
                   Control Centre
@@ -274,7 +293,9 @@ const Balance = () => {
           </div>
           <div className="flex justify-between items-center p-4 border-t-[1px] border-[#CBCBCB]">
             <div className="flex gap-2 items-center">
-              <div className="rounded-full bg-[#CBCBCB] p-4"></div>
+              <div className="rounded-full">
+                <img src={Statements} alt="" />
+              </div>
               <div className="flex flex-col">
                 <p className="font-semibold text-sm text-[#2C2D32]">
                   Statements & Certificate
