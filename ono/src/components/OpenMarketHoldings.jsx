@@ -162,13 +162,20 @@ const OpenMarketHoldings = ({ marketPrices, setMarketPrices }) => {
       </div>
       <div className="flex flex-col w-full">
         <div className="flex flex-col gap-4 items-center pb-8 pt-6">
-          <div>
-            <img src={CricketImage} alt="" />
-          </div>
-          <div>
-            <p className="font-normal text-sm text-[#2C2D32]">
-              Hyderabad to win the match vs Mumbai?
-            </p>
+          <div
+            className="flex flex-col gap-4 items-center"
+            onClick={() => {
+              navigate(`/event/${market_id}`)
+            }}
+          >
+            <div>
+              <img src={CricketImage} alt="" />
+            </div>
+            <div>
+              <p className="font-normal text-sm text-center text-[#2C2D32] w-[85%] mx-auto">
+                {openMarketHoldingsOverall?.question}
+              </p>
+            </div>
           </div>
           <div>
             <p className="text-xs font-normal text-[#5F5F5F]">

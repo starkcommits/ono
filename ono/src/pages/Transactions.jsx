@@ -110,7 +110,7 @@ const Transactions = () => {
         accountTransactionsAll?.length > 0 &&
         accountTransactionsAll?.map((transaction, index) => (
           <div
-            className={`px-4 py-4    pt-4 first:pt-2 flex items-center justify-between border-b border-dashed border-[#CBCBCB] ${
+            className={`px-4 py-4 pt-4 first:pt-2 flex items-center justify-between border-b border-dashed border-[#CBCBCB] ${
               index === accountTransactionsAll?.length - 1 ? 'border-b-0' : ''
             }`}
             key={transaction.name}

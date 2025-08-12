@@ -347,35 +347,37 @@ const EventDetails = () => {
           </div>
         </div>
       </div>
-      <div className="bg-white sticky bottom-0 z-[50] pb-4 border-t border-[#DBC5F7]">
-        <div className="flex justify-between px-4 py-2.5 gap-2">
-          <button
-            className="flex gap-2 justify-center items-center bg-[#F2EBFF] text-[#492C82] rounded-[6px] w-[50%] font-[500] text-xs"
-            onClick={() => {
-              setSelectedChoice('YES')
-              setIsDrawerOpen(true)
-            }}
-          >
-            <span>YES</span>
-            <span className="font-inter font-medium">
-              &#8377;{market.yes_price?.toFixed(1)}
-            </span>
-          </button>
+      {market.status === 'OPEN' ? (
+        <div className="bg-white sticky bottom-0 z-[50] pb-4 border-t border-[#DBC5F7]">
+          <div className="flex justify-between px-4 py-2.5 gap-2">
+            <button
+              className="flex gap-2 justify-center items-center bg-[#F2EBFF] text-[#492C82] rounded-[6px] w-[50%] font-[500] text-xs"
+              onClick={() => {
+                setSelectedChoice('YES')
+                setIsDrawerOpen(true)
+              }}
+            >
+              <span>YES</span>
+              <span className="font-inter font-medium">
+                &#8377;{market.yes_price?.toFixed(1)}
+              </span>
+            </button>
 
-          <button
-            className="py-2 flex gap-2 justify-center items-center bg-[#F6DFDD] text-[#B74136] rounded-[6px] w-[50%] font-[500] text-xs"
-            onClick={() => {
-              setSelectedChoice('NO')
-              setIsDrawerOpen(true)
-            }}
-          >
-            <span>NO</span>
-            <span className="font-inter font-medium">
-              &#8377;{market.no_price?.toFixed(1)}
-            </span>
-          </button>
+            <button
+              className="py-2 flex gap-2 justify-center items-center bg-[#F6DFDD] text-[#B74136] rounded-[6px] w-[50%] font-[500] text-xs"
+              onClick={() => {
+                setSelectedChoice('NO')
+                setIsDrawerOpen(true)
+              }}
+            >
+              <span>NO</span>
+              <span className="font-inter font-medium">
+                &#8377;{market.no_price?.toFixed(1)}
+              </span>
+            </button>
+          </div>
         </div>
-      </div>
+      ) : null}
     </div>
   )
 }

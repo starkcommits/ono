@@ -63,7 +63,9 @@ const TransactionHistory = () => {
           </div>
         </Tabs>
       </div>
-      {currentTransactionTab === 'account' && <AccountTransactions />}
+      {currentTransactionTab === 'account' && (
+        <AccountTransactions currentTransactionTab={currentTransactionTab} />
+      )}
       {currentTransactionTab === 'recharge' && <RechargeTransactions />}
       {currentTransactionTab === 'withdraw' && <WithdrawTransactions />}
     </div>

@@ -108,13 +108,20 @@ const ResolvedMarketHoldings = ({ marketPrices, setMarketPrices }) => {
       </div>
       <div className="flex flex-col w-full">
         <div className="flex flex-col gap-4 items-center pb-8 pt-6">
-          <div>
-            <img src={CricketImage} alt="" />
-          </div>
-          <div>
-            <p className="font-medium text-base text-[#337265] w-[90%] text-center mx-auto">
-              {marketPrices.market_question}
-            </p>
+          <div
+            className="flex flex-col gap-4 items-center"
+            onClick={() => {
+              navigate(`/event/${market_id}`)
+            }}
+          >
+            <div>
+              <img src={CricketImage} alt="" />
+            </div>
+            <div>
+              <p className="font-medium text-base text-[#337265] w-[90%] text-center mx-auto">
+                {marketPrices.market_question}
+              </p>
+            </div>
           </div>
           <div>
             {marketPrices.market_result === 'YES' ? (

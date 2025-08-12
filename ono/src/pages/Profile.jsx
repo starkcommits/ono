@@ -7,6 +7,8 @@ import Twitter from '@/assets/Twitter.svg'
 import NoProfilePic from '@/assets/NoProfilePic.svg'
 import Right from '@/assets/Right.svg'
 import { useNavigate } from 'react-router-dom'
+import ONOLogo from '@/assets/ONOLogo.avif'
+
 import {
   useFrappeAuth,
   useFrappeGetDoc,
@@ -182,7 +184,12 @@ const Profile = () => {
               <img src={Right} className="w-3 h-3" alt="" />
             </div>
           </div>
-          <div className="flex items-center justify-between gap-2 border-b border-[#CBCBCB] px-4 pb-4 cursor-pointer">
+          <div
+            className="flex items-center justify-between gap-2 border-b border-[#CBCBCB] px-4 pb-4 cursor-pointer"
+            onClick={() => {
+              navigate('/rate')
+            }}
+          >
             <div className="flex items-center gap-2">
               <div className="rounded-[50px] w-[20px]">
                 <img src={RateOno} alt="" />
@@ -254,11 +261,9 @@ const Profile = () => {
         </div>
       </div>
       <div className="bg-[#F4F3EF] sticky bottom-0 z-[50] pb-4 border-t border-[#DBC5F7]">
-        <div className="flex justify-between px-4 py-2.5 gap-2">
-          <div className="rounded-full bg-[#2C2D32]">
-            <span className="leading-[22px] text-xs font-normal text-white px-2.5 py-[5px]">
-              ONO
-            </span>
+        <div className="flex justify-between items-center px-4 py-2.5 gap-2">
+          <div>
+            <img src={ONOLogo} width={72} height={12} alt="" />
           </div>
 
           <span className="leading-[22px] text-[10px] font-[500]">

@@ -30,6 +30,7 @@ import Transactions from './pages/Transactions'
 import PublicRoute from './components/PublicRoute'
 import ProtectedRoute from './components/ProtectedRoute'
 import GotReferralCode from './pages/GotReferralCode'
+import RateUs from './pages/RateUs'
 
 function App() {
   return (
@@ -54,6 +55,8 @@ function App() {
 
             <Route path="/topics" element={<Topics />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/rate" element={<RateUs />} />
+
             <Route path="/profile/:username" element={<UserProfile />} />
             <Route
               path="/profile/:username/:type"
