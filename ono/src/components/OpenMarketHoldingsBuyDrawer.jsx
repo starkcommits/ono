@@ -731,7 +731,9 @@ const OpenMarketHoldingsBuyDrawer = ({
             <div className="flex justify-between items-center font-normal text-[10px] leading-[100%] text-[#5F5F5F] px-4">
               <div className="flex items-center gap-0.5">
                 <span>Available Balance:</span>
-                <span>&#8377;15.00</span>
+                <span className="font-inter">
+                  &#8377;{userWalletData?.balance.toLocaleString()}
+                </span>
               </div>
               <div className="flex items-center gap-0.5">
                 <span>Commission: </span>

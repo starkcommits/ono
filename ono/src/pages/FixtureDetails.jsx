@@ -165,7 +165,7 @@ const FixtureDetails = () => {
                   <img src={WalletWhite} alt="" />
                 </div>
                 <p className="font-inter text-[13px] font-medium text-white">
-                  &#8377; {userWalletData?.balance}
+                  &#8377; {userWalletData?.balance.toLocaleString()}
                 </p>
               </div>
             </div>

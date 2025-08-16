@@ -31,12 +31,14 @@ import PublicRoute from './components/PublicRoute'
 import ProtectedRoute from './components/ProtectedRoute'
 import GotReferralCode from './pages/GotReferralCode'
 import RateUs from './pages/RateUs'
+import PostHogInit from './components/PostHogInit'
 
 function App() {
   return (
     <div className="max-w-md mx-auto relative">
       <Toaster richColors position="top-right" />
       <ScrollToTop />
+      <PostHogInit />
       <Routes>
         <Route element={<PublicRoute />}>
           <Route path="/login" element={<Login />} />

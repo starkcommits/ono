@@ -727,7 +727,7 @@ const BuyDrawer = ({
               <div className="flex items-center gap-0.5">
                 <span className="">Available Balance:</span>
                 <span className="font-inter">
-                  &#8377; {userWalletData?.balance}
+                  &#8377; {userWalletData?.balance.toLocaleString()}
                 </span>
               </div>
               <div className="flex items-center gap-0.5">

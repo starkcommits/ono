@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom'
 const Search = () => {
   const navigate = useNavigate()
   const [searchCategoryTab, setSearchCategoryTab] = useState(
-    localStorage.getItem('searchCategoryTab' || 'all')
+    localStorage.getItem('searchCategoryTab') || 'all'
   )
   const { data: marketCategoryData } = useFrappeGetDocList('Market Category', {
     fields: ['name', 'category_image', 'image_url'],

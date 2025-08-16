@@ -1,6 +1,4 @@
-import React from 'react'
 import Back from '@/assets/Back.svg'
-import ProfileIcon from '@/assets/Profile.png'
 import Share from '@/assets/Share.svg'
 import Instagram from '@/assets/Instagram.svg'
 import Twitter from '@/assets/Twitter.svg'
@@ -8,21 +6,16 @@ import NoProfilePic from '@/assets/NoProfilePic.svg'
 import Right from '@/assets/Right.svg'
 import { useNavigate } from 'react-router-dom'
 import ONOLogo from '@/assets/ONOLogo.avif'
-
-import {
-  useFrappeAuth,
-  useFrappeGetDoc,
-  useFrappeGetDocList,
-} from 'frappe-react-sdk'
+import { useFrappeAuth, useFrappeGetDoc } from 'frappe-react-sdk'
 import HelpIcon from '@/assets/HelpIcon.svg'
-import AppLanguage from '@/assets/AppLanguage.svg'
+
 import OnoAcademy from '@/assets/OnoAcademy.svg'
 import InviteAndEarn from '@/assets/InviteAndEarn.svg'
 import RateOno from '@/assets/RateOno.svg'
 import TrustAndSafety from '@/assets/TrustAndSafety.svg'
 import TermsAndConditions from '@/assets/TermsAndConditions.svg'
 import Logout from '@/assets/Logout.svg'
-import CroppedImage from '@/assets/CroppedImage1.png'
+import AppLanguage from '../components/AppLanguage'
 
 const Profile = () => {
   const navigate = useNavigate()
@@ -148,18 +141,7 @@ const Profile = () => {
               <img src={Right} className="w-3 h-3" alt="" />
             </div>
           </div>
-          <div className="flex items-center justify-between gap-2 border-b border-[#CBCBCB] px-4 pb-4 cursor-pointer">
-            <div className="flex items-center gap-2">
-              <div className="rounded-[50px] w-[20px]">
-                <img src={AppLanguage} alt="" />
-              </div>
-              <p className="font-normal text-xs text-[#2C2D32]">App Language</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <p className="font-normal text-xs text-[#5F5F5F]">English</p>
-              <img src={Right} className="w-3 h-3" alt="" />
-            </div>
-          </div>
+          <AppLanguage />
           <div className="flex items-center justify-between gap-2 border-b border-[#CBCBCB] px-4 pb-4 cursor-pointer">
             <div className="flex items-center gap-2">
               <div className="rounded-[50px] w-[20px]">
@@ -263,7 +245,15 @@ const Profile = () => {
       <div className="bg-[#F4F3EF] sticky bottom-0 z-[50] pb-4 border-t border-[#DBC5F7]">
         <div className="flex justify-between items-center px-4 py-2.5 gap-2">
           <div>
-            <img src={ONOLogo} width={72} height={12} alt="" />
+            <img
+              src={ONOLogo}
+              width={72}
+              height={12}
+              alt=""
+              onClick={() => {
+                navigate('/')
+              }}
+            />
           </div>
 
           <span className="leading-[22px] text-[10px] font-[500]">

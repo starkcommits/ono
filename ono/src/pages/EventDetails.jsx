@@ -12,7 +12,6 @@ import {
 } from 'frappe-react-sdk'
 import MarketActivityDrawer from '../components/MarketActivityDrawer'
 import Source from '@/assets/Source.svg'
-import Rules from '@/assets/Rules.svg'
 import Research from '@/assets/Research.svg'
 import ArrowRight from '@/assets/ArrowRight.svg'
 import EventFooterImage from '@/assets/EventFooterImage.svg'
@@ -20,6 +19,7 @@ import ShareAndroid from '@/assets/ShareAndroid.svg'
 import Back from '@/assets/Back.svg'
 import BuyDrawer from '../components/BuyDrawer'
 import OrderBook from '../components/OrderBook'
+import Rules from '../components/Rules'
 
 const EventDetails = () => {
   const navigate = useNavigate()
@@ -327,20 +327,8 @@ const EventDetails = () => {
                 <img src={ArrowRight} alt="" />
               </div>
             </div>
-            <div className="flex items-center justify-between border-[#03B591] bg-gradient-to-r from-[#E8FFFA] to-[#FFFFFF] py-[10px] px-[13px] rounded-[5px]">
-              <div className="flex items-center gap-[13px]">
-                <img src={Rules} alt="" />
-                <div className="space-y-2">
-                  <p className="font-semibold text-sm text-[#2C2D32]">Rules</p>
-                  <p className="font-normal text-xs text-[#5F5F5F]">
-                    Terms and conditions
-                  </p>
-                </div>
-              </div>
-              <div>
-                <img src={ArrowRight} alt="" />
-              </div>
-            </div>
+
+            <Rules />
           </div>
           <div className="w-full">
             <img src={EventFooterImage} className="w-full" alt="" />

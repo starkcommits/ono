@@ -5,6 +5,8 @@ import HomeHeader from './HomeHeader'
 import { useFrappeEventListener } from 'frappe-react-sdk'
 import { MarketEventListener } from './MarketEventListener'
 import { OrderBookEventListener } from './OrderBookEventListener'
+import { useEffect } from 'react'
+import posthog from 'posthog-js'
 
 const Layout = () => {
   const location = useLocation()
@@ -25,6 +27,12 @@ const Layout = () => {
   useFrappeEventListener('order_book_event', (event) => {
     OrderBookEventListener.emit(event)
   })
+
+  useEffect(() => {
+    posthog.init(import.meta.env.VITE_PUBLIC_POSTHOG_API_KEY, {
+      api_host: 'https://apps.paymegas.com',
+    })
+  }, [location.pathname])
 
   return (
     <div className="min-h-screen flex flex-col">

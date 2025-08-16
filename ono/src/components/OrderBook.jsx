@@ -187,7 +187,7 @@ const OrderBook = ({ marketId }) => {
               )
               .slice(0, 5)
               .map((entry) => (
-                <div key={entry.price} className="relative w-full px-0 py-1">
+                <div key={entry.price} className="w-full px-0 py-1">
                   {/* Background fill from RIGHT to LEFT */}
                   <div
                     className="absolute right-0 top-0 h-full transition-all"
@@ -195,7 +195,7 @@ const OrderBook = ({ marketId }) => {
                   />
 
                   {/* Foreground content */}
-                  <div className="grid grid-cols-2 gap-4 relative z-10 w-full">
+                  <div className="grid grid-cols-2 gap-4 w-full">
                     <span className="font-semibold text-[10px]">
                       ₹{entry.price}
                     </span>

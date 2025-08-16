@@ -4,7 +4,7 @@ import './index.css'
 import App from './App.jsx'
 import { FrappeProvider } from 'frappe-react-sdk'
 import { BrowserRouter as Router } from 'react-router-dom'
-import { Toaster } from 'react-hot-toast'
+import { PostHogProvider } from 'posthog-js/react'
 
 const getSiteName = () => {
   // @ts-ignore
@@ -19,6 +19,11 @@ const getSiteName = () => {
   return import.meta.env.VITE_SITE_NAME
 }
 
+const options = {
+  api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
+  defaults: '2025-05-24',
+}
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <FrappeProvider
@@ -29,9 +34,14 @@ createRoot(document.getElementById('root')).render(
         provider: () => new Map(),
       }}
     >
-      <Router basename={import.meta.env.VITE_BASE_PATH}>
-        <App />
-      </Router>
+      <PostHogProvider
+        apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_KEY}
+        options={options}
+      >
+        <Router basename={import.meta.env.VITE_BASE_PATH}>
+          <App />
+        </Router>
+      </PostHogProvider>
     </FrappeProvider>
   </StrictMode>
 )
