@@ -130,7 +130,12 @@ const Profile = () => {
           </div>
         </div>
         <div className="py-4 pt-8 flex flex-col gap-4 leading-[22px]">
-          <div className="flex items-center justify-between gap-2 border-b border-[#CBCBCB] px-4 pb-4 cursor-pointer">
+          <div
+            className="flex items-center justify-between gap-2 border-b border-[#CBCBCB] px-4 pb-4 cursor-pointer"
+            onClick={() => {
+              navigate('/help')
+            }}
+          >
             <div className="flex items-center gap-2">
               <div className="rounded-[50px] w-[20px]">
                 <img src={HelpIcon} alt="" />
@@ -142,7 +147,12 @@ const Profile = () => {
             </div>
           </div>
           <AppLanguage />
-          <div className="flex items-center justify-between gap-2 border-b border-[#CBCBCB] px-4 pb-4 cursor-pointer">
+          <div
+            className="flex items-center justify-between gap-2 border-b border-[#CBCBCB] px-4 pb-4 cursor-pointer"
+            onClick={() => {
+              navigate('/ono-academy')
+            }}
+          >
             <div className="flex items-center gap-2">
               <div className="rounded-[50px] w-[20px]">
                 <img src={OnoAcademy} alt="" />
@@ -195,7 +205,12 @@ const Profile = () => {
               <img src={Right} className="w-3 h-3" alt="" />
             </div>
           </div>
-          <div className="flex items-center justify-between gap-2 border-b border-[#CBCBCB] px-4 pb-4 cursor-pointer">
+          <div
+            className="flex items-center justify-between gap-2 border-b border-[#CBCBCB] px-4 pb-4 cursor-pointer"
+            onClick={() => {
+              navigate('/terms')
+            }}
+          >
             <div className="flex items-center gap-2">
               <div className="rounded-[50px] w-[20px]">
                 <img src={TermsAndConditions} alt="" />
