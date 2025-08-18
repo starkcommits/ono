@@ -105,7 +105,7 @@ const FixtureMarkets = () => {
                   <div className="w-[20%]">
                     <img src={CricketImage} alt="" />
                   </div>
-                  <div className="flex flex-col gap-2 w-[70%]">
+                  <div className="flex flex-col gap-2 w-[60%]">
                     <h3 className="font-normal text-sm leading-[20px] text-[#181818]">
                       {market.question}
                     </h3>

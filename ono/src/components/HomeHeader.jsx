@@ -2,7 +2,7 @@ import HamburgerIcon from '@/assets/HamburgerHeader.svg'
 import WalletIcon from '@/assets/WalletHeader.svg'
 import BellIcon from '@/assets/BellHeader.svg'
 import { NovuInbox } from './ui/inbox/NovuInbox'
-import ONOLogo from '@/assets/ONOLogo.avif'
+import ONOLogoWithTagline from '@/assets/ONOLogoWithTagline.svg'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { useFrappeAuth } from 'frappe-react-sdk'
 
@@ -17,7 +17,7 @@ const HomeHeader = () => {
             navigate('/')
           }}
         >
-          <img src={ONOLogo} width={85} height={40} alt="" />
+          <img src={ONOLogoWithTagline} width={165} height={125} alt="" />
         </span>
       </div>
 

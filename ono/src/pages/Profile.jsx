@@ -5,7 +5,7 @@ import Twitter from '@/assets/Twitter.svg'
 import NoProfilePic from '@/assets/NoProfilePic.svg'
 import Right from '@/assets/Right.svg'
 import { useNavigate } from 'react-router-dom'
-import ONOLogo from '@/assets/ONOLogo.avif'
+import ONOLogoWithTagline from '@/assets/ONOLogoWithTagline.svg'
 import { useFrappeAuth, useFrappeGetDoc } from 'frappe-react-sdk'
 import HelpIcon from '@/assets/HelpIcon.svg'
 
@@ -261,9 +261,9 @@ const Profile = () => {
         <div className="flex justify-between items-center px-4 py-2.5 gap-2">
           <div>
             <img
-              src={ONOLogo}
-              width={72}
-              height={12}
+              src={ONOLogoWithTagline}
+              width={175}
+              height={125}
               alt=""
               onClick={() => {
                 navigate('/')
