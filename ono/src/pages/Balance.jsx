@@ -237,7 +237,7 @@ const Balance = () => {
               <img src={QuickAction} alt="" />
             </div>
           </div>
-          <div className="flex justify-between items-center p-4 border-t-[1px] border-[#CBCBCB]">
+          {/* <div className="flex justify-between items-center p-4 border-t-[1px] border-[#CBCBCB]">
             <div className="flex gap-2 items-center">
               <div className="rounded-full">
                 <img src={Vault} alt="" />
@@ -254,7 +254,7 @@ const Balance = () => {
             <div>
               <img src={QuickAction} alt="" />
             </div>
-          </div>
+          </div> */}
           <div className="flex justify-between items-center p-4 border-t-[1px] border-[#CBCBCB]">
             <div className="flex gap-2 items-center">
               <div className="rounded-full">
@@ -273,7 +273,12 @@ const Balance = () => {
               <img src={QuickAction} alt="" />
             </div>
           </div>
-          <div className="flex justify-between items-center p-4 border-t-[1px] border-[#CBCBCB]">
+          <div
+            className="flex justify-between items-center p-4 border-t-[1px] border-[#CBCBCB] cursor-pointer"
+            onClick={() => {
+              navigate('/control-centre')
+            }}
+          >
             <div className="flex gap-2 items-center">
               <div className="rounded-full">
                 <img src={ControlCentre} alt="" />
@@ -291,7 +296,12 @@ const Balance = () => {
               <img src={QuickAction} alt="" />
             </div>
           </div>
-          <div className="flex justify-between items-center p-4 border-t-[1px] border-[#CBCBCB]">
+          <div
+            className="flex justify-between items-center p-4 border-t-[1px] border-[#CBCBCB] cursor-pointer"
+            onClick={() => {
+              navigate('/statements')
+            }}
+          >
             <div className="flex gap-2 items-center">
               <div className="rounded-full">
                 <img src={Statements} alt="" />

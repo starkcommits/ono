@@ -7,7 +7,7 @@ import ActiveHomeNavbar from '@/assets/ActiveHomeNavbar.svg'
 import ActiveSearchNavbar from '@/assets/ActiveSearchNavbar.svg'
 import ActiveNewsNavbar from '@/assets/ActiveNewsNavbar.svg'
 import ActivePortfolioNavbar from '@/assets/ActivePortfolioNavbar.svg'
-import ActiveProfileNavbar from '@/assets/ActiveSearchNavbar.svg'
+import ActiveProfileNavbar from '@/assets/ActiveProfileNavbar.svg'
 
 import { useLocation, useNavigate } from 'react-router-dom'
 

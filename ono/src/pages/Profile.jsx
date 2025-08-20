@@ -6,7 +6,7 @@ import NoProfilePic from '@/assets/NoProfilePic.svg'
 import Right from '@/assets/Right.svg'
 import { useNavigate } from 'react-router-dom'
 import ONOLogoWithTagline from '@/assets/ONOLogoWithTagline.svg'
-import { useFrappeAuth, useFrappeGetDoc } from 'frappe-react-sdk'
+import { FrappeContext, useFrappeAuth, useFrappeGetDoc } from 'frappe-react-sdk'
 import HelpIcon from '@/assets/HelpIcon.svg'
 
 import OnoAcademy from '@/assets/OnoAcademy.svg'
@@ -16,9 +16,12 @@ import TrustAndSafety from '@/assets/TrustAndSafety.svg'
 import TermsAndConditions from '@/assets/TermsAndConditions.svg'
 import Logout from '@/assets/Logout.svg'
 import AppLanguage from '../components/AppLanguage'
+import { useContext } from 'react'
 
 const Profile = () => {
   const navigate = useNavigate()
+
+  const { db, call } = useContext(FrappeContext)
 
   const { currentUser, logout } = useFrappeAuth()
 
@@ -129,7 +132,7 @@ const Profile = () => {
             </div>
           </div>
         </div>
-        <div className="py-4 pt-8 flex flex-col gap-4 leading-[22px]">
+        <div className="pt-8 flex flex-col gap-4 leading-[22px]">
           <div
             className="flex items-center justify-between gap-2 border-b border-[#CBCBCB] px-4 pb-4 cursor-pointer"
             onClick={() => {
@@ -240,40 +243,40 @@ const Profile = () => {
             </div>
           </div>
         </div>
-        <div className="flex flex-col gap-2 pb-4 px-4 leading-[22px]">
-          <div className="font-semibold text-[10px] text-[#E26F64]">
-            FOLLOW US
-          </div>
-          <div className="flex items-center gap-3 ">
-            <div>
-              <img src={Share} alt="" />
+        <div className="flex justify-between items-center gap-2 leading-[22px]">
+          <div className="flex flex-col items-start px-4 py-2.5 gap-0">
+            <div className="cursor-pointer">
+              <img
+                src={ONOLogoWithTagline}
+                width={175}
+                height={125}
+                alt=""
+                onClick={() => {
+                  navigate('/')
+                }}
+              />
             </div>
-            <div>
-              <img src={Twitter} alt="" />
-            </div>
-            <div>
-              <img src={Instagram} alt="" />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="bg-[#F4F3EF] sticky bottom-0 z-[50] pb-4 border-t border-[#DBC5F7]">
-        <div className="flex justify-between items-center px-4 py-2.5 gap-2">
-          <div>
-            <img
-              src={ONOLogoWithTagline}
-              width={175}
-              height={125}
-              alt=""
-              onClick={() => {
-                navigate('/')
-              }}
-            />
-          </div>
 
-          <span className="leading-[22px] text-[10px] font-[500]">
-            VERSION 1.0.0
-          </span>
+            <span className="leading-[22px] text-[10px] font-[500]">
+              VERSION 1.0.0
+            </span>
+          </div>
+          <div className="flex flex-col items-end px-4">
+            <div className="font-semibold text-[10px] text-[#E26F64]">
+              FOLLOW US
+            </div>
+            <div className="flex items-center gap-3 ">
+              <div>
+                <img src={Share} alt="" />
+              </div>
+              <div>
+                <img src={Twitter} alt="" />
+              </div>
+              <div>
+                <img src={Instagram} alt="" />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -4,8 +4,11 @@ import { useFrappeEventListener, useFrappeGetCall } from 'frappe-react-sdk'
 import ProfitUpArrow from '@/assets/ProfitUpArrow.svg'
 import LossDownArrow from '@/assets/LossDownArrow.svg'
 import { MarketEventListener } from './MarketEventListener'
+import { useNavigate } from 'react-router-dom'
 
 const Widget = () => {
+  const navigate = useNavigate()
+
   const [marketwiseActiveHoldings, setMarketwiseActiveHoldings] = useState({})
 
   const { data: marketwiseActiveHoldingsData } = useFrappeGetCall(
@@ -86,7 +89,12 @@ const Widget = () => {
 
   if (total_investment > 0 && current_value > 0)
     return (
-      <div className="bg-[#492C82] flex justify-between items-center select-none py-1.5 px-[13px] font-inter w-full max-w-md mx-auto ">
+      <div
+        className="bg-[#492C82] flex justify-between items-center select-none py-1.5 px-[13px] font-inter w-full max-w-md mx-auto cursor-pointer"
+        onClick={() => {
+          navigate('/portfolio')
+        }}
+      >
         <div className="flex gap-2 items-center">
           <div className="flex gap-2 text-white items-center">
             <span className="font-normal text-xs">Investment</span>

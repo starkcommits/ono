@@ -13,10 +13,6 @@ const OrderBook = ({ marketId }) => {
     market_id: marketId,
   })
 
-  console.log('Order book data:', orderBookData)
-
-  console.log('Order book:', orderBook)
-
   useEffect(() => {
     const id = 'orderbook'
 
@@ -165,8 +161,8 @@ const OrderBook = ({ marketId }) => {
   // })
 
   return (
-    <div className="mb-4">
-      <div className="bg-white border-gray-100 overflow-hidden">
+    <div className="mb-4 ">
+      <div className="bg-white border-gray-100">
         {/* <div className="flex items-center px-4 py-1 bg-gray-50">
           <Book className="h-5 w-5 mr-2" />
           <span className="font-medium">Order Book</span>
@@ -187,7 +183,7 @@ const OrderBook = ({ marketId }) => {
               )
               .slice(0, 5)
               .map((entry) => (
-                <div key={entry.price} className="w-full px-0 py-1">
+                <div key={entry.price} className="w-full px-0 py-1 relative">
                   {/* Background fill from RIGHT to LEFT */}
                   <div
                     className="absolute right-0 top-0 h-full transition-all"
@@ -195,7 +191,7 @@ const OrderBook = ({ marketId }) => {
                   />
 
                   {/* Foreground content */}
-                  <div className="grid grid-cols-2 gap-4 w-full">
+                  <div className="grid grid-cols-2 gap-4 w-full relative z-100">
                     <span className="font-semibold text-[10px]">
                       ₹{entry.price}
                     </span>
@@ -222,7 +218,7 @@ const OrderBook = ({ marketId }) => {
               .map((entry) => (
                 <div
                   key={entry.price}
-                  className="grid grid-cols-2 gap-4 px-0 py-1"
+                  className="grid grid-cols-2 gap-4 px-0 py-1 relative z-10"
                 >
                   <span className="font-semibold text-[10px]">
                     ₹{entry.price}

@@ -73,7 +73,7 @@ const Help = () => {
             <div
               className="flex flex-col items-center gap-2 bg-white p-[13px] rounded-[10px] cursor-pointer"
               onClick={() => {
-                navigate('/control-centre')
+                navigate('/control-centre-faq')
               }}
             >
               <div>

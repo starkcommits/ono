@@ -42,13 +42,15 @@ import TaxRelated from './pages/TaxRelated'
 import OtherIssues from './pages/OtherIssues'
 import TrustSafety from './pages/TrustSafety'
 import ONOAcademy from './pages/ONOAcademy'
+import ControlCentreFAQ from './pages/ControlCentreFAQ'
+import StatementsCertificate from './pages/StatementsCertificate'
 
 function App() {
   return (
     <div className="max-w-md mx-auto relative">
       <Toaster richColors position="top-right" />
       <ScrollToTop />
-      <PostHogInit />
+      {/* <PostHogInit /> */}
       <Routes>
         <Route element={<PublicRoute />}>
           <Route path="/login" element={<Login />} />
@@ -76,6 +78,8 @@ function App() {
             />
             <Route path="/edit/" element={<EditProfile />} />
             <Route path="/balance" element={<Balance />} />
+            <Route path="/control-centre" element={<ControlCentre />} />
+            <Route path="/statements" element={<StatementsCertificate />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/event/:id" element={<EventDetails />} />
             <Route path="/category/:id" element={<CategoryDetails />} />
@@ -88,7 +92,7 @@ function App() {
 
             <Route path="/payments" element={<PaymentsRecharges />} />
             <Route path="/trading" element={<TradingSettlement />} />
-            <Route path="/control-centre" element={<ControlCentre />} />
+            <Route path="/control-centre-faq" element={<ControlCentreFAQ />} />
             <Route path="/tax-related" element={<TaxRelated />} />
             <Route path="/other-issues" element={<OtherIssues />} />
             <Route path="/trust-safety" element={<TrustSafety />} />

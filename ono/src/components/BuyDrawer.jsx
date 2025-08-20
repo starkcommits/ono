@@ -42,13 +42,14 @@ import {
 } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 import OrderBook from './OrderBook'
-
+import InfoDrawer from '@/assets/InfoDrawer.svg'
 import CricketIcon from '@/assets/Cricket.svg'
 import OrderBookIcon from '@/assets/OrderBook.svg'
 import { DateTimePicker } from './ui/date-picker'
 import { toast } from 'sonner'
 import HigherQuantityDrawer from './HigherQuantityDrawer'
 import { trackEvent } from '../analytics/ga'
+import BalanceUsage from './BalanceUsage'
 
 const BuyDrawer = ({
   isDrawerOpen,
@@ -57,7 +58,7 @@ const BuyDrawer = ({
   setSelectedChoice,
   marketId,
 }) => {
-  const { createDoc, isLoading } = useFrappeCreateDoc()
+  const { createDoc } = useFrappeCreateDoc()
   const { currentUser } = useFrappeAuth()
   const { id } = useParams()
   const location = useLocation()
@@ -67,6 +68,9 @@ const BuyDrawer = ({
     'Market',
     marketId || id
   )
+
+  const [orderBookAccordion, setOrderBookAccordion] = useState('')
+  const [advancedOptionsAccordion, setAdvancedOptionsAccordion] = useState('')
 
   const { data: userWalletData, isLoading: userWalletDataLoading } =
     useFrappeGetDoc('User Wallet', currentUser, currentUser ? undefined : null)
@@ -431,7 +435,7 @@ const BuyDrawer = ({
             </div>
 
             <div className="p-4">
-              <div className="bg-white border flex flex-col rounded-[10px] px-4 leading-[100%]">
+              <div className="bg-white border flex flex-col rounded-[10px] px-4 leading-[100%] overflow-auto">
                 <Accordion type="single" collapsible className="w-full">
                   <AccordionItem value="order-book" className="border-none">
                     <AccordionTrigger className="hover:no-underline py-2">
@@ -445,7 +449,9 @@ const BuyDrawer = ({
                       </div>
                     </AccordionTrigger>
                     <AccordionContent>
-                      <OrderBook marketId={marketId || id} />
+                      <div className="">
+                        <OrderBook marketId={marketId || id} />
+                      </div>
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>
@@ -454,8 +460,17 @@ const BuyDrawer = ({
 
             <div className="p-0 px-4">
               <div className="flex flex-col leading-[100%] font-inter">
-                <Accordion type="single" collapsible className="w-full">
-                  <AccordionItem value="order-book" className="border-none">
+                <Accordion
+                  value={advancedOptionsAccordion}
+                  onValueChange={setAdvancedOptionsAccordion}
+                  type="single"
+                  collapsible
+                  className="w-full"
+                >
+                  <AccordionItem
+                    value="advanced-options"
+                    className="border-none"
+                  >
                     <AccordionTrigger className="hover:no-underline flex justify-center gap-2">
                       <div className="flex gap-2.5 items-center">
                         <span className="font-semibold text-sm">
@@ -476,12 +491,6 @@ const BuyDrawer = ({
                                 <span className="text-sm font-semibold">
                                   Stop Loss
                                 </span>
-                                {/* {stopLossError ? (
-                        <div className="flex items-center gap-2 bg-red-100 text-red-800 border border-red-300 px-2 py-0.5 rounded-md shadow-sm">
-                          <AlertTriangle className="w-4 h-4 text-red-600" />
-                          <span className="font-semibold">{stopLossError}</span>
-                        </div>
-                      ) : null} */}
                               </div>
                             </Label>
                             <Switch
@@ -552,12 +561,6 @@ const BuyDrawer = ({
                                 <span className="text-sm font-semibold">
                                   Book Profit
                                 </span>
-                                {/* {stopLossError ? (
-                        <div className="flex items-center gap-2 bg-red-100 text-red-800 border border-red-300 px-2 py-0.5 rounded-md shadow-sm">
-                          <AlertTriangle className="w-4 h-4 text-red-600" />
-                          <span className="font-semibold">{stopLossError}</span>
-                        </div>
-                      ) : null} */}
                               </div>
                             </Label>
                             <Switch
@@ -632,12 +635,6 @@ const BuyDrawer = ({
                                 <span className="text-sm font-semibold">
                                   Auto Cancel
                                 </span>
-                                {/* {stopLossError ? (
-                        <div className="flex items-center gap-2 bg-red-100 text-red-800 border border-red-300 px-2 py-0.5 rounded-md shadow-sm">
-                          <AlertTriangle className="w-4 h-4 text-red-600" />
-                          <span className="font-semibold">{stopLossError}</span>
-                        </div>
-                      ) : null} */}
                               </div>
                             </Label>
                             <Switch
@@ -685,7 +682,6 @@ const BuyDrawer = ({
                                 </div>
                               </div>
                               <div className=" flex items-center justify-between mb-4">
-                                {/*  make three badges here for 1 minute 3 minutes and 5 minutes */}
                                 <button
                                   onClick={() => handleBadgeClick(1)}
                                   className="px-3 py-1 text-sm rounded-full bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-colors"
@@ -729,11 +725,12 @@ const BuyDrawer = ({
                 <span className="font-inter">
                   &#8377; {userWalletData?.balance.toLocaleString()}
                 </span>
+                <BalanceUsage />
               </div>
-              <div className="flex items-center gap-0.5">
+              {/* <div className="flex items-center gap-0.5">
                 <span>Commission: </span>
                 <span className="font-inter">20.0%</span>
-              </div>
+              </div> */}
             </div>
             <div className="px-2">
               <SwipeButton

@@ -19,6 +19,7 @@ const Layout = () => {
   const portfolioRoute = path === '/portfolio' // dynamically hide for /event/:id
   const eventRoute = path.startsWith('/event/')
   const newsRoute = path === '/news'
+  const profileRoute = path === '/profile'
 
   useFrappeEventListener('market_event', (event) => {
     MarketEventListener.emit(event)
@@ -56,7 +57,7 @@ const Layout = () => {
           <Navbar />
         </div>
       )}
-      {(portfolioRoute || searchRoute || newsRoute) && (
+      {(portfolioRoute || searchRoute || newsRoute || profileRoute) && (
         <div className="sticky left-0 right-0 bottom-0 flex flex-col pb-8 z-[50] bg-white mt-auto">
           <Navbar />
         </div>

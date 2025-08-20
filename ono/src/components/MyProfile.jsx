@@ -60,10 +60,10 @@ const MyProfile = ({ user }) => {
               <img src={ShareProfile} alt="" />
               <p>Share</p>
             </div>
-            <div className="flex items-center gap-4 border-b p-4 cursor-pointer">
+            {/* <div className="flex items-center gap-4 border-b p-4 cursor-pointer">
               <img src={LogoutAllDevices} alt="" />
               <p>Log Out From All Devices</p>
-            </div>
+            </div> */}
             <div
               className="flex items-center gap-4 last:border-b-0 border-b p-4 cursor-pointer"
               onClick={() => {
