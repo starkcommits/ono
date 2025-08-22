@@ -2,7 +2,7 @@ import React from 'react'
 import Back from '@/assets/Back.svg'
 import { useNavigate } from 'react-router-dom'
 import Right from '@/assets/Right.svg'
-import { ArrowRight } from 'lucide-react'
+import PowerOff from '@/assets/PowerOff.svg'
 
 const ControlCentre = () => {
   const navigate = useNavigate()
@@ -38,6 +38,20 @@ const ControlCentre = () => {
           </p>
           <div>
             <img src={Right} alt="" />
+          </div>
+        </div>
+        <div className="flex justify-between items-center py-2">
+          <div className="flex flex-col gap-2 w-[80%]">
+            <p className="text-[#E26F64] leading-[16px] text-sm font-normal">
+              Time off
+            </p>
+            <p className="text-xs font-normal leading-[16px] text-[#5F5F5F]">
+              Please note that on activating the feature you won’t be able to
+              trade for set number od days.
+            </p>
+          </div>
+          <div className="w-[20%] flex justify-end">
+            <img src={PowerOff} alt="" />
           </div>
         </div>
         <div className="flex justify-between items-center py-2">

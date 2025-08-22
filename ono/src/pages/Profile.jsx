@@ -149,7 +149,7 @@ const Profile = () => {
               <img src={Right} className="w-3 h-3" alt="" />
             </div>
           </div>
-          <AppLanguage />
+          {/* <AppLanguage /> */}
           <div
             className="flex items-center justify-between gap-2 border-b border-[#CBCBCB] px-4 pb-4 cursor-pointer"
             onClick={() => {

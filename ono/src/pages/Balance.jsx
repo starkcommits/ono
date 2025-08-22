@@ -215,7 +215,7 @@ const Balance = () => {
         </h2>
         <div className="flex flex-col bg-white mt-4">
           <div
-            className="flex justify-between items-center p-4"
+            className="flex justify-between items-center p-4 cursor-pointer"
             onClick={() => {
               navigate('/transactions')
             }}
@@ -255,7 +255,12 @@ const Balance = () => {
               <img src={QuickAction} alt="" />
             </div>
           </div> */}
-          <div className="flex justify-between items-center p-4 border-t-[1px] border-[#CBCBCB]">
+          <div
+            className="flex justify-between items-center p-4 border-t-[1px] border-[#CBCBCB]"
+            onClick={() => {
+              navigate('/kyc')
+            }}
+          >
             <div className="flex gap-2 items-center">
               <div className="rounded-full">
                 <img src={KYC} alt="" />

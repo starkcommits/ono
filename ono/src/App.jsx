@@ -44,6 +44,7 @@ import TrustSafety from './pages/TrustSafety'
 import ONOAcademy from './pages/ONOAcademy'
 import ControlCentreFAQ from './pages/ControlCentreFAQ'
 import StatementsCertificate from './pages/StatementsCertificate'
+import KYC from './pages/KYC'
 
 function App() {
   return (
@@ -89,6 +90,7 @@ function App() {
             <Route path="/terms" element={<Terms />} />
             <Route path="/help" element={<Help />} />
             <Route path="/ono-academy" element={<ONOAcademy />} />
+            <Route path="/kyc" element={<KYC />} />
 
             <Route path="/payments" element={<PaymentsRecharges />} />
             <Route path="/trading" element={<TradingSettlement />} />
