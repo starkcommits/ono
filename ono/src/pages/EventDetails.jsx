@@ -12,7 +12,6 @@ import {
 } from 'frappe-react-sdk'
 import MarketActivityDrawer from '../components/MarketActivityDrawer'
 import Source from '@/assets/Source.svg'
-import Rules from '@/assets/Rules.svg'
 import Research from '@/assets/Research.svg'
 import ArrowRight from '@/assets/ArrowRight.svg'
 import EventFooterImage from '@/assets/EventFooterImage.svg'
@@ -20,6 +19,7 @@ import ShareAndroid from '@/assets/ShareAndroid.svg'
 import Back from '@/assets/Back.svg'
 import BuyDrawer from '../components/BuyDrawer'
 import OrderBook from '../components/OrderBook'
+import Rules from '../components/Rules'
 
 const EventDetails = () => {
   const navigate = useNavigate()
@@ -88,7 +88,7 @@ const EventDetails = () => {
 
   return (
     <div className="bg-[#F5F5F5] min-h-screen select-none">
-      <div className="h-16 sticky top-0 select-none w-full p-4 border-b flex justify-between items-center gap-4 border-[#8D8D8D80]/50 max-w-md mx-auto bg-white">
+      <div className="h-16 sticky z-20 top-0 select-none w-full p-4 border-b flex justify-between items-center gap-4 border-[#8D8D8D80]/50 max-w-md mx-auto bg-white">
         <div className="flex items-center gap-3">
           <img
             src={Back}
@@ -327,55 +327,45 @@ const EventDetails = () => {
                 <img src={ArrowRight} alt="" />
               </div>
             </div>
-            <div className="flex items-center justify-between border-[#03B591] bg-gradient-to-r from-[#E8FFFA] to-[#FFFFFF] py-[10px] px-[13px] rounded-[5px]">
-              <div className="flex items-center gap-[13px]">
-                <img src={Rules} alt="" />
-                <div className="space-y-2">
-                  <p className="font-semibold text-sm text-[#2C2D32]">Rules</p>
-                  <p className="font-normal text-xs text-[#5F5F5F]">
-                    Terms and conditions
-                  </p>
-                </div>
-              </div>
-              <div>
-                <img src={ArrowRight} alt="" />
-              </div>
-            </div>
+
+            <Rules />
           </div>
           <div className="w-full">
             <img src={EventFooterImage} className="w-full" alt="" />
           </div>
         </div>
       </div>
-      <div className="bg-white sticky bottom-0 z-[50] pb-4 border-t border-[#DBC5F7]">
-        <div className="flex justify-between px-4 py-2.5 gap-2">
-          <button
-            className="flex gap-2 justify-center items-center bg-[#F2EBFF] text-[#492C82] rounded-[6px] w-[50%] font-[500] text-xs"
-            onClick={() => {
-              setSelectedChoice('YES')
-              setIsDrawerOpen(true)
-            }}
-          >
-            <span>YES</span>
-            <span className="font-inter font-medium">
-              &#8377;{market.yes_price?.toFixed(1)}
-            </span>
-          </button>
+      {market.status === 'OPEN' ? (
+        <div className="bg-white sticky bottom-0 z-[50] pb-4 border-t border-[#DBC5F7]">
+          <div className="flex justify-between px-4 py-2.5 gap-2">
+            <button
+              className="flex gap-2 justify-center items-center bg-[#F2EBFF] text-[#492C82] rounded-[6px] w-[50%] font-[500] text-xs"
+              onClick={() => {
+                setSelectedChoice('YES')
+                setIsDrawerOpen(true)
+              }}
+            >
+              <span>YES</span>
+              <span className="font-inter font-medium">
+                &#8377;{market.yes_price?.toFixed(1)}
+              </span>
+            </button>
 
-          <button
-            className="py-2 flex gap-2 justify-center items-center bg-[#F6DFDD] text-[#B74136] rounded-[6px] w-[50%] font-[500] text-xs"
-            onClick={() => {
-              setSelectedChoice('NO')
-              setIsDrawerOpen(true)
-            }}
-          >
-            <span>NO</span>
-            <span className="font-inter font-medium">
-              &#8377;{market.no_price?.toFixed(1)}
-            </span>
-          </button>
+            <button
+              className="py-2 flex gap-2 justify-center items-center bg-[#F6DFDD] text-[#B74136] rounded-[6px] w-[50%] font-[500] text-xs"
+              onClick={() => {
+                setSelectedChoice('NO')
+                setIsDrawerOpen(true)
+              }}
+            >
+              <span>NO</span>
+              <span className="font-inter font-medium">
+                &#8377;{market.no_price?.toFixed(1)}
+              </span>
+            </button>
+          </div>
         </div>
-      </div>
+      ) : null}
     </div>
   )
 }

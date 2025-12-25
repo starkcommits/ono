@@ -15,7 +15,16 @@ import UnmatchedIcon from '@/assets/UnmatchedIcon.svg'
 import ClosedYesOpinionIcon from '@/assets/ClosedYesOpinionIcon.svg'
 import ClosedNoOpinionIcon from '@/assets/ClosedNoOpinionIcon.svg'
 import NoTrades from '@/assets/NoTrades.svg'
-
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from '@/components/ui/drawer'
 import {
   useFrappeAuth,
   useFrappeEventListener,
@@ -38,6 +47,9 @@ const FixturePortfolio = ({
   const { currentUser } = useFrappeAuth()
 
   const navigate = useNavigate()
+
+  const [isInfoActiveDrawerOpen, setIsInfoActiveDrawerOpen] = useState(false)
+  const [isInfoClosedDrawerOpen, setIsInfoClosedDrawerOpen] = useState(false)
 
   const { data: { message: marketwiseClosedHoldingsData } = {} } =
     useFrappeGetCall(
@@ -205,7 +217,40 @@ const FixturePortfolio = ({
                         </div>
                       </div>
                       <div>
-                        <img src={InfoIcon} alt="" />
+                        <Drawer
+                          open={isInfoActiveDrawerOpen}
+                          onOpenChange={setIsInfoActiveDrawerOpen}
+                          className=""
+                        >
+                          <DrawerTrigger className="w-full h-full">
+                            <div>
+                              <img src={InfoIcon} alt="" />
+                            </div>
+                          </DrawerTrigger>
+                          <DrawerContent className="max-w-md mx-auto w-full max-h-full bg-[#F5F5F5]">
+                            <div className="flex flex-col gap-4 text-[#5F5F5F] p-4">
+                              <div className="flex items-center gap-[23px]">
+                                <p className="text-xs font-semibold w-[20%]">
+                                  Current Value:
+                                </p>
+                                <p className="text-xs font-normal leading-[15px] w-[80%]">
+                                  Current market value of your investment
+                                  according to last traded price
+                                </p>
+                              </div>
+                              <div className="flex items-center justify-between gap-[23px]">
+                                <p className="text-xs font-semibold w-[20%]">
+                                  Live Gains:
+                                </p>
+                                <p className="text-xs font-normal leading-[15px] w-[80%]">
+                                  Difference between the current market value of
+                                  your investment and the original investment
+                                  amount
+                                </p>
+                              </div>
+                            </div>
+                          </DrawerContent>
+                        </Drawer>
                       </div>
                     </div>
                     <div className="flex justify-between items-center">
@@ -508,7 +553,37 @@ const FixturePortfolio = ({
                         <div className="font-inter text-sm">Portfolio</div>
                       </div>
                       <div>
-                        <img src={InfoIcon} alt="" />
+                        <Drawer
+                          open={isInfoClosedDrawerOpen}
+                          onOpenChange={setIsInfoClosedDrawerOpen}
+                          className=""
+                        >
+                          <DrawerTrigger className="w-full h-full">
+                            <div>
+                              <img src={InfoIcon} alt="" />
+                            </div>
+                          </DrawerTrigger>
+                          <DrawerContent className="max-w-md mx-auto w-full max-h-full bg-[#F5F5F5]">
+                            <div className="flex flex-col gap-4 text-[#5F5F5F] p-4">
+                              <div className="flex items-center justify-between gap-[23px]">
+                                <p className="text-xs font-semibold w-[20%]">
+                                  Today&apos;s Returns:
+                                </p>
+                                <p className="text-xs font-normal leading-[15px] w-[80%]">
+                                  Total earnings on events that concluded Today
+                                </p>
+                              </div>
+                              <div className="flex items-center justify-between gap-[23px]">
+                                <p className="text-xs font-semibold w-[20%]">
+                                  Returns:
+                                </p>
+                                <p className="text-xs font-normal leading-[15px] w-[80%]">
+                                  Profit earned till date
+                                </p>
+                              </div>
+                            </div>
+                          </DrawerContent>
+                        </Drawer>
                       </div>
                     </div>
                     <div className="flex justify-between items-center px-2">

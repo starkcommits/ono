@@ -5,6 +5,8 @@ import HomeHeader from './HomeHeader'
 import { useFrappeEventListener } from 'frappe-react-sdk'
 import { MarketEventListener } from './MarketEventListener'
 import { OrderBookEventListener } from './OrderBookEventListener'
+import { useEffect } from 'react'
+import posthog from 'posthog-js'
 
 const Layout = () => {
   const location = useLocation()
@@ -17,6 +19,7 @@ const Layout = () => {
   const portfolioRoute = path === '/portfolio' // dynamically hide for /event/:id
   const eventRoute = path.startsWith('/event/')
   const newsRoute = path === '/news'
+  const profileRoute = path === '/profile'
 
   useFrappeEventListener('market_event', (event) => {
     MarketEventListener.emit(event)
@@ -25,6 +28,12 @@ const Layout = () => {
   useFrappeEventListener('order_book_event', (event) => {
     OrderBookEventListener.emit(event)
   })
+
+  useEffect(() => {
+    posthog.init(import.meta.env.VITE_PUBLIC_POSTHOG_API_KEY, {
+      api_host: 'https://apps.paymegas.com',
+    })
+  }, [location.pathname])
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -48,7 +57,7 @@ const Layout = () => {
           <Navbar />
         </div>
       )}
-      {(portfolioRoute || searchRoute || newsRoute) && (
+      {(portfolioRoute || searchRoute || newsRoute || profileRoute) && (
         <div className="sticky left-0 right-0 bottom-0 flex flex-col pb-8 z-[50] bg-white mt-auto">
           <Navbar />
         </div>

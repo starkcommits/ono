@@ -1,29 +1,27 @@
-import React from 'react'
 import Back from '@/assets/Back.svg'
-import ProfileIcon from '@/assets/Profile.png'
 import Share from '@/assets/Share.svg'
 import Instagram from '@/assets/Instagram.svg'
 import Twitter from '@/assets/Twitter.svg'
 import NoProfilePic from '@/assets/NoProfilePic.svg'
 import Right from '@/assets/Right.svg'
 import { useNavigate } from 'react-router-dom'
-import {
-  useFrappeAuth,
-  useFrappeGetDoc,
-  useFrappeGetDocList,
-} from 'frappe-react-sdk'
+import ONOLogoWithTagline from '@/assets/ONOLogoWithTagline.svg'
+import { FrappeContext, useFrappeAuth, useFrappeGetDoc } from 'frappe-react-sdk'
 import HelpIcon from '@/assets/HelpIcon.svg'
-import AppLanguage from '@/assets/AppLanguage.svg'
+
 import OnoAcademy from '@/assets/OnoAcademy.svg'
 import InviteAndEarn from '@/assets/InviteAndEarn.svg'
 import RateOno from '@/assets/RateOno.svg'
 import TrustAndSafety from '@/assets/TrustAndSafety.svg'
 import TermsAndConditions from '@/assets/TermsAndConditions.svg'
 import Logout from '@/assets/Logout.svg'
-import CroppedImage from '@/assets/CroppedImage1.png'
+import AppLanguage from '../components/AppLanguage'
+import { useContext } from 'react'
 
 const Profile = () => {
   const navigate = useNavigate()
+
+  const { db, call } = useContext(FrappeContext)
 
   const { currentUser, logout } = useFrappeAuth()
 
@@ -134,8 +132,13 @@ const Profile = () => {
             </div>
           </div>
         </div>
-        <div className="py-4 pt-8 flex flex-col gap-4 leading-[22px]">
-          <div className="flex items-center justify-between gap-2 border-b border-[#CBCBCB] px-4 pb-4 cursor-pointer">
+        <div className="pt-8 flex flex-col gap-4 leading-[22px]">
+          <div
+            className="flex items-center justify-between gap-2 border-b border-[#CBCBCB] px-4 pb-4 cursor-pointer"
+            onClick={() => {
+              navigate('/help')
+            }}
+          >
             <div className="flex items-center gap-2">
               <div className="rounded-[50px] w-[20px]">
                 <img src={HelpIcon} alt="" />
@@ -146,19 +149,13 @@ const Profile = () => {
               <img src={Right} className="w-3 h-3" alt="" />
             </div>
           </div>
-          <div className="flex items-center justify-between gap-2 border-b border-[#CBCBCB] px-4 pb-4 cursor-pointer">
-            <div className="flex items-center gap-2">
-              <div className="rounded-[50px] w-[20px]">
-                <img src={AppLanguage} alt="" />
-              </div>
-              <p className="font-normal text-xs text-[#2C2D32]">App Language</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <p className="font-normal text-xs text-[#5F5F5F]">English</p>
-              <img src={Right} className="w-3 h-3" alt="" />
-            </div>
-          </div>
-          <div className="flex items-center justify-between gap-2 border-b border-[#CBCBCB] px-4 pb-4 cursor-pointer">
+          {/* <AppLanguage /> */}
+          <div
+            className="flex items-center justify-between gap-2 border-b border-[#CBCBCB] px-4 pb-4 cursor-pointer"
+            onClick={() => {
+              navigate('/ono-academy')
+            }}
+          >
             <div className="flex items-center gap-2">
               <div className="rounded-[50px] w-[20px]">
                 <img src={OnoAcademy} alt="" />
@@ -182,7 +179,12 @@ const Profile = () => {
               <img src={Right} className="w-3 h-3" alt="" />
             </div>
           </div>
-          <div className="flex items-center justify-between gap-2 border-b border-[#CBCBCB] px-4 pb-4 cursor-pointer">
+          <div
+            className="flex items-center justify-between gap-2 border-b border-[#CBCBCB] px-4 pb-4 cursor-pointer"
+            onClick={() => {
+              navigate('/rate')
+            }}
+          >
             <div className="flex items-center gap-2">
               <div className="rounded-[50px] w-[20px]">
                 <img src={RateOno} alt="" />
@@ -206,7 +208,12 @@ const Profile = () => {
               <img src={Right} className="w-3 h-3" alt="" />
             </div>
           </div>
-          <div className="flex items-center justify-between gap-2 border-b border-[#CBCBCB] px-4 pb-4 cursor-pointer">
+          <div
+            className="flex items-center justify-between gap-2 border-b border-[#CBCBCB] px-4 pb-4 cursor-pointer"
+            onClick={() => {
+              navigate('/terms')
+            }}
+          >
             <div className="flex items-center gap-2">
               <div className="rounded-[50px] w-[20px]">
                 <img src={TermsAndConditions} alt="" />
@@ -236,34 +243,40 @@ const Profile = () => {
             </div>
           </div>
         </div>
-        <div className="flex flex-col gap-2 pb-4 px-4 leading-[22px]">
-          <div className="font-semibold text-[10px] text-[#E26F64]">
-            FOLLOW US
-          </div>
-          <div className="flex items-center gap-3 ">
-            <div>
-              <img src={Share} alt="" />
+        <div className="flex justify-between items-center gap-2 leading-[22px]">
+          <div className="flex flex-col items-start px-4 py-2.5 gap-0">
+            <div className="cursor-pointer">
+              <img
+                src={ONOLogoWithTagline}
+                width={175}
+                height={125}
+                alt=""
+                onClick={() => {
+                  navigate('/')
+                }}
+              />
             </div>
-            <div>
-              <img src={Twitter} alt="" />
-            </div>
-            <div>
-              <img src={Instagram} alt="" />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="bg-[#F4F3EF] sticky bottom-0 z-[50] pb-4 border-t border-[#DBC5F7]">
-        <div className="flex justify-between px-4 py-2.5 gap-2">
-          <div className="rounded-full bg-[#2C2D32]">
-            <span className="leading-[22px] text-xs font-normal text-white px-2.5 py-[5px]">
-              ONO
+
+            <span className="leading-[22px] text-[10px] font-[500]">
+              VERSION 1.0.0
             </span>
           </div>
-
-          <span className="leading-[22px] text-[10px] font-[500]">
-            VERSION 1.0.0
-          </span>
+          <div className="flex flex-col items-end px-4">
+            <div className="font-semibold text-[10px] text-[#E26F64]">
+              FOLLOW US
+            </div>
+            <div className="flex items-center gap-3 ">
+              <div>
+                <img src={Share} alt="" />
+              </div>
+              <div>
+                <img src={Twitter} alt="" />
+              </div>
+              <div>
+                <img src={Instagram} alt="" />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -3,42 +3,113 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useFrappeAuth, useFrappeGetDocList } from 'frappe-react-sdk'
 import NoTransactionsIcon from '@/assets/NoTransactionsIcon.svg'
 
-const AccountTransactions = () => {
+const AccountTransactions = ({ currentTransactionTab }) => {
   const [currentAccountTab, setCurrentAccountTab] = useState('all')
 
   const { currentUser } = useFrappeAuth()
 
-  const { data: accountTransactionsAll } = useFrappeGetDocList(
+  // const { data: openMarketHoldings, isLoading: openMarketHoldingsLoading } =
+  //   useFrappeGetDocList(
+  //     'Holding',
+  //     {
+  //       fields: [
+  //         'name',
+  //         'market_id',
+  //         'order_id',
+  //         'price',
+  //         'buy_order',
+  //         'returns',
+  //         'quantity',
+  //         'opinion_type',
+  //         'status',
+  //         'exit_price',
+  //         'market_yes_price',
+  //         'market_no_price',
+  //         'filled_quantity',
+  //       ],
+  //       filters:
+  //         openMarketHoldingsPortfolioTab === 'all'
+  //           ? [
+  //               ['user_id', '=', currentUser],
+  //               ['market_id', '=', market_id],
+  //               ['market_status', '=', 'OPEN'],
+  //             ]
+  //           : openMarketHoldingsPortfolioTab === 'matched'
+  //           ? [
+  //               ['user_id', '=', currentUser],
+  //               ['market_id', '=', market_id],
+  //               ['market_status', '=', 'OPEN'],
+  //               ['status', '=', 'ACTIVE'],
+  //             ]
+  //           : openMarketHoldingsPortfolioTab === 'pending'
+  //           ? [
+  //               ['user_id', '=', currentUser],
+  //               ['market_id', '=', market_id],
+  //               ['market_status', '=', 'OPEN'],
+  //               ['status', '=', `UNMATCHED`],
+  //             ]
+  //           : [
+  //               ['user_id', '=', currentUser],
+  //               ['market_id', '=', market_id],
+  //               ['market_status', '=', 'OPEN'],
+  //               [
+  //                 'status',
+  //                 '=',
+  //                 `${openMarketHoldingsPortfolioTab.toUpperCase()}`,
+  //               ],
+  //             ],
+  //       orderBy: {
+  //         field: 'creation',
+  //         order: 'desc',
+  //       },
+  //     },
+  //     currentUser && market_id
+  //       ? [`${openMarketHoldingsPortfolioTab}_open_market_holdings`]
+  //       : null
+  //   )
+
+  const { data: accountTransactions } = useFrappeGetDocList(
     'Transaction Logs',
     {
       fields: ['*'],
-      filters: [['user', '=', currentUser]],
+      filters:
+        currentAccountTab === 'all'
+          ? []
+          : currentAccountTab === 'credit'
+          ? [
+              ['user', '=', currentUser],
+              ['transaction_type', '=', 'Credit'],
+            ]
+          : [
+              ['user', '=', currentUser],
+              ['transaction_type', '=', 'Debit'],
+            ],
     },
-    currentAccountTab === 'all' && currentUser ? undefined : null
+    currentUser ? [`${currentAccountTab}_transactions`] : null
   )
 
-  const { data: accountTransactionsCredit } = useFrappeGetDocList(
-    'Transaction Logs',
-    {
-      fields: ['*'],
-      filters: [
-        ['user', '=', currentUser],
-        ['transaction_type', '=', 'Credit'],
-      ],
-    },
-    currentAccountTab === 'credit' && currentUser ? undefined : null
-  )
-  const { data: accountTransactionsDebit } = useFrappeGetDocList(
-    'Transaction Logs',
-    {
-      fields: ['*'],
-      filters: [
-        ['user', '=', currentUser],
-        ['transaction_type', '=', 'Debit'],
-      ],
-    },
-    currentAccountTab === 'debit' && currentUser ? undefined : null
-  )
+  // const { data: accountTransactionsCredit } = useFrappeGetDocList(
+  //   'Transaction Logs',
+  //   {
+  //     fields: ['*'],
+  //     filters: [
+  //       ['user', '=', currentUser],
+  //       ['transaction_type', '=', 'Credit'],
+  //     ],
+  //   },
+  //   currentAccountTab === 'credit' && currentUser ? undefined : null
+  // )
+  // const { data: accountTransactionsDebit } = useFrappeGetDocList(
+  //   'Transaction Logs',
+  //   {
+  //     fields: ['*'],
+  //     filters: [
+  //       ['user', '=', currentUser],
+  //       ['transaction_type', '=', 'Debit'],
+  //     ],
+  //   },
+  //   currentAccountTab === 'debit' && currentUser ? undefined : null
+  // )
 
   const tabKeys = ['all', 'debit', 'credit']
   const tabRefs = tabKeys.reduce((acc, key) => {
@@ -101,23 +172,21 @@ const AccountTransactions = () => {
         </Tabs>
       </div>
       <div className="flex flex-col gap-4 px-4 w-full h-full">
-        {currentAccountTab === 'all' &&
-          accountTransactionsAll?.length === 0 && (
-            <div className="w-full min-h-[400px] flex flex-col gap-6 items-center justify-center">
-              <div>
-                <img src={NoTransactionsIcon} alt="" />
-              </div>
-              <p className="font-normal text-[18px] text-[#2C2D32]">
-                No Transaction yet!
-              </p>
+        {accountTransactions?.length === 0 && (
+          <div className="w-full min-h-[400px] flex flex-col gap-6 items-center justify-center">
+            <div>
+              <img src={NoTransactionsIcon} alt="" />
             </div>
-          )}
-        {currentAccountTab === 'all' &&
-          accountTransactionsAll?.length > 0 &&
-          accountTransactionsAll?.map((transaction, index) => (
+            <p className="font-normal text-[18px] text-[#2C2D32]">
+              No Transaction yet!
+            </p>
+          </div>
+        )}
+        {accountTransactions?.length > 0 &&
+          accountTransactions?.map((transaction, index) => (
             <div
               className={`py-4 pt-2 flex items-center justify-between border-b border-dashed border-[#CBCBCB] ${
-                index === accountTransactionsAll?.length - 1 ? 'border-b-0' : ''
+                index === accountTransactions?.length - 1 ? 'border-b-0' : ''
               }`}
               key={transaction.name}
               style={{
@@ -141,96 +210,6 @@ const AccountTransactions = () => {
                 {transaction.transaction_type === 'Credit' ? (
                   <p className="font-semibold text-[13px] text-[#1C895E] font-inter">
                     +&#8377;{transaction.transaction_amount}
-                  </p>
-                ) : null}
-
-                <p className="bg-[linear-gradient(270deg,_#FFD8D4_0%,_#FFFFFF_100%)] text-[10px] font-normal py-[2px] px-[8px]">
-                  Promotional
-                </p>
-              </div>
-            </div>
-          ))}
-        {currentAccountTab === 'credit' &&
-          accountTransactionsCredit?.length === 0 && (
-            <div className="w-full min-h-[400px] flex flex-col gap-6 items-center justify-center">
-              <div>
-                <img src={NoTransactionsIcon} alt="" />
-              </div>
-              <p className="font-normal text-[18px] text-[#2C2D32]">
-                No Transaction yet!
-              </p>
-            </div>
-          )}
-        {currentAccountTab === 'credit' &&
-          accountTransactionsCredit?.map((transaction, index) => (
-            <div
-              className={`py-4 pt-2 flex items-center justify-between border-b border-dashed border-[#CBCBCB] ${
-                index === accountTransactionsCredit?.length - 1
-                  ? 'border-b-0'
-                  : ''
-              }`}
-              key={transaction.name}
-              style={{
-                strokeDasharray: '2, 2',
-              }}
-            >
-              <div className="flex flex-col items-start gap-2.5 w-[50%]">
-                <p className="font-normal text-sm text-[#2C2D32]">
-                  {transaction.question}
-                </p>
-                <p className="text-[#5F5F5F] text-xs font-normal">
-                  {formatFrappeDateTime(transaction.creation)}
-                </p>
-              </div>
-              <div className="flex flex-col items-end gap-2.5 w-[50%]">
-                {transaction.transaction_type === 'Credit' ? (
-                  <p className="font-semibold text-[13px] text-[#1C895E] font-inter">
-                    +&#8377;{transaction.transaction_amount}
-                  </p>
-                ) : null}
-
-                <p className="bg-[linear-gradient(270deg,_#FFD8D4_0%,_#FFFFFF_100%)] text-[10px] font-normal py-[2px] px-[8px]">
-                  Promotional
-                </p>
-              </div>
-            </div>
-          ))}
-        {currentAccountTab === 'debit' &&
-          accountTransactionsDebit?.length === 0 && (
-            <div className="w-full min-h-[400px] flex flex-col gap-6 items-center justify-center">
-              <div>
-                <img src={NoTransactionsIcon} alt="" />
-              </div>
-              <p className="font-normal text-[18px] text-[#2C2D32]">
-                No Transaction yet!
-              </p>
-            </div>
-          )}
-        {currentAccountTab === 'debit' &&
-          accountTransactionsDebit?.map((transaction, index) => (
-            <div
-              className={`py-4 pt-2 flex items-center justify-between border-b border-dashed border-[#CBCBCB] ${
-                index === accountTransactionsDebit?.length - 1
-                  ? 'border-b-0'
-                  : ''
-              }`}
-              key={transaction.name}
-              style={{
-                strokeDasharray: '2, 2',
-              }}
-            >
-              <div className="flex flex-col items-start gap-2.5 w-[50%]">
-                <p className="font-normal text-sm text-[#2C2D32]">
-                  {transaction.question}
-                </p>
-                <p className="text-[#5F5F5F] text-xs font-normal">
-                  {formatFrappeDateTime(transaction.creation)}
-                </p>
-              </div>
-              <div className="flex flex-col items-end gap-2.5 w-[50%]">
-                {transaction.transaction_type === 'Debit' ? (
-                  <p className="font-semibold text-[13px] text-[#DB342C] font-inter">
-                    -&#8377;{transaction.transaction_amount}
                   </p>
                 ) : null}
 

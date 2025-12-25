@@ -9,11 +9,8 @@ import { useNavigate } from 'react-router-dom'
 const TransactionHistory = () => {
   const navigate = useNavigate()
 
-  const [currentTransactionTab, setCurrentTransactionTab] = useState(
-    localStorage.getItem('currentTransactionTab') || 'account'
-  )
+  const [currentTransactionTab, setCurrentTransactionTab] = useState('account')
   const handleTabChange = (value) => {
-    localStorage.setItem('currentTransactionTab', value)
     setCurrentTransactionTab(value)
   }
   return (
@@ -63,7 +60,9 @@ const TransactionHistory = () => {
           </div>
         </Tabs>
       </div>
-      {currentTransactionTab === 'account' && <AccountTransactions />}
+      {currentTransactionTab === 'account' && (
+        <AccountTransactions currentTransactionTab={currentTransactionTab} />
+      )}
       {currentTransactionTab === 'recharge' && <RechargeTransactions />}
       {currentTransactionTab === 'withdraw' && <WithdrawTransactions />}
     </div>
